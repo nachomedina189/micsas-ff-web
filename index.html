@@ -6,67 +6,63 @@
   <title>micsas.ff — Pizza napolitana a Matadepera</title>
   <meta name="description" content="micsas.ff · Pizzeria a domicili a Matadepera. Pizza napolitana tradicional. Truca, mossega, somriu.">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#2A1A0F] overflow-hidden h-screen">
+<body class="bg-[#F7E8CC] overflow-hidden h-screen selection:bg-[#E23F2E]/30 antialiased text-[#2A1E16] font-['Inter',sans-serif] text-[16px] leading-[1.5]">
 
   <!-- Video background -->
-  <div class="fixed inset-0 z-0">
-    <video
-      src="https://micsas-hero.vercel.app/micsas-hero.mp4"
-      autoplay loop muted playsinline
-      class="w-full h-full object-cover"
-      poster="https://micsas-hero.vercel.app/micsas-hero.jpg"
-    ></video>
-    <div class="absolute inset-0 bg-[#2A1A0F]/65"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-[#2A1A0F]/80 via-transparent to-[#2A1A0F]/20"></div>
+  <div class="video-background-container fixed top-0 w-full h-screen -z-10 opacity-40"
+    style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
+    <video src="https://micsas-hero.vercel.app/micsas-hero.mp4" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
   </div>
 
-  <!-- Paper texture -->
-  <div class="fixed inset-0 pointer-events-none z-[1] opacity-[0.04]"
-    style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)">
-  </div>
+  <!-- Noise texture -->
+  <div class="fixed inset-0 pointer-events-none z-0 opacity-[0.03] mix-blend-difference"
+    style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
   <!-- Main content -->
-  <main class="relative z-10 h-screen flex flex-col items-center justify-center text-center px-6">
+  <main class="relative z-10 h-screen flex flex-col items-center text-center px-6 justify-center">
+    <div class="flex flex-col items-center">
 
-    <h1 class="font-['Lilita_One'] tracking-tight text-7xl sm:text-8xl md:text-9xl leading-none mb-4 text-[#E23F2E]">
-      micsas.ff
-    </h1>
+      <!-- Subtitle -->
+      <p class="text-[#2A1E16] uppercase mb-6 flex items-center gap-3 font-['Bebas_Neue',sans-serif] text-[20px] sm:text-[24px] leading-[1.2] font-normal">
+        <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#2A1E16]/50"></span>
+        Micsas Friends &amp; Family
+        <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#2A1E16]/50"></span>
+      </p>
 
-    <p class="text-base md:text-lg font-light text-[#F2E6CE]/80 tracking-widest uppercase font-serif mb-14 letter-spacing-wide">
-      MICSAS FRIENDS &amp; FAMILY
-    </p>
+      <!-- Title -->
+      <h1 class="leading-none select-none sm:text-7xl md:text-8xl lg:text-9xl text-6xl font-normal text-[#E23F2E] tracking-normal font-['Lilita_One',sans-serif] mb-12 drop-shadow-[0_0_40px_rgba(226,63,46,0.15)]">
+        micsas.ff
+      </h1>
 
-    <!-- CTAs -->
-    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+      <!-- CTAs -->
+      <div class="flex flex-col sm:flex-row gap-3 items-center justify-center w-full max-w-[360px] sm:max-w-none">
 
-      <!-- Primary CTA -->
-      <a href="pedido.html"
-        class="px-10 py-4 rounded-full font-['DM_Sans'] font-medium text-base text-[#F2E6CE] bg-[#E23F2E] shadow-lg transition-all duration-300 hover:bg-[#B82A1F] hover:-translate-y-0.5 hover:shadow-xl active:scale-95">
-        Demana aquí!
-      </a>
+        <!-- Primary CTA -->
+        <a href="pedido.html"
+          class="w-[70%] sm:w-auto px-6 py-3 rounded-full text-[#F7E8CC] bg-[#E23F2E] border-2 border-transparent hover:bg-[#8E2A15] shadow-[0_4px_12px_rgba(226,63,46,0.25)] transition-all duration-200 ease flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E23F2E] order-3 sm:order-1 font-['Inter',sans-serif] font-medium text-[16px]">
+          Demana aquí!
+        </a>
 
-      <!-- Secondary CTAs -->
-      <a href="carta.html"
-        class="px-8 py-3.5 rounded-full font-['DM_Sans'] font-medium text-sm text-[#F2E6CE] bg-white/10 border border-white/25 backdrop-blur-sm transition-all duration-300 hover:bg-white/20 active:scale-95">
-        Ver la carta
-      </a>
+        <!-- Secondary CTAs -->
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto order-1 sm:order-2 items-center">
+          <a href="carta.html"
+            class="w-[90%] sm:w-auto px-6 py-3 rounded-full text-[#E23F2E] bg-transparent border-2 border-[#E23F2E] hover:bg-[#E23F2E] hover:text-[#F7E8CC] transition-all duration-200 ease flex items-center justify-center gap-2 font-['Inter',sans-serif] font-normal text-[16px]">
+            Ver la carta
+          </a>
 
-      <a href="carta.html#micsas-events"
-        class="px-8 py-3.5 rounded-full font-['DM_Sans'] font-medium text-sm text-[#F2E6CE] bg-white/10 border border-white/25 backdrop-blur-sm transition-all duration-300 hover:bg-white/20 active:scale-95">
-        Micsas Events
-      </a>
+          <a href="carta.html#micsas-events"
+            class="w-[80%] sm:w-auto px-6 py-3 rounded-full text-[#E23F2E] bg-transparent border-2 border-[#E23F2E] hover:bg-[#2A1E16] hover:border-[#2A1E16] hover:text-[#F7E8CC] transition-all duration-[250ms] ease flex items-center justify-center gap-2 font-['Inter',sans-serif] font-normal text-[16px]">
+            Micsas Events
+          </a>
+        </div>
 
+      </div>
     </div>
-
-    <!-- Subtle tagline at bottom -->
-    <p class="absolute bottom-10 text-xs font-light text-[#F2E6CE]/40 tracking-widest uppercase font-['DM_Sans']">
-      Matadepera · Sense pressa, només amor i temps
-    </p>
-
   </main>
 
 </body>
