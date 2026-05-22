@@ -36,13 +36,13 @@
 
   <!-- ════ NAV ════ -->
   <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
-    <a href="index.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
+    <a href="#" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
 
     <div class="hidden md:flex gap-8 text-sm font-normal text-[#2A1A0F]">
       <a href="#nosaltres" class="relative transition-opacity hover:opacity-60">Nosaltres</a>
-      <a href="#carta" class="relative transition-opacity hover:opacity-60">Carta</a>
+      <a href="menu.html" class="relative transition-opacity hover:opacity-60">Carta</a>
       <a href="#micsas-events" class="relative transition-opacity hover:opacity-60">Micsas Events</a>
       <a href="#shop" class="relative transition-opacity hover:opacity-60">Shop</a>
     </div>
@@ -63,7 +63,7 @@
       <iconify-icon icon="solar:close-square-linear" width="26" style="stroke-width:1.5;"></iconify-icon>
     </button>
     <a href="#nosaltres" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Nosaltres</a>
-    <a href="#carta" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Carta</a>
+    <a href="menu.html" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Carta</a>
     <a href="#micsas-events" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Micsas Events</a>
     <a href="#shop" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Shop</a>
     <a href="pedido.html" class="mt-8 py-4 px-6 flex items-center justify-center gap-2 rounded-full text-[#F2E6CE] bg-[#E23F2E] font-medium text-sm transition-opacity hover:opacity-90">
@@ -90,7 +90,7 @@
       <a href="pedido.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
         Demana ja! →
       </a>
-      <a href="#carta" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10">
+      <a href="menu.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10">
         Veure la carta
       </a>
     </div>
@@ -134,126 +134,56 @@
     </div>
   </section>
 
-  <!-- ════ LA CARTA ════ -->
-  <section id="carta" class="py-24 md:py-36 px-6 md:px-12">
-    <div class="max-w-3xl mx-auto">
+  <!-- ════ LES NOSTRES MILLORS PIZZES ════ -->
+  <section class="py-24 md:py-36 px-6 md:px-12">
+    <div class="max-w-5xl mx-auto">
 
-      <div class="text-center mb-6 reveal">
-        <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">Carta · Primavera 2025</span>
-        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]">Les nostres pizzes</h2>
+      <div class="text-center mb-16 reveal">
+        <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">Les preferides</span>
+        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]">Les nostres millors pizzes</h2>
+        <p class="text-sm font-light mt-4 text-[#5A3E28] font-serif max-w-sm mx-auto">Tres pizzes que ho diuen tot. Massa fermentada 72h, ingredients de primera.</p>
       </div>
 
-      <!-- CTA superior -->
-      <div class="flex justify-center mb-12 reveal">
-        <a href="pedido.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
-          Demana ja! →
+      <div class="grid md:grid-cols-3 gap-6 reveal">
+
+        <!-- Margherita -->
+        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 flex flex-col gap-4 hover:-translate-y-1 transition-all hover:shadow-sm">
+          <div class="flex justify-between items-start">
+            <span class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">Margherita</span>
+            <span class="font-normal text-sm text-[#2A1A0F] shrink-0 pt-1">€11</span>
+          </div>
+          <p class="text-xs font-light text-[#5A3E28] leading-relaxed flex-1">Tomàquet San Marzano, mozzarella fior di latte, alfàbrega fresca.</p>
+          <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">La clàssica</span>
+        </div>
+
+        <!-- La Bèstia — destacada -->
+        <div class="p-8 rounded-2xl bg-[#E23F2E] border border-[#E23F2E] flex flex-col gap-4 hover:-translate-y-1 transition-all hover:shadow-sm relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#2A1A0F] text-[#F2E6CE] text-[10px] uppercase tracking-widest font-medium whitespace-nowrap">⭐ La nostra recomanació</div>
+          <div class="flex justify-between items-start">
+            <span class="font-['Lilita_One'] tracking-tight text-2xl text-[#F2E6CE]">La Bèstia</span>
+            <span class="font-normal text-sm text-[#F2E6CE]/80 shrink-0 pt-1">€17</span>
+          </div>
+          <p class="text-xs font-light text-[#F2E6CE]/80 leading-relaxed flex-1">Botifarra, ceba caramel·litzada, salsa romesco, mozzarella.</p>
+          <span class="text-xs uppercase tracking-widest font-normal text-[#F2E6CE]/60">De Matadepera</span>
+        </div>
+
+        <!-- La Moto -->
+        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 flex flex-col gap-4 hover:-translate-y-1 transition-all hover:shadow-sm">
+          <div class="flex justify-between items-start">
+            <span class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">La Moto</span>
+            <span class="font-normal text-sm text-[#2A1A0F] shrink-0 pt-1">€16</span>
+          </div>
+          <p class="text-xs font-light text-[#5A3E28] leading-relaxed flex-1">Mortadel·la, burrata, pesto de rúcula, orenga.</p>
+          <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">La favorita</span>
+        </div>
+
+      </div>
+
+      <div class="text-center mt-14 reveal">
+        <a href="menu.html" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10 mr-4">
+          Veure tota la carta →
         </a>
-      </div>
-
-      <!-- Pizzes clàssiques -->
-      <div class="mb-12 reveal">
-        <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h3 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes clàssiques</h3>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">tradició napolitana</p>
-        </div>
-        <div class="space-y-1">
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6">
-              <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">La Moto</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Mortadel·la, burrata, pesto de rúcula, orenga</span>
-            </div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€16.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6">
-              <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">El Telèfon Vermell</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Salami picant, mel de romaní, gorgonzola, nous</span>
-            </div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€15.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6">
-              <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">La Bèstia de Matadepera</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Botifarra, ceba caramel·litzada, salsa romesco, mozzarella</span>
-            </div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€17.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6">
-              <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">L'Avi Fresc</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Pernil ibèric, rúcula, parmesà, tàperes, filet de llimona</span>
-            </div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€16.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6">
-              <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">La Cremosa</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Mascarpone, bolets de temporada, tòfona negra</span>
-            </div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€15.00</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Les clàssiques -->
-      <div class="mb-12 reveal">
-        <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h3 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Les clàssiques</h3>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">Tradició napolitana</p>
-        </div>
-        <div class="space-y-1">
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Margherita</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Tomàquet San Marzano, mozzarella fior di latte, alfàbrega fresca</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€11.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Marinara</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Tomàquet, all, orenga, oli d'oliva verge extra</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€9.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Napolitana</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Tomàquet, mozzarella, anxoves, tàperes, olives negres</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€13.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Quatre formatges</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Mozzarella, gorgonzola, parmesà, provolone, mel</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€14.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Calzone</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Ricotta, mozzarella, pernil dolç, alfàbrega</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€13.00</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Begudes & Postres -->
-      <div class="mb-16 reveal">
-        <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h3 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Begudes &amp; Postres</h3>
-        </div>
-        <div class="space-y-1">
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Aigua mineral</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">50 cl</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€2.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Refresc</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Coca-Cola, Fanta, Sprite · 33 cl</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€2.50</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Cervesa artesana</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Producció local · 33 cl</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€4.00</span>
-          </div>
-          <div class="flex items-center justify-between px-2 py-4 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Tiramisú casolà</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Fet a la cuina cada dia</span></div>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€5.00</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- CTA inferior -->
-      <div class="text-center reveal">
-        <p class="text-sm font-light text-[#5A3E28] font-serif mb-6">T'hem convençut? Ara pots triar i demanar des d'aquí.</p>
-        <a href="pedido.html" class="inline-block px-10 py-4 rounded-full font-medium text-base text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+        <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
           Demana ja! →
         </a>
       </div>
