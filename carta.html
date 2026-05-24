@@ -26,29 +26,52 @@
     .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
   </style>
+  <style>
+    @keyframes floating-bob {
+      0%, 100% { transform: translateY(0); }
+      50%     { transform: translateY(-10px); }
+    }
+    .hero-pizza.floating-loop {
+      animation: floating-bob 4s ease-in-out infinite;
+    }
+    .hero-pizza {
+      -webkit-mask-image: radial-gradient(ellipse at center, black 55%, transparent 95%);
+      mask-image: radial-gradient(ellipse at center, black 55%, transparent 95%);
+    }
+  </style>
+  <style>
+    .perspective-1000 { perspective: 1000px; }
+    .preserve-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .flip-card-inner { transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+  </style>
 </head>
 <body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
-
   <!-- Paper texture -->
-  <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]"
-    style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)">
+  <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
+  <div class="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cb6ab273-5899-4784-bea8-6448c9f5418e_320w.jpg" class="absolute top-[15%] left-[5%] md:left-[10%] w-[70px] opacity-15 mix-blend-multiply -rotate-12" alt="">
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cb6ab273-5899-4784-bea8-6448c9f5418e_320w.jpg" class="absolute top-[45%] right-[5%] md:right-[8%] w-[80px] opacity-15 mix-blend-multiply rotate-12" alt="">
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cb6ab273-5899-4784-bea8-6448c9f5418e_320w.jpg" class="absolute bottom-[20%] left-[8%] md:left-[15%] w-[60px] opacity-15 mix-blend-multiply rotate-6" alt="">
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cb6ab273-5899-4784-bea8-6448c9f5418e_320w.jpg" class="absolute bottom-[5%] right-[5%] md:right-[12%] w-[75px] opacity-15 mix-blend-multiply -rotate-6" alt="">
   </div>
 
   <!-- ════ NAV ════ -->
-  <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
+  <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b" id="navbar">
     <a href="#" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
 
-    <div class="hidden md:flex gap-8 text-sm font-normal text-[#2A1A0F]">
-      <a href="#nosaltres" class="relative transition-opacity hover:opacity-60">Nosaltres</a>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-[#2A1A0F] bg-white/70 backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[#C4B08A]/30">
+      <a href="#nosaltres" class="relative transition-opacity hover:opacity-60">Història</a>
       <a href="menu.html" class="relative transition-opacity hover:opacity-60">Carta</a>
-      <a href="#micsas-events" class="relative transition-opacity hover:opacity-60">Micsas Events</a>
+      <a href="micsas-events.html" class="relative transition-opacity hover:opacity-60">Micsas Events</a>
       <a href="#shop" class="relative transition-opacity hover:opacity-60">Shop</a>
     </div>
 
     <div class="flex items-center gap-3">
-      <a href="pedido.html" class="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all hover:-translate-y-0.5">
+      <a href="pedido.html" class="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium text-[#E23F2E] border border-[#E23F2E] hover:bg-[#E23F2E] hover:text-[#F2E6CE] transition-all">
         Demana ja! →
       </a>
       <button class="md:hidden p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" onclick="toggleMobileMenu()" aria-label="Menú">
@@ -64,7 +87,7 @@
     </button>
     <a href="#nosaltres" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Nosaltres</a>
     <a href="menu.html" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Carta</a>
-    <a href="#micsas-events" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Micsas Events</a>
+    <a href="micsas-events.html" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Micsas Events</a>
     <a href="#shop" onclick="toggleMobileMenu()" class="font-['Lilita_One'] tracking-tight text-4xl text-[#2A1A0F] block">Shop</a>
     <a href="pedido.html" class="mt-8 py-4 px-6 flex items-center justify-center gap-2 rounded-full text-[#F2E6CE] bg-[#E23F2E] font-medium text-sm transition-opacity hover:opacity-90">
       Demana ja! →
@@ -72,41 +95,113 @@
   </div>
 
   <!-- ════ HERO ════ -->
-  <div class="relative w-full h-[55vh] md:h-[60vh] -z-10 absolute top-0">
-    <video src="https://micsas-hero.vercel.app/micsas-hero.mp4" autoplay loop muted playsinline
-      class="w-full h-full object-cover opacity-40"
-      poster="https://micsas-hero.vercel.app/micsas-hero.jpg"></video>
-    <div class="absolute bottom-0 left-0 w-full h-[25%] bg-gradient-to-b from-transparent to-[#F2E6CE] z-10"></div>
-  </div>
+  <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-36 pb-32">
+    <video id="hero-pizza-video" class="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto mb-6 reveal visible hero-pizza" autoplay muted playsinline preload="auto" aria-hidden="true" onended="this.classList.add('floating-loop')">
+      <source src="https://micsas-ff-web-11g9.vercel.app/pizza-carta.mp4" type="video/mp4">
+    </video>
 
-  <header class="relative min-h-[85vh] flex flex-col items-center text-center px-6 justify-start pt-[52vh] md:pt-[56vh] pb-24">
-    <h1 class="font-['Lilita_One'] tracking-tight text-6xl sm:text-7xl md:text-8xl leading-none mb-6 text-[#E23F2E] reveal">
-      micsas.ff
-    </h1>
-    <p class="md:text-xl text-lg font-light text-[#2A1A0F] tracking-tight font-serif opacity-80 max-w-sm mx-auto mb-10 reveal">
+    <h1 class="reveal leading-tight sm:text-6xl md:text-6xl text-4xl text-[#2A1A0F] tracking-tight font-serif max-w-6xl mr-auto mb-10 ml-auto visible">
       MICSAS FRIENDS &amp; FAMILY
-    </p>
-    <div class="flex flex-col sm:flex-row gap-4 reveal">
-      <a href="pedido.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
-        Demana ja! →
+    </h1>
+    <div class="flex flex-col sm:flex-row items-center gap-4 reveal visible justify-center w-full">
+      <a href="menu.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#2A1A0F] bg-white shadow-sm border border-[#C4B08A]/30 transition-all hover:bg-gray-50">
+        La nostra carta
       </a>
-      <a href="menu.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10">
-        Veure la carta
+      <a href="#nosaltres" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#2A1A0F]/90">
+        Sobre nosaltres
+      </a>
+      <a href="pedido.html" class="px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-transparent border border-[#E23F2E] transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE]">
+        Demana ja
       </a>
     </div>
-    <a href="#nosaltres" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+    <a href="#les-preferides" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
       <span class="text-xs uppercase tracking-widest font-normal text-[#2A1A0F]">Descobreix</span>
       <div class="w-[1px] h-8 bg-gradient-to-b from-[#2A1A0F]/60 to-transparent"></div>
     </a>
   </header>
 
+  <!-- ════ LES MILLORS PIZZES ════ -->
+  <section class="py-24 md:py-36 px-6 md:px-12" id="les-preferides">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16 reveal visible">
+        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]">Les nostres millors pizzes</h2>
+      </div>
+
+      <div class="flex flex-col gap-6 md:gap-8 max-w-4xl mx-auto reveal visible">
+        <!-- Margherita -->
+        <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
+          <div class="flip-card-inner preserve-3d relative w-full h-full">
+            <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              <img src="https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&q=80&w=1200" alt="Pizza Margherita" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
+                <span class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">MARGHERITA 1889</span>
+                <span class="mt-4 px-4 py-1.5 rounded-full border border-[#F2E6CE]/50 text-[#F2E6CE] text-xs uppercase tracking-widest backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">Ingredients</span>
+              </div>
+            </div>
+            <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F] mb-4">Margherita</h3>
+              <p class="text-sm md:text-base font-light text-[#5A3E28] leading-relaxed max-w-md mx-auto">Tomàquet San Marzano DOP, Fior di latte artesana Il grande Desiderio, Alfàbrega fresca, Formatge Parmigiano (curat 24 mesos) i Oli d'oliva verge extra Valpolicella Slow Food.</p>
+              <span class="mt-6 font-medium text-lg text-[#2A1A0F]">€9</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Caramella Affumicata -->
+        <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
+          <div class="flip-card-inner preserve-3d relative w-full h-full">
+            <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#E23F2E]/30">
+              <div class="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#E23F2E] text-[#F2E6CE] text-[10px] md:text-xs uppercase tracking-widest font-medium z-10 whitespace-nowrap shadow-md">⭐ La nostra recomanació</div>
+              <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=1200" alt="La Bèstia" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
+                <span class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md mt-4">CARAMELLA AFFUMICATA</span>
+                <span class="mt-4 px-4 py-1.5 rounded-full border border-[#F2E6CE]/50 text-[#F2E6CE] text-xs uppercase tracking-widest backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">Ingredients</span>
+              </div>
+            </div>
+            <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#E23F2E] border border-[#E23F2E] p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#F2E6CE] mb-4">Caramella Affumicata</h3>
+              <p class="text-sm md:text-base font-light text-[#F2E6CE]/90 leading-relaxed max-w-md mx-auto">Tomàquet datterino caramella, Formatge fumat (Provola), Fior di latte artesana Il grande Desiderio, Alfàbrega fresca en cru, Formatge Caciocavallo i Oli d'oliva verge extra Valpolicella Slow Food.</p>
+              <span class="mt-6 font-medium text-lg text-[#F2E6CE]">€13</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nutellina -->
+        <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
+          <div class="flip-card-inner preserve-3d relative w-full h-full">
+            <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=1200" alt="La Moto" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
+                <span class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">NUTELLINA</span>
+                <span class="mt-4 px-4 py-1.5 rounded-full border border-[#F2E6CE]/50 text-[#F2E6CE] text-xs uppercase tracking-widest backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">Ingredients</span>
+              </div>
+            </div>
+            <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F] mb-4">Nutellina</h3>
+              <p class="text-sm md:text-base font-light text-[#5A3E28] leading-relaxed max-w-md mx-auto">Base de crema de xocolata i avellanes Nutella amb topping de festuc de Sicília DOP</p>
+              <span class="mt-6 font-medium text-lg text-[#2A1A0F]">€13</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-14 reveal">
+        <a href="menu.html" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10 mr-4">
+          Veure tota la carta →
+        </a>
+        <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+          Demana ja! →
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- ════ NOSALTRES ════ -->
   <section class="py-24 md:py-36 px-6 md:px-12 bg-[#E6D5B0]/20" id="nosaltres">
     <div class="grid md:grid-cols-2 gap-16 max-w-6xl mx-auto items-stretch">
       <div class="space-y-6 flex flex-col justify-center reveal">
-        <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E] border-l-2 border-[#E23F2E] pl-3 inline-block">sobre nosaltres</span>
+        <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E] border-l-2 border-[#E23F2E] pl-3 inline-block">la meva història</span>
         <h2 class="leading-tight md:text-4xl text-4xl text-[#2A1A0F] tracking-tight font-['Lilita_One']">
-          Nascuts a Matadepera,<span class="text-[#E23F2E]"> fets</span><br>per compartir.
+          Nascuts a Matadepera, <span class="text-[#E23F2E]">fets</span><br>per compartir.
         </h2>
         <div class="space-y-4 text-sm font-light leading-relaxed max-w-md text-[#5A3E28]">
           <p class="font-serif">Micsas neix a Matadepera, d'un grup d'amics obsessionats amb la pizza napolitana de veritat: massa fermentada 72 hores i ingredients escollits un per un. Sense app, sense intermediaris.</p>
@@ -126,109 +221,10 @@
 
   <!-- ════ MANIFESTO BANNER ════ -->
   <section class="py-20 md:py-28 px-6 text-center relative overflow-hidden bg-gradient-to-br from-[#E23F2E] to-[#B82A1F]">
+    <img src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&q=80&w=1600" alt="Forn de llenya" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay">
     <div class="relative z-10 max-w-4xl mx-auto reveal">
       <p class="font-['Lilita_One'] tracking-tight text-4xl md:text-6xl text-[#F2E6CE] leading-tight">Pizza napolitana tradicional</p>
-      <p class="text-sm font-normal text-[#F2E6CE]/80 tracking-wide font-serif mt-4">
-        Sense pressa, només amor i temps. L'olor de la massa al matí, el so de les motos al vespre, la calor del forn de pedra. Així és Micsas. Així és el nostre barri.
-      </p>
-    </div>
-  </section>
-
-  <!-- ════ LES NOSTRES MILLORS PIZZES ════ -->
-  <section class="py-24 md:py-36 px-6 md:px-12">
-    <div class="max-w-5xl mx-auto">
-
-      <div class="text-center mb-16 reveal">
-        <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">Les preferides</span>
-        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]">Les nostres millors pizzes</h2>
-        <p class="text-sm font-light mt-4 text-[#5A3E28] font-serif max-w-sm mx-auto">Tres pizzes que ho diuen tot. Massa fermentada 72h, ingredients de primera.</p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6 reveal">
-
-        <!-- Margherita -->
-        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 flex flex-col gap-4 hover:-translate-y-1 transition-all hover:shadow-sm">
-          <div class="flex justify-between items-start">
-            <span class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">Margherita</span>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0 pt-1">€11</span>
-          </div>
-          <p class="text-xs font-light text-[#5A3E28] leading-relaxed flex-1">Tomàquet San Marzano, mozzarella fior di latte, alfàbrega fresca.</p>
-          <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">La clàssica</span>
-        </div>
-
-        <!-- La Bèstia — destacada -->
-        <div class="p-8 rounded-2xl bg-[#E23F2E] border border-[#E23F2E] flex flex-col gap-4 hover:-translate-y-1 transition-all hover:shadow-sm relative">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#2A1A0F] text-[#F2E6CE] text-[10px] uppercase tracking-widest font-medium whitespace-nowrap">⭐ La nostra recomanació</div>
-          <div class="flex justify-between items-start">
-            <span class="font-['Lilita_One'] tracking-tight text-2xl text-[#F2E6CE]">La Bèstia</span>
-            <span class="font-normal text-sm text-[#F2E6CE]/80 shrink-0 pt-1">€17</span>
-          </div>
-          <p class="text-xs font-light text-[#F2E6CE]/80 leading-relaxed flex-1">Botifarra, ceba caramel·litzada, salsa romesco, mozzarella.</p>
-          <span class="text-xs uppercase tracking-widest font-normal text-[#F2E6CE]/60">De Matadepera</span>
-        </div>
-
-        <!-- La Moto -->
-        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 flex flex-col gap-4 hover:-translate-y-1 transition-all hover:shadow-sm">
-          <div class="flex justify-between items-start">
-            <span class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">La Moto</span>
-            <span class="font-normal text-sm text-[#2A1A0F] shrink-0 pt-1">€16</span>
-          </div>
-          <p class="text-xs font-light text-[#5A3E28] leading-relaxed flex-1">Mortadel·la, burrata, pesto de rúcula, orenga.</p>
-          <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">La favorita</span>
-        </div>
-
-      </div>
-
-      <div class="text-center mt-14 reveal">
-        <a href="menu.html" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10 mr-4">
-          Veure tota la carta →
-        </a>
-        <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
-          Demana ja! →
-        </a>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ════ MICSAS EVENTS ════ -->
-  <section id="micsas-events" class="py-24 md:py-32 px-6 md:px-12 bg-[#E6D5B0]/20 border-y border-[#C4B08A]/20">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-16 reveal">
-        <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">Servei especial</span>
-        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]">Micsas Events</h2>
-        <p class="text-sm font-light mt-4 text-[#5A3E28] font-serif max-w-md mx-auto leading-relaxed">
-          Pizza napolitana artesanal per a les teves festes, aniversaris i esdeveniments. Portem el forn i la passió fins a casa teva.
-        </p>
-        <a href="https://ig.me/m/micsas.ff" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-8 px-6 py-2.5 rounded-full text-sm font-medium text-[#E23F2E] bg-[#E23F2E]/10 border border-[#E23F2E]/20 hover:bg-[#E23F2E] hover:text-[#F2E6CE] transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
-          Demana informació per Instagram
-        </a>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6 reveal">
-        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 transition-all hover:shadow-sm hover:-translate-y-1 group">
-          <div class="w-14 h-14 rounded-full mx-auto mb-6 flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] transition-transform group-hover:scale-110">
-            <iconify-icon icon="solar:home-2-linear" width="24" style="stroke-width:1.5;"></iconify-icon>
-          </div>
-          <h3 class="font-['Lilita_One'] tracking-tight text-2xl mb-3 text-[#2A1A0F] text-center">A domicili</h3>
-          <p class="text-sm font-light leading-relaxed text-[#5A3E28] text-center">Portem tot el necessari al teu espai. Forn, ingredients i els nostres mans.</p>
-        </div>
-        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 transition-all hover:shadow-sm hover:-translate-y-1 group">
-          <div class="w-14 h-14 rounded-full mx-auto mb-6 flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] transition-transform group-hover:scale-110">
-            <iconify-icon icon="solar:users-group-rounded-linear" width="24" style="stroke-width:1.5;"></iconify-icon>
-          </div>
-          <h3 class="font-['Lilita_One'] tracking-tight text-2xl mb-3 text-[#2A1A0F] text-center">Grups grans</h3>
-          <p class="text-sm font-light leading-relaxed text-[#5A3E28] text-center">Des de 10 fins a 100 persones. Aniversaris, festes d'empresa, reunions de barri.</p>
-        </div>
-        <div class="p-8 rounded-2xl bg-[#F2E6CE] border border-[#C4B08A]/30 transition-all hover:shadow-sm hover:-translate-y-1 group">
-          <div class="w-14 h-14 rounded-full mx-auto mb-6 flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] transition-transform group-hover:scale-110">
-            <iconify-icon icon="solar:chef-hat-heart-linear" width="24" style="stroke-width:1.5;"></iconify-icon>
-          </div>
-          <h3 class="font-['Lilita_One'] tracking-tight text-2xl mb-3 text-[#2A1A0F] text-center">100% artesà</h3>
-          <p class="text-sm font-light leading-relaxed text-[#5A3E28] text-center">La mateixa massa fermentada 72h i els mateixos ingredients que al local. Sense compromís.</p>
-        </div>
-      </div>
+      <p class="text-sm font-normal text-[#F2E6CE]/80 tracking-wide font-serif mt-4">Sense pressa, només amor i temps. L'olor de la massa al matí, el so de les motos al vespre, la calor del forn de pedra. Així és Micsas. Així és el nostre barri.</p>
     </div>
   </section>
 
@@ -242,7 +238,6 @@
 
       <div class="relative flex flex-col justify-center items-center py-12 md:py-16 overflow-hidden md:overflow-visible w-full">
         <div class="testimonial-container flex md:justify-center items-center relative w-full max-w-full transition-transform duration-300 ease-out will-change-transform" id="testimonial-track">
-
           <div class="t-card relative h-[280px] shrink-0 bg-[#F2E6CE] border border-[#C4B08A]/30 shadow-sm rounded-2xl flex flex-col p-6 transition-all duration-500 ease-out z-10 w-full md:w-[260px]">
             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] mb-5 shrink-0"><iconify-icon icon="solar:chat-round-like-linear" width="20" style="stroke-width:1.5;"></iconify-icon></div>
             <p class="leading-relaxed text-sm font-light text-[#5A3E28] font-serif mb-auto">"La millor pizza de Matadepera, sens dubte. La massa és increïble i arriba súper calenta gràcies a la moto."</p>
@@ -251,7 +246,6 @@
               <div class="flex items-center gap-0.5 text-[#E23F2E]"><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon></div>
             </div>
           </div>
-
           <div class="t-card relative h-[280px] shrink-0 bg-[#F2E6CE] border border-[#C4B08A]/30 shadow-sm rounded-2xl flex flex-col p-6 transition-all duration-500 ease-out z-20 w-full md:w-[260px]">
             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] mb-5 shrink-0"><iconify-icon icon="solar:chat-round-like-linear" width="20" style="stroke-width:1.5;"></iconify-icon></div>
             <p class="leading-relaxed text-sm font-light text-[#5A3E28] font-serif mb-auto">"Es nota que fan la fermentació de 72h. No es fa gens pesada, i els ingredients són de primera qualitat."</p>
@@ -260,7 +254,6 @@
               <div class="flex items-center gap-0.5 text-[#E23F2E]"><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon></div>
             </div>
           </div>
-
           <div class="t-card relative h-[280px] shrink-0 bg-[#F2E6CE] border border-[#C4B08A]/30 shadow-md rounded-2xl flex flex-col p-6 transition-all duration-500 ease-out z-30 w-full md:w-[260px]">
             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] mb-5 shrink-0"><iconify-icon icon="solar:chat-round-like-bold" width="20"></iconify-icon></div>
             <p class="leading-relaxed text-sm font-light text-[#5A3E28] font-serif mb-auto">"Un tracte excepcional pel telèfon i la pizza impressionant. Ens va encantar 'La Bèstia de Matadepera'."</p>
@@ -269,7 +262,6 @@
               <div class="flex items-center gap-0.5 text-[#E23F2E]"><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon></div>
             </div>
           </div>
-
           <div class="t-card relative h-[280px] shrink-0 bg-[#F2E6CE] border border-[#C4B08A]/30 shadow-sm rounded-2xl flex flex-col p-6 transition-all duration-500 ease-out z-20 w-full md:w-[260px]">
             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] mb-5 shrink-0"><iconify-icon icon="solar:chat-round-like-linear" width="20" style="stroke-width:1.5;"></iconify-icon></div>
             <p class="leading-relaxed text-sm font-light text-[#5A3E28] font-serif mb-auto">"Molt bona relació qualitat-preu. Finalment una pizzeria autèntica napolitana al barri sense complicacions."</p>
@@ -278,7 +270,6 @@
               <div class="flex items-center gap-0.5 text-[#E23F2E]"><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon></div>
             </div>
           </div>
-
           <div class="t-card relative h-[280px] shrink-0 bg-[#F2E6CE] border border-[#C4B08A]/30 shadow-sm rounded-2xl flex flex-col p-6 transition-all duration-500 ease-out z-10 w-full md:w-[260px]">
             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E23F2E]/10 text-[#E23F2E] mb-5 shrink-0"><iconify-icon icon="solar:chat-round-like-linear" width="20" style="stroke-width:1.5;"></iconify-icon></div>
             <p class="leading-relaxed text-sm font-light text-[#5A3E28] font-serif mb-auto">"Ràpids, amables i amb un forn de pedra que es nota a cada mossegada. Totalment recomanable per divendres a la nit."</p>
@@ -287,12 +278,9 @@
               <div class="flex items-center gap-0.5 text-[#E23F2E]"><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon><iconify-icon icon="solar:star-bold" width="14"></iconify-icon></div>
             </div>
           </div>
-
         </div>
         <div class="flex md:hidden items-center justify-center gap-4 mt-8 w-full z-20">
-          <button id="t-prev" class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E6D5B0]/50 text-[#E23F2E] hover:bg-[#E23F2E]/10 transition-colors">
-            <iconify-icon icon="solar:alt-arrow-left-linear" width="24" style="stroke-width:1.5;"></iconify-icon>
-          </button>
+          <button id="t-prev" class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E6D5B0]/50 text-[#E23F2E] hover:bg-[#E23F2E]/10 transition-colors"><iconify-icon icon="solar:alt-arrow-left-linear" width="24" style="stroke-width:1.5;"></iconify-icon></button>
           <div id="t-dots" class="flex gap-2">
             <button class="w-2 h-2 rounded-full bg-[#E23F2E] transition-all"></button>
             <button class="w-2 h-2 rounded-full bg-[#C4B08A]/50 transition-all"></button>
@@ -300,9 +288,7 @@
             <button class="w-2 h-2 rounded-full bg-[#C4B08A]/50 transition-all"></button>
             <button class="w-2 h-2 rounded-full bg-[#C4B08A]/50 transition-all"></button>
           </div>
-          <button id="t-next" class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E6D5B0]/50 text-[#E23F2E] hover:bg-[#E23F2E]/10 transition-colors">
-            <iconify-icon icon="solar:alt-arrow-right-linear" width="24" style="stroke-width:1.5;"></iconify-icon>
-          </button>
+          <button id="t-next" class="w-10 h-10 rounded-full flex items-center justify-center bg-[#E6D5B0]/50 text-[#E23F2E] hover:bg-[#E23F2E]/10 transition-colors"><iconify-icon icon="solar:alt-arrow-right-linear" width="24" style="stroke-width:1.5;"></iconify-icon></button>
         </div>
       </div>
     </div>
@@ -341,21 +327,15 @@
           </div>
         </div>
       </div>
-
       <div class="rounded-2xl border border-[#C4B08A]/30 overflow-hidden bg-[#E6D5B0]/10 shadow-sm reveal">
         <div class="p-6 border-b border-[#C4B08A]/20 bg-[#E6D5B0]/20">
           <h3 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">On arriben les nostres pizzes</h3>
           <p class="text-xs font-light mt-1 text-[#5A3E28]">Matadepera, Vallès Occidental</p>
         </div>
         <a href="https://www.google.com/maps/search/Matadepera+08230" target="_blank" class="relative flex items-center justify-center h-64 group transition-all">
-          <svg class="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-            <defs><pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0L0 0 0 24" fill="none" stroke="#C4B08A" stroke-width="0.5"></path></pattern></defs>
-            <rect width="100%" height="100%" fill="url(#g)"></rect>
-          </svg>
+          <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" alt="Mapa Matadepera" class="absolute inset-0 w-full h-full object-cover opacity-50 grayscale mix-blend-multiply">
           <div class="relative z-10 flex flex-col items-center gap-4">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-[#E23F2E] text-[#F2E6CE] group-hover:scale-110 transition-transform duration-500 shadow-md">
-              <iconify-icon icon="solar:map-point-bold" width="24"></iconify-icon>
-            </div>
+            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-[#E23F2E] text-[#F2E6CE] group-hover:scale-110 transition-transform duration-500 shadow-md"><iconify-icon icon="solar:map-point-bold" width="24"></iconify-icon></div>
             <span class="text-xs font-medium px-4 py-2 rounded-full bg-[#F2E6CE] text-[#E23F2E] shadow-sm border border-[#C4B08A]/20">Obre Google Maps →</span>
           </div>
         </a>
@@ -364,13 +344,12 @@
   </section>
 
   <!-- ════ SHOP ════ -->
-  <section id="shop" class="py-24 md:py-28 px-6 md:px-12 bg-[#2A1A0F] text-center">
-    <div class="max-w-xl mx-auto">
+  <section id="shop" class="py-24 md:py-28 px-6 md:px-12 bg-[#2A1A0F] text-center relative overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1600" alt="Ingredients Shop Background" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity">
+    <div class="max-w-xl mx-auto relative z-10">
       <span class="text-xs uppercase tracking-widest font-normal text-[#C4B08A] block mb-4">Properament</span>
       <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#F2E6CE] mb-6">Micsas Shop</h2>
-      <p class="text-sm font-light text-[#C4B08A] font-serif leading-relaxed mb-8">
-        Aviat podràs portar un tros de Micsas a casa. Salses, masses, merchandising i molt més. Estem treballant-hi.
-      </p>
+      <p class="text-sm font-light text-[#C4B08A] font-serif leading-relaxed mb-8">Aviat podràs portar un tros de Micsas a casa. Salses, masses, merchandising i molt més. Estem treballant-hi.</p>
       <div class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#C4B08A]/30 text-sm font-normal text-[#C4B08A]/60 cursor-not-allowed">
         <span class="w-2 h-2 rounded-full bg-[#E23F2E] animate-pulse inline-block"></span>
         En construcció
@@ -385,8 +364,7 @@
         <p class="font-['Lilita_One'] tracking-tighter text-4xl mb-2 text-[#F2E6CE]">micsas.ff</p>
         <p class="text-xs font-light tracking-wide text-[#C4B08A]">Pasta, foc i moto. Res més.</p>
         <div class="flex justify-center gap-4 mt-8">
-          <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer"
-            class="w-10 h-10 rounded-full border border-[#C4B08A]/20 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:border-[#E23F2E] text-[#C4B08A] hover:text-[#F2E6CE]">
+          <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full border border-[#C4B08A]/20 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:border-[#E23F2E] text-[#C4B08A] hover:text-[#F2E6CE]">
             <iconify-icon icon="solar:camera-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
           </a>
         </div>
@@ -403,7 +381,6 @@
   </footer>
 
   <script>
-    // Navbar scroll effect
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 40) {
@@ -415,14 +392,12 @@
       }
     }, { passive: true });
 
-    // Mobile menu
     function toggleMobileMenu() {
       const m = document.getElementById('mobile-menu');
       if (m.classList.contains('hidden')) { m.classList.remove('hidden'); m.classList.add('flex'); document.body.style.overflow = 'hidden'; }
       else { m.classList.add('hidden'); m.classList.remove('flex'); document.body.style.overflow = ''; }
     }
 
-    // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
         const t = document.querySelector(a.getAttribute('href'));
@@ -430,18 +405,15 @@
       });
     });
 
-    // Reveal on scroll
     const reveals = document.querySelectorAll('.reveal');
     function doReveal() {
-      const vh = window.innerHeight;
       reveals.forEach(el => {
-        if (el.getBoundingClientRect().top < vh - 60) el.classList.add('visible');
+        if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
       });
     }
     window.addEventListener('scroll', doReveal, { passive: true });
     doReveal();
 
-    // Testimonials carousel
     (function() {
       const track = document.getElementById('testimonial-track');
       if (!track) return;
@@ -460,11 +432,7 @@
         });
       }
 
-      function goTo(index) {
-        currentIndex = ((index % total) + total) % total;
-        updateCarousel();
-      }
-
+      function goTo(index) { currentIndex = ((index % total) + total) % total; updateCarousel(); }
       function startAutoPlay() { clearInterval(autoPlayInterval); autoPlayInterval = setInterval(() => goTo(currentIndex + 1), 6000); }
       function pauseAutoPlay() { clearInterval(autoPlayInterval); setTimeout(startAutoPlay, 10000); }
 

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ca" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Micsas Events — Portem el forn al teu esdeveniment</title>
+  <meta name="description" content="micsas.ff · Forn de pizza napolitana mòbil per a casaments, festes d'empresa, aniversaris i qualsevol celebració.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
+
+  <!-- ════ NAV ════ -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-4 flex items-center justify-between border-b border-transparent transition-all duration-300">
+    <a href="carta.html" class="font-['Lilita_One'] text-2xl text-[#E23F2E] tracking-tight leading-none">micsas.ff</a>
+    <div class="flex items-center gap-3">
+      <a href="carta.html" class="flex items-center gap-2 text-sm font-normal text-[#5A3E28] hover:text-[#E23F2E] transition-colors px-4 py-2 rounded-full border border-[#C4B08A]/40 hover:border-[#E23F2E]/40">
+        <iconify-icon icon="solar:arrow-left-linear" width="16"></iconify-icon>
+        Tornar
+      </a>
+      <a href="pedido.html" class="flex items-center gap-2 text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] px-5 py-2.5 rounded-full shadow-sm hover:bg-[#B82A1F] transition-all">
+        Demana ja!
+      </a>
+    </div>
+  </nav>
+
+  <!-- ════ MICSAS EVENTS ════ -->
+  <section id="micsas-events" class="pt-28 pb-24 md:pt-36 md:pb-32 px-6 md:px-12 bg-[#E6D5B0]/20 border-y border-[#C4B08A]/20">
+    <div class="max-w-6xl mx-auto space-y-24 md:space-y-32">
+
+      <!-- 1. HERO -->
+      <div class="text-center reveal visible">
+        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-6xl text-[#2A1A0F] mb-6 max-w-4xl mx-auto leading-tight">
+          Portem el forn de pizza al teu esdeveniment
+        </h2>
+        <p class="text-lg md:text-xl font-light text-[#5A3E28] font-serif max-w-3xl mx-auto leading-relaxed mb-12">
+          Pizzes napolitanes fetes al moment, allà on tu vulguis. Casaments,
+          festes d'empresa, aniversaris o qualsevol celebració que es mereixi
+          una pizza de veritat.
+        </p>
+        <div class="w-full h-[400px] md:h-[600px] rounded-3xl overflow-hidden shadow-2xl border border-[#C4B08A]/30 relative">
+          <img src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&q=80&w=1600" alt="Forn de llenya a l'aire lliure" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#2A1A0F]/60 to-transparent"></div>
+        </div>
+      </div>
+
+      <!-- 2. QUÈ INCLOU -->
+      <div class="reveal">
+        <div class="text-center mb-12">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+            Què inclou el servei
+          </h3>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
+            <div class="text-4xl mb-4">🔥</div>
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+              Forn de pizza napolitana mòbil
+            </h4>
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+              Forn portàtil de pedra refractària que arriba a 450º per a una
+              cocció perfecta.
+            </p>
+          </div>
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
+            <div class="text-4xl mb-4">👨‍🍳</div>
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+              Pizzaiolo professional
+            </h4>
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+              El nostre equip expert s'encarrega de tot. Cuinem les pizzes en
+              directe.
+            </p>
+          </div>
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
+            <div class="text-4xl mb-4">🍕</div>
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+              Massa artesana i ingredients
+            </h4>
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+              Massa de 72h de fermentació i ingredients frescos de primera
+              qualitat.
+            </p>
+          </div>
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
+            <div class="text-4xl mb-4">📍</div>
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+              Adaptació total a l'espai
+            </h4>
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+              Muntem la parada on necessitis, només necessitem un petit racó
+              al teu event.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. PER A QUIN TIPUS D'ESDEVENIMENTS -->
+      <div class="reveal">
+        <div class="text-center mb-12">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+            Per a qualsevol celebració
+          </h3>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div class="group relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#C4B08A]/30 cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Casaments">
+            <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md">
+                Casaments
+              </span>
+            </div>
+          </div>
+          <div class="group relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#C4B08A]/30 cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Festes d'empresa">
+            <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+                Festes
+                <br>
+                d'empresa
+              </span>
+            </div>
+          </div>
+          <div class="group relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#C4B08A]/30 cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1530103862676-de88b3bc1c6c?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Aniversaris">
+            <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md">
+                Aniversaris
+              </span>
+            </div>
+          </div>
+          <div class="group relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#C4B08A]/30 cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Festes privades">
+            <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+                Festes
+                <br>
+                privades
+              </span>
+            </div>
+          </div>
+          <div class="group relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#C4B08A]/30 cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Sopars d'equip i tornejos">
+            <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+                Sopars d'equip
+                <br>
+                i tornejos
+              </span>
+            </div>
+          </div>
+          <div class="group relative rounded-3xl overflow-hidden aspect-[4/3] border border-[#C4B08A]/30 cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1533142278453-6bbdb17f168d?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Esdeveniments de barri">
+            <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+                Esdeveniments
+                <br>
+                de barri
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. COM FUNCIONA -->
+      <div class="reveal">
+        <div class="text-center mb-12">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+            Així de fàcil
+          </h3>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8 md:gap-10">
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl relative mt-6 text-center shadow-sm">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-[#E23F2E] text-[#F2E6CE] font-['Lilita_One'] text-2xl flex items-center justify-center shadow-md border-[4px] border-[#E6D5B0] pt-1">
+              1
+            </div>
+            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4">
+              Ens contactes
+            </h4>
+            <p class="text-base font-light text-[#5A3E28] font-serif">
+              Explica'ns la data, lloc i nombre de convidats.
+            </p>
+          </div>
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl relative mt-6 text-center shadow-sm">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-[#E23F2E] text-[#F2E6CE] font-['Lilita_One'] text-2xl flex items-center justify-center shadow-md border-[4px] border-[#E6D5B0] pt-1">
+              2
+            </div>
+            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4">
+              Pressupost a mida
+            </h4>
+            <p class="text-base font-light text-[#5A3E28] font-serif">
+              En menys de 24h tens la nostra proposta detallada.
+            </p>
+          </div>
+          <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl relative mt-6 text-center shadow-sm">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-[#E23F2E] text-[#F2E6CE] font-['Lilita_One'] text-2xl flex items-center justify-center shadow-md border-[4px] border-[#E6D5B0] pt-1">
+              3
+            </div>
+            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4">
+              Fem la festa
+            </h4>
+            <p class="text-base font-light text-[#5A3E28] font-serif">
+              Anem al teu event, muntem el forn i fem pizzes al moment.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. GALERIA -->
+      <div class="reveal">
+        <div class="text-center mb-12">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+            Així són els nostres events
+          </h3>
+        </div>
+        <div class="columns-2 md:columns-3 gap-4 space-y-4">
+          <div class="rounded-3xl overflow-hidden shadow-sm border border-[#C4B08A]/30 inline-block w-full">
+            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8154efd2-74e4-4d0d-b511-1993d18c2c4e_800w.jpg" class="w-full object-cover" alt="Event Micsas">
+          </div>
+          <div class="rounded-3xl overflow-hidden shadow-sm border border-[#C4B08A]/30 inline-block w-full">
+            <img src="https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&q=80&w=800" class="w-full object-cover" alt="Event Micsas">
+          </div>
+          <div class="rounded-3xl overflow-hidden shadow-sm border border-[#C4B08A]/30 inline-block w-full">
+            <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=800" class="w-full object-cover" alt="Event Micsas">
+          </div>
+          <div class="rounded-3xl overflow-hidden shadow-sm border border-[#C4B08A]/30 inline-block w-full">
+            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3d19fee0-3d63-4c87-8083-e9c6122884f8_800w.jpg" class="w-full object-cover" alt="Event Micsas">
+          </div>
+          <div class="rounded-3xl overflow-hidden shadow-sm border border-[#C4B08A]/30 inline-block w-full">
+            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800" class="w-full object-cover" alt="Event Micsas">
+          </div>
+          <div class="rounded-3xl overflow-hidden shadow-sm border border-[#C4B08A]/30 inline-block w-full">
+            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/d1b5e2de-f800-4df8-a2d8-193ff41a9b40_800w.jpg" class="w-full object-cover" alt="Event Micsas">
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. CTA FINAL -->
+      <div class="reveal">
+        <div class="bg-[#F2E6CE] rounded-3xl border border-[#C4B08A]/30 p-8 md:p-14 shadow-lg relative overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=800" class="absolute top-0 right-0 w-64 opacity-5 pointer-events-none mix-blend-multiply rotate-12" alt="">
+
+          <div class="grid md:grid-cols-2 gap-12 md:gap-16 relative z-10 items-center">
+            <div>
+              <h3 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#2A1A0F] mb-4">
+                Tens un event a la vista?
+              </h3>
+              <p class="text-[#5A3E28] font-serif font-light text-lg mb-10 leading-relaxed">
+                Contacta'ns i et fem pressupost sense compromís.
+              </p>
+
+              <div class="space-y-4">
+                <a href="tel:" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl font-medium text-lg text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+                  <iconify-icon icon="solar:phone-bold" width="22"></iconify-icon>
+                  Telèfon de contacte
+                </a>
+                <a href="https://ig.me/m/micsas.ff" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl font-medium text-lg text-[#E23F2E] bg-transparent border border-[#E23F2E] transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:-translate-y-0.5">
+                  <iconify-icon icon="lucide:instagram" width="22"></iconify-icon>
+                  Escriu-nos per Insta
+                </a>
+              </div>
+            </div>
+
+            <div class="bg-white/60 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-[#C4B08A]/20 shadow-sm">
+              <form class="space-y-5" onsubmit="event.preventDefault();">
+                <div>
+                  <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                    Nom o Empresa
+                  </label>
+                  <input type="text" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all" placeholder="El teu nom">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                      Data event
+                    </label>
+                    <input type="date" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                      Nº Convidats
+                    </label>
+                    <input type="number" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all" placeholder="Ex: 50">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                    Més detalls
+                  </label>
+                  <textarea rows="3" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all resize-none" placeholder="Lloc, tipus d'event..."></textarea>
+                </div>
+                <button class="w-full py-4 mt-2 rounded-xl font-medium text-sm text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#1A0F08] hover:-translate-y-0.5">
+                  Demanar pressupost
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════ FOOTER ════ -->
+  <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#2A1A0F] border-t border-[#C4B08A]/10">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="font-['Lilita_One'] tracking-tighter text-4xl mb-2 text-[#F2E6CE]">micsas.ff</p>
+        <p class="text-xs font-light tracking-wide text-[#C4B08A]">Pasta, foc i moto. Res més.</p>
+        <div class="flex justify-center gap-4 mt-8">
+          <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full border border-[#C4B08A]/20 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:border-[#E23F2E] text-[#C4B08A] hover:text-[#F2E6CE]">
+            <iconify-icon icon="solar:camera-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
+          </a>
+        </div>
+      </div>
+      <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-[#C4B08A]/10 gap-4">
+        <p class="text-xs font-light text-[#C4B08A]/60">© 2025 micsas.ff · Tots els drets reservats</p>
+        <div class="flex items-center gap-4 text-xs font-light text-[#C4B08A]/60">
+          <span>Efectiu</span><span class="w-1 h-1 rounded-full bg-[#C4B08A]/30"></span>
+          <span>Targeta</span><span class="w-1 h-1 rounded-full bg-[#C4B08A]/30"></span>
+          <span>Pagament online</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 40) {
+        navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+        navbar.classList.remove('border-transparent');
+      } else {
+        navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+        navbar.classList.add('border-transparent');
+      }
+    }, { passive: true });
+
+    const reveals = document.querySelectorAll('.reveal');
+    function doReveal() {
+      reveals.forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
+      });
+    }
+    window.addEventListener('scroll', doReveal, { passive: true });
+    doReveal();
+  </script>
+
+</body>
+</html>
