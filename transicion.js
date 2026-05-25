@@ -4,8 +4,9 @@
 // y deja que el navegador gestione la transición.
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Si el navegador soporta View Transitions cross-document, no hacemos nada
-  if (document.startViewTransition) return;
+  // Solo saltar si el navegador soporta View Transitions CROSS-document (Chrome 126+, Safari 18.2+)
+  // document.startViewTransition existe desde Chrome 111 (same-doc), pero NO garantiza cross-doc
+  if ('onpagereveal' in window) return;
 
   document.querySelectorAll('a[href]').forEach(link => {
     let url;
