@@ -1,0 +1,35 @@
+/* Transición zoom + fundido entre páginas.
+   Incluir este archivo en todas las páginas del sitio. */
+
+/* --- View Transitions API (Chrome, Edge, Safari recientes) --- */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 400ms ease-in both zoom-out;
+}
+
+::view-transition-new(root) {
+  animation: 500ms ease-out both zoom-in;
+}
+
+@keyframes zoom-out {
+  to { transform: scale(1.1); opacity: 0; }
+}
+
+@keyframes zoom-in {
+  from { transform: scale(0.95); opacity: 0; }
+}
+
+/* --- Fallback clásico para navegadores sin soporte (Firefox, etc.) --- */
+
+body {
+  transition: transform 400ms ease-in, opacity 400ms ease-in;
+}
+
+body.zoom-out {
+  transform: scale(1.1);
+  opacity: 0;
+}
