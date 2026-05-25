@@ -9,23 +9,21 @@
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#F7E8CC] overflow-hidden h-screen selection:bg-[#E23F2E]/30 antialiased text-[#2A1E16] font-['Inter',sans-serif] text-[16px] leading-[1.5]">
+<body class="relative w-full min-h-screen overflow-hidden selection:bg-[#E23F2E]/30 antialiased text-[#2A1E16] font-['Inter',sans-serif] text-[16px] leading-[1.5] bg-[#F1E5CD]">
 
   <!-- Video background -->
-  <div class="video-background-container fixed top-0 w-full h-screen -z-10 opacity-40"
+  <div class="video-background-container fixed top-0 w-full h-screen -z-10 opacity-20"
     style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
-    <video src="https://micsas-hero.vercel.app/micsas-hero.mp4" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
+    <video src="https://micsas-ff-web-11g9.vercel.app/micsas-hero-F1E5CD.mp4" autoplay loop muted playsinline class="w-full h-full object-cover"></video>
   </div>
 
-  <!-- Noise texture -->
-  <div class="fixed inset-0 pointer-events-none z-0 opacity-[0.03] mix-blend-difference"
-    style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
+  <div class="absolute top-0 left-0 w-full bg-black/10 z-10 h-screen"></div>
 
   <!-- Main content -->
-  <main class="relative z-10 h-screen flex flex-col items-center text-center px-6 justify-center">
-    <div class="flex flex-col items-center">
+  <main class="relative z-20 flex flex-col items-center justify-center min-h-screen text-center px-6 pointer-events-none">
+    <div class="flex flex-col items-center pointer-events-auto">
 
       <!-- Subtitle -->
       <p class="text-[#2A1E16] uppercase mb-6 flex items-center gap-3 font-['Bebas_Neue',sans-serif] text-[20px] sm:text-[24px] leading-[1.2] font-normal">
@@ -52,8 +50,7 @@
         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto order-1 sm:order-2 items-center">
           <a href="carta.html"
             class="w-[90%] sm:w-auto px-6 py-3 rounded-full text-[#E23F2E] bg-transparent border-2 border-[#E23F2E] hover:bg-[#E23F2E] hover:text-[#F7E8CC] transition-all duration-200 ease flex items-center justify-center gap-2 font-['Inter',sans-serif] font-normal text-[16px]">
-            La nostre carta
-        
+            Veure la carta
           </a>
 
           <a href="micsas-events.html"
@@ -64,6 +61,8 @@
 
       </div>
     </div>
+
+    <div class="absolute bottom-8 w-full flex justify-center"></div>
   </main>
 
 </body>
