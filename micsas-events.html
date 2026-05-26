@@ -23,11 +23,16 @@
   <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-4 flex items-center justify-between border-b border-transparent transition-all duration-300">
     <a href="carta.html" class="font-['Lilita_One'] text-2xl text-[#E23F2E] tracking-tight leading-none">micsas.ff</a>
     <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+        <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+        <span class="text-[#C4B08A]/60 select-none">|</span>
+        <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+      </div>
       <a href="carta.html" class="flex items-center gap-2 text-sm font-normal text-[#5A3E28] hover:text-[#E23F2E] transition-colors px-4 py-2 rounded-full border border-[#C4B08A]/40 hover:border-[#E23F2E]/40">
         <iconify-icon icon="solar:arrow-left-linear" width="16"></iconify-icon>
-        Tornar
+        <span data-i18n="ev_tornar">Tornar</span>
       </a>
-      <a href="pedido.html" class="flex items-center gap-2 text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] px-5 py-2.5 rounded-full shadow-sm hover:bg-[#B82A1F] transition-all">
+      <a href="pedido.html" class="flex items-center gap-2 text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] px-5 py-2.5 rounded-full shadow-sm hover:bg-[#B82A1F] transition-all" data-i18n="demana">
         Demana ja!
       </a>
     </div>
@@ -39,10 +44,10 @@
 
       <!-- 1. HERO -->
       <div class="text-center reveal visible">
-        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-6xl text-[#2A1A0F] mb-6 max-w-4xl mx-auto leading-tight">
+        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-6xl text-[#2A1A0F] mb-6 max-w-4xl mx-auto leading-tight" data-i18n="ev_title">
           Portem el forn de pizza al teu esdeveniment
         </h2>
-        <p class="text-lg md:text-xl font-light text-[#5A3E28] font-serif max-w-3xl mx-auto leading-relaxed mb-12">
+        <p class="text-lg md:text-xl font-light text-[#5A3E28] font-serif max-w-3xl mx-auto leading-relaxed mb-12" data-i18n="ev_sub">
           Pizzes napolitanes fetes al moment, allà on tu vulguis. Casaments,
           festes d'empresa, aniversaris o qualsevol celebració que es mereixi
           una pizza de veritat.
@@ -56,47 +61,47 @@
       <!-- 2. QUÈ INCLOU -->
       <div class="reveal">
         <div class="text-center mb-12">
-          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]" data-i18n="ev_inclou">
             Què inclou el servei
           </h3>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
             <div class="text-4xl mb-4">🔥</div>
-            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg" data-i18n="ev_c1_t">
               Forn de pizza napolitana mòbil
             </h4>
-            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed" data-i18n="ev_c1_d">
               Forn portàtil de pedra refractària que arriba a 450º per a una
               cocció perfecta.
             </p>
           </div>
           <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
             <div class="text-4xl mb-4">👨‍🍳</div>
-            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg" data-i18n="ev_c2_t">
               Pizzaiolo professional
             </h4>
-            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed" data-i18n="ev_c2_d">
               El nostre equip expert s'encarrega de tot. Cuinem les pizzes en
               directe.
             </p>
           </div>
           <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
             <div class="text-4xl mb-4">🍕</div>
-            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg" data-i18n="ev_c3_t">
               Massa artesana i ingredients
             </h4>
-            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed" data-i18n="ev_c3_d">
               Massa de 72h de fermentació i ingredients frescos de primera
               qualitat.
             </p>
           </div>
           <div class="bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 rounded-3xl shadow-sm text-center">
             <div class="text-4xl mb-4">📍</div>
-            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg">
+            <h4 class="font-bold text-[#2A1A0F] mb-3 text-lg" data-i18n="ev_c4_t">
               Adaptació total a l'espai
             </h4>
-            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed">
+            <p class="text-sm font-light text-[#5A3E28] font-serif leading-relaxed" data-i18n="ev_c4_d">
               Muntem la parada on necessitis, només necessitem un petit racó
               al teu event.
             </p>
@@ -107,7 +112,7 @@
       <!-- 3. PER A QUIN TIPUS D'ESDEVENIMENTS -->
       <div class="reveal">
         <div class="text-center mb-12">
-          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]" data-i18n="ev_tipus">
             Per a qualsevol celebració
           </h3>
         </div>
@@ -116,7 +121,7 @@
             <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Casaments">
             <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md" data-i18n="ev_casa">
                 Casaments
               </span>
             </div>
@@ -125,7 +130,7 @@
             <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Festes d'empresa">
             <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight" data-i18n-html="ev_empr_html">
                 Festes
                 <br>
                 d'empresa
@@ -136,7 +141,7 @@
             <img src="https://images.unsplash.com/photo-1530103862676-de88b3bc1c6c?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Aniversaris">
             <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md" data-i18n="ev_aniv">
                 Aniversaris
               </span>
             </div>
@@ -145,7 +150,7 @@
             <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Festes privades">
             <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight" data-i18n-html="ev_priv_html">
                 Festes
                 <br>
                 privades
@@ -156,7 +161,7 @@
             <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Sopars d'equip i tornejos">
             <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight" data-i18n-html="ev_equip_html">
                 Sopars d'equip
                 <br>
                 i tornejos
@@ -167,7 +172,7 @@
             <img src="https://images.unsplash.com/photo-1533142278453-6bbdb17f168d?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Esdeveniments de barri">
             <div class="absolute inset-0 bg-[#2A1A0F]/40 group-hover:bg-[#2A1A0F]/30 transition-colors"></div>
             <div class="absolute inset-0 flex items-center justify-center p-4 text-center">
-              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight">
+              <span class="font-['Lilita_One'] text-2xl md:text-3xl text-[#F2E6CE] drop-shadow-md leading-tight" data-i18n-html="ev_barri_html">
                 Esdeveniments
                 <br>
                 de barri
@@ -180,7 +185,7 @@
       <!-- 4. COM FUNCIONA -->
       <div class="reveal">
         <div class="text-center mb-12">
-          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]" data-i18n="ev_com">
             Així de fàcil
           </h3>
         </div>
@@ -189,10 +194,10 @@
             <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-[#E23F2E] text-[#F2E6CE] font-['Lilita_One'] text-2xl flex items-center justify-center shadow-md border-[4px] border-[#E6D5B0] pt-1">
               1
             </div>
-            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4">
+            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4" data-i18n="ev_s1_t">
               Ens contactes
             </h4>
-            <p class="text-base font-light text-[#5A3E28] font-serif">
+            <p class="text-base font-light text-[#5A3E28] font-serif" data-i18n="ev_s1_d">
               Explica'ns la data, lloc i nombre de convidats.
             </p>
           </div>
@@ -200,10 +205,10 @@
             <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-[#E23F2E] text-[#F2E6CE] font-['Lilita_One'] text-2xl flex items-center justify-center shadow-md border-[4px] border-[#E6D5B0] pt-1">
               2
             </div>
-            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4">
+            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4" data-i18n="ev_s2_t">
               Pressupost a mida
             </h4>
-            <p class="text-base font-light text-[#5A3E28] font-serif">
+            <p class="text-base font-light text-[#5A3E28] font-serif" data-i18n="ev_s2_d">
               En menys de 24h tens la nostra proposta detallada.
             </p>
           </div>
@@ -211,10 +216,10 @@
             <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-[#E23F2E] text-[#F2E6CE] font-['Lilita_One'] text-2xl flex items-center justify-center shadow-md border-[4px] border-[#E6D5B0] pt-1">
               3
             </div>
-            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4">
+            <h4 class="font-bold text-[#2A1A0F] text-xl mb-3 mt-4" data-i18n="ev_s3_t">
               Fem la festa
             </h4>
-            <p class="text-base font-light text-[#5A3E28] font-serif">
+            <p class="text-base font-light text-[#5A3E28] font-serif" data-i18n="ev_s3_d">
               Anem al teu event, muntem el forn i fem pizzes al moment.
             </p>
           </div>
@@ -224,7 +229,7 @@
       <!-- 5. GALERIA -->
       <div class="reveal">
         <div class="text-center mb-12">
-          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]">
+          <h3 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F]" data-i18n="ev_galeria">
             Així són els nostres events
           </h3>
         </div>
@@ -257,21 +262,21 @@
 
           <div class="grid md:grid-cols-2 gap-12 md:gap-16 relative z-10 items-center">
             <div>
-              <h3 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#2A1A0F] mb-4">
+              <h3 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#2A1A0F] mb-4" data-i18n="ev_cta_t">
                 Tens un event a la vista?
               </h3>
-              <p class="text-[#5A3E28] font-serif font-light text-lg mb-10 leading-relaxed">
+              <p class="text-[#5A3E28] font-serif font-light text-lg mb-10 leading-relaxed" data-i18n="ev_cta_d">
                 Contacta'ns i et fem pressupost sense compromís.
               </p>
 
               <div class="space-y-4">
                 <a href="tel:" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl font-medium text-lg text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
                   <iconify-icon icon="solar:phone-bold" width="22"></iconify-icon>
-                  Telèfon de contacte
+                  <span data-i18n="ev_tel">Telèfon de contacte</span>
                 </a>
                 <a href="https://ig.me/m/micsas.ff" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-3 w-full py-4 px-6 rounded-2xl font-medium text-lg text-[#E23F2E] bg-transparent border border-[#E23F2E] transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:-translate-y-0.5">
                   <iconify-icon icon="lucide:instagram" width="22"></iconify-icon>
-                  Escriu-nos per Insta
+                  <span data-i18n="ev_inst">Escriu-nos per Insta</span>
                 </a>
               </div>
             </div>
@@ -279,32 +284,32 @@
             <div class="bg-white/60 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-[#C4B08A]/20 shadow-sm">
               <form class="space-y-5" onsubmit="event.preventDefault();">
                 <div>
-                  <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                  <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2" data-i18n="ev_f_nom">
                     Nom o Empresa
                   </label>
-                  <input type="text" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all" placeholder="El teu nom">
+                  <input type="text" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all" data-i18n-placeholder="ev_f_nom_ph" placeholder="El teu nom">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                    <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2" data-i18n="ev_f_data">
                       Data event
                     </label>
                     <input type="date" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all">
                   </div>
                   <div>
-                    <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                    <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2" data-i18n="ev_f_inv">
                       Nº Convidats
                     </label>
                     <input type="number" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all" placeholder="Ex: 50">
                   </div>
                 </div>
                 <div>
-                  <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2">
+                  <label class="block text-xs uppercase tracking-widest font-normal text-[#E23F2E] mb-2" data-i18n="ev_f_det">
                     Més detalls
                   </label>
-                  <textarea rows="3" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all resize-none" placeholder="Lloc, tipus d'event..."></textarea>
+                  <textarea rows="3" class="w-full bg-white border border-[#C4B08A]/30 rounded-xl px-4 py-3.5 text-sm text-[#2A1A0F] focus:outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all resize-none" data-i18n-placeholder="ev_f_det_ph" placeholder="Lloc, tipus d'event..."></textarea>
                 </div>
-                <button class="w-full py-4 mt-2 rounded-xl font-medium text-sm text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#1A0F08] hover:-translate-y-0.5">
+                <button class="w-full py-4 mt-2 rounded-xl font-medium text-sm text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#1A0F08] hover:-translate-y-0.5" data-i18n="ev_f_btn">
                   Demanar pressupost
                 </button>
               </form>
@@ -328,24 +333,25 @@
       <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
         <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
           <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
-          <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase">Horaris</h3>
+          <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase" data-i18n="horaris">Horaris</h3>
         </div>
         <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
-          <p>Dl – Dj: <span class="text-[#2A1A0F]/40">Tancat</span></p>
-          <p>Dv – Dg: <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
+          <p><span data-i18n="hor_dl">Dl – Dj:</span> <span class="text-[#2A1A0F]/40" data-i18n="hor_tancat">Tancat</span></p>
+          <p><span data-i18n="hor_dv">Dv – Dg:</span> <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
         </div>
       </div>
       <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
         <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
           <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
         </a>
-        <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0">
+        <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
           Contacte
         </a>
-        <button class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm font-medium text-[#2A1A0F] hover:bg-[#E6D5B0]/50 transition-colors shrink-0">
-          CA
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="16"></iconify-icon>
-        </button>
+        <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">
+          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+          <span class="text-[#C4B08A]/60 select-none">|</span>
+          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+        </div>
       </div>
       <div class="w-full h-px bg-[#C4B08A]/30"></div>
       <div class="w-full flex justify-center items-center overflow-visible mt-12 mb-12">
@@ -353,11 +359,11 @@
           micsas.ff
         </a>
       </div>
-      <p class="text-xs font-light text-[#5A3E28] mb-3 text-center">© 2025 micsas.ff · Tots els drets reservats</p>
+      <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">© 2025 micsas.ff · Tots els drets reservats</p>
       <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
         <a href="#" class="hover:text-[#E23F2E] transition-colors">Cookies</a>
         <span>·</span>
-        <a href="#" class="hover:text-[#E23F2E] transition-colors">Privacitat</a>
+        <a href="#" class="hover:text-[#E23F2E] transition-colors" data-i18n="privacitat">Privacitat</a>
       </div>
       <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
         Made for micsas.ff with
@@ -388,6 +394,7 @@
     window.addEventListener('scroll', doReveal, { passive: true });
     doReveal();
   </script>
+  <script src="i18n.js"></script>
   <script src="transicion.js"></script>
 
 </body>

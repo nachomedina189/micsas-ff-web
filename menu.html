@@ -28,18 +28,25 @@
     <a href="carta.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
-    <a href="pedido.html" class="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all hover:-translate-y-0.5">
-      Demana ja! →
-    </a>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+        <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+        <span class="text-[#C4B08A]/60 select-none">|</span>
+        <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+      </div>
+      <a href="pedido.html" class="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all hover:-translate-y-0.5" data-i18n="demana">
+        Demana ja! →
+      </a>
+    </div>
   </nav>
 
   <!-- ════ HEADER ════ -->
   <header class="pt-32 pb-16 px-6 md:px-12 text-center">
     <div class="max-w-3xl mx-auto reveal">
       <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">Carta · Primavera 2025</span>
-      <h1 class="font-['Lilita_One'] tracking-tight text-5xl md:text-6xl mt-3 mb-4 text-[#2A1A0F]">Les nostres pizzes</h1>
-      <p class="text-sm font-light text-[#5A3E28] font-serif mb-10">Massa fermentada 72h. Ingredients escollits un per un. Cuinem i entreguem nosaltres.</p>
-      <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+      <h1 class="font-['Lilita_One'] tracking-tight text-5xl md:text-6xl mt-3 mb-4 text-[#2A1A0F]" data-i18n="menu_h1">Les nostres pizzes</h1>
+      <p class="text-sm font-light text-[#5A3E28] font-serif mb-10" data-i18n="menu_intro">Massa fermentada 72h. Ingredients escollits un per un. Cuinem i entreguem nosaltres.</p>
+      <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5" data-i18n="demana">
         Demana ja! →
       </a>
     </div>
@@ -52,42 +59,42 @@
       <!-- Pizzes clàssiques -->
       <div class="mb-16 reveal">
         <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes clàssiques</h2>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">tradició napolitana</p>
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]" data-i18n="menu_sec1">Pizzes clàssiques</h2>
+          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]" data-i18n="menu_sec1_sub">tradició napolitana</p>
         </div>
         <div class="space-y-1">
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
             <div class="flex-1 min-w-0 pr-6">
               <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">La Moto</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Mortadel·la, burrata, pesto de rúcula, orenga</span>
+              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_moto_d">Mortadel·la, burrata, pesto de rúcula, orenga</span>
             </div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€16.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
             <div class="flex-1 min-w-0 pr-6">
               <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">El Telèfon Vermell</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Salami picant, mel de romaní, gorgonzola, nous</span>
+              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_tel_d">Salami picant, mel de romaní, gorgonzola, nous</span>
             </div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€15.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
             <div class="flex-1 min-w-0 pr-6">
               <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">La Bèstia de Matadepera</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Botifarra, ceba caramel·litzada, salsa romesco, mozzarella</span>
+              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_bes_d">Botifarra, ceba caramel·litzada, salsa romesco, mozzarella</span>
             </div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€17.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
             <div class="flex-1 min-w-0 pr-6">
               <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">L'Avi Fresc</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Pernil ibèric, rúcula, parmesà, tàperes, filet de llimona</span>
+              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_avi_d">Pernil ibèric, rúcula, parmesà, tàperes, filet de llimona</span>
             </div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€16.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
             <div class="flex-1 min-w-0 pr-6">
               <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">La Cremosa</span>
-              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Mascarpone, bolets de temporada, tòfona negra</span>
+              <span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_cre_d">Mascarpone, bolets de temporada, tòfona negra</span>
             </div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€15.00</span>
           </div>
@@ -97,28 +104,28 @@
       <!-- Les clàssiques -->
       <div class="mb-16 reveal">
         <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Les clàssiques</h2>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">Tradició napolitana</p>
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]" data-i18n="menu_sec2">Les clàssiques</h2>
+          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]" data-i18n="menu_sec2_sub">Tradició napolitana</p>
         </div>
         <div class="space-y-1">
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Margherita</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Tomàquet San Marzano, mozzarella fior di latte, alfàbrega fresca</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Margherita</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_marg_d">Tomàquet San Marzano, mozzarella fior di latte, alfàbrega fresca</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€11.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Marinara</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Tomàquet, all, orenga, oli d'oliva verge extra</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Marinara</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_mar_d">Tomàquet, all, orenga, oli d'oliva verge extra</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€9.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Napolitana</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Tomàquet, mozzarella, anxoves, tàperes, olives negres</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Napolitana</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_napo_d">Tomàquet, mozzarella, anxoves, tàperes, olives negres</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€13.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Quatre formatges</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Mozzarella, gorgonzola, parmesà, provolone, mel</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Quatre formatges</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_4f_d">Mozzarella, gorgonzola, parmesà, provolone, mel</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€14.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Calzone</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Ricotta, mozzarella, pernil dolç, alfàbrega</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Calzone</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_cal_d">Ricotta, mozzarella, pernil dolç, alfàbrega</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€13.00</span>
           </div>
         </div>
@@ -127,7 +134,7 @@
       <!-- Begudes & Postres -->
       <div class="mb-16 reveal">
         <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Begudes &amp; Postres</h2>
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]" data-i18n="menu_sec3">Begudes &amp; Postres</h2>
         </div>
         <div class="space-y-1">
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
@@ -139,11 +146,11 @@
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€2.50</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 border-b border-[#C4B08A]/20 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Cervesa artesana</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Producció local · 33 cl</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Cervesa artesana</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_cerv_d">Producció local · 33 cl</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€4.00</span>
           </div>
           <div class="flex items-center justify-between px-2 py-4 hover:bg-[#E6D5B0]/20 transition-colors rounded-lg">
-            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Tiramisú casolà</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed">Fet a la cuina cada dia</span></div>
+            <div class="flex-1 min-w-0 pr-6"><span class="font-medium text-base text-[#2A1A0F] block mb-0.5">Tiramisú casolà</span><span class="block text-xs font-light text-[#5A3E28] leading-relaxed" data-i18n="menu_tira_d">Fet a la cuina cada dia</span></div>
             <span class="font-normal text-sm text-[#2A1A0F] shrink-0">€5.00</span>
           </div>
         </div>
@@ -151,8 +158,8 @@
 
       <!-- CTA inferior -->
       <div class="text-center reveal">
-        <p class="text-sm font-light text-[#5A3E28] font-serif mb-6">T'hem convençut? Ara pots triar i demanar.</p>
-        <a href="pedido.html" class="inline-block px-10 py-4 rounded-full font-medium text-base text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+        <p class="text-sm font-light text-[#5A3E28] font-serif mb-6" data-i18n="menu_cta">T'hem convençut? Ara pots triar i demanar.</p>
+        <a href="pedido.html" class="inline-block px-10 py-4 rounded-full font-medium text-base text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5" data-i18n="demana">
           Demana ja! →
         </a>
       </div>
@@ -172,24 +179,25 @@
       <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
         <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
           <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
-          <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase">Horaris</h3>
+          <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase" data-i18n="horaris">Horaris</h3>
         </div>
         <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
-          <p>Dl – Dj: <span class="text-[#2A1A0F]/40">Tancat</span></p>
-          <p>Dv – Dg: <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
+          <p><span data-i18n="hor_dl">Dl – Dj:</span> <span class="text-[#2A1A0F]/40" data-i18n="hor_tancat">Tancat</span></p>
+          <p><span data-i18n="hor_dv">Dv – Dg:</span> <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
         </div>
       </div>
       <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
         <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
           <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
         </a>
-        <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0">
+        <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
           Contacte
         </a>
-        <button class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm font-medium text-[#2A1A0F] hover:bg-[#E6D5B0]/50 transition-colors shrink-0">
-          CA
-          <iconify-icon icon="solar:alt-arrow-down-linear" width="16"></iconify-icon>
-        </button>
+        <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">
+          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+          <span class="text-[#C4B08A]/60 select-none">|</span>
+          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+        </div>
       </div>
       <div class="w-full h-px bg-[#C4B08A]/30"></div>
       <div class="w-full flex justify-center items-center overflow-visible mt-12 mb-12">
@@ -197,11 +205,11 @@
           micsas.ff
         </a>
       </div>
-      <p class="text-xs font-light text-[#5A3E28] mb-3 text-center">© 2025 micsas.ff · Tots els drets reservats</p>
+      <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">© 2025 micsas.ff · Tots els drets reservats</p>
       <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
         <a href="#" class="hover:text-[#E23F2E] transition-colors">Cookies</a>
         <span>·</span>
-        <a href="#" class="hover:text-[#E23F2E] transition-colors">Privacitat</a>
+        <a href="#" class="hover:text-[#E23F2E] transition-colors" data-i18n="privacitat">Privacitat</a>
       </div>
       <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
         Made for micsas.ff with
@@ -232,6 +240,7 @@
     window.addEventListener('scroll', doReveal, { passive: true });
     doReveal();
   </script>
+  <script src="i18n.js"></script>
   <script src="transicion.js"></script>
 
 </body>
