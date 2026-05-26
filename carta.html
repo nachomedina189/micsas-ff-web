@@ -52,11 +52,8 @@
       .liquid-glass { background: rgba(230, 213, 176, 0.2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(226, 63, 46, 0.15); box-shadow: 0 4px 6px rgba(42, 30, 22, 0.05); position: relative; overflow: hidden; }
     </style>
   </head>
-  <body class="text-[var(--foreground)] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-[var(--background)]">
-    <!-- Background (video) added by Aura -->
-    <div class="video-background-container fixed top-0 w-full h-screen -z-10 opacity-20" data-alpha-mask="63" style="; mask-image: linear-gradient(to bottom, transparent, black 0%, black 63%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 63%, transparent)">
-      <video src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4" autoplay="" loop="" muted="" playsinline="" class="w-full h-full object-cover"></video>
-    </div>
+  <body class="text-[var(--foreground)] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
+    <video class="fixed top-0 left-0 w-[100vw] h-[100vh] object-cover z-[-1] pointer-events-none opacity-[0.35]" autoplay="" muted="" loop="" playsinline="" preload="metadata" aria-hidden="true" src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4"></video>
     <!-- Paper texture -->
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
@@ -92,7 +89,7 @@
     </nav>
 
     <!-- ──── MOBILE MENU ──── -->
-    <div id="mobile-menu" class="fixed inset-0 z-[550] backdrop-blur-md pt-24 px-8 pb-8 flex-col gap-8 overflow-y-auto hidden bg-[#F1E5CD]/97">
+    <div id="mobile-menu" class="fixed inset-0 z-[550] backdrop-blur-md pt-24 px-8 pb-8 flex-col gap-8 overflow-y-auto hidden bg-[#F1E5CD]/85">
       <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors text-[#2A1A0F]">
         <iconify-icon icon="solar:close-square-linear" width="26" style="stroke-width:1.5;"></iconify-icon>
       </button>
@@ -114,18 +111,17 @@
     </div>
 
     <!-- ──── HERO ──── -->
-    <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-24 pb-48 bg-transparent overflow-hidden">
-      <video autoplay="" loop="" muted="" playsinline="" class="absolute inset-0 w-full h-full object-cover z-0" src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4"></video>
+    <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-24 pb-48 bg-[#F7E8CC]/85 overflow-hidden">
       <h1 class="reveal leading-tight text-[var(--foreground)] sm:text-6xl md:text-5xl text-4xl tracking-tight font-serif max-w-6xl z-10 mr-auto mb-10 ml-auto relative visible">
         PIZZA
         <em class="not-italic text-[var(--primary)]">NAPOLITANA</em>
         TRADICIONAL
       </h1>
       <div class="flex flex-col sm:flex-row items-center gap-4 reveal visible justify-center w-full relative z-10">
-        <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[var(--foreground)] shadow-sm transition-all hover:-translate-y-0.5 bg-[#F2E6CE] hover:bg-[#E6D5B0]">
+        <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm shadow-sm transition-all hover:-translate-y-0.5 text-[var(--primary-foreground)] bg-[var(--foreground)] hover:bg-[var(--foreground)]/90">
           La nostra carta →
         </a>
-        <a href="#nosaltres" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[var(--primary-foreground)] bg-[var(--foreground)] shadow-sm transition-all hover:bg-[var(--foreground)]/90 hover:-translate-y-0.5">
+        <a href="#nosaltres" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm shadow-sm transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0]">
           Sobre nosaltres
         </a>
         <a href="pedido.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm transition-all hover:bg-[var(--muted-foreground)] hover:-translate-y-0.5">
@@ -133,19 +129,19 @@
         </a>
       </div>
       <a href="#les-preferides" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10">
-        <span class="text-xs uppercase tracking-widest font-normal text-[var(--foreground)]">
+        <span class="uppercase text-[var(--foreground)] text-sm font-bold tracking-widest font-serif">
           Descobreix
         </span>
         <div class="w-[1px] h-8 bg-gradient-to-b from-[var(--foreground)]/60 to-transparent"></div>
       </a>
     </header>
 
-    <!-- ──── LES MILLORS PIZZES ──── -->
-    <section class="py-24 md:py-36 px-6 md:px-12" id="les-preferides">
+    <!-- ──── ELS BESTSELLERS ──── -->
+    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#F7E8CC]/85" id="les-preferides">
       <div class="max-w-5xl mx-auto">
         <div class="text-center mb-16 reveal visible">
-          <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]">
-            Les nostres millors pizzes
+          <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]" id="les-preferides">
+            Els nostres Bestsellers
           </h2>
         </div>
 
@@ -238,17 +234,21 @@
           </div>
         </div>
 
-        <div class="text-center mt-14 reveal">
-          <a href="menu.html" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10 mr-4">
-            Veure tota la carta →
-          </a>
-          <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+        <div class="text-center mt-16 md:mt-24 reveal flex flex-col items-center gap-6">
+          <a href="pedido.html" class="inline-flex items-center justify-center px-10 py-4 rounded-full font-bold text-base text-[#F2E6CE] bg-[#E23F2E] shadow-md transition-all hover:bg-[#B82A1F] hover:-translate-y-1">
             Demana ja! →
+          </a>
+          <p class="md:text-xl text-lg font-medium text-[#5A3E28] font-serif max-w-md mr-auto ml-auto pr-4 pl-4">
+            Explora la nostra carta i descobreix tot el que t'oferim
+          </p>
+          <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-sm text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10">
+            Veure tota la carta →
           </a>
         </div>
       </div>
     </section>
-    <section class="py-20 md:py-28 px-6 text-center relative overflow-hidden bg-gradient-to-br from-[#E23F2E] to-[#B82A1F]">
+
+    <section class="py-20 md:py-28 px-6 text-center relative overflow-hidden bg-gradient-to-br from-[#E23F2E]/85 to-[#B82A1F]/85">
       <img src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&q=80&w=1600" alt="Forn de llenya" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay">
       <div class="relative z-10 max-w-4xl mx-auto reveal">
         <p class="font-['Lilita_One'] tracking-tight text-4xl md:text-6xl text-[#F2E6CE] leading-tight">
@@ -263,7 +263,7 @@
     </section>
 
     <!-- ──── NOSALTRES ──── -->
-    <section class="py-24 md:py-36 px-6 md:px-12 bg-[var(--background)]" id="nosaltres">
+    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#F7E8CC]/85" id="nosaltres">
       <div class="grid md:grid-cols-2 gap-16 max-w-6xl mx-auto items-stretch">
         <div class="space-y-6 flex flex-col justify-center reveal">
           <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E] border-l-2 border-[#E23F2E] pl-3 inline-block">
@@ -301,17 +301,16 @@
     </section>
 
     <!-- ──── SHOP ──── -->
-    <section id="shop" class="py-24 md:py-28 px-6 md:px-12 bg-[#2A1A0F] text-center relative overflow-hidden">
-      <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1600" alt="Ingredients Shop Background" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity">
+    <section id="shop" class="py-24 md:py-28 px-6 md:px-12 bg-[#2A1A0F]/85 text-center relative overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1600" alt="Ingredients Shop Background" class="opacity-20 mix-blend-luminosity w-full h-full absolute top-0 right-0 bottom-0 left-0 object-cover">
       <div class="max-w-xl mx-auto relative z-10">
-        <span class="text-xs uppercase tracking-widest font-normal text-[#C4B08A] block mb-4">
-          comiing soon
-        </span>
-        <h2 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#F2E6CE] mb-6">
-          Micsas Shop
+        <span class="text-xs uppercase tracking-widest font-normal text-[#C4B08A] block mb-4">cooming soon...</span>
+        <h2 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#F2E6CE] mb-4">
+          Molt més que pizza
         </h2>
         <p class="text-sm font-light text-[#C4B08A] font-serif leading-relaxed mb-8">
-          Aviat rebreu informació, estigueu atens al insta de micsas.ff!!!
+          Aviat tindreu novetats sobre la nostra botiga. Estigueu atents al
+          nostre Instagram @micsas.ff!
         </p>
         <div class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#C4B08A]/30 text-sm font-normal text-[#C4B08A]/60 cursor-not-allowed">
           <span class="w-2 h-2 rounded-full bg-[#E23F2E] animate-pulse inline-block"></span>
@@ -321,10 +320,16 @@
     </section>
 
     <!-- ──── FOOTER ──── -->
-    <footer class="pt-16 pb-8 px-6 md:px-12 bg-[var(--background)] border-t border-[var(--border)]/30 relative overflow-hidden z-10">
+    <section class="w-full">
+      <div class="w-full aspect-[4/5] md:aspect-video relative overflow-hidden">
+        <video src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" disablepictureinpicture="" aria-hidden="true" class="object-center w-full h-full max-h-full object-cover"></video>
+        <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#F7E8CC]/85 to-transparent pointer-events-none z-10"></div>
+      </div>
+    </section>
+    <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#F7E8CC]/85 border-t border-[var(--border)]/30 relative overflow-hidden z-10">
       <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
         <!-- Horaris Card -->
-        <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#E23F2E]/5 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
+        <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
           <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
             <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
             <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase">
@@ -396,10 +401,10 @@
       const navbar = document.getElementById('navbar');
       window.addEventListener('scroll', () => {
         if (window.scrollY > 40) {
-          navbar.classList.add('bg-[#F1E5CD]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+          navbar.classList.add('bg-[#F1E5CD]/85', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
           navbar.classList.remove('border-transparent');
         } else {
-          navbar.classList.remove('bg-[#F1E5CD]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+          navbar.classList.remove('bg-[#F1E5CD]/85', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
           navbar.classList.add('border-transparent');
         }
       }, { passive: true });

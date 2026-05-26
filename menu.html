@@ -161,26 +161,53 @@
   </main>
 
   <!-- ════ FOOTER ════ -->
-  <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#2A1A0F] border-t border-[#C4B08A]/10">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-12">
-        <p class="font-['Lilita_One'] tracking-tighter text-4xl mb-2 text-[#F2E6CE]">micsas.ff</p>
-        <p class="text-xs font-light tracking-wide text-[#C4B08A]">Pasta, foc i moto. Res més.</p>
-        <div class="flex justify-center gap-4 mt-8">
-          <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer"
-            class="w-10 h-10 rounded-full border border-[#C4B08A]/20 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:border-[#E23F2E] text-[#C4B08A] hover:text-[#F2E6CE]">
-            <iconify-icon icon="solar:camera-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
-          </a>
+  <section class="w-full">
+    <div class="w-full aspect-[4/5] md:aspect-video relative overflow-hidden">
+      <video src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" disablepictureinpicture="" aria-hidden="true" class="object-center w-full h-full max-h-full object-cover"></video>
+      <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#F7E8CC]/85 to-transparent pointer-events-none z-10"></div>
+    </div>
+  </section>
+  <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#F7E8CC]/85 border-t border-[#E6D5B0]/30 relative overflow-hidden z-10">
+    <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
+      <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
+        <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
+          <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
+          <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase">Horaris</h3>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
+          <p>Dl – Dj: <span class="text-[#2A1A0F]/40">Tancat</span></p>
+          <p>Dv – Dg: <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
         </div>
       </div>
-      <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-[#C4B08A]/10 gap-4">
-        <p class="text-xs font-light text-[#C4B08A]/60">© 2025 micsas.ff · Tots els drets reservats</p>
-        <div class="flex items-center gap-4 text-xs font-light text-[#C4B08A]/60">
-          <span>Efectiu</span><span class="w-1 h-1 rounded-full bg-[#C4B08A]/30"></span>
-          <span>Targeta</span><span class="w-1 h-1 rounded-full bg-[#C4B08A]/30"></span>
-          <span>Pagament online</span>
-        </div>
+      <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
+        <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
+          <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
+        </a>
+        <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0">
+          Contacte
+        </a>
+        <button class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm font-medium text-[#2A1A0F] hover:bg-[#E6D5B0]/50 transition-colors shrink-0">
+          CA
+          <iconify-icon icon="solar:alt-arrow-down-linear" width="16"></iconify-icon>
+        </button>
       </div>
+      <div class="w-full h-px bg-[#C4B08A]/30"></div>
+      <div class="w-full flex justify-center items-center overflow-visible mt-12 mb-12">
+        <a href="carta.html" class="text-[16vw] leading-[0.8] hover:text-[#E23F2E] transition-colors select-none block md:text-[9vw] lg:text-[130px] xl:text-[160px] text-[#2A1A0F] tracking-wide font-['Lilita_One'] text-center w-full">
+          micsas.ff
+        </a>
+      </div>
+      <p class="text-xs font-light text-[#5A3E28] mb-3 text-center">© 2025 micsas.ff · Tots els drets reservats</p>
+      <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
+        <a href="#" class="hover:text-[#E23F2E] transition-colors">Cookies</a>
+        <span>·</span>
+        <a href="#" class="hover:text-[#E23F2E] transition-colors">Privacitat</a>
+      </div>
+      <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
+        Made for micsas.ff with
+        <iconify-icon icon="solar:heart-bold" class="text-[#E23F2E] inline-block align-text-bottom" width="14"></iconify-icon>
+        by UnitedOps
+      </p>
     </div>
   </footer>
 
