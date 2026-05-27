@@ -9,7 +9,7 @@
       idx_demana: 'Demana aquí! →', idx_carta: 'Experiència micsas',
       // CARTA NAV
       nav_historia: 'Història', nav_mob_nos: 'Nosaltres',
-      hero_carta: 'La nostra carta →', descobreix: 'Descobreix',
+      hero_carta: 'La nostra carta', descobreix: 'Descobreix',
       // BESTSELLERS
       bs_title: 'Els nostres Bestsellers', bs_ingr: 'Ingredients',
       bs_recom: '⭐ La nostra recomanació',
@@ -17,7 +17,7 @@
       bs_ca_desc: "Tomàquet datterino caramella, Formatge fumat (Provola), Fior di latte artesana Il grande Desiderio, Alfàbrega fresca en cru, Formatge Caciocavallo i Oli d'oliva verge extra Valpolicella Slow Food.",
       bs_nu_desc: 'Base de crema de xocolata i avellanes Nutella amb topping de festuc de Sicília DOP',
       bs_explora: "Explora la nostra carta i descobreix tot el que t'oferim",
-      bs_veure: 'Veure tota la carta →',
+      bs_veure: 'Veure tota la carta',
       // BANNER
       banner_sub: "Sense pressa, només amor i temps. L'olor de la massa al matí, el so de les motos al vespre, la calor del forn de pedra. Així és Micsas. Així és el nostre barri.",
       // NOSALTRES
@@ -80,7 +80,7 @@
       idx_demana: '¡Pide aquí! →', idx_carta: 'Experiencia micsas',
       // CARTA NAV
       nav_historia: 'Historia', nav_mob_nos: 'Nosotros',
-      hero_carta: 'Nuestra carta →', descobreix: 'Descubre',
+      hero_carta: 'Nuestra carta', descobreix: 'Descubre',
       // BESTSELLERS
       bs_title: 'Nuestros Bestsellers', bs_ingr: 'Ingredientes',
       bs_recom: '⭐ Nuestra recomendación',
@@ -88,7 +88,7 @@
       bs_ca_desc: 'Tomate datterino caramella, Queso ahumado (Provola), Fior di latte artesana Il grande Desiderio, Albahaca fresca en crudo, Queso Caciocavallo y Aceite de oliva virgen extra Valpolicella Slow Food.',
       bs_nu_desc: 'Base de crema de chocolate y avellanas Nutella con topping de pistacho de Sicilia DOP',
       bs_explora: "Explora nuestra carta y descubre todo lo que te ofrecemos",
-      bs_veure: 'Ver toda la carta →',
+      bs_veure: 'Ver toda la carta',
       // BANNER
       banner_sub: "Sin prisa, solo amor y tiempo. El olor de la masa por la mañana, el sonido de las motos al atardecer, el calor del horno de piedra. Así es Micsas. Así es nuestro barrio.",
       // NOSALTRES
