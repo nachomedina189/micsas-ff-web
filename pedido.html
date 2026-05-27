@@ -19,6 +19,7 @@
   <link rel="prefetch" href="menu.html">
   <link rel="prefetch" href="micsas-events.html">
 </head>
+
 <body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
 
   <!-- Paper texture -->
@@ -39,9 +40,7 @@
 
   <!-- HEADER -->
   <section class="py-12 md:py-16 px-6 md:px-12 text-center">
-    <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E] block mb-3">La teva comanda</span>
-    <h1 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#2A1A0F] mb-3">Tria les teves pizzes</h1>
-    <p class="text-sm font-light text-[#5A3E28] font-serif">Afegeix a la cistella i demana quan vulguis.</p>
+    <h1 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#2A1A0F] mb-3">Enviament gratuït, sense comanda mínima!</h1>
   </section>
 
   <!-- MENU -->
@@ -131,14 +130,9 @@
     </div>
 
     <div id="cart-empty" class="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
-      <div class="w-16 h-16 rounded-full bg-[#E6D5B0]/40 flex items-center justify-center text-[#9B8A72] mb-2">
-        <iconify-icon icon="solar:pizza-linear" width="32" style="stroke-width:1.5;"></iconify-icon>
-      </div>
+      <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cb6ab273-5899-4784-bea8-6448c9f5418e_800w.jpg" alt="Vintage Style Pizza Delivery" class="w-48 h-48 object-cover rounded-2xl shadow-sm border border-[#C4B08A]/30 mb-2 mix-blend-multiply">
       <p class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">La cistella és buida</p>
       <p class="text-sm font-light text-[#5A3E28]">Afegeix pizzes des de la carta per començar.</p>
-      <button onclick="closeCartDrawer()" class="mt-4 px-6 py-3 rounded-full font-['Inter',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
-        Veure carta
-      </button>
     </div>
 
     <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-4 space-y-3 hidden"></div>
@@ -148,10 +142,6 @@
         <div class="flex justify-between text-sm font-light text-[#5A3E28]">
           <span>Subtotal</span>
           <span id="subtotal-val" class="font-normal text-[#2A1A0F]">€0.00</span>
-        </div>
-        <div class="flex justify-between text-sm font-light text-[#5A3E28]">
-          <span>Lliurament</span>
-          <span class="font-normal text-[#2A1A0F]">€2.50</span>
         </div>
         <div class="flex justify-between border-t border-[#C4B08A]/20 pt-3">
           <span class="font-['Lilita_One'] tracking-tight text-xl text-[#2A1A0F]">Total</span>
@@ -367,7 +357,7 @@
         { id:'d4', name:'Tiramisú casolà',   desc:'Fet a la cuina cada dia',           price:5   },
       ],
     };
-    const DELIVERY_FEE = 2.50;
+    const DELIVERY_FEE = 0;
     let cart = [];
     let orderAllergies = '';
 
@@ -680,7 +670,6 @@
           const noteLine = (it.note && it.note.trim()) ? `<div class="text-xs text-[#9B8A72] mt-0.5">Nota: ${it.note.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : '';
           return `<div class="flex justify-between"><span>${it.name} × ${it.qty}</span><span class="font-medium">${fmt(it.price * it.qty)}</span></div>${noteLine}`;
         }),
-        `<div class="flex justify-between pt-2 mt-2 border-t border-[#C4B08A]/30 text-xs text-[#5A3E28]"><span>Lliurament</span><span>${fmt(DELIVERY_FEE)}</span></div>`,
         allergiesVal ? `<div class="pt-2 mt-2 border-t border-[#C4B08A]/30"><div class="text-xs uppercase tracking-widest font-normal mb-1 text-[#5A3E28]">Al·lèrgies</div><div class="text-xs text-[#9B8A72]">${allergiesVal.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>` : ''
       ].join('');
       document.getElementById('conf-address').innerHTML = `<strong class="font-medium text-[#2A1A0F]">${name}</strong> · ${phone}<br>${addr}${floor ? ', '+floor : ''}<br>${zip || '08230'} Matadepera${notes ? '<br><em class="text-[#9B8A72] text-xs mt-1 block">'+notes+'</em>' : ''}`;
