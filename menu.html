@@ -1,509 +1,513 @@
 <!DOCTYPE html>
-<html lang="ca" class="scroll-smooth">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Carta — micsas.ff</title>
-  <meta name="description" content="Tota la carta de micsas.ff. Pizzes napolitanes artesanals a Matadepera.">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="transicion.css">
-  <style>
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-  </style>
-</head>
-<body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
-
-  <!-- Paper texture -->
-  <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]"
-    style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)">
-  </div>
-
-  <!-- ════ NAV ════ -->
-  <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
-    <a href="carta.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
-      micsas.ff
-    </a>
-    <div class="flex items-center gap-3">
-      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
-        <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
-        <span class="text-[#C4B08A]/60 select-none">|</span>
-        <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
-      </div>
-      <a href="pedido.html" class="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all hover:-translate-y-0.5" data-i18n="demana">
-        Demana ja! →
-      </a>
-    </div>
-  </nav>
-
-  <!-- ════ HEADER ════ -->
-  <header class="pt-32 pb-16 px-6 md:px-12 text-center">
-    <div class="max-w-3xl mx-auto reveal">
-      <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E]">Carta · Primavera 2025</span>
-      <h1 class="font-['Lilita_One'] tracking-tight text-5xl md:text-6xl mt-3 mb-4 text-[#2A1A0F]" data-i18n="menu_h1">Les nostres pizzes</h1>
-      <p class="text-sm font-light text-[#5A3E28] font-serif mb-10" data-i18n="menu_intro">Massa fermentada 72h. Ingredients escollits un per un. Cuinem i entreguem nosaltres.</p>
-      <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5" data-i18n="demana">
-        Demana ja! →
-      </a>
-    </div>
-  </header>
-
-  <!-- ════ LA CARTA ════ -->
-  <main id="menu-pizzes" class="py-16 pb-32" style="background-color:#E6D5B0;">
+<html lang="ca" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Carta — micsas.ff</title>
+    <meta name="description" content="Tota la carta de micsas.ff. Pizzes napolitanes artesanals a Matadepera.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="transicion.css">
     <style>
-      /* ── Pizza Grid ── */
-      .pizza-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-      }
-      @media (max-width: 1023px) and (min-width: 768px) {
-        .pizza-grid { grid-template-columns: repeat(2, 1fr); }
-      }
-      @media (max-width: 767px) {
-        .pizza-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
-      }
-
-      /* Card */
-      .pizza-grid-card {
-        position: relative;
-        background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(42,26,15,0.09);
-        overflow: hidden;
-        height: 340px;
-        display: flex;
-        flex-direction: column;
-      }
-      .pizza-card-photo {
-        width: 100%; height: 65%;
-        object-fit: cover;
-        display: block;
-        flex-shrink: 0;
-        background: #E6D5B0;
-      }
-      .pizza-card-body {
-        padding: 12px 14px 12px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        position: relative;
-        box-sizing: border-box;
-      }
-      .pizza-grid-price {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 1.1rem; font-weight: 600;
-        color: #E23F2E;
-        display: block; margin-bottom: 2px;
-      }
-      .pizza-grid-name {
-        font-family: 'Lilita One', cursive;
-        font-size: 0.95rem; letter-spacing: -0.02em;
-        color: #2A1A0F; line-height: 1.15;
-        display: block;
-      }
-      .pizza-grid-subtitle {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.68rem; font-weight: 300;
-        color: #5A3E28; text-transform: uppercase;
-        letter-spacing: 0.05em;
-        display: block; margin-top: 2px;
-      }
-
-      /* Toggle button */
-      .pizza-toggle-btn {
-        position: absolute; bottom: 10px; right: 12px;
-        width: 30px; height: 30px; border-radius: 50%;
-        border: 1.5px solid #C4B08A;
-        background: #F2E6CE; color: #2A1A0F;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s, border-color 0.2s;
-        flex-shrink: 0;
-        padding: 0;
-      }
-      .pizza-toggle-btn:hover,
-      .pizza-grid-card.open .pizza-toggle-btn {
-        background: #E23F2E; color: #F2E6CE; border-color: #E23F2E;
-      }
-      .pizza-toggle-btn:focus-visible {
-        outline: 2px solid #E23F2E; outline-offset: 2px;
-      }
-
-      /* Ingredients overlay — covers photo area only */
-      .pizza-ingredients-overlay {
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 65%;
-        background: rgba(255,255,255,0.97);
-        border-radius: 20px 20px 0 0;
-        padding: 14px 16px;
-        opacity: 0;
-        transition: opacity 0.25s ease;
-        pointer-events: none;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #E6D5B0 transparent;
-        z-index: 2;
-      }
-      .pizza-grid-card.open .pizza-ingredients-overlay {
-        opacity: 1; pointer-events: auto;
-      }
-      .ingredients-list {
-        list-style: none; padding: 0; margin: 0;
-        display: flex; flex-direction: column; gap: 5px;
-      }
-      .ingredients-list li {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.78rem; font-weight: 300;
-        color: #2A1A0F; padding-left: 12px;
-        position: relative; line-height: 1.35;
-      }
-      .ingredients-list li::before {
-        content: '·'; position: absolute; left: 0;
-        color: #E23F2E; font-weight: 700;
-      }
-      .pizza-allergens-row {
-        display: flex; flex-wrap: wrap; gap: 4px;
-        margin-top: 6px;
-      }
-      .pizza-allergen-chip {
-        background: #F2E6CE; border: 1px solid #C4B08A;
-        border-radius: 999px; padding: 2px 8px;
-        font-size: 0.68rem; color: #5A3E28;
-        font-family: 'DM Sans', sans-serif;
-      }
+      .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+      .reveal.visible { opacity: 1; transform: translateY(0); }
     </style>
+  </head>
+  <body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
+    <!-- Paper texture -->
+    <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
-    <div class="px-6 md:px-12 max-w-6xl mx-auto">
-
-      <!-- CLÀSSIQUES -->
-      <div class="mb-16 reveal">
-        <div class="border-b border-[#C4B08A]/50 pb-4 mb-8">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Clàssiques</h2>
-          <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#E23F2E]">tradició napolitana</p>
+    <!-- ════ NAV ════ -->
+    <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b" id="navbar">
+      <a href="carta.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
+        micsas.ff
+      </a>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">
+            CA
+          </button>
+          <span class="text-[#C4B08A]/60 select-none">|</span>
+          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">
+            ES
+          </button>
         </div>
-        <div class="pizza-grid">
-
-          <!-- MARGHERITA 1889 -->
-          <div class="pizza-grid-card" data-id="margherita-1889">
-            <img src="/menu/margherita-1889.webp" alt="MARGHERITA 1889" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Tomàquet San Marzano DOP</li>
-                <li>Fior di latte artesana Il grande Desiderio</li>
-                <li>Alfàbrega fresca</li>
-                <li>Formatge Parmigiano (curat 24 mesos)</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">9€</span>
-              <span class="pizza-grid-name">MARGHERITA 1889</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- MARINARA OLIVATA -->
-          <div class="pizza-grid-card" data-id="marinara-olivata">
-            <img src="/menu/marinara-olivata.webp" alt="MARINARA OLIVATA" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Tomàquet San Marzano DOP</li>
-                <li>Orenga salvatge</li>
-                <li>All</li>
-                <li>Alfàbrega fresca</li>
-                <li>Olives negres</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">8€</span>
-              <span class="pizza-grid-name">MARINARA OLIVATA</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- BIANCA SUPREMA -->
-          <div class="pizza-grid-card" data-id="bianca-suprema">
-            <img src="/menu/bianca-suprema.webp" alt="BIANCA SUPREMA" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Fior di latte artesana Il grande Desiderio</li>
-                <li>Formatge Pecorino</li>
-                <li>Formatge Gorgonzola dolç</li>
-                <li>Ricotta artesana Il grande Desiderio</li>
-                <li>Alfàbrega fresca</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">11€</span>
-              <span class="pizza-grid-name">BIANCA SUPREMA</span>
-              <span class="pizza-grid-subtitle">4 FORMATGES</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- SOTTOBOSCO -->
-          <div class="pizza-grid-card" data-id="sottobosco">
-            <img src="/menu/sottobosco.webp" alt="SOTTOBOSCO" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Tomàquet San Marzano DOP</li>
-                <li>Fior di latte artesana Il grande Desiderio</li>
-                <li>Formatge Parmigiano (curat 24 mesos)</li>
-                <li>Xampinyons</li>
-                <li>Pernil dolç</li>
-                <li>Alfàbrega fresca</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">11€</span>
-              <span class="pizza-grid-name">SOTTOBOSCO</span>
-              <span class="pizza-grid-subtitle">PROSCIUTTO E FUNGHI</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- DE LA CASA -->
-      <div class="mb-16 reveal">
-        <div class="border-b border-[#C4B08A]/50 pb-4 mb-8">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">De la casa</h2>
-          <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#E23F2E]">les nostres creacions</p>
-        </div>
-        <div class="pizza-grid">
-
-          <!-- INFERNO DI 'NDUJA -->
-          <div class="pizza-grid-card" data-id="inferno-di-nduja">
-            <img src="/menu/inferno-di-nduja.webp" alt="INFERNO DI 'NDUJA" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Sobrassada picant (Nduja)</li>
-                <li>Formatge Gorgonzola picant</li>
-                <li>Fior di latte artesana Il grande Desiderio</li>
-                <li>Formatge Parmigiano (curat 24 mesos)</li>
-                <li>Alfàbrega fresca</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">13€</span>
-              <span class="pizza-grid-name">INFERNO DI 'NDUJA</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- CARAMELLA AFFUMICATA -->
-          <div class="pizza-grid-card" data-id="caramella-affumicata">
-            <img src="/menu/caramella-affumicata.webp" alt="CARAMELLA AFFUMICATA" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Tomàquet datterino caramella</li>
-                <li>Formatge fumat (Provola)</li>
-                <li>Fior di latte artesana Il grande Desiderio</li>
-                <li>Alfàbrega fresca en cru</li>
-                <li>Formatge Caciocavallo</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">13€</span>
-              <span class="pizza-grid-name">CARAMELLA AFFUMICATA</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- ANTIDIAVOLA -->
-          <div class="pizza-grid-card" data-id="antidiavola">
-            <img src="/menu/antidiavola.webp" alt="ANTIDIAVOLA" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Tomàquet San Marzano DOP</li>
-                <li>Fior di latte artesana Il grande Desiderio</li>
-                <li>Xoriço ibèric de gla Joselito</li>
-                <li>Alfàbrega fresca</li>
-                <li>Formatge Parmigiano (curat 24 mesos)</li>
-                <li>Oli d'oliva verge extra Valpolicella Slow Food</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">13€</span>
-              <span class="pizza-grid-name">ANTIDIAVOLA</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- NUTELLINA -->
-          <div class="pizza-grid-card" data-id="nutellina">
-            <img src="/menu/nutellina.webp" alt="NUTELLINA" loading="lazy" class="pizza-card-photo">
-            <div class="pizza-ingredients-overlay" aria-hidden="true">
-              <ul class="ingredients-list">
-                <li>Base de crema de xocolata i avellanes Nutella</li>
-                <li>Topping de festuc de Sicília DOP</li>
-              </ul>
-              <div class="pizza-allergens-row"></div>
-            </div>
-            <div class="pizza-card-body">
-              <span class="pizza-grid-price">13€</span>
-              <span class="pizza-grid-name">NUTELLINA</span>
-              <button class="pizza-toggle-btn" aria-pressed="false" aria-label="Veure ingredients">
-                <iconify-icon icon="ph:list-bullets" width="14"></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- CTA inferior -->
-      <div class="text-center reveal">
-        <p class="text-sm font-light text-[#5A3E28] font-serif mb-6" data-i18n="menu_cta">T'hem convençut? Ara pots triar i demanar.</p>
-        <a href="pedido.html" class="inline-block px-10 py-4 rounded-full font-medium text-base text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5" data-i18n="demana">
+        <a href="pedido.html" class="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all hover:-translate-y-0.5" data-i18n="demana">
           Demana ja! →
         </a>
       </div>
+    </nav>
 
-    </div>
+    <!-- ════ HEADER ════ -->
+    <header class="pt-32 pb-16 px-6 md:px-12 text-center">
+      <div class="reveal max-w-3xl mr-auto ml-auto visible">
+        <h1 class="font-['Lilita_One'] tracking-tight text-5xl md:text-6xl mt-3 text-[#2A1A0F] mb-1" data-i18n="menu_h1">
+          La carta de micsas
+        </h1>
+        <p class="text-sm font-light text-[#5A3E28] font-serif mb-10" data-i18n="menu_intro"></p>
+        <a href="pedido.html" class="inline-block px-8 py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5" data-i18n="demana">
+          Demana ja! →
+        </a>
+      </div>
+    </header>
+
+    <!-- ════ LA CARTA ════ -->
+    <main id="menu-pizzes" class="py-16 pb-32" style="background-color:#E6D5B0;">
+      <style>
+        /* ── Pizza Grid ── */
+        .pizza-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+        @media (max-width: 1023px) and (min-width: 768px) {
+          .pizza-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 767px) {
+          .pizza-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+        }
+
+        /* Card (Scene) */
+        .pizza-grid-card {
+          position: relative;
+          perspective: 1000px;
+          height: 340px;
+          cursor: pointer;
+        }
+        .pizza-grid-card-inner {
+          position: relative;
+          width: 100%; height: 100%;
+          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-style: preserve-3d;
+        }
+        .pizza-grid-card.is-flipped .pizza-grid-card-inner {
+          transform: rotateY(180deg);
+        }
+        .pizza-card-front, .pizza-card-back {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          background: #E8DCC4;
+          border-radius: 20px;
+          box-shadow: 0 4px 20px rgba(42,26,15,0.09);
+          overflow: hidden;
+        }
+        .pizza-card-front {
+          display: flex;
+          flex-direction: column;
+        }
+        .pizza-card-back {
+          transform: rotateY(180deg);
+          padding: 0;
+          background: #E8DCC4;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          scrollbar-width: thin;
+          scrollbar-color: #E6D5B0 transparent;
+        }
+        .pizza-card-photo {
+          width: 100%; height: 65%;
+          object-fit: cover;
+          display: block;
+          flex-shrink: 0;
+          background: #E6D5B0;
+        }
+        .pizza-card-photo-back {
+          width: 100%; height: 50%;
+          object-fit: cover;
+          display: block;
+          flex-shrink: 0;
+          background: #E6D5B0;
+        }
+        .pizza-card-body {
+          padding: 12px 14px 12px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+        }
+        .pizza-grid-price {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 1.1rem; font-weight: 600;
+          color: #E23F2E;
+          display: block; margin-bottom: 2px;
+        }
+        .pizza-grid-name {
+          font-family: 'Lilita One', cursive;
+          font-size: 0.95rem; letter-spacing: -0.02em;
+          color: #2A1A0F; line-height: 1.15;
+          display: block;
+        }
+        .pizza-grid-subtitle {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.68rem; font-weight: 300;
+          color: #5A3E28; text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: block; margin-top: 2px;
+        }
+        .pizza-allergens-row {
+          display: flex; flex-wrap: wrap; gap: 4px;
+          margin-top: auto;
+          padding-top: 16px;
+        }
+        .pizza-allergen-chip {
+          background: #F2E6CE; border: 1px solid #C4B08A;
+          border-radius: 999px; padding: 2px 8px;
+          font-size: 0.68rem; color: #5A3E28;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .pizza-card-body-back {
+          padding: 16px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+        .pizza-back-desc {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.85rem;
+          font-weight: 400;
+          color: #2A1A0F;
+          line-height: 1.4;
+          text-align: center;
+          margin: 0;
+        }
+      </style>
+
+      <div class="px-6 md:px-12 max-w-6xl mx-auto">
+
+        <!-- CLÀSSIQUES -->
+        <div class="mb-16 reveal visible">
+          <div class="border-b border-[#C4B08A]/50 pb-4 mb-8">
+            <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">
+              Pizzes Clàssiques
+            </h2>
+            <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#E23F2E]">
+              tradició napolitana
+            </p>
+          </div>
+          <div class="pizza-grid">
+
+            <!-- MARGHERITA 1889 -->
+            <div class="pizza-grid-card" data-id="margherita-1889">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5f02febf-c3ac-4d03-8b90-d93063e81a6d_800w.png" alt="MARGHERITA 1889" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">9€</span>
+                    <span class="pizza-grid-name">MARGHERITA 1889</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5f02febf-c3ac-4d03-8b90-d93063e81a6d_800w.png" alt="MARGHERITA 1889" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Tomàquet</strong> San Marzano DOP,
+                      <strong>Fior di latte</strong> artesana Il grande Desiderio,
+                      <strong>Alfàbrega</strong> fresca, Formatge
+                      <strong>Parmigiano</strong> (curat 24 mesos),
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MARINARA OLIVATA -->
+            <div class="pizza-grid-card" data-id="marinara-olivata">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/564cf6e8-c423-4e41-97c4-e532d6170927_800w.png" alt="MARINARA OLIVATA" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">8€</span>
+                    <span class="pizza-grid-name">MARINARA OLIVATA</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/564cf6e8-c423-4e41-97c4-e532d6170927_800w.png" alt="MARINARA OLIVATA" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Tomàquet</strong> San Marzano DOP,
+                      <strong>Orenga</strong> salvatge,
+                      <strong>All</strong>,
+                      <strong>Alfàbrega</strong> fresca,
+                      <strong>Olives negres</strong>,
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BIANCA SUPREMA -->
+            <div class="pizza-grid-card" data-id="bianca-suprema">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/96229985-0c2f-49ef-9b97-4176c853ed01_800w.png" alt="BIANCA SUPREMA" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">11€</span>
+                    <span class="pizza-grid-name">BIANCA SUPREMA</span>
+                    <span class="pizza-grid-subtitle">4 FORMATGES</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/96229985-0c2f-49ef-9b97-4176c853ed01_800w.png" alt="BIANCA SUPREMA" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
+                      <strong>Pecorino</strong>, Formatge
+                      <strong>Gorgonzola</strong> dolç,
+                      <strong>Ricotta</strong> artesana Il grande Desiderio,
+                      <strong>Alfàbrega</strong> fresca,
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SOTTOBOSCO -->
+            <div class="pizza-grid-card" data-id="sottobosco">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8cc52fad-0f29-44e5-8157-8c79e7f3ff30_800w.jpg" alt="SOTTOBOSCO" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">11€</span>
+                    <span class="pizza-grid-name">SOTTOBOSCO</span>
+                    <span class="pizza-grid-subtitle">PROSCIUTTO E FUNGHI</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8cc52fad-0f29-44e5-8157-8c79e7f3ff30_800w.jpg" alt="SOTTOBOSCO" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Tomàquet</strong> San Marzano DOP,
+                      <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
+                      <strong>Parmigiano</strong> (curat 24 mesos),
+                      <strong>Xampinyons</strong>,
+                      <strong>Pernil dolç</strong>,
+                      <strong>Alfàbrega</strong> fresca,
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- DE LA CASA -->
+        <div class="mb-16 reveal">
+          <div class="border-b border-[#C4B08A]/50 pb-4 mb-8">
+            <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">
+              Pizzes de la casa
+            </h2>
+            <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#E23F2E]">
+              les nostres creacions
+            </p>
+          </div>
+          <div class="pizza-grid">
+
+            <!-- INFERNO DI 'NDUJA -->
+            <div class="pizza-grid-card" data-id="inferno-di-nduja">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3c561ade-eeb8-400d-84de-ebf32f00a736_800w.png" alt="INFERNO DI 'NDUJA" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">13€</span>
+                    <span class="pizza-grid-name">INFERNO DI 'NDUJA</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3c561ade-eeb8-400d-84de-ebf32f00a736_800w.png" alt="INFERNO DI 'NDUJA" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Sobrassada</strong> picant (Nduja), Formatge
+                      <strong>Gorgonzola</strong> picant,
+                      <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
+                      <strong>Parmigiano</strong> (curat 24 mesos),
+                      <strong>Alfàbrega</strong> fresca,
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARAMELLA AFFUMICATA -->
+            <div class="pizza-grid-card" data-id="caramella-affumicata">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bf41b53-9048-4867-b0d2-7b05f13c46a7_800w.png" alt="CARAMELLA AFFUMICATA" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">13€</span>
+                    <span class="pizza-grid-name">CARAMELLA AFFUMICATA</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bf41b53-9048-4867-b0d2-7b05f13c46a7_800w.png" alt="CARAMELLA AFFUMICATA" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Tomàquet</strong> datterino caramella, Formatge fumat (Provola),
+                      <strong>Fior di latte</strong> artesana Il grande Desiderio,
+                      <strong>Alfàbrega</strong> fresca en cru, Formatge
+                      <strong>Caciocavallo</strong>,
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ANTIDIAVOLA -->
+            <div class="pizza-grid-card" data-id="antidiavola">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png" alt="ANTIDIAVOLA" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">13€</span>
+                    <span class="pizza-grid-name">ANTIDIAVOLA</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png" alt="ANTIDIAVOLA" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      <strong>Tomàquet</strong> San Marzano DOP,
+                      <strong>Fior di latte</strong> artesana Il grande Desiderio,
+                      <strong>Xoriço ibèric</strong> de gla Joselito,
+                      <strong>Alfàbrega</strong> fresca, Formatge
+                      <strong>Parmigiano</strong> (curat 24 mesos),
+                      <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NUTELLINA -->
+            <div class="pizza-grid-card" data-id="nutellina">
+              <div class="pizza-grid-card-inner">
+                <div class="pizza-card-front">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="NUTELLINA" loading="lazy" class="pizza-card-photo">
+                  <div class="pizza-card-body">
+                    <span class="pizza-grid-price">13€</span>
+                    <span class="pizza-grid-name">NUTELLINA</span>
+                  </div>
+                </div>
+                <div class="pizza-card-back">
+                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="NUTELLINA" loading="lazy" class="pizza-card-photo-back">
+                  <div class="pizza-card-body-back">
+                    <p class="pizza-back-desc">
+                      Base de crema de xocolata i avellanes
+                      <strong>Nutella</strong>, Topping de
+                      <strong>festuc</strong> de Sicília DOP.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CTA inferior -->
+        <div class="text-center reveal">
+          <a href="pedido.html" class="inline-block px-10 py-4 rounded-full font-medium text-base text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5" data-i18n="demana">
+            Demana ja! →
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ════ FOOTER ════ -->
+    <section class="w-full">
+      <div class="w-full aspect-[4/5] md:aspect-video relative overflow-hidden">
+        <video src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" disablepictureinpicture="" aria-hidden="true" class="object-center w-full h-full max-h-full object-cover"></video>
+        <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#F7E8CC]/85 to-transparent pointer-events-none z-10"></div>
+      </div>
+    </section>
+    <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#F7E8CC]/85 border-t border-[#E6D5B0]/30 relative overflow-hidden z-10">
+      <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
+        <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
+          <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
+            <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
+            <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase" data-i18n="horaris">Horaris</h3>
+          </div>
+          <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
+            <p><span data-i18n="hor_dl">Dl – Dj:</span> <span class="text-[#2A1A0F]/40" data-i18n="hor_tancat">Tancat</span></p>
+            <p><span data-i18n="hor_dv">Dv – Dg:</span> <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
+          </div>
+        </div>
+        <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
+          <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
+            <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
+          </a>
+          <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
+            Contacte
+          </a>
+          <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">
+            <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+            <span class="text-[#C4B08A]/60 select-none">|</span>
+            <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+          </div>
+        </div>
+        <div class="w-full h-px bg-[#C4B08A]/30"></div>
+        <div class="w-full flex justify-center items-center overflow-visible mt-12 mb-12">
+          <a href="carta.html" class="text-[16vw] leading-[0.8] hover:text-[#E23F2E] transition-colors select-none block md:text-[9vw] lg:text-[130px] xl:text-[160px] text-[#2A1A0F] tracking-wide font-['Lilita_One'] text-center w-full">
+            micsas.ff
+          </a>
+        </div>
+        <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">© 2025 micsas.ff · Tots els drets reservats</p>
+        <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
+          <a href="#" class="hover:text-[#E23F2E] transition-colors">Cookies</a>
+          <span>·</span>
+          <a href="#" class="hover:text-[#E23F2E] transition-colors" data-i18n="privacitat">Privacitat</a>
+        </div>
+        <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
+          Made for micsas.ff with
+          <iconify-icon icon="solar:heart-bold" class="text-[#E23F2E] inline-block align-text-bottom" width="14"></iconify-icon>
+          by UnitedOps
+        </p>
+      </div>
+    </footer>
 
     <script>
-      (function () {
-        document.querySelectorAll('.pizza-toggle-btn').forEach(function (btn) {
-          btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            var card = btn.closest('.pizza-grid-card');
-            var isOpen = card.classList.contains('open');
-            card.classList.toggle('open', !isOpen);
-            btn.setAttribute('aria-pressed', !isOpen ? 'true' : 'false');
-            btn.setAttribute('aria-label', !isOpen ? 'Amagar ingredients' : 'Veure ingredients');
-            var overlay = card.querySelector('.pizza-ingredients-overlay');
-            if (overlay) overlay.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
-          });
-          btn.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
-          });
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 40) {
+          navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+          navbar.classList.remove('border-transparent');
+        } else {
+          navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+          navbar.classList.add('border-transparent');
+        }
+      }, { passive: true });
+
+      const reveals = document.querySelectorAll('.reveal');
+      function doReveal() {
+        reveals.forEach(el => {
+          if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
         });
-        document.addEventListener('click', function (e) {
-          if (!e.target.closest('.pizza-grid-card')) {
-            document.querySelectorAll('.pizza-grid-card.open').forEach(function (c) {
-              c.classList.remove('open');
-              var b = c.querySelector('.pizza-toggle-btn');
-              if (b) { b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Veure ingredients'); }
-              var o = c.querySelector('.pizza-ingredients-overlay');
-              if (o) o.setAttribute('aria-hidden', 'true');
-            });
-          }
-        });
-      })();
-    </script>
-
-  </main>
-
-  <!-- ════ FOOTER ════ -->
-  <section class="w-full">
-    <div class="w-full aspect-[4/5] md:aspect-video relative overflow-hidden">
-      <video src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" disablepictureinpicture="" aria-hidden="true" class="object-center w-full h-full max-h-full object-cover"></video>
-      <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#F7E8CC]/85 to-transparent pointer-events-none z-10"></div>
-    </div>
-  </section>
-  <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#F7E8CC]/85 border-t border-[#E6D5B0]/30 relative overflow-hidden z-10">
-    <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
-      <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
-        <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
-          <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
-          <h3 class="font-['Lilita_One'] tracking-wider text-lg text-[#2A1A0F] uppercase" data-i18n="horaris">Horaris</h3>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
-          <p><span data-i18n="hor_dl">Dl – Dj:</span> <span class="text-[#2A1A0F]/40" data-i18n="hor_tancat">Tancat</span></p>
-          <p><span data-i18n="hor_dv">Dv – Dg:</span> <span class="text-[#E23F2E]">20:30 – 23:30</span></p>
-        </div>
-      </div>
-      <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
-        <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
-          <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
-        </a>
-        <a href="tel:+34600000000" class="inline-flex items-center justify-center h-11 px-6 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
-          Contacte
-        </a>
-        <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">
-          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
-          <span class="text-[#C4B08A]/60 select-none">|</span>
-          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
-        </div>
-      </div>
-      <div class="w-full h-px bg-[#C4B08A]/30"></div>
-      <div class="w-full flex justify-center items-center overflow-visible mt-12 mb-12">
-        <a href="carta.html" class="text-[16vw] leading-[0.8] hover:text-[#E23F2E] transition-colors select-none block md:text-[9vw] lg:text-[130px] xl:text-[160px] text-[#2A1A0F] tracking-wide font-['Lilita_One'] text-center w-full">
-          micsas.ff
-        </a>
-      </div>
-      <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">© 2025 micsas.ff · Tots els drets reservats</p>
-      <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
-        <a href="#" class="hover:text-[#E23F2E] transition-colors">Cookies</a>
-        <span>·</span>
-        <a href="#" class="hover:text-[#E23F2E] transition-colors" data-i18n="privacitat">Privacitat</a>
-      </div>
-      <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
-        Made for micsas.ff with
-        <iconify-icon icon="solar:heart-bold" class="text-[#E23F2E] inline-block align-text-bottom" width="14"></iconify-icon>
-        by UnitedOps
-      </p>
-    </div>
-  </footer>
-
-  <script>
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
-        navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
-        navbar.classList.remove('border-transparent');
-      } else {
-        navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
-        navbar.classList.add('border-transparent');
       }
-    }, { passive: true });
+      window.addEventListener('scroll', doReveal, { passive: true });
+      doReveal();
 
-    const reveals = document.querySelectorAll('.reveal');
-    function doReveal() {
-      reveals.forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
+      document.querySelectorAll('.pizza-grid-card').forEach(card => {
+        card.addEventListener('click', () => {
+          card.classList.toggle('is-flipped');
+        });
       });
-    }
-    window.addEventListener('scroll', doReveal, { passive: true });
-    doReveal();
-  </script>
-  <script src="i18n.js"></script>
-  <script src="transicion.js"></script>
+    </script>
+    <script src="i18n.js"></script>
+    <script src="transicion.js"></script>
 
-</body>
-</html>
+</body></html>
