@@ -680,10 +680,107 @@
       document.getElementById('conf-total').textContent = fmt(total());
     }
 
-    function placeOrder() {
+    async function placeOrder() {
+      if (cart.length === 0) {
+        document.getElementById('err-3').classList.remove('hidden');
+        return;
+      }
+
       const btn = document.getElementById('btn-place');
-      btn.textContent = 'Processant...'; btn.disabled = true;
-      setTimeout(() => { showStep('success'); btn.textContent = 'Confirma ✓'; btn.disabled = false; }, payMethod === 'online' ? 1600 : 900);
+      btn.textContent = 'Processant...';
+      btn.disabled = true;
+
+      const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      const name        = g('f-name');
+      const phone       = g('f-phone');
+      const street      = g('f-address');
+      const floor       = g('f-floor') || null;
+      const postalCode  = g('f-zip') || '08230';
+      const delivNotes  = g('f-notes') || null;
+      const allergiesVal = (document.getElementById('order-allergies')
+        ? document.getElementById('order-allergies').value.trim()
+        : orderAllergies) || null;
+
+      const dlvRadio = document.querySelector('input[name="dlv"]:checked');
+      let paymentMethod;
+      if (payMethod === 'online') {
+        paymentMethod = 'card_online';
+      } else if (dlvRadio && dlvRadio.value === 'cash') {
+        paymentMethod = 'cash';
+      } else {
+        paymentMethod = 'card_delivery';
+      }
+
+      const sb = window.supabase;
+
+      try {
+        // 1. Customer
+        const { data: customer, error: custErr } = await sb
+          .from('customers')
+          .insert({ name, phone, email: null })
+          .select()
+          .single();
+        if (custErr) throw custErr;
+
+        // 2. Address
+        const { data: address, error: addrErr } = await sb
+          .from('addresses')
+          .insert({
+            customer_id: customer.id,
+            street,
+            number: '',
+            floor,
+            postal_code: postalCode,
+            city: 'Matadepera',
+            notes: delivNotes,
+          })
+          .select()
+          .single();
+        if (addrErr) throw addrErr;
+
+        // 3. Order
+        const { data: order, error: orderErr } = await sb
+          .from('orders')
+          .insert({
+            customer_id:    customer.id,
+            address_id:     address.id,
+            payment_method: paymentMethod,
+            payment_status: 'pending',
+            status:         'pending',
+            subtotal:       subtotal(),
+            delivery_fee:   0,
+            total:          total(),
+            notes:          allergiesVal,
+          })
+          .select()
+          .single();
+        if (orderErr) throw orderErr;
+
+        // 4. Order items
+        const items = cart.map(it => ({
+          order_id:     order.id,
+          product_id:   null,
+          product_name: it.name,
+          unit_price:   it.price,
+          quantity:     it.qty,
+          notes:        it.note || null,
+        }));
+        const { error: itemsErr } = await sb.from('order_items').insert(items);
+        if (itemsErr) throw itemsErr;
+
+        document.getElementById('err-3').classList.add('hidden');
+        showStep('success');
+        btn.textContent = 'Confirma ✓';
+        btn.disabled = false;
+
+      } catch (err) {
+        console.error('[placeOrder]', err);
+        const errEl = document.getElementById('err-3');
+        errEl.textContent = 'Hi ha hagut un error al guardar la comanda. Torna-ho a intentar.';
+        errEl.classList.remove('hidden');
+        btn.textContent = 'Confirma ✓';
+        btn.disabled = false;
+      }
     }
 
     function resetCart() {
@@ -789,6 +886,10 @@
     });
   </script>
   <script src="transicion.js"></script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    window.supabase = supabase;
+  </script>
 
   <!-- ════ ITEM MODAL ════ -->
   <div id="item-modal" role="dialog" aria-modal="true" aria-labelledby="item-modal-title"
