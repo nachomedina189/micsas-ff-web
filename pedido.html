@@ -48,22 +48,22 @@
   <section class="pb-24 px-6 md:px-12">
     <div class="max-w-5xl mx-auto">
 
-      <!-- Pizzes clàssiques de la casa -->
+      <!-- Pizzes Clàssiques -->
       <div class="mb-16">
         <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes clàssiques</h2>
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes Clàssiques</h2>
           <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">tradició napolitana</p>
         </div>
-        <div class="space-y-1" id="menu-casa"></div>
+        <div id="menu-casa"></div>
       </div>
 
-      <!-- Les clàssiques -->
+      <!-- Pizzes de la casa -->
       <div class="mb-16">
         <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Les clàssiques</h2>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">Tradició napolitana</p>
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes de la casa</h2>
+          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">les nostres creacions</p>
         </div>
-        <div class="space-y-1" id="menu-classics"></div>
+        <div id="menu-classics"></div>
       </div>
 
       <!-- Begudes & Postres -->
@@ -349,18 +349,16 @@
   <script>
     const MENU = {
       casa: [
-        { id:'c1',  name:'La Moto',                desc:'Mortadel·la, burrata, pesto de rúcula, orenga',              ingredients:['Mortadel·la','Burrata','Pesto de rúcula','Orenga'],                              img:null, price:16 },
-        { id:'c2',  name:'El Telèfon Vermell',     desc:'Salami picant, mel de romaní, gorgonzola, nous',             ingredients:['Salami picant','Mel de romaní','Gorgonzola','Nous'],                            img:null, price:15 },
-        { id:'c3',  name:'La Bèstia de Matadepera',desc:'Botifarra, ceba caramel·litzada, salsa romesco, mozzarella', ingredients:['Botifarra','Ceba caramel·litzada','Salsa romesco','Mozzarella'],               img:null, price:17 },
-        { id:'c4',  name:"L'Avi Fresc",            desc:"Pernil ibèric, rúcula, parmesà, tàperes, filet de llimona", ingredients:["Pernil ibèric","Rúcula","Parmesà","Tàperes","Filet de llimona"],               img:null, price:16 },
-        { id:'c5',  name:'La Cremosa',             desc:'Mascarpone, bolets de temporada, tòfona negra',             ingredients:['Mascarpone','Bolets de temporada','Tòfona negra'],                             img:null, price:15 },
+        { id:'margherita-1889',       name:'Margherita 1889',       desc:'Tomàquet San Marzano DOP, Fior di latte, Parmigiano, Alfàbrega',        ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Alfàbrega fresca','Parmigiano (curat 24 mesos)',"Oli d'oliva verge extra"], img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5f02febf-c3ac-4d03-8b90-d93063e81a6d_800w.png', price:9  },
+        { id:'marinara-olivata',      name:'Marinara Olivata',      desc:'Tomàquet San Marzano DOP, All, Orenga, Olives negres',                   ingredients:['Tomàquet San Marzano DOP','Orenga salvatge','All','Alfàbrega fresca','Olives negres',"Oli d'oliva verge extra"],          img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/564cf6e8-c423-4e41-97c4-e532d6170927_800w.png', price:8  },
+        { id:'bianca-suprema',        name:'Bianca Suprema',        desc:'Fior di latte, Pecorino, Gorgonzola dolç, Ricotta — 4 formatges',        ingredients:['Fior di latte artesana','Pecorino','Gorgonzola dolç','Ricotta artesana','Alfàbrega fresca',"Oli d'oliva verge extra"],    img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/96229985-0c2f-49ef-9b97-4176c853ed01_800w.png', price:11 },
+        { id:'sottobosco',            name:'Sottobosco',            desc:'Fior di latte, Xampinyons, Pernil dolç, Parmigiano',                     ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Parmigiano (curat 24 mesos)','Xampinyons','Pernil dolç','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8cc52fad-0f29-44e5-8157-8c79e7f3ff30_800w.jpg', price:11 },
       ],
       classics: [
-        { id:'cl1', name:'Margherita',       desc:'Tomàquet San Marzano, mozzarella fior di latte, alfàbrega fresca', ingredients:['Tomàquet San Marzano','Mozzarella fior di latte','Alfàbrega fresca'],        img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5f02febf-c3ac-4d03-8b90-d93063e81a6d_800w.png', price:11 },
-        { id:'cl2', name:'Marinara',         desc:"Tomàquet, all, orenga, oli d'oliva verge extra",                   ingredients:["Tomàquet","All","Orenga","Oli d'oliva verge extra"],                           img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/564cf6e8-c423-4e41-97c4-e532d6170927_800w.png', price:9  },
-        { id:'cl3', name:'Napolitana',       desc:'Tomàquet, mozzarella, anxoves, tàperes, olives negres',            ingredients:['Tomàquet','Mozzarella','Anxoves','Tàperes','Olives negres'],                   img:null, price:13 },
-        { id:'cl4', name:'Quatre formatges', desc:'Mozzarella, gorgonzola, parmesà, provolone, mel',                  ingredients:['Mozzarella','Gorgonzola','Parmesà','Provolone','Mel'],                         img:null, price:14 },
-        { id:'cl5', name:'Calzone',          desc:'Ricotta, mozzarella, pernil dolç, alfàbrega',                      ingredients:['Ricotta','Mozzarella','Pernil dolç','Alfàbrega'],                             img:null, price:13 },
+        { id:'inferno-di-nduja',      name:"Inferno di 'Nduja",     desc:"Sobrassada picant (Nduja), Gorgonzola, Fior di latte, Parmigiano",       ingredients:["Sobrassada picant (Nduja)",'Gorgonzola picant','Fior di latte artesana','Parmigiano (curat 24 mesos)','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3c561ade-eeb8-400d-84de-ebf32f00a736_800w.png', price:13 },
+        { id:'caramella-affumicata',  name:'Caramella Affumicata',  desc:'Tomàquet datterino, Provola fumada, Caciocavallo, Fior di latte',         ingredients:['Tomàquet datterino caramella','Formatge fumat (Provola)','Fior di latte artesana','Alfàbrega fresca en cru','Caciocavallo',"Oli d'oliva verge extra"], img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bf41b53-9048-4867-b0d2-7b05f13c46a7_800w.png', price:13 },
+        { id:'antidiavola',           name:'Antidiavola',           desc:'Tomàquet San Marzano DOP, Xoriço ibèric Joselito, Fior di latte',         ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Xoriço ibèric de gla Joselito','Alfàbrega fresca','Parmigiano (curat 24 mesos)',"Oli d'oliva verge extra"], img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png', price:13 },
+        { id:'nutellina',             name:'Nutellina',             desc:'Nutella, Festuc de Sicília DOP',                                          ingredients:['Nutella (xocolata i avellanes)','Festuc de Sicília DOP'],                                                                 img:'https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png', price:13 },
       ],
       drinks: [
         { id:'d1', name:'Aigua mineral',     desc:'50 cl',                             price:2   },
