@@ -9,7 +9,7 @@
   <script defer src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="transicion.css">
   <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
   <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
@@ -136,7 +136,7 @@
       </div>
       <p class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">La cistella és buida</p>
       <p class="text-sm font-light text-[#5A3E28]">Afegeix pizzes des de la carta per començar.</p>
-      <button onclick="closeCartDrawer()" class="mt-4 px-6 py-2.5 rounded-full text-sm font-medium text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
+      <button onclick="closeCartDrawer()" class="mt-4 px-6 py-3 rounded-full font-['Inter',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
         Veure carta
       </button>
     </div>
@@ -161,7 +161,7 @@
           <label class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">⚠️ Al·lèrgies o intoleràncies</label>
           <textarea id="order-allergies" rows="2" placeholder="Indica'ns qualsevol al·lèrgia o intolerància alimentària." class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-2.5 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] resize-none"></textarea>
         </div>
-        <button onclick="openCheckout()" class="w-full py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
+        <button onclick="openCheckout()" class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm transition-all hover:bg-[#B82A1F] hover:-translate-y-0.5">
           Continuar → Checkout
         </button>
       </div>
@@ -339,7 +339,7 @@
         <p class="text-lg tracking-tight mb-2 text-[#2A1A0F]">La teva comanda és en camí.</p>
         <p class="text-sm font-light mb-1 text-[#5A3E28]">Temps estimat d'entrega: <strong class="font-medium">30–45 minuts</strong></p>
         <p class="text-sm font-light mb-10 text-[#5A3E28]">El Riki et trucarà per confirmar quan surti.</p>
-        <button onclick="closeCheckout(); resetCart();" class="px-8 py-3 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
+        <button onclick="closeCheckout(); resetCart();" class="px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
           Tornar a l'inici
         </button>
       </div>
@@ -853,7 +853,7 @@
         </div>
 
         <button onclick="submitItemModal()"
-          class="w-full py-3.5 rounded-full font-medium text-sm text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] active:scale-95 shadow-sm transition-all">
+          class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] active:scale-95 shadow-sm transition-all">
           Afegir a la cistella
         </button>
       </div>
