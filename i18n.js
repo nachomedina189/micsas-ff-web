@@ -6,7 +6,7 @@
       hor_dl: 'Dl – Dj:', hor_tancat: 'Tancat', hor_dv: 'Dv – Dg:',
       copyright: '© 2025 micsas.ff · Tots els drets reservats', privacitat: 'Privacitat',
       // INDEX
-      idx_demana: 'Demana aquí!', idx_carta: 'Veure la carta',
+      idx_demana: 'Demana aquí! →', idx_carta: 'Experiència micsas',
       // CARTA NAV
       nav_historia: 'Història', nav_mob_nos: 'Nosaltres',
       hero_carta: 'La nostra carta →', descobreix: 'Descobreix',
@@ -77,7 +77,7 @@
       hor_dl: 'Lun – Jue:', hor_tancat: 'Cerrado', hor_dv: 'Vie – Dom:',
       copyright: '© 2025 micsas.ff · Todos los derechos reservados', privacitat: 'Privacidad',
       // INDEX
-      idx_demana: '¡Pide aquí!', idx_carta: 'Ver la carta',
+      idx_demana: '¡Pide aquí! →', idx_carta: 'Experiencia micsas',
       // CARTA NAV
       nav_historia: 'Historia', nav_mob_nos: 'Nosotros',
       hero_carta: 'Nuestra carta →', descobreix: 'Descubre',
