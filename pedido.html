@@ -298,10 +298,20 @@
                 <label for="cf-zip" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
                   Codi postal <span class="text-[#E23F2E]" aria-hidden="true">*</span>
                 </label>
-                <input id="cf-zip" type="text" autocomplete="postal-code" placeholder="08230"
-                  aria-required="true"
-                  class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+                <div class="relative">
+                  <input id="cf-zip" type="text" autocomplete="postal-code" placeholder="08230"
+                    aria-required="true"
+                    class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 pr-9 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+                  <div id="cf-zip-spinner" class="hidden absolute right-3 inset-y-0 flex items-center pointer-events-none">
+                    <svg class="animate-spin w-4 h-4 text-[#9B8A72]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  </div>
+                </div>
                 <p class="cf-field-err hidden text-xs mt-1 text-[#E23F2E]" data-for="cf-zip">Codi postal obligatori.</p>
+                <p id="cf-zone-err" class="hidden text-xs mt-1.5 text-[#E23F2E]">Ho sentim, no fem entregues a aquesta zona postal.</p>
+                <p id="cf-zone-ok" class="hidden text-xs mt-1.5 text-[#10B981]">Repartim a aquesta zona ✓</p>
               </div>
             </div>
 
@@ -672,6 +682,8 @@
     // ── Checkout Fullscreen State ──
     let cfPayMethod = null;
     let cfPlacesAddress = '';
+    let currentZone = null;
+    let _zipDebounceTimer = null;
 
     function openCheckout() {
       closeCartDrawer();
@@ -768,7 +780,7 @@
       const phoneOk = phone.replace(/\D/g, '').length >= 9;
       const addrOk  = addr.trim().length > 0;
       const zipOk   = zip.trim().length > 0;
-      const allOk   = nameOk && emailOk && phoneOk && addrOk && zipOk && tnc && cfPayMethod !== null;
+      const allOk   = nameOk && emailOk && phoneOk && addrOk && zipOk && tnc && cfPayMethod !== null && currentZone !== null;
 
       const btn = document.getElementById('cf-submit');
       if (!btn) return allOk;
@@ -822,6 +834,20 @@
       const postalCode = g('cf-zip') || '08230';
       const delivNotes = g('cf-notes') || null;
       const paymentMethod = cfPayMethod === 'cash' ? 'cash' : 'card_delivery';
+
+      // Defensive zone re-check before inserting
+      if (!currentZone) {
+        await validateZone(g('cf-zip'));
+        if (!currentZone) {
+          const errEl = document.getElementById('cf-global-err');
+          errEl.textContent = 'No fem entregues a la zona postal indicada.';
+          errEl.classList.remove('hidden');
+          btn.textContent = originalLabel;
+          btn.disabled = false;
+          validateCheckout();
+          return;
+        }
+      }
 
       const sb = window.supabase;
       try {
@@ -915,6 +941,14 @@
         if (radio) { radio.classList.remove('border-[#E23F2E]'); radio.classList.add('border-[#C4B08A]'); }
         if (dot)   dot.classList.add('opacity-0');
       });
+      // Reset zone state
+      currentZone = null;
+      clearTimeout(_zipDebounceTimer);
+      const zipInput = document.getElementById('cf-zip');
+      if (zipInput) { zipInput.style.borderColor = ''; zipInput.style.boxShadow = ''; }
+      const zoneErr = document.getElementById('cf-zone-err'); if (zoneErr) zoneErr.classList.add('hidden');
+      const zoneOk  = document.getElementById('cf-zone-ok');  if (zoneOk)  zoneOk.classList.add('hidden');
+      const zipSpin = document.getElementById('cf-zip-spinner'); if (zipSpin) zipSpin.classList.add('hidden');
       // Reset T&C
       const tnc = document.getElementById('cf-tnc'); if (tnc) tnc.checked = false;
       // Reset order summary panel
@@ -927,6 +961,65 @@
       const btn = document.getElementById('cf-submit');
       if (btn) { btn.textContent = 'Pagar 0,00 €'; btn.disabled = true; btn.className = 'w-full py-4 rounded-full font-[\'Inter\',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all'; }
       [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
+    }
+
+    async function validateZone(cp) {
+      const input   = document.getElementById('cf-zip');
+      const spinner = document.getElementById('cf-zip-spinner');
+      const errEl   = document.getElementById('cf-zone-err');
+      const okEl    = document.getElementById('cf-zone-ok');
+      const clean   = (cp || '').replace(/\s/g, '');
+
+      const resetBorder = () => {
+        if (input) { input.style.borderColor = ''; input.style.boxShadow = ''; }
+      };
+      const successBorder = () => {
+        if (input) { input.style.borderColor = 'rgba(16,185,129,0.7)'; input.style.boxShadow = '0 0 0 1px rgba(16,185,129,0.35)'; }
+      };
+      const errorBorder = () => {
+        if (input) { input.style.borderColor = '#E23F2E'; input.style.boxShadow = '0 0 0 1px rgba(226,63,46,0.3)'; }
+      };
+
+      // Too short — clear everything silently
+      if (clean.length < 5) {
+        currentZone = null;
+        resetBorder();
+        if (errEl) errEl.classList.add('hidden');
+        if (okEl)  okEl.classList.add('hidden');
+        validateCheckout();
+        return;
+      }
+
+      if (spinner) spinner.classList.remove('hidden');
+      if (errEl)   errEl.classList.add('hidden');
+      if (okEl)    okEl.classList.add('hidden');
+
+      try {
+        const { data } = await window.supabase
+          .from('delivery_zones')
+          .select('*')
+          .eq('postal_code', clean)
+          .eq('active', true)
+          .maybeSingle();
+
+        if (data) {
+          currentZone = data;
+          successBorder();
+          if (okEl)  okEl.classList.remove('hidden');
+        } else {
+          currentZone = null;
+          errorBorder();
+          if (errEl) errEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        console.error('[validateZone]', err);
+        currentZone = null;
+        errorBorder();
+        if (errEl) errEl.classList.remove('hidden');
+      } finally {
+        if (spinner) spinner.classList.add('hidden');
+        validateCheckout();
+      }
     }
 
     // Google Places autocomplete — callback invoked by Maps script
@@ -946,6 +1039,7 @@
         const postalComp = place.address_components.find(c => c.types.includes('postal_code'));
         if (postalComp) {
           document.getElementById('cf-zip').value = postalComp.long_name;
+          validateZone(postalComp.long_name);
         }
         validateCheckout();
       });
@@ -969,6 +1063,21 @@
       if (id === 'cf-phone') {
         const digits = e.target.value.replace(/\D/g,'');
         showFieldErr('cf-phone', digits.length > 0 && digits.length < 9);
+      }
+      if (id === 'cf-zip') {
+        clearTimeout(_zipDebounceTimer);
+        const v = e.target.value.trim();
+        if (v.length < 5) {
+          // Reset zone state immediately when CP gets too short
+          currentZone = null;
+          const inp = document.getElementById('cf-zip');
+          if (inp) { inp.style.borderColor = ''; inp.style.boxShadow = ''; }
+          document.getElementById('cf-zone-err').classList.add('hidden');
+          document.getElementById('cf-zone-ok').classList.add('hidden');
+          validateCheckout();
+        } else {
+          _zipDebounceTimer = setTimeout(() => validateZone(v), 400);
+        }
       }
     });
 
