@@ -227,6 +227,33 @@
           </div>
         </div>
 
+        <!-- Repeat-cart banner (shown when arriving from compte.html) -->
+        <div id="cf-repeat-banner" class="hidden items-center justify-between gap-3 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30 px-4 py-3 text-sm">
+          <div class="flex items-center gap-2">
+            <iconify-icon icon="solar:cart-check-bold" width="18" style="color:#10B981;"></iconify-icon>
+            <span class="font-light text-[#2A1A0F]">S'ha carregat la comanda anterior al carret ✓</span>
+          </div>
+          <button onclick="document.getElementById('cf-repeat-banner').classList.add('hidden')" class="text-[#9B8A72] hover:text-[#2A1A0F] transition-colors shrink-0" aria-label="Tancar">
+            <iconify-icon icon="solar:close-linear" width="16"></iconify-icon>
+          </button>
+        </div>
+
+        <!-- Auth block -->
+        <div id="cf-auth-block" class="rounded-xl border border-[#C4B08A]/30 px-5 py-3.5 flex items-center justify-between gap-3 text-sm">
+          <div id="cf-auth-out" class="flex items-center gap-2 w-full justify-between">
+            <span class="font-light text-[#5A3E28]">Ja tens compte?</span>
+            <button onclick="openLoginModal()" class="text-[#E23F2E] font-medium hover:underline font-['Inter',sans-serif]">Inicia sessió</button>
+          </div>
+          <div id="cf-auth-in" class="hidden items-center gap-3 w-full justify-between flex-wrap">
+            <span class="font-light text-[#5A3E28] text-xs">Connectat com <strong id="cf-auth-email" class="font-medium text-[#2A1A0F]"></strong></span>
+            <div class="flex items-center gap-3 shrink-0">
+              <a href="compte.html" class="text-xs font-medium text-[#E23F2E] hover:underline font-['Inter',sans-serif]">El meu compte</a>
+              <span class="text-[#C4B08A]/50 text-xs">·</span>
+              <button onclick="doSignOut()" class="text-xs font-medium text-[#5A3E28] hover:text-[#2A1A0F] transition-colors font-['Inter',sans-serif]">Sortir</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Client section -->
         <section>
           <h2 class="font-['Lilita_One'] tracking-tight text-xl text-[#2A1A0F] mb-4">Client</h2>
@@ -685,6 +712,7 @@
     let cfPlacesAddress = '';
     let currentZone = null;
     let _zipDebounceTimer = null;
+    let currentUser = null;
 
     function openCheckout() {
       closeCartDrawer();
@@ -708,6 +736,8 @@
       document.getElementById('cf-scroll').scrollTop = 0;
       ensureAutocomplete();
       validateCheckout();
+      // Fire event so repeat-cart banner can show
+      document.dispatchEvent(new Event('checkout-opened'));
     }
 
     function closeCheckout() {
@@ -801,6 +831,152 @@
       if (err) err.classList.toggle('hidden', !show);
     }
 
+    // ── Auth ──
+
+    function updateAuthUI() {
+      const outEl = document.getElementById('cf-auth-out');
+      const inEl  = document.getElementById('cf-auth-in');
+      const emailEl = document.getElementById('cf-auth-email');
+      if (!outEl || !inEl) return;
+      if (currentUser) {
+        outEl.classList.add('hidden');
+        inEl.classList.remove('hidden'); inEl.classList.add('flex');
+        if (emailEl) emailEl.textContent = currentUser.email;
+      } else {
+        inEl.classList.add('hidden'); inEl.classList.remove('flex');
+        outEl.classList.remove('hidden');
+      }
+    }
+
+    async function onUserLogin(user) {
+      currentUser = user;
+      const sb = window.supabase;
+      if (!sb) { updateAuthUI(); return; }
+
+      // Link any orphan guest customers with this email
+      await sb.from('customers')
+        .update({ auth_user_id: user.id })
+        .eq('email', user.email)
+        .is('auth_user_id', null);
+
+      // Fetch most recent customer for this auth user
+      const { data: customers } = await sb.from('customers')
+        .select('*')
+        .eq('auth_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      const cust = customers && customers[0];
+      if (cust) {
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        setVal('cf-name', cust.name);
+        setVal('cf-phone', cust.phone ? cust.phone.replace(/^\+\d+\s?/, '') : '');
+        setVal('cf-email', cust.email || user.email);
+
+        // Fetch most recent address
+        const { data: addrs } = await sb.from('addresses')
+          .select('*')
+          .eq('customer_id', cust.id)
+          .order('id', { ascending: false })
+          .limit(1);
+        const addr = addrs && addrs[0];
+        if (addr) {
+          setVal('cf-address', addr.street);
+          cfPlacesAddress = addr.street || '';
+          setVal('cf-floor', addr.floor);
+          if (addr.postal_code) {
+            setVal('cf-zip', addr.postal_code);
+            validateZone(addr.postal_code);
+          }
+        }
+        validateCheckout();
+      }
+      updateAuthUI();
+    }
+
+    async function doSignOut() {
+      if (!window.supabase) return;
+      await window.supabase.auth.signOut();
+      // onAuthStateChange fires SIGNED_OUT and clears state
+    }
+
+    function openLoginModal() {
+      // Reset to form view
+      document.getElementById('login-form-view').classList.remove('hidden');
+      document.getElementById('login-ok-view').classList.add('hidden');
+      document.getElementById('login-email-input').value = '';
+      document.getElementById('login-err').classList.add('hidden');
+      document.getElementById('login-send-btn').disabled = false;
+      document.getElementById('login-send-btn').textContent = 'Enviar enllaç';
+      const m = document.getElementById('login-modal');
+      m.classList.remove('hidden');
+      setTimeout(() => {
+        m.classList.remove('opacity-0', 'pointer-events-none');
+        document.getElementById('login-email-input').focus();
+      }, 10);
+    }
+
+    function closeLoginModal() {
+      const m = document.getElementById('login-modal');
+      m.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    async function sendMagicLink() {
+      const emailVal = document.getElementById('login-email-input').value.trim();
+      const errEl = document.getElementById('login-err');
+      if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        errEl.textContent = 'Introdueix un correu vàlid.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      errEl.classList.add('hidden');
+      const btn = document.getElementById('login-send-btn');
+      btn.disabled = true;
+      btn.textContent = 'Enviant...';
+      const { error } = await window.supabase.auth.signInWithOtp({
+        email: emailVal,
+        options: { emailRedirectTo: window.location.origin + '/pedido.html' }
+      });
+      if (error) {
+        errEl.textContent = "Error en enviar l'enllaç. Torna-ho a intentar.";
+        errEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Enviar enllaç';
+      } else {
+        document.getElementById('login-sent-email').textContent = emailVal;
+        document.getElementById('login-form-view').classList.add('hidden');
+        document.getElementById('login-ok-view').classList.remove('hidden');
+      }
+    }
+
+    async function initAuth() {
+      const sb = window.supabase;
+      if (!sb) return;
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) await onUserLogin(user);
+
+      sb.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await onUserLogin(session.user);
+          closeLoginModal();
+        } else if (event === 'SIGNED_OUT') {
+          currentUser = null;
+          cfPlacesAddress = '';
+          ['cf-name','cf-email','cf-phone','cf-address','cf-floor','cf-zip'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.value = '';
+          });
+          currentZone = null;
+          const zipInp = document.getElementById('cf-zip');
+          if (zipInp) { zipInp.style.borderColor = ''; zipInp.style.boxShadow = ''; }
+          document.getElementById('cf-zone-err')?.classList.add('hidden');
+          document.getElementById('cf-zone-ok')?.classList.add('hidden');
+          updateAuthUI();
+          validateCheckout();
+        }
+      });
+    }
+
     let _toastTimer = null;
     function showCfToast(msg) {
       const toast = document.getElementById('cf-toast');
@@ -853,19 +1029,32 @@
 
       const sb = window.supabase;
       try {
-        // 1. Customer
-        const { data: customer, error: custErr } = await sb
-          .from('customers')
-          .insert({ name, phone, email })
-          .select()
-          .single();
-        if (custErr) throw custErr;
+        // 1. Customer — upsert if logged in, insert as guest otherwise
+        let customerId;
+        if (currentUser) {
+          const { data: existingCust } = await sb.from('customers')
+            .select('id').eq('auth_user_id', currentUser.id).limit(1).maybeSingle();
+          if (existingCust) {
+            await sb.from('customers').update({ name, phone, email: currentUser.email }).eq('id', existingCust.id);
+            customerId = existingCust.id;
+          } else {
+            const { data: nc, error: ne } = await sb.from('customers')
+              .insert({ name, phone, email: currentUser.email, auth_user_id: currentUser.id }).select().single();
+            if (ne) throw ne;
+            customerId = nc.id;
+          }
+        } else {
+          const { data: nc, error: ne } = await sb.from('customers')
+            .insert({ name, phone, email }).select().single();
+          if (ne) throw ne;
+          customerId = nc.id;
+        }
 
         // 2. Address
         const { data: address, error: addrErr } = await sb
           .from('addresses')
           .insert({
-            customer_id: customer.id,
+            customer_id: customerId,
             street,
             number: '',
             floor,
@@ -881,7 +1070,7 @@
         const { data: order, error: orderErr } = await sb
           .from('orders')
           .insert({
-            customer_id:    customer.id,
+            customer_id:    customerId,
             address_id:     address.id,
             payment_method: paymentMethod,
             payment_status: 'pending',
@@ -1099,6 +1288,25 @@
     renderCart(false);
     [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
 
+    // Restore repeat-order cart from compte.html
+    const _repeatRaw = sessionStorage.getItem('micsas_repeat');
+    if (_repeatRaw) {
+      try {
+        const _parsed = JSON.parse(_repeatRaw);
+        if (Array.isArray(_parsed) && _parsed.length) {
+          cart = _parsed;
+          renderCart(false);
+          [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
+          // Show banner when checkout opens
+          document.addEventListener('checkout-opened', () => {
+            document.getElementById('cf-repeat-banner')?.classList.remove('hidden');
+            document.getElementById('cf-repeat-banner')?.classList.add('flex');
+          }, { once: true });
+        }
+      } catch(e) { console.warn('[repeat-cart]', e); }
+      sessionStorage.removeItem('micsas_repeat');
+    }
+
     /* ── Item modal ── */
     let _modalItemId = null;
 
@@ -1172,7 +1380,9 @@
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        if (!document.getElementById('item-modal').classList.contains('hidden')) {
+        if (!document.getElementById('login-modal').classList.contains('hidden')) {
+          closeLoginModal();
+        } else if (!document.getElementById('item-modal').classList.contains('hidden')) {
           closeItemModal();
         } else if (!document.getElementById('checkout-fullscreen').classList.contains('hidden')) {
           closeCheckout();
@@ -1184,7 +1394,57 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     window.supabase = supabase;
+    if (typeof initAuth === 'function') initAuth();
   </script>
+
+  <!-- ════ LOGIN MODAL ════ -->
+  <div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title"
+       class="fixed inset-0 z-[810] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200 hidden">
+    <div class="absolute inset-0 bg-[#2A1A0F]/40 backdrop-blur-sm" onclick="closeLoginModal()"></div>
+    <div class="relative w-full max-w-sm bg-[#F2E6CE] rounded-2xl shadow-2xl border border-[#C4B08A]/30 p-6 z-10">
+      <button onclick="closeLoginModal()" aria-label="Tancar"
+        class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#E6D5B0]/60 text-[#9B8A72] hover:text-[#2A1A0F] transition-colors">
+        <iconify-icon icon="solar:close-linear" width="18"></iconify-icon>
+      </button>
+
+      <!-- Form view -->
+      <div id="login-form-view">
+        <h2 id="login-modal-title" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Inicia sessió</h2>
+        <p class="text-sm font-light text-[#5A3E28] mb-5 leading-relaxed">T'enviarem un enllaç al teu correu per entrar sense contrasenya.</p>
+        <div class="space-y-4">
+          <div>
+            <label for="login-email-input" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">Correu electrònic</label>
+            <input id="login-email-input" type="email" autocomplete="email" placeholder="correu@exemple.com"
+              class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]"
+              onkeydown="if(event.key==='Enter') sendMagicLink()">
+          </div>
+          <p id="login-err" class="hidden text-xs text-[#E23F2E]"></p>
+          <button onclick="sendMagicLink()" id="login-send-btn"
+            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+            Enviar enllaç
+          </button>
+          <button onclick="closeLoginModal()"
+            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#E6D5B0]/30 transition-all">
+            Cancel·lar
+          </button>
+        </div>
+      </div>
+
+      <!-- Success view -->
+      <div id="login-ok-view" class="hidden text-center py-2">
+        <div class="w-16 h-16 rounded-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center mx-auto mb-4">
+          <iconify-icon icon="solar:check-circle-bold" width="36"></iconify-icon>
+        </div>
+        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-2">Hem enviat l'enllaç!</h2>
+        <p class="text-sm font-light text-[#5A3E28] mb-1">Hem enviat un enllaç a <strong id="login-sent-email" class="font-medium text-[#2A1A0F]"></strong></p>
+        <p class="text-sm font-light text-[#5A3E28] mb-6">Obre el teu correu i clica per entrar.</p>
+        <button onclick="closeLoginModal()"
+          class="px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#2A1A0F] hover:bg-[#1a1009] transition-all">
+          D'acord
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ════ ITEM MODAL ════ -->
   <div id="item-modal" role="dialog" aria-modal="true" aria-labelledby="item-modal-title"
