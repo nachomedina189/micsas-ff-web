@@ -158,7 +158,10 @@
 
   <!-- ════ CHECKOUT FULLSCREEN ════ -->
   <div id="checkout-fullscreen" role="dialog" aria-modal="true" aria-label="Procés de comanda"
-       class="fixed inset-0 z-[700] bg-[#F2E6CE] flex flex-col opacity-0 pointer-events-none transition-opacity duration-300 hidden">
+       class="fixed inset-0 z-[700] bg-[#DDD0B3] flex items-start sm:items-center justify-center p-0 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300 hidden">
+
+    <!-- Card wrapper -->
+    <div class="relative w-full sm:max-w-lg bg-[#F2E6CE] sm:rounded-2xl sm:shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[92dvh] overflow-hidden">
 
     <!-- Header bar -->
     <div class="shrink-0 flex items-center px-4 py-4 border-b border-[#C4B08A]/30 bg-[#F2E6CE] relative">
@@ -431,6 +434,8 @@
         Tornar a l'inici
       </button>
     </div>
+
+    </div> <!-- /card wrapper -->
 
     <!-- Toast notification -->
     <div id="cf-toast" class="fixed bottom-6 inset-x-4 z-[800] flex justify-center pointer-events-none hidden">

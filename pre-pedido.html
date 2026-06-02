@@ -43,15 +43,10 @@
     .pac-icon { display: none; }
   </style>
 </head>
-<body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased selection:bg-[#E23F2E]/20">
-
-  <!-- Paper texture -->
-  <div class="fixed inset-0 pointer-events-none z-[9998] opacity-[0.03]"
-    style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)">
-  </div>
+<body class="bg-[#DDD0B3] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased selection:bg-[#E23F2E]/20">
 
   <!-- NAV -->
-  <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#F2E6CE]/95 backdrop-blur-md border-b border-[#C4B08A]/30 shadow-sm">
+  <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#DDD0B3]/95 backdrop-blur-md border-b border-[#C4B08A]/40 shadow-sm">
     <a href="index.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
@@ -62,35 +57,40 @@
   </nav>
 
   <!-- MAIN -->
-  <main class="min-h-[calc(100dvh-65px)] flex items-start justify-center px-4 py-10 md:py-14">
-    <div class="w-full max-w-lg space-y-5">
+  <main class="min-h-[calc(100dvh-65px)] flex items-center justify-center px-4 py-10 md:py-14">
+    <div class="w-full max-w-md bg-[#F2E6CE] rounded-2xl shadow-xl border border-[#C4B08A]/30 overflow-hidden">
 
-      <!-- Header -->
-      <div class="text-center mb-4">
-        <h1 class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F] mb-1.5">Quan i on et portem la pizza?</h1>
+      <!-- Card header -->
+      <div class="px-6 pt-7 pb-5 border-b border-[#C4B08A]/20">
+        <h1 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-0.5">Quan i on et portem la pizza?</h1>
         <p class="text-sm font-light text-[#5A3E28]">Tria la franja i afegeix la teva adreça</p>
       </div>
 
-      <!-- Step 1: Time -->
-      <div class="bg-[#F7EDD8] rounded-2xl border border-[#C4B08A]/30 p-5 shadow-sm">
-        <div class="flex items-center gap-2.5 mb-4">
-          <span class="w-6 h-6 rounded-full bg-[#E23F2E] text-[#F2E6CE] text-xs font-['Lilita_One'] flex items-center justify-center shrink-0 pt-0.5">1</span>
-          <h2 class="font-semibold text-[#2A1A0F] text-base">Quan vols rebre-la?</h2>
-        </div>
-        <div id="pp-time-slots" class="grid grid-cols-2 gap-2"></div>
-      </div>
+      <div class="px-6 py-5 space-y-5">
 
-      <!-- Step 2: Address -->
-      <div class="bg-[#F7EDD8] rounded-2xl border border-[#C4B08A]/30 p-5 shadow-sm">
-        <div class="flex items-center gap-2.5 mb-4">
-          <span class="w-6 h-6 rounded-full bg-[#E23F2E] text-[#F2E6CE] text-xs font-['Lilita_One'] flex items-center justify-center shrink-0 pt-0.5">2</span>
-          <h2 class="font-semibold text-[#2A1A0F] text-base">On la portem?</h2>
+        <!-- Time -->
+        <div>
+          <label for="pp-time-select" class="block text-xs font-semibold uppercase tracking-widest text-[#2A1A0F] mb-2">Quan vols rebre-la?</label>
+          <div class="relative">
+            <select id="pp-time-select" onchange="selectTimeFromSelect(this.value)"
+              class="w-full appearance-none bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 pr-10 text-[#2A1A0F] text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all cursor-pointer">
+              <option value="" disabled selected>Tria una franja horària...</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#9B8A72]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
         </div>
+
+        <div class="border-t border-[#C4B08A]/20"></div>
+
+        <!-- Address -->
         <div class="space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-widest text-[#2A1A0F]">On la portem?</p>
 
           <div>
-            <label for="pp-address" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
-              Adreça <span class="text-[#E23F2E]" aria-hidden="true">*</span>
+            <label for="pp-address" class="block text-xs font-medium mb-1.5 text-[#5A3E28]">
+              Adreça <span class="text-[#E23F2E]">*</span>
             </label>
             <input id="pp-address" type="text" autocomplete="off" placeholder="Carrer i número"
               class="w-full bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]"
@@ -99,15 +99,15 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="pp-floor" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
+              <label for="pp-floor" class="block text-xs font-medium mb-1.5 text-[#5A3E28]">
                 Pis / Porta <span class="text-[#9B8A72] font-normal">(opcional)</span>
               </label>
               <input id="pp-floor" type="text" autocomplete="address-line2" placeholder="2n 1a"
                 class="w-full bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
             </div>
             <div>
-              <label for="pp-zip" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
-                Codi postal <span class="text-[#E23F2E]" aria-hidden="true">*</span>
+              <label for="pp-zip" class="block text-xs font-medium mb-1.5 text-[#5A3E28]">
+                Codi postal <span class="text-[#E23F2E]">*</span>
               </label>
               <div class="relative">
                 <input id="pp-zip" type="text" autocomplete="postal-code" placeholder="08230" maxlength="5"
@@ -124,18 +124,18 @@
               <p id="pp-zone-err" class="hidden text-xs mt-1.5 text-[#E23F2E]">No fem entregues a aquesta zona.</p>
             </div>
           </div>
-
         </div>
+
+        <!-- CTA -->
+        <div class="pt-1">
+          <button id="pp-cta" disabled onclick="goToMenu()"
+            class="w-full py-3.5 rounded-xl font-['Inter',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
+            Veure la carta i demanar
+          </button>
+          <p class="text-xs text-center font-light text-[#9B8A72] mt-3">Podràs triar les teves pizzes al següent pas</p>
+        </div>
+
       </div>
-
-      <!-- CTA -->
-      <button id="pp-cta" disabled onclick="goToMenu()"
-        class="w-full py-4 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
-        Veure la carta i demanar
-        <iconify-icon icon="solar:arrow-right-linear" width="16" class="inline ml-1" style="stroke-width:1.5; vertical-align:-2px;"></iconify-icon>
-      </button>
-      <p class="text-xs text-center font-light text-[#9B8A72] pb-6">Podràs triar les teves pizzes al següent pas</p>
-
     </div>
   </main>
 
@@ -185,52 +185,29 @@
 
     function renderTimeSlots() {
       const asap = resolveAsap();
-      const c = document.getElementById('pp-time-slots');
-      c.innerHTML = PP_SLOTS.map((s, i) => {
-        const first = i === 0;
+      const sel  = document.getElementById('pp-time-select');
+      let html   = '<option value="" disabled selected>Tria una franja horària...</option>';
 
-        // "Cuanto antes" button
-        if (first) {
-          if (!asap) {
-            return `<button type="button" disabled
-              class="slot-btn col-span-2 py-4 text-base flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/20 font-medium text-[#9B8A72] bg-[#C4B08A]/10 cursor-not-allowed">
-              <iconify-icon icon="solar:lock-linear" width="16" style="color:#9B8A72;"></iconify-icon>
-              Cuanto antes <span class="text-xs font-normal opacity-70">· Sense franges disponibles</span>
-            </button>`;
-          }
-          return `<button type="button" data-idx="0" onclick="selectTime('cuanto-antes',0)"
-            class="slot-btn col-span-2 py-4 text-base flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/40 font-medium text-[#2A1A0F] hover:border-[#E23F2E]/50 hover:bg-[#E23F2E]/5 transition-all active:scale-95">
-            <iconify-icon icon="solar:bolt-bold" width="16" style="color:#E23F2E;"></iconify-icon>
-            Cuanto antes
-          </button>`;
-        }
+      if (asap) {
+        html += `<option value="cuanto-antes">Cuanto antes</option>`;
+      } else {
+        html += `<option value="" disabled>Cuanto antes (sense disponibilitat)</option>`;
+      }
+      html += `<option value="" disabled>──────────────</option>`;
 
-        // Regular slots
-        const used = _slotCounts[s] || 0;
-        const full = used >= 6;
-        if (full) {
-          return `<button type="button" disabled
-            class="slot-btn py-3 flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/20 text-sm font-medium text-[#9B8A72] bg-[#C4B08A]/10 cursor-not-allowed">
-            <iconify-icon icon="solar:lock-linear" width="13" style="color:#9B8A72;"></iconify-icon>
-            ${s} <span class="text-xs font-normal opacity-70">· Complet</span>
-          </button>`;
-        }
-        return `<button type="button" data-idx="${i}" onclick="selectTime('${s}',${i})"
-          class="slot-btn py-3 flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/40 text-sm font-medium text-[#2A1A0F] hover:border-[#E23F2E]/50 hover:bg-[#E23F2E]/5 transition-all active:scale-95">
-          <iconify-icon icon="solar:clock-circle-linear" width="13" style="color:#9B8A72;"></iconify-icon>
-          ${s}
-        </button>`;
-      }).join('');
+      PP_SLOTS.slice(1).forEach(s => {
+        const full = (_slotCounts[s] || 0) >= 6;
+        html += full
+          ? `<option value="" disabled>${s} — Complet</option>`
+          : `<option value="${s}">${s}</option>`;
+      });
+
+      sel.innerHTML = html;
     }
 
-    function selectTime(time, idx) {
-      // "Cuanto antes" resolves to the nearest available slot
-      const resolved = time === 'cuanto-antes' ? resolveAsap() : time;
-      if (!resolved) return;
-      ppSelectedTime = resolved;
-      document.querySelectorAll('.slot-btn').forEach((btn, i) => {
-        btn.classList.toggle('selected', i === idx);
-      });
+    function selectTimeFromSelect(val) {
+      const resolved = val === 'cuanto-antes' ? resolveAsap() : val;
+      ppSelectedTime = resolved || null;
       validateForm();
     }
 
