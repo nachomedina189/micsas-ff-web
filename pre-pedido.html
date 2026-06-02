@@ -19,6 +19,28 @@
       background-color: rgba(226,63,46,0.08);
       color: #E23F2E !important;
     }
+    .pac-container {
+      background: #F2E6CE;
+      border: 1px solid rgba(196,176,138,0.4);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(42,26,15,0.12);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      margin-top: 4px;
+      overflow: hidden;
+      z-index: 9999 !important;
+    }
+    .pac-item {
+      padding: 10px 16px;
+      color: #2A1A0F;
+      border-top: 1px solid rgba(196,176,138,0.2);
+      cursor: pointer;
+    }
+    .pac-item:first-child { border-top: none; }
+    .pac-item:hover, .pac-item-selected { background: rgba(230,213,176,0.3); }
+    .pac-item-query { color: #2A1A0F; font-weight: 500; }
+    .pac-matched { color: #E23F2E; }
+    .pac-icon { display: none; }
   </style>
 </head>
 <body class="bg-[#F2E6CE] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased selection:bg-[#E23F2E]/20">
@@ -221,6 +243,28 @@
     }
 
     renderTimeSlots();
+
+    function initPlaces() {
+      const input = document.getElementById('pp-address');
+      try {
+        const ac = new google.maps.places.Autocomplete(input, {
+          componentRestrictions: { country: 'es' },
+          fields: ['address_components', 'formatted_address'],
+          types: ['address'],
+        });
+        ac.addListener('place_changed', () => {
+          const place = ac.getPlace();
+          if (!place || !place.address_components) { validateForm(); return; }
+          input.value = place.formatted_address || input.value;
+          const postalComp = place.address_components.find(c => c.types.includes('postal_code'));
+          if (postalComp) {
+            document.getElementById('pp-zip').value = postalComp.long_name;
+            validateZone(postalComp.long_name);
+          }
+          validateForm();
+        });
+      } catch(e) { console.warn('[Places]', e); }
+    }
   </script>
 
   <script type="module">
@@ -228,6 +272,7 @@
     window.supabase = supabase;
   </script>
 
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbMHwFSwFTlyXhGXQe7CZFGF7Jcl_FORg&libraries=places&callback=initPlaces" async defer></script>
   <script src="transicion.js"></script>
 
 </body>
