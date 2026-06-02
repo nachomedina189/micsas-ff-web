@@ -172,29 +172,62 @@
       });
     }
 
+    function resolveAsap() {
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      for (let i = 1; i < PP_SLOTS.length; i++) {
+        const s = PP_SLOTS[i];
+        const [h, m] = s.split(':').map(Number);
+        if (h * 60 + m > nowMins && (_slotCounts[s] || 0) < 6) return s;
+      }
+      return null;
+    }
+
     function renderTimeSlots() {
+      const asap = resolveAsap();
       const c = document.getElementById('pp-time-slots');
       c.innerHTML = PP_SLOTS.map((s, i) => {
         const first = i === 0;
-        const used  = _slotCounts[s] || 0;
-        const full  = used >= 6;
+
+        // "Cuanto antes" button
+        if (first) {
+          if (!asap) {
+            return `<button type="button" disabled
+              class="slot-btn col-span-2 py-4 text-base flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/20 font-medium text-[#9B8A72] bg-[#C4B08A]/10 cursor-not-allowed">
+              <iconify-icon icon="solar:lock-linear" width="16" style="color:#9B8A72;"></iconify-icon>
+              Cuanto antes <span class="text-xs font-normal opacity-70">· Sense franges disponibles</span>
+            </button>`;
+          }
+          return `<button type="button" data-idx="0" onclick="selectTime('cuanto-antes',0)"
+            class="slot-btn col-span-2 py-4 text-base flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/40 font-medium text-[#2A1A0F] hover:border-[#E23F2E]/50 hover:bg-[#E23F2E]/5 transition-all active:scale-95">
+            <iconify-icon icon="solar:bolt-bold" width="16" style="color:#E23F2E;"></iconify-icon>
+            Cuanto antes <span class="text-xs font-normal text-[#9B8A72]">· ${asap}</span>
+          </button>`;
+        }
+
+        // Regular slots
+        const used = _slotCounts[s] || 0;
+        const full = used >= 6;
         if (full) {
           return `<button type="button" disabled
-            class="slot-btn flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/20 text-sm font-medium text-[#9B8A72] bg-[#C4B08A]/10 cursor-not-allowed ${first ? 'col-span-2 py-4 text-base' : 'py-3'}">
-            <iconify-icon icon="solar:lock-linear" width="${first ? 16 : 13}" style="color:#9B8A72;"></iconify-icon>
+            class="slot-btn py-3 flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/20 text-sm font-medium text-[#9B8A72] bg-[#C4B08A]/10 cursor-not-allowed">
+            <iconify-icon icon="solar:lock-linear" width="13" style="color:#9B8A72;"></iconify-icon>
             ${s} <span class="text-xs font-normal opacity-70">· Complet</span>
           </button>`;
         }
         return `<button type="button" data-idx="${i}" onclick="selectTime('${s}',${i})"
-          class="slot-btn flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/40 text-sm font-medium text-[#2A1A0F] hover:border-[#E23F2E]/50 hover:bg-[#E23F2E]/5 transition-all active:scale-95 ${first ? 'col-span-2 py-4 text-base' : 'py-3'}">
-          <iconify-icon icon="${first ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${first ? 16 : 13}" style="color:${first ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
+          class="slot-btn py-3 flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/40 text-sm font-medium text-[#2A1A0F] hover:border-[#E23F2E]/50 hover:bg-[#E23F2E]/5 transition-all active:scale-95">
+          <iconify-icon icon="solar:clock-circle-linear" width="13" style="color:#9B8A72;"></iconify-icon>
           ${s}
         </button>`;
       }).join('');
     }
 
     function selectTime(time, idx) {
-      ppSelectedTime = time;
+      // "Cuanto antes" resolves to the nearest available slot
+      const resolved = time === 'cuanto-antes' ? resolveAsap() : time;
+      if (!resolved) return;
+      ppSelectedTime = resolved;
       document.querySelectorAll('.slot-btn').forEach((btn, i) => {
         btn.classList.toggle('selected', i === idx);
       });
