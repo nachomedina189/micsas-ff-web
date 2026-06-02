@@ -1267,19 +1267,63 @@
       }
     }
 
-    // Google Maps callback — kept for compatibility but Places Autocomplete is disabled
-    // because it was intercepting keystrokes and freezing the address field.
-    // The address is captured as plain text; postal code handles zone validation.
+    // Google Maps / Places Autocomplete
     let _mapsLoaded = false;
-    function initAutocomplete() { _mapsLoaded = true; }
-    function ensureAutocomplete() { /* Places disabled */ }
+    let _autocompleteReady = false;
+    function initAutocomplete() {
+      _mapsLoaded = true;
+      const fs = document.getElementById('checkout-fullscreen');
+      if (fs && !fs.classList.contains('hidden')) ensureAutocomplete();
+    }
+
+    function ensureAutocomplete() {
+      if (_autocompleteReady || !_mapsLoaded || typeof google === 'undefined') return;
+      if (!google.maps || !google.maps.places) return;
+      const input = document.getElementById('cf-address');
+      if (!input) return;
+      _autocompleteReady = true;
+      try {
+        const ac = new google.maps.places.Autocomplete(input, {
+          componentRestrictions: { country: 'es' },
+          fields: ['address_components', 'formatted_address'],
+          types: ['address'],
+        });
+        // Stop Places from intercepting Enter (causes field freeze)
+        google.maps.event.addDomListener(input, 'keydown', e => {
+          if (e.key === 'Enter' || e.keyCode === 13) {
+            if (document.querySelector('.pac-item-selected') === null) {
+              e.stopPropagation();
+            }
+          }
+        });
+        ac.addListener('place_changed', () => {
+          const place = ac.getPlace();
+          if (!place || !place.address_components) {
+            cfPlacesAddress = input.value;
+            validateCheckout();
+            return;
+          }
+          cfPlacesAddress = place.formatted_address || input.value;
+          input.value = cfPlacesAddress;
+          const postalComp = place.address_components.find(c => c.types.includes('postal_code'));
+          if (postalComp) {
+            const zip = document.getElementById('cf-zip');
+            if (zip) { zip.value = postalComp.long_name; validateZone(postalComp.long_name); }
+          }
+          validateCheckout();
+        });
+      } catch (err) {
+        console.warn('[ensureAutocomplete]', err);
+        _autocompleteReady = false;
+      }
+    }
 
     // Real-time validation on checkout inputs
     document.addEventListener('input', e => {
       const id = e.target && e.target.id;
       if (id === 'order-allergies') { orderAllergies = e.target.value; return; }
       if (!id || !id.startsWith('cf-')) return;
-      if (id === 'cf-address') cfPlacesAddress = e.target.value;
+      if (id === 'cf-address') cfPlacesAddress = e.target.value; // kept in sync; Places overwrites on selection
       validateCheckout();
       if (id === 'cf-name') {
         const v = e.target.value.trim();
