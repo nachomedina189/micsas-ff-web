@@ -19,29 +19,6 @@
   <link rel="prefetch" href="menu.html">
   <link rel="prefetch" href="micsas-events.html">
   <style>
-    /* Google Places autocomplete dropdown styling */
-    .pac-container {
-      background: #F2E6CE;
-      border: 1px solid rgba(196,176,138,0.4);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(42,26,15,0.12);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      margin-top: 4px;
-      overflow: hidden;
-      z-index: 9999 !important;
-    }
-    .pac-item {
-      padding: 10px 16px;
-      color: #2A1A0F;
-      border-top: 1px solid rgba(196,176,138,0.2);
-      cursor: pointer;
-    }
-    .pac-item:first-child { border-top: none; }
-    .pac-item:hover, .pac-item-selected { background: rgba(230,213,176,0.3); }
-    .pac-item-query { color: #2A1A0F; font-weight: 500; }
-    .pac-matched { color: #E23F2E; }
-    .pac-icon { display: none; }
   </style>
 </head>
 
@@ -1267,56 +1244,10 @@
       }
     }
 
-    // Google Maps / Places Autocomplete
-    let _mapsLoaded = false;
-    let _autocompleteReady = false;
-    function initAutocomplete() {
-      _mapsLoaded = true;
-      const fs = document.getElementById('checkout-fullscreen');
-      if (fs && !fs.classList.contains('hidden')) ensureAutocomplete();
-    }
-
-    function ensureAutocomplete() {
-      if (_autocompleteReady || !_mapsLoaded || typeof google === 'undefined') return;
-      if (!google.maps || !google.maps.places) return;
-      const input = document.getElementById('cf-address');
-      if (!input) return;
-      _autocompleteReady = true;
-      try {
-        const ac = new google.maps.places.Autocomplete(input, {
-          componentRestrictions: { country: 'es' },
-          fields: ['address_components', 'formatted_address'],
-          types: ['address'],
-        });
-        // Stop Places from intercepting Enter (causes field freeze)
-        google.maps.event.addDomListener(input, 'keydown', e => {
-          if (e.key === 'Enter' || e.keyCode === 13) {
-            if (document.querySelector('.pac-item-selected') === null) {
-              e.stopPropagation();
-            }
-          }
-        });
-        ac.addListener('place_changed', () => {
-          const place = ac.getPlace();
-          if (!place || !place.address_components) {
-            cfPlacesAddress = input.value;
-            validateCheckout();
-            return;
-          }
-          cfPlacesAddress = place.formatted_address || input.value;
-          input.value = cfPlacesAddress;
-          const postalComp = place.address_components.find(c => c.types.includes('postal_code'));
-          if (postalComp) {
-            const zip = document.getElementById('cf-zip');
-            if (zip) { zip.value = postalComp.long_name; validateZone(postalComp.long_name); }
-          }
-          validateCheckout();
-        });
-      } catch (err) {
-        console.warn('[ensureAutocomplete]', err);
-        _autocompleteReady = false;
-      }
-    }
+    // Places Autocomplete eliminat — incompatible amb inputs dins d'overlays fixed.
+    // El camp d'adreça és text lliure; el codi postal valida la zona de repartiment.
+    function initAutocomplete() {}
+    function ensureAutocomplete() {}
 
     // Real-time validation on checkout inputs
     document.addEventListener('input', e => {
@@ -1577,8 +1508,6 @@
     </div>
   </div>
 
-  <!-- Google Maps / Places API — replace PEGA_AQUI_GOOGLE_MAPS_API_KEY with your key -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbMHwFSwFTlyXhGXQe7CZFGF7Jcl_FORg&libraries=places&callback=initAutocomplete" async defer></script>
 
 </body>
 </html>
