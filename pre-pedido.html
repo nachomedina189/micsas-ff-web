@@ -154,10 +154,37 @@
       }
     }
 
+    let _slotCounts = {};
+
+    async function loadSlotCounts() {
+      if (!window.supabase) return;
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await window.supabase
+        .from('orders')
+        .select('slot_time, pizza_count')
+        .gte('created_at', today + 'T00:00:00+00:00')
+        .neq('status', 'cancelled');
+      if (!data) return;
+      _slotCounts = {};
+      data.forEach(row => {
+        if (!row.slot_time) return;
+        _slotCounts[row.slot_time] = (_slotCounts[row.slot_time] || 0) + (row.pizza_count || 0);
+      });
+    }
+
     function renderTimeSlots() {
       const c = document.getElementById('pp-time-slots');
       c.innerHTML = PP_SLOTS.map((s, i) => {
         const first = i === 0;
+        const used  = _slotCounts[s] || 0;
+        const full  = used >= 6;
+        if (full) {
+          return `<button type="button" disabled
+            class="slot-btn flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/20 text-sm font-medium text-[#9B8A72] bg-[#C4B08A]/10 cursor-not-allowed ${first ? 'col-span-2 py-4 text-base' : 'py-3'}">
+            <iconify-icon icon="solar:lock-linear" width="${first ? 16 : 13}" style="color:#9B8A72;"></iconify-icon>
+            ${s} <span class="text-xs font-normal opacity-70">· Complet</span>
+          </button>`;
+        }
         return `<button type="button" data-idx="${i}" onclick="selectTime('${s}',${i})"
           class="slot-btn flex items-center justify-center gap-2 rounded-xl border border-[#C4B08A]/40 text-sm font-medium text-[#2A1A0F] hover:border-[#E23F2E]/50 hover:bg-[#E23F2E]/5 transition-all active:scale-95 ${first ? 'col-span-2 py-4 text-base' : 'py-3'}">
           <iconify-icon icon="${first ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${first ? 16 : 13}" style="color:${first ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
@@ -242,6 +269,7 @@
       window.location.href = 'pedido.html';
     }
 
+    // Render slots immediately (no counts yet), then reload once Supabase is ready
     renderTimeSlots();
 
     function initPlaces() {
@@ -270,6 +298,8 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     window.supabase = supabase;
+    await loadSlotCounts();
+    renderTimeSlots();
   </script>
 
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbMHwFSwFTlyXhGXQe7CZFGF7Jcl_FORg&libraries=places&callback=initPlaces" async defer></script>

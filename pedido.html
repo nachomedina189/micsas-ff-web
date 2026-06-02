@@ -1125,6 +1125,8 @@
             delivery_fee:   0,
             total:          total(),
             notes:          finalNotes,
+            slot_time:      cfSelectedTime || null,
+            pizza_count:    cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0),
           })
           .select()
           .single();
