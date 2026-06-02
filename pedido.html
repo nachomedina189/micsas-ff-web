@@ -475,7 +475,7 @@
         : `<div class="w-full h-full flex items-center justify-center bg-[#E6D5B0]"><iconify-icon icon="solar:pizza-slice-bold-duotone" width="48" style="color:#C4B08A;opacity:0.5;"></iconify-icon></div>`;
       const priceStr = item.price.toFixed(2).replace('.', ',') + ' €';
       return `
-        <div class="cursor-pointer relative rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden" data-pizza-row="${item.id}" onclick="addPizzaById('${item.id}')">
+        <div class="cursor-pointer relative rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden" data-pizza-row="${item.id}" onclick="openItemModal('${item.id}')">
           <div class="absolute top-0 right-0 w-[38%] h-full">${imgHtml}</div>
           <div class="relative z-10 p-5 pr-[42%] flex flex-col justify-between min-h-[140px]">
             <div>
@@ -484,11 +484,6 @@
             </div>
             <div class="flex items-center justify-between mt-4">
               <span class="font-medium text-sm text-[#E23F2E]">${priceStr}</span>
-              <div data-counter="${item.id}" class="hidden items-center gap-1 bg-[#E23F2E] rounded-full px-2.5 py-1" onclick="event.stopPropagation()">
-                <button type="button" class="text-[#F2E6CE] font-bold text-base w-5 h-5 flex items-center justify-center leading-none" onclick="changeQtySilent('${item.id}',-1)">−</button>
-                <span data-qty="${item.id}" class="text-[#F2E6CE] text-xs font-medium min-w-[1ch] text-center">1</span>
-                <button type="button" class="text-[#F2E6CE] font-bold text-base w-5 h-5 flex items-center justify-center leading-none" onclick="changeQtySilent('${item.id}',1)">+</button>
-              </div>
             </div>
           </div>
         </div>`;
@@ -1334,6 +1329,12 @@
 
     /* ── Item modal ── */
     let _modalItemId = null;
+    let _modalQty = 1;
+
+    function changeModalQty(delta) {
+      _modalQty = Math.max(1, _modalQty + delta);
+      document.getElementById('modal-qty-display').textContent = _modalQty;
+    }
 
     function openItemModal(id) {
       const item = [...MENU.casa, ...MENU.classics].find(i => i.id === id);
@@ -1368,6 +1369,8 @@
         MENU.drinks.map(d => `<option value="${d.id}">${d.name} — ${d.price.toFixed(2).replace('.', ',')} €</option>`).join('');
       sel.value = '';
       document.getElementById('item-modal-allergies').value = '';
+      _modalQty = 1;
+      document.getElementById('modal-qty-display').textContent = '1';
 
       document.getElementById('item-modal').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
@@ -1390,7 +1393,7 @@
       if (removed.length) note += 'Sense: ' + removed.join(', ');
       if (allergy) note += (note ? ' · ' : '') + 'Al·lèrgia: ' + allergy;
 
-      addToCartSilent(item.id, item.name, item.price);
+      for (let i = 0; i < _modalQty; i++) addToCartSilent(item.id, item.name, item.price);
       if (note) setPizzaNote(item.id, note);
 
       const drinkId = document.getElementById('item-modal-drink').value;
@@ -1477,7 +1480,7 @@
     <div class="relative w-full sm:max-w-md bg-[#F2E6CE] rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92dvh] overflow-y-auto z-10">
       <button onclick="closeItemModal()" aria-label="Tancar"
         class="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-[#E6D5B0] hover:bg-[#C4B08A]/50 transition-colors">
-        <iconify-icon icon="solar:close-linear" width="18"></iconify-icon>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
 
       <div class="w-full h-56 sm:h-64 overflow-hidden rounded-t-3xl sm:rounded-t-3xl bg-[#E6D5B0] flex items-center justify-center shrink-0">
@@ -1519,6 +1522,14 @@
               <iconify-icon icon="solar:alt-arrow-down-linear" width="16"></iconify-icon>
             </div>
           </div>
+        </div>
+
+        <div class="flex items-center justify-center gap-5">
+          <button type="button" onclick="changeModalQty(-1)"
+            class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-[#E23F2E] text-[#E23F2E] text-xl font-bold hover:bg-[#E23F2E] hover:text-[#F2E6CE] transition-colors">−</button>
+          <span id="modal-qty-display" class="font-['Lilita_One'] text-2xl text-[#2A1A0F] min-w-[2ch] text-center">1</span>
+          <button type="button" onclick="changeModalQty(1)"
+            class="w-10 h-10 flex items-center justify-center rounded-full border-2 border-[#E23F2E] text-[#E23F2E] text-xl font-bold hover:bg-[#E23F2E] hover:text-[#F2E6CE] transition-colors">+</button>
         </div>
 
         <button onclick="submitItemModal()"
