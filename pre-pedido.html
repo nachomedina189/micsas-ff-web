@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="transicion.css">
   <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
+  <link rel="dns-prefetch" href="https://maps.googleapis.com">
+  <link rel="dns-prefetch" href="https://maps.gstatic.com">
   <link rel="prefetch" href="pedido.html">
   <style>
     .slot-btn.selected {
@@ -173,6 +175,7 @@
     let ppSelectedTime   = null;
     let ppZipValid       = false;
     let _ppExtractedZip  = '';
+    let _placesSelecting = false;
 
     // Generate time slots: Cuanto antes + 20:30 → 23:30 every 15 min
     const PP_SLOTS = ['Cuanto antes'];
@@ -252,7 +255,8 @@
     }
 
     function onAddressInput() {
-      // User is typing manually — reset zone validity until Places selects again
+      // Guard: Places internally sets input.value which may trigger 'input' in some browsers
+      if (_placesSelecting) return;
       ppZipValid = false;
       _ppExtractedZip = '';
       document.getElementById('pp-zone-ok').classList.add('hidden');
@@ -311,6 +315,10 @@
         // Prevent Enter from submitting before a place is selected
         input.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
         ac.addListener('place_changed', () => {
+          // Flag prevents onAddressInput from resetting state if browser fires 'input' event
+          _placesSelecting = true;
+          setTimeout(() => { _placesSelecting = false; }, 300);
+
           const place = ac.getPlace();
           if (!place || !place.address_components) { validateForm(); return; }
           // Places already sets input.value — don't overwrite it (avoids freezing)
@@ -336,7 +344,7 @@
     await initAuth();
   </script>
 
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbMHwFSwFTlyXhGXQe7CZFGF7Jcl_FORg&libraries=places&callback=initPlaces" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbMHwFSwFTlyXhGXQe7CZFGF7Jcl_FORg&libraries=places&loading=async&callback=initPlaces" defer></script>
   <script src="transicion.js"></script>
 
   <!-- ════ PROFILE PANEL ════ -->
