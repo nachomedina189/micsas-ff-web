@@ -58,7 +58,22 @@
 
   <!-- MAIN -->
   <main class="min-h-[calc(100dvh-65px)] flex items-center justify-center px-4 py-10 md:py-14">
-    <div class="w-full max-w-md bg-[#F2E6CE] rounded-2xl shadow-2xl border border-[#C4B08A]/30 overflow-hidden">
+
+    <!-- LANDING -->
+    <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-8 transition-opacity duration-250">
+      <div class="space-y-2">
+        <p class="text-xs uppercase tracking-widest font-semibold text-[#9B8A72]">entrega a domicili · Matadepera</p>
+        <h1 class="font-['Lilita_One'] tracking-tighter text-5xl text-[#2A1A0F]">micsas.ff</h1>
+        <p class="text-[#5A3E28] font-light">Pizza napolitana feta al moment, lliurada per nosaltres.</p>
+      </div>
+      <button onclick="openOrderCard()"
+        class="px-10 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#E23F2E] shadow-lg hover:bg-[#B82A1F] hover:-translate-y-0.5 active:scale-95 transition-all">
+        Demana ja! →
+      </button>
+    </div>
+
+    <!-- ORDER CARD (hidden until button click) -->
+    <div id="pp-card" class="hidden w-full max-w-md bg-[#F2E6CE] rounded-2xl shadow-2xl border border-[#C4B08A]/30 overflow-hidden">
 
       <!-- Card header -->
       <div class="px-6 pt-7 pb-5 border-b border-[#C4B08A]/20">
@@ -136,10 +151,27 @@
         </div>
 
       </div>
-    </div>
+    </div><!-- /pp-card -->
   </main>
 
   <script>
+    function openOrderCard() {
+      const landing = document.getElementById('pp-landing');
+      const card    = document.getElementById('pp-card');
+      landing.style.opacity = '0';
+      setTimeout(() => {
+        landing.classList.add('hidden');
+        card.classList.remove('hidden');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(18px)';
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }));
+      }, 220);
+    }
+
     let ppSelectedTime = null;
     let ppZipValid     = false;
     let _ppZipTimer    = null;
