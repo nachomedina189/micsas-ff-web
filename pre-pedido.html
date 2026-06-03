@@ -45,65 +45,8 @@
 </head>
 <body class="bg-[#DDD0B3] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased selection:bg-[#E23F2E]/20">
 
-  <!-- Background illustrations -->
-  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-
-    <!-- Pizza entera — cantó superior esquerre -->
-    <svg class="absolute -top-6 -left-8 w-52 h-52 opacity-[0.13] rotate-[-18deg]" viewBox="0 0 200 200" fill="none" stroke="#E23F2E" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="100" cy="100" r="82" stroke-width="3.5"/>
-      <circle cx="100" cy="100" r="68" stroke-width="2"/>
-      <circle cx="85"  cy="72"  r="8" fill="#E23F2E" stroke="none"/>
-      <circle cx="114" cy="68"  r="7" fill="#E23F2E" stroke="none"/>
-      <circle cx="70"  cy="95"  r="7" fill="#E23F2E" stroke="none"/>
-      <circle cx="100" cy="92"  r="8" fill="#E23F2E" stroke="none"/>
-      <circle cx="126" cy="94"  r="7" fill="#E23F2E" stroke="none"/>
-      <circle cx="80"  cy="118" r="8" fill="#E23F2E" stroke="none"/>
-      <circle cx="108" cy="120" r="7" fill="#E23F2E" stroke="none"/>
-      <circle cx="132" cy="116" r="7" fill="#E23F2E" stroke="none"/>
-      <circle cx="92"  cy="142" r="7" fill="#E23F2E" stroke="none"/>
-      <circle cx="118" cy="143" r="6" fill="#E23F2E" stroke="none"/>
-    </svg>
-
-    <!-- Caixa de pizza — cantó inferior esquerre -->
-    <svg class="absolute -bottom-4 -left-10 w-64 h-48 opacity-[0.12] rotate-[8deg]" viewBox="0 0 280 200" fill="none" stroke="#E23F2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <!-- tapa superior -->
-      <path d="M40 80 L140 40 L240 80 L140 120 Z"/>
-      <!-- cara frontal -->
-      <path d="M40 80 L40 145 L140 185 L240 145 L240 80 L140 120 Z"/>
-      <!-- línia divisoria -->
-      <path d="M40 145 L140 105 L240 145"/>
-      <path d="M140 185 L140 105"/>
-      <!-- text aproximat -->
-      <text x="140" y="128" text-anchor="middle" font-size="18" font-family="serif" font-weight="bold" fill="#E23F2E" stroke="none" letter-spacing="1">micsas.ff</text>
-      <!-- dots decoratius -->
-      <circle cx="70"  cy="62" r="3" fill="#E23F2E" stroke="none"/>
-      <circle cx="180" cy="55" r="2.5" fill="#E23F2E" stroke="none"/>
-      <circle cx="200" cy="68" r="2" fill="#E23F2E" stroke="none"/>
-    </svg>
-
-    <!-- Llesca de pizza — cantó inferior dret -->
-    <svg class="absolute -bottom-8 -right-6 w-56 h-56 opacity-[0.13] rotate-[22deg]" viewBox="0 0 200 220" fill="none" stroke="#E23F2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <!-- cos de la llesca -->
-      <path d="M100 10 L20 170 Q100 145 180 170 Z"/>
-      <!-- crosta -->
-      <path d="M100 10 Q130 5 155 22 Q170 35 180 170 Q140 155 100 10"/>
-      <path d="M100 10 Q70 5 45 22 Q30 35 20 170 Q60 155 100 10"/>
-      <!-- mozzarella que degota -->
-      <path d="M60 165 Q58 180 55 195 Q57 200 60 195 Q62 188 64 175"/>
-      <path d="M100 158 Q100 175 98 190 Q100 198 103 190 Q104 177 105 162"/>
-      <path d="M140 162 Q142 178 144 193 Q146 200 149 193 Q148 182 146 168"/>
-      <!-- pepperoni -->
-      <ellipse cx="90"  cy="80"  rx="11" ry="10" stroke-width="2.5"/>
-      <ellipse cx="118" cy="75"  rx="10" ry="9"  stroke-width="2.5"/>
-      <ellipse cx="75"  cy="115" rx="10" ry="9"  stroke-width="2.5"/>
-      <ellipse cx="108" cy="118" rx="11" ry="10" stroke-width="2.5"/>
-      <ellipse cx="137" cy="110" rx="10" ry="9"  stroke-width="2.5"/>
-    </svg>
-
-  </div>
-
   <!-- NAV -->
-  <nav class="sticky top-0 z-40 relative px-6 py-4 md:px-12 flex justify-between items-center bg-[#DDD0B3]/95 backdrop-blur-md border-b border-[#C4B08A]/40 shadow-sm">
+  <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#DDD0B3]/95 backdrop-blur-md border-b border-[#C4B08A]/40 shadow-sm">
     <a href="index.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
@@ -120,7 +63,7 @@
   </nav>
 
   <!-- MAIN -->
-  <main class="relative z-10 min-h-[calc(100dvh-65px)] flex items-center justify-center px-4 py-10 md:py-14">
+  <main class="min-h-[calc(100dvh-65px)] flex items-center justify-center px-4 py-10 md:py-14">
 
     <!-- LANDING -->
     <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-8 transition-opacity duration-250">
