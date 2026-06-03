@@ -28,7 +28,7 @@
       shop_desc: "Aviat tindreu novetats sobre la nostra botiga. Estigueu atents al nostre Instagram @micsas.ff!",
       shop_wip: 'En construcció',
       // MENU
-      menu_h1: 'Les nostres pizzes', menu_intro: 'Massa fermentada 72h. Ingredients escollits un per un. Cuinem i entreguem nosaltres.',
+      menu_h1: 'Les nostres pizzes',
       menu_sec1: 'Pizzes clàssiques', menu_sec1_sub: 'tradició napolitana',
       menu_moto_d: "Mortadel·la, burrata, pesto de rúcüla, orenga",
       menu_tel_d: "Salami picant, mel de romaní, gorgonzola, nous",
@@ -99,7 +99,7 @@
       shop_desc: "Pronto tendréis novedades sobre nuestra tienda. ¡Estad atentos a nuestro Instagram @micsas.ff!",
       shop_wip: 'En construcción',
       // MENU
-      menu_h1: 'Nuestras pizzas', menu_intro: 'Masa fermentada 72h. Ingredientes elegidos uno a uno. Cocinamos y entregamos nosotros.',
+      menu_h1: 'Nuestras pizzas',
       menu_sec1: 'Pizzas especiales', menu_sec1_sub: 'tradición napolitana',
       menu_moto_d: "Mortadela, burrata, pesto de rúcula, orégano",
       menu_tel_d: "Salami picante, miel de romero, gorgonzola, nueces",
