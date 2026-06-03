@@ -95,6 +95,12 @@
               Adreça <span class="text-[#E23F2E]">*</span>
             </label>
             <div id="pp-address-mount" class="w-full"></div>
+            <div id="pp-zone-feedback" class="hidden mt-1.5 flex items-center gap-1.5 flex-wrap">
+              <span class="text-xs text-[#9B8A72]">CP <span id="pp-zip-badge" class="font-medium text-[#2A1A0F]"></span></span>
+              <span id="pp-zone-ok"  class="hidden text-xs text-[#10B981]">· Repartim a aquesta zona ✓</span>
+              <span id="pp-zone-err" class="hidden text-xs text-[#E23F2E]">· No fem entregues a aquesta zona</span>
+              <svg id="pp-zone-spin" class="hidden animate-spin w-3 h-3 text-[#9B8A72]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            </div>
           </div>
 
           <div>
@@ -538,8 +544,52 @@
 
   <!-- ════ PLACES AUTOCOMPLETE INTEGRATION ════ -->
   <script>
-    window._ppExtractedZip      = null;
-    window._ppFormattedAddress  = '';
+    window._ppExtractedZip     = null;
+    window._ppFormattedAddress = '';
+
+    function _ppResetZoneFeedback() {
+      document.getElementById('pp-zone-feedback').classList.add('hidden');
+      document.getElementById('pp-zip-badge').textContent  = '';
+      document.getElementById('pp-zone-ok').classList.add('hidden');
+      document.getElementById('pp-zone-err').classList.add('hidden');
+      document.getElementById('pp-zone-spin').classList.add('hidden');
+    }
+
+    async function _ppValidateZone(zip) {
+      const feedbackEl = document.getElementById('pp-zone-feedback');
+      const badgeEl    = document.getElementById('pp-zip-badge');
+      const okEl       = document.getElementById('pp-zone-ok');
+      const errEl      = document.getElementById('pp-zone-err');
+      const spinEl     = document.getElementById('pp-zone-spin');
+
+      badgeEl.textContent = zip;
+      feedbackEl.classList.remove('hidden');
+      okEl.classList.add('hidden');
+      errEl.classList.add('hidden');
+      spinEl.classList.remove('hidden');
+
+      if (!window.supabase) { spinEl.classList.add('hidden'); return; }
+
+      try {
+        const { data } = await window.supabase
+          .from('delivery_zones').select('id')
+          .eq('postal_code', zip).eq('active', true).maybeSingle();
+        spinEl.classList.add('hidden');
+        if (data) {
+          ppAddressValid = true;
+          okEl.classList.remove('hidden');
+        } else {
+          ppAddressValid = false;
+          errEl.classList.remove('hidden');
+        }
+      } catch (e) {
+        console.warn('[validateZone]', e);
+        ppAddressValid = false;
+        spinEl.classList.add('hidden');
+        errEl.classList.remove('hidden');
+      }
+      if (typeof validateForm === "function") validateForm();
+    }
 
     async function initPpAddress() {
       const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
@@ -561,14 +611,21 @@
             .find(c => c.types.includes("postal_code"));
           window._ppExtractedZip     = cp ? (cp.longText || cp.shortText || null) : null;
           window._ppFormattedAddress = place.formattedAddress || '';
-          ppAddressValid = true;
+          ppAddressValid = false; // will be set true by _ppValidateZone if zone ok
+          if (window._ppExtractedZip) {
+            await _ppValidateZone(window._ppExtractedZip);
+          } else {
+            _ppResetZoneFeedback();
+            if (typeof validateForm === "function") validateForm();
+          }
         } catch (e) {
-          console.error("Error obteniendo el código postal:", e);
+          console.error("Error obteniendo lugar:", e);
           window._ppExtractedZip     = null;
           window._ppFormattedAddress = '';
           ppAddressValid = false;
+          _ppResetZoneFeedback();
+          if (typeof validateForm === "function") validateForm();
         }
-        if (typeof validateForm === "function") validateForm();
         setTimeout(() => { acabaDeSeleccionar = false; }, 0);
       });
 
@@ -577,6 +634,7 @@
           window._ppExtractedZip     = null;
           window._ppFormattedAddress = '';
           ppAddressValid = false;
+          _ppResetZoneFeedback();
         }
         if (typeof validateForm === "function") validateForm();
       };
