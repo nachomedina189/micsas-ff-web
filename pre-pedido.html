@@ -600,6 +600,35 @@
 
       document.getElementById("pp-address-mount").appendChild(ac);
 
+      // Inject styles into shadow DOM to match other form inputs
+      setTimeout(() => {
+        if (!ac.shadowRoot) return;
+        const s = document.createElement('style');
+        s.textContent = `
+          input, input[type="text"] {
+            background: #ffffff !important;
+            border: 1px solid rgba(196,176,138,0.4) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.75rem 1rem !important;
+            color: #2A1A0F !important;
+            font-size: 0.875rem !important;
+            font-family: 'DM Sans', sans-serif !important;
+            line-height: 1.5 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            outline: none !important;
+            box-shadow: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+          }
+          input::placeholder { color: #9B8A72 !important; }
+          input:focus {
+            border-color: #E23F2E !important;
+            box-shadow: 0 0 0 1px rgba(226,63,46,0.3) !important;
+          }
+        `;
+        ac.shadowRoot.appendChild(s);
+      }, 100);
+
       let acabaDeSeleccionar = false;
 
       ac.addEventListener("gmp-select", async ({ placePrediction }) => {
