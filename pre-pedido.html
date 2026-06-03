@@ -50,14 +50,16 @@
     <a href="index.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-3">
+      <!-- Logged out -->
       <button id="nav-login-btn" onclick="openLoginModal()"
         class="text-sm font-medium underline underline-offset-2 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors font-['Inter',sans-serif]">
         Iniciar sessió
       </button>
-      <div id="nav-user-wrap" class="hidden items-center gap-2 text-xs font-medium text-[#2A1A0F] px-3 py-1.5 rounded-full bg-[#E6D5B0]/50 border border-[#C4B08A]/40">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-        <span id="nav-user-name" class="max-w-[80px] truncate"></span>
+      <!-- Logged in -->
+      <div id="nav-user-wrap" class="hidden items-center gap-3">
+        <span class="text-sm font-medium text-[#2A1A0F] font-['Inter',sans-serif]">Benvingut, <span id="nav-user-name" class="text-[#E23F2E]"></span></span>
+        <button onclick="doSignOut()" class="text-xs font-medium text-[#9B8A72] hover:text-[#E23F2E] transition-colors underline underline-offset-2 font-['Inter',sans-serif]">Tancar sessió</button>
       </div>
     </div>
   </nav>
@@ -66,15 +68,18 @@
   <main class="min-h-[calc(100dvh-65px)] flex items-center justify-center px-4 py-10 md:py-14">
 
     <!-- LANDING -->
-    <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-8 transition-opacity duration-250">
+    <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-6 transition-opacity duration-250">
       <div class="space-y-2">
         <p class="text-xs uppercase tracking-widest font-semibold text-[#9B8A72]">entrega a domicili · Matadepera</p>
-        <h1 class="font-['Lilita_One'] tracking-tighter text-5xl text-[#2A1A0F]">micsas.ff</h1>
         <p class="text-[#5A3E28] font-light">Pizza napolitana feta al moment, lliurada per nosaltres.</p>
       </div>
       <button onclick="openOrderCard()"
         class="px-10 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#E23F2E] shadow-lg hover:bg-[#B82A1F] hover:-translate-y-0.5 active:scale-95 transition-all">
         Demana ja! →
+      </button>
+      <!-- Shown only when logged in -->
+      <button id="pp-profile-btn" onclick="openProfilePanel()" class="hidden text-sm font-medium text-[#5A3E28] underline underline-offset-2 hover:text-[#E23F2E] transition-colors font-['Inter',sans-serif]">
+        El meu perfil
       </button>
     </div>
 
@@ -354,6 +359,71 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbMHwFSwFTlyXhGXQe7CZFGF7Jcl_FORg&libraries=places&callback=initPlaces" async defer></script>
   <script src="transicion.js"></script>
 
+  <!-- ════ PROFILE PANEL ════ -->
+  <div id="pp-profile-panel" class="hidden fixed inset-0 z-[820] bg-[#DDD0B3] flex flex-col translate-x-full transition-transform duration-300 ease-out">
+
+    <!-- Header -->
+    <div class="shrink-0 flex items-center px-5 py-4 border-b border-[#C4B08A]/30 bg-[#DDD0B3]">
+      <button onclick="closeProfilePanel()" class="flex items-center gap-1.5 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors p-1 rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        <span class="text-sm font-medium font-['Inter',sans-serif]">Enrere</span>
+      </button>
+      <h1 class="font-['Lilita_One'] tracking-tight text-xl text-[#2A1A0F] mx-auto">El meu compte</h1>
+    </div>
+
+    <!-- Avatar + name -->
+    <div class="shrink-0 flex flex-col items-center pt-8 pb-5 px-6">
+      <div class="w-20 h-20 rounded-full bg-[#E23F2E] flex items-center justify-center mb-3">
+        <span id="pp-prof-initials" class="font-['Lilita_One'] text-3xl text-[#F2E6CE]">?</span>
+      </div>
+      <p id="pp-prof-name" class="font-['Lilita_One'] text-2xl text-[#2A1A0F]">—</p>
+      <p id="pp-prof-email" class="text-sm font-light text-[#5A3E28] mt-0.5"></p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="shrink-0 flex border-b border-[#C4B08A]/30 px-6">
+      <button id="pp-tab-perfil" onclick="showProfileTab('perfil')"
+        class="py-3 pr-6 text-sm font-medium border-b-2 border-[#E23F2E] text-[#E23F2E] transition-colors font-['Inter',sans-serif]">
+        Perfil
+      </button>
+      <button id="pp-tab-historial" onclick="showProfileTab('historial')"
+        class="py-3 px-6 text-sm font-medium text-[#9B8A72] transition-colors font-['Inter',sans-serif]">
+        Historial de pedidos
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto">
+
+      <!-- Perfil tab -->
+      <div id="pp-section-perfil" class="px-6 py-6 space-y-0 max-w-lg mx-auto">
+        <div class="bg-[#F2E6CE] rounded-2xl border border-[#C4B08A]/30 overflow-hidden divide-y divide-[#C4B08A]/20">
+          <div class="px-5 py-4">
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-[#9B8A72] mb-1">Nom</p>
+            <p id="pp-prof-name-row" class="text-sm text-[#2A1A0F] font-medium">—</p>
+          </div>
+          <div class="px-5 py-4">
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-[#9B8A72] mb-1">Correu</p>
+            <p id="pp-prof-email-row" class="text-sm text-[#2A1A0F]">—</p>
+          </div>
+          <div class="px-5 py-4">
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-[#9B8A72] mb-1">Telèfon</p>
+            <p id="pp-prof-phone" class="text-sm text-[#2A1A0F]">—</p>
+          </div>
+        </div>
+        <p class="text-xs text-center text-[#9B8A72] pt-4 font-light">Per modificar les teves dades, contacta'ns per Instagram.</p>
+      </div>
+
+      <!-- Historial tab -->
+      <div id="pp-section-historial" class="hidden px-6 py-6 max-w-lg mx-auto">
+        <div id="pp-order-list" class="space-y-3">
+          <p class="text-sm text-[#9B8A72] text-center py-8">Carregant...</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ════ LOGIN MODAL ════ -->
   <div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="pp-login-title"
        class="fixed inset-0 z-[810] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200 hidden">
@@ -401,19 +471,117 @@
 
   <script>
     let ppCurrentUser = null;
+    let ppCustomer = null;
 
     function updateNavAuth() {
-      const loginBtn  = document.getElementById('nav-login-btn');
-      const userWrap  = document.getElementById('nav-user-wrap');
-      const userName  = document.getElementById('nav-user-name');
+      const loginBtn   = document.getElementById('nav-login-btn');
+      const userWrap   = document.getElementById('nav-user-wrap');
+      const userName   = document.getElementById('nav-user-name');
+      const profileBtn = document.getElementById('pp-profile-btn');
       if (ppCurrentUser) {
-        if (loginBtn) loginBtn.classList.add('hidden');
-        if (userWrap) { userWrap.classList.remove('hidden'); userWrap.classList.add('flex'); }
-        if (userName) userName.textContent = ppCurrentUser.email.split('@')[0];
+        if (loginBtn)   loginBtn.classList.add('hidden');
+        if (userWrap)   { userWrap.classList.remove('hidden'); userWrap.classList.add('flex'); }
+        const displayName = ppCustomer?.name || ppCurrentUser.email.split('@')[0];
+        if (userName)   userName.textContent = displayName;
+        if (profileBtn) profileBtn.classList.remove('hidden');
       } else {
-        if (loginBtn) loginBtn.classList.remove('hidden');
-        if (userWrap) { userWrap.classList.add('hidden'); userWrap.classList.remove('flex'); }
+        if (loginBtn)   loginBtn.classList.remove('hidden');
+        if (userWrap)   { userWrap.classList.add('hidden'); userWrap.classList.remove('flex'); }
+        if (profileBtn) profileBtn.classList.add('hidden');
       }
+    }
+
+    async function doSignOut() {
+      if (!window.supabase) return;
+      await window.supabase.auth.signOut();
+      ppCurrentUser = null; ppCustomer = null;
+      updateNavAuth();
+    }
+
+    // ── Profile panel ──
+
+    function openProfilePanel() {
+      const panel = document.getElementById('pp-profile-panel');
+      panel.classList.remove('hidden');
+      requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.remove('translate-x-full')));
+      document.body.style.overflow = 'hidden';
+      showProfileTab('perfil');
+      loadProfileData();
+    }
+
+    function closeProfilePanel() {
+      const panel = document.getElementById('pp-profile-panel');
+      panel.classList.add('translate-x-full');
+      setTimeout(() => panel.classList.add('hidden'), 300);
+      document.body.style.overflow = '';
+    }
+
+    function showProfileTab(tab) {
+      ['perfil','historial'].forEach(t => {
+        document.getElementById('pp-tab-' + t).classList.toggle('border-b-2', t === tab);
+        document.getElementById('pp-tab-' + t).classList.toggle('border-[#E23F2E]', t === tab);
+        document.getElementById('pp-tab-' + t).classList.toggle('text-[#E23F2E]', t === tab);
+        document.getElementById('pp-tab-' + t).classList.toggle('text-[#9B8A72]', t !== tab);
+        document.getElementById('pp-section-' + t).classList.toggle('hidden', t !== tab);
+      });
+      if (tab === 'historial') loadOrderHistory();
+    }
+
+    async function loadProfileData() {
+      if (!window.supabase || !ppCurrentUser) return;
+      const { data } = await window.supabase
+        .from('customers').select('*')
+        .eq('auth_user_id', ppCurrentUser.id)
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      ppCustomer = data;
+      const name = data?.name || '—';
+      ['pp-prof-name','pp-prof-name-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = name; });
+      ['pp-prof-email','pp-prof-email-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ppCurrentUser.email; });
+      const phoneEl = document.getElementById('pp-prof-phone'); if (phoneEl) phoneEl.textContent = data?.phone || '—';
+      const initEl  = document.getElementById('pp-prof-initials'); if (initEl) initEl.textContent = name.charAt(0).toUpperCase();
+      updateNavAuth();
+    }
+
+    async function loadOrderHistory() {
+      const listEl = document.getElementById('pp-order-list');
+      if (!listEl || !window.supabase || !ppCurrentUser) return;
+      listEl.innerHTML = '<p class="text-sm text-[#9B8A72] text-center py-8">Carregant...</p>';
+      const { data: cust } = await window.supabase
+        .from('customers').select('id')
+        .eq('auth_user_id', ppCurrentUser.id).limit(1).maybeSingle();
+      if (!cust) { listEl.innerHTML = '<p class="text-sm text-[#9B8A72] text-center py-8">Cap comanda trobada.</p>'; return; }
+
+      const { data: orders } = await window.supabase
+        .from('orders').select('*, order_items(*)')
+        .eq('customer_id', cust.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (!orders || orders.length === 0) {
+        listEl.innerHTML = '<p class="text-sm text-[#9B8A72] text-center py-8">Encara no tens cap comanda.</p>';
+        return;
+      }
+
+      const statusLabel = { pending:'Pendent', confirmed:'Confirmada', delivered:'Entregada', cancelled:'Cancel·lada' };
+      const statusColor = { pending:'text-[#F59E0B]', confirmed:'text-[#10B981]', delivered:'text-[#10B981]', cancelled:'text-[#E23F2E]' };
+
+      listEl.innerHTML = orders.map(o => {
+        const date = new Date(o.created_at).toLocaleDateString('ca-ES', { day:'2-digit', month:'short', year:'numeric' });
+        const items = (o.order_items || []).map(i => `${i.quantity || i.qty || 1}× ${i.name || i.item_name || i.product_name || ''}`).filter(Boolean);
+        return `
+          <div class="rounded-xl border border-[#C4B08A]/30 bg-[#E6D5B0]/20 px-4 py-4 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-light text-[#9B8A72]">${date}</span>
+              <span class="text-xs font-medium ${statusColor[o.status] || 'text-[#9B8A72]'}">${statusLabel[o.status] || o.status || ''}</span>
+            </div>
+            ${items.length ? `<p class="text-sm text-[#2A1A0F] font-light">${items.join(', ')}</p>` : ''}
+            ${o.slot_time ? `<p class="text-xs text-[#9B8A72]">Hora: ${o.slot_time}</p>` : ''}
+            <div class="flex justify-between items-center pt-1 border-t border-[#C4B08A]/20">
+              <span class="text-xs font-light text-[#5A3E28]">${o.payment_method === 'cash' ? 'Efectiu' : 'Targeta'}</span>
+              <span class="font-['Lilita_One'] text-base text-[#E23F2E]">€${(o.total || 0).toFixed(2).replace('.',',')}</span>
+            </div>
+          </div>`;
+      }).join('');
     }
 
     function openLoginModal() {
@@ -460,18 +628,21 @@
     async function initAuth() {
       const sb = window.supabase; if (!sb) return;
       const { data: { user } } = await sb.auth.getUser();
-      if (user) { ppCurrentUser = user; updateNavAuth(); }
-      sb.auth.onAuthStateChange((event, session) => {
+      if (user) { ppCurrentUser = user; await loadProfileData(); updateNavAuth(); }
+      sb.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          ppCurrentUser = session.user; updateNavAuth(); closeLoginModal();
+          ppCurrentUser = session.user; await loadProfileData(); updateNavAuth(); closeLoginModal();
         } else if (event === 'SIGNED_OUT') {
-          ppCurrentUser = null; updateNavAuth();
+          ppCurrentUser = null; ppCustomer = null; updateNavAuth();
         }
       });
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !document.getElementById('login-modal').classList.contains('hidden')) closeLoginModal();
+      if (e.key === 'Escape') {
+        if (!document.getElementById('pp-profile-panel').classList.contains('hidden')) closeProfilePanel();
+        else if (!document.getElementById('login-modal').classList.contains('hidden')) closeLoginModal();
+      }
     });
   </script>
 
