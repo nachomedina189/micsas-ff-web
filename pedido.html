@@ -34,10 +34,20 @@
     <a href="index.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
-    <button onclick="openCartDrawer()" class="relative p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" aria-label="Cistella">
-      <iconify-icon icon="solar:cart-large-2-linear" width="22" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
-      <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 rounded-full text-xs font-medium flex items-center justify-center text-[#F2E6CE] bg-[#E23F2E] hidden">0</span>
-    </button>
+    <div class="flex items-center gap-2">
+      <button id="nav-login-btn" onclick="openLoginModal()"
+        class="hidden text-xs font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors px-3 py-1.5 rounded-full border border-[#C4B08A]/40 hover:border-[#E23F2E]/40 font-['Inter',sans-serif]">
+        Iniciar sessió
+      </button>
+      <div id="nav-user-wrap" class="hidden items-center gap-2 text-xs font-medium text-[#2A1A0F] px-3 py-1.5 rounded-full bg-[#E6D5B0]/50 border border-[#C4B08A]/40">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        <span id="nav-user-name" class="max-w-[80px] truncate"></span>
+      </div>
+      <button onclick="openCartDrawer()" class="relative p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" aria-label="Cistella">
+        <iconify-icon icon="solar:cart-large-2-linear" width="22" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
+        <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 rounded-full text-xs font-medium flex items-center justify-center text-[#F2E6CE] bg-[#E23F2E] hidden">0</span>
+      </button>
+    </div>
   </nav>
 
   <!-- HEADER -->
@@ -244,7 +254,24 @@
         <!-- Client section -->
         <section>
           <h2 class="font-['Lilita_One'] tracking-tight text-xl text-[#2A1A0F] mb-4">Client</h2>
-          <div class="space-y-4">
+
+          <!-- Collapsed card (logged in + complete profile) -->
+          <div id="cf-client-card" class="hidden rounded-xl border border-[#C4B08A]/40 bg-[#E6D5B0]/20 px-5 py-4 mb-4">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p id="cf-card-name" class="font-semibold text-sm text-[#2A1A0F] truncate"></p>
+                <p id="cf-card-email" class="text-xs font-light text-[#5A3E28] mt-0.5 truncate"></p>
+                <p id="cf-card-phone" class="text-xs font-light text-[#5A3E28] truncate"></p>
+              </div>
+              <button onclick="expandClientForm()" aria-label="Editar dades client"
+                class="shrink-0 p-1.5 rounded-lg hover:bg-[#C4B08A]/20 transition-colors text-[#9B8A72] hover:text-[#2A1A0F]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form (guest or editing) -->
+          <div id="cf-client-form" class="space-y-4">
 
             <!-- Nom -->
             <div>
@@ -287,47 +314,6 @@
                   class="flex-1 bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
               </div>
               <p class="cf-field-err hidden text-xs mt-1 text-[#E23F2E]" data-for="cf-phone">Mínim 9 dígits.</p>
-            </div>
-
-            <!-- Adreça -->
-            <div>
-              <label for="cf-address" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
-                Adreça <span class="text-[#E23F2E]" aria-hidden="true">*</span>
-              </label>
-              <input id="cf-address" type="text" autocomplete="off" placeholder="Carrer i número"
-                aria-required="true"
-                class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
-              <p class="cf-field-err hidden text-xs mt-1 text-[#E23F2E]" data-for="cf-address">L'adreça és obligatòria.</p>
-            </div>
-
-            <!-- Pis/porta + Codi postal -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="cf-floor" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
-                  Pis / Porta <span class="text-[#9B8A72] font-normal">(opcional)</span>
-                </label>
-                <input id="cf-floor" type="text" autocomplete="address-line2" placeholder="2n 1a"
-                  class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
-              </div>
-              <div>
-                <label for="cf-zip" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
-                  Codi postal <span class="text-[#E23F2E]" aria-hidden="true">*</span>
-                </label>
-                <div class="relative">
-                  <input id="cf-zip" type="text" autocomplete="postal-code" placeholder="08230"
-                    aria-required="true"
-                    class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 pr-9 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
-                  <div id="cf-zip-spinner" class="hidden absolute right-3 inset-y-0 flex items-center pointer-events-none">
-                    <svg class="animate-spin w-4 h-4 text-[#9B8A72]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <p class="cf-field-err hidden text-xs mt-1 text-[#E23F2E]" data-for="cf-zip">Codi postal obligatori.</p>
-                <p id="cf-zone-err" class="hidden text-xs mt-1.5 text-[#E23F2E]">Ho sentim, no fem entregues a aquesta zona postal.</p>
-                <p id="cf-zone-ok" class="hidden text-xs mt-1.5 text-[#10B981]">Repartim a aquesta zona ✓</p>
-              </div>
             </div>
 
             <!-- Observacions -->
@@ -700,6 +686,8 @@
     let currentZone = null;
     let _zipDebounceTimer = null;
     let currentUser = null;
+    let cfClientComplete = false;
+    let cfClientName = '', cfClientPhone = '', cfClientEmail = '';
 
     function renderTimeSlots() {
       const slots = ['Cuanto antes'];
@@ -773,11 +761,9 @@
       document.getElementById('cf-success').classList.remove('flex');
       document.getElementById('cf-global-err').classList.add('hidden');
 
-      // Pre-fill address/zip/floor from pre-pedido
-      if (_ssAddr) { const el = document.getElementById('cf-address'); if (el) { el.value = _ssAddr; cfPlacesAddress = _ssAddr; } }
-      if (_ssZip)  { const el = document.getElementById('cf-zip');     if (el)   el.value = _ssZip;  }
-      if (_ssFloor){ const el = document.getElementById('cf-floor');   if (el)   el.value = _ssFloor; }
-      if (_ssZip)  validateZone(_ssZip);
+      // Address from pre-pedido — already validated, mark zone as ok
+      cfPlacesAddress = _ssAddr || '';
+      if (_ssZip) currentZone = { postal_code: _ssZip, prevalidated: true };
       // Show overlay
       const fs = document.getElementById('checkout-fullscreen');
       fs.classList.remove('hidden');
@@ -849,19 +835,18 @@
     }
 
     function validateCheckout() {
-      const name  = (document.getElementById('cf-name')  || {}).value || '';
-      const email = (document.getElementById('cf-email') || {}).value || '';
-      const phone = (document.getElementById('cf-phone') || {}).value || '';
-      const addr  = (document.getElementById('cf-address') || {}).value || '';
-      const zip   = (document.getElementById('cf-zip')   || {}).value || '';
-      const tnc   = document.getElementById('cf-tnc') && document.getElementById('cf-tnc').checked;
-
-      const nameOk  = name.trim().length >= 2;
-      const emailOk = !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-      const phoneOk = phone.replace(/\D/g, '').length >= 9;
-      const addrOk  = addr.trim().length > 0;
-      const zipOk   = zip.trim().length > 0;
-      const allOk   = nameOk && emailOk && phoneOk && addrOk && zipOk && tnc && cfPayMethod !== null && currentZone !== null;
+      const tnc = document.getElementById('cf-tnc') && document.getElementById('cf-tnc').checked;
+      let clientOk = cfClientComplete;
+      if (!clientOk) {
+        const name  = (document.getElementById('cf-name')  || {}).value || '';
+        const email = (document.getElementById('cf-email') || {}).value || '';
+        const phone = (document.getElementById('cf-phone') || {}).value || '';
+        const nameOk  = name.trim().length >= 2;
+        const emailOk = !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+        const phoneOk = phone.replace(/\D/g, '').length >= 9;
+        clientOk = nameOk && emailOk && phoneOk;
+      }
+      const allOk = clientOk && tnc && cfPayMethod !== null;
 
       const btn = document.getElementById('cf-submit');
       if (!btn) return allOk;
@@ -880,20 +865,55 @@
       if (err) err.classList.toggle('hidden', !show);
     }
 
+    function showClientCard(name, email, phone) {
+      cfClientName  = name  || '';
+      cfClientEmail = email || '';
+      cfClientPhone = phone || '';
+      const nameEl  = document.getElementById('cf-card-name');
+      const emailEl = document.getElementById('cf-card-email');
+      const phoneEl = document.getElementById('cf-card-phone');
+      if (nameEl)  nameEl.textContent  = name  || '';
+      if (emailEl) emailEl.textContent = email || '';
+      if (phoneEl) phoneEl.textContent = phone || '';
+      const card = document.getElementById('cf-client-card');
+      const form = document.getElementById('cf-client-form');
+      if (card) card.classList.remove('hidden');
+      if (form) form.classList.add('hidden');
+      cfClientComplete = true;
+      validateCheckout();
+    }
+
+    function expandClientForm() {
+      const card = document.getElementById('cf-client-card');
+      const form = document.getElementById('cf-client-form');
+      if (card) card.classList.add('hidden');
+      if (form) form.classList.remove('hidden');
+      cfClientComplete = false;
+      validateCheckout();
+    }
+
     // ── Auth ──
 
     function updateAuthUI() {
       const outEl = document.getElementById('cf-auth-out');
       const inEl  = document.getElementById('cf-auth-in');
       const emailEl = document.getElementById('cf-auth-email');
+      const navLoginBtn = document.getElementById('nav-login-btn');
+      const navUserWrap = document.getElementById('nav-user-wrap');
+      const navUserName = document.getElementById('nav-user-name');
       if (!outEl || !inEl) return;
       if (currentUser) {
         outEl.classList.add('hidden');
         inEl.classList.remove('hidden'); inEl.classList.add('flex');
         if (emailEl) emailEl.textContent = currentUser.email;
+        if (navLoginBtn) navLoginBtn.classList.add('hidden');
+        if (navUserWrap) { navUserWrap.classList.remove('hidden'); navUserWrap.classList.add('flex'); }
+        if (navUserName) navUserName.textContent = currentUser.email.split('@')[0];
       } else {
         inEl.classList.add('hidden'); inEl.classList.remove('flex');
         outEl.classList.remove('hidden');
+        if (navLoginBtn) navLoginBtn.classList.remove('hidden');
+        if (navUserWrap) { navUserWrap.classList.add('hidden'); navUserWrap.classList.remove('flex'); }
       }
     }
 
@@ -918,27 +938,16 @@
       const cust = customers && customers[0];
       if (cust) {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-        setVal('cf-name', cust.name);
+        // Pre-fill form in case card is not shown (fallback)
+        setVal('cf-name',  cust.name);
         setVal('cf-phone', cust.phone ? cust.phone.replace(/^\+\d+\s?/, '') : '');
         setVal('cf-email', cust.email || user.email);
 
-        // Fetch most recent address
-        const { data: addrs } = await sb.from('addresses')
-          .select('*')
-          .eq('customer_id', cust.id)
-          .order('id', { ascending: false })
-          .limit(1);
-        const addr = addrs && addrs[0];
-        if (addr) {
-          setVal('cf-address', addr.street);
-          cfPlacesAddress = addr.street || '';
-          setVal('cf-floor', addr.floor);
-          if (addr.postal_code) {
-            setVal('cf-zip', addr.postal_code);
-            validateZone(addr.postal_code);
-          }
+        if (cust.name && cust.phone) {
+          showClientCard(cust.name, cust.email || user.email, cust.phone);
+        } else {
+          validateCheckout();
         }
-        validateCheckout();
       }
       updateAuthUI();
     }
@@ -1012,14 +1021,15 @@
         } else if (event === 'SIGNED_OUT') {
           currentUser = null;
           cfPlacesAddress = '';
-          ['cf-name','cf-email','cf-phone','cf-address','cf-floor','cf-zip'].forEach(id => {
+          cfClientComplete = false; cfClientName = ''; cfClientPhone = ''; cfClientEmail = '';
+          ['cf-name','cf-email','cf-phone'].forEach(id => {
             const el = document.getElementById(id); if (el) el.value = '';
           });
           currentZone = null;
-          const zipInp = document.getElementById('cf-zip');
-          if (zipInp) { zipInp.style.borderColor = ''; zipInp.style.boxShadow = ''; }
-          document.getElementById('cf-zone-err')?.classList.add('hidden');
-          document.getElementById('cf-zone-ok')?.classList.add('hidden');
+          const clientCard = document.getElementById('cf-client-card');
+          const clientForm = document.getElementById('cf-client-form');
+          if (clientCard) clientCard.classList.add('hidden');
+          if (clientForm) clientForm.classList.remove('hidden');
           updateAuthUI();
           validateCheckout();
         }
@@ -1051,32 +1061,27 @@
       btn.disabled = true;
 
       const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-      const name       = g('cf-name');
-      const email      = g('cf-email') || null;
-      const prefix     = document.getElementById('cf-phone-prefix').value;
-      const phoneRaw   = g('cf-phone');
-      const phone      = prefix + ' ' + phoneRaw;
-      const street     = cfPlacesAddress || g('cf-address');
-      const floor      = g('cf-floor') || null;
-      const postalCode = g('cf-zip') || '08230';
+      let name, email, phone;
+      if (cfClientComplete) {
+        name  = cfClientName;
+        email = cfClientEmail || null;
+        phone = cfClientPhone;
+      } else {
+        name  = g('cf-name');
+        email = g('cf-email') || null;
+        const prefix   = document.getElementById('cf-phone-prefix');
+        const phoneRaw = g('cf-phone');
+        phone = (prefix ? prefix.value : '+34') + ' ' + phoneRaw;
+      }
+      const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
+      const floor      = sessionStorage.getItem('micsas_floor')   || null;
+      const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '08230';
       const delivNotes = g('cf-notes') || null;
       const timeNote = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
       const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
       const paymentMethod = cfPayMethod === 'cash' ? 'cash' : 'card_delivery';
 
-      // Defensive zone re-check before inserting
-      if (!currentZone) {
-        await validateZone(g('cf-zip'));
-        if (!currentZone) {
-          const errEl = document.getElementById('cf-global-err');
-          errEl.textContent = 'No fem entregues a la zona postal indicada.';
-          errEl.classList.remove('hidden');
-          btn.textContent = originalLabel;
-          btn.disabled = false;
-          validateCheckout();
-          return;
-        }
-      }
+      // Zone was validated in pre-pedido.html — skip re-check
 
       const sb = window.supabase;
       try {
@@ -1171,8 +1176,9 @@
 
     function resetCart() {
       cart = []; renderCart(false); cfPayMethod = null; cfPlacesAddress = ''; cfSelectedTime = null; orderAllergies = '';
+      cfClientComplete = false; cfClientName = ''; cfClientPhone = ''; cfClientEmail = '';
       // Reset form fields
-      ['cf-name','cf-email','cf-phone','cf-address','cf-floor','cf-zip','cf-notes'].forEach(id => {
+      ['cf-name','cf-email','cf-phone','cf-notes'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';
       });
       const oa = document.getElementById('order-allergies'); if (oa) oa.value = '';
@@ -1185,14 +1191,12 @@
         if (radio) { radio.classList.remove('border-[#E23F2E]'); radio.classList.add('border-[#C4B08A]'); }
         if (dot)   dot.classList.add('opacity-0');
       });
-      // Reset zone state
+      // Reset zone/client state
       currentZone = null;
-      clearTimeout(_zipDebounceTimer);
-      const zipInput = document.getElementById('cf-zip');
-      if (zipInput) { zipInput.style.borderColor = ''; zipInput.style.boxShadow = ''; }
-      const zoneErr = document.getElementById('cf-zone-err'); if (zoneErr) zoneErr.classList.add('hidden');
-      const zoneOk  = document.getElementById('cf-zone-ok');  if (zoneOk)  zoneOk.classList.add('hidden');
-      const zipSpin = document.getElementById('cf-zip-spinner'); if (zipSpin) zipSpin.classList.add('hidden');
+      const clientCard = document.getElementById('cf-client-card');
+      const clientForm = document.getElementById('cf-client-form');
+      if (clientCard) clientCard.classList.add('hidden');
+      if (clientForm) clientForm.classList.remove('hidden');
       // Reset T&C
       const tnc = document.getElementById('cf-tnc'); if (tnc) tnc.checked = false;
       // Reset order summary panel
