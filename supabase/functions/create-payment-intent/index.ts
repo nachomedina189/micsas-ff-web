@@ -28,10 +28,7 @@ Deno.serve(async (req) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount),
       currency,
-      automatic_payment_methods: { enabled: true },
-      payment_method_options: {
-        link: { display_preference: { preference: "off" } },
-      },
+      payment_method_types: ["card"],
       metadata: { order_id: orderId ?? "" },
     });
 
