@@ -19,6 +19,48 @@
   <link rel="prefetch" href="menu.html">
   <link rel="prefetch" href="micsas-events.html">
   <style>
+    /* ── Entrance animations ── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes modalSlideUp {
+      from { opacity: 0; transform: translateY(48px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes stepSlideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes stepSlideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .enter-card      { animation: fadeSlideUp   0.42s cubic-bezier(0.16,1,0.3,1) both; }
+    .enter-modal     { animation: modalSlideUp  0.38s cubic-bezier(0.16,1,0.3,1) both; }
+    .enter-step      { animation: stepSlideIn   0.35s cubic-bezier(0.16,1,0.3,1) both; }
+    .enter-step-left { animation: stepSlideInLeft 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* ── Smooth dropdowns (max-height trick) ── */
+    #cf-delivery-dropdown {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    #cf-order-summary {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* ── Toast slide-up ── */
+    #cf-toast > div {
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    #cf-toast.toast-out > div {
+      opacity: 0;
+      transform: translateY(10px);
+    }
   </style>
 </head>
 
@@ -203,7 +245,7 @@
               <iconify-icon id="cf-chevron" icon="solar:alt-arrow-down-linear" width="18" class="transition-transform duration-200 shrink-0"></iconify-icon>
             </div>
           </button>
-          <div id="cf-order-summary" class="hidden border-t border-[#C4B08A]/20 px-5 pb-4 pt-3 space-y-1.5">
+          <div id="cf-order-summary" class="border-t border-[#C4B08A]/20 px-5 pb-4 pt-3 space-y-1.5">
             <div id="cf-summary-items" class="space-y-2 mb-3"></div>
             <div class="flex justify-between border-t border-[#C4B08A]/20 pt-3">
               <span class="text-sm font-light text-[#5A3E28]">Subtotal</span>
@@ -393,7 +435,7 @@
                 </div>
               </div>
               <!-- Sub-opcions -->
-              <div id="cf-delivery-dropdown" class="hidden border-t border-[#E6D5B0] bg-[#FAF6F0]">
+              <div id="cf-delivery-dropdown" class="border-t border-[#E6D5B0] bg-[#FAF6F0]">
                 <div id="cf-pay-cash" onclick="selectDeliveryMethod('cash')" class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F0E8D8] transition-all">
                   <iconify-icon icon="solar:banknote-linear" width="16" class="text-[#5A3E28] shrink-0"></iconify-icon>
                   <span class="text-sm text-[#2A1A0F] flex-1">En efectiu</span>
@@ -495,7 +537,7 @@
         : `<div class="w-full h-full flex items-center justify-center bg-[#E6D5B0]"><iconify-icon icon="solar:pizza-slice-bold-duotone" width="48" style="color:#C4B08A;opacity:0.5;"></iconify-icon></div>`;
       const priceStr = item.price.toFixed(2).replace('.', ',') + ' €';
       return `
-        <div class="cursor-pointer relative rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden" data-pizza-row="${item.id}" onclick="openItemModal('${item.id}')">
+        <div class="cursor-pointer relative rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden" data-pizza-row="${item.id}" data-pizza-card onclick="openItemModal('${item.id}')">
           <div class="absolute top-0 right-0 w-[38%] h-full">${imgHtml}</div>
           <div class="relative z-10 p-5 pr-[42%] flex flex-col justify-between min-h-[140px]">
             <div>
@@ -549,6 +591,10 @@
       grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
       grid.innerHTML = items.map(it => menuCard(it)).join('');
       document.getElementById(containerId).replaceChildren(grid);
+      grid.querySelectorAll('[data-pizza-card]').forEach((card, i) => {
+        card.classList.add('enter-card');
+        card.style.animationDelay = (i * 60) + 'ms';
+      });
     }
     renderPizzaGrid('menu-casa', MENU.casa);
     renderPizzaGrid('menu-classics', MENU.classics);
@@ -749,9 +795,19 @@
 
     function selectTimeSlot(time) {
       cfSelectedTime = time;
-      document.getElementById('cf-time-step').classList.add('hidden');
-      document.getElementById('cf-scroll').classList.remove('hidden');
-      document.getElementById('cf-scroll').scrollTop = 0;
+      const timeStep = document.getElementById('cf-time-step');
+      const scroll   = document.getElementById('cf-scroll');
+      timeStep.style.opacity = '0';
+      timeStep.style.transition = 'opacity 0.18s ease';
+      setTimeout(() => {
+        timeStep.classList.add('hidden');
+        timeStep.style.opacity = '';
+        timeStep.style.transition = '';
+        scroll.classList.remove('hidden');
+        scroll.classList.add('enter-step');
+        scroll.scrollTop = 0;
+        setTimeout(() => scroll.classList.remove('enter-step'), 400);
+      }, 180);
     }
 
     function checkoutGoBack() {
@@ -759,12 +815,20 @@
       if (!timeStep.classList.contains('hidden')) {
         closeCheckout();
       } else if (sessionStorage.getItem('micsas_time')) {
-        // Came from pre-pedido — back closes checkout, not back to time step
         closeCheckout();
       } else {
-        document.getElementById('cf-scroll').classList.add('hidden');
-        document.getElementById('cf-time-step').classList.remove('hidden');
-        cfSelectedTime = null;
+        const scroll = document.getElementById('cf-scroll');
+        scroll.style.opacity = '0';
+        scroll.style.transition = 'opacity 0.18s ease';
+        setTimeout(() => {
+          scroll.classList.add('hidden');
+          scroll.style.opacity = '';
+          scroll.style.transition = '';
+          timeStep.classList.remove('hidden');
+          timeStep.classList.add('enter-step-left');
+          cfSelectedTime = null;
+          setTimeout(() => timeStep.classList.remove('enter-step-left'), 400);
+        }, 180);
       }
     }
 
@@ -829,9 +893,9 @@
       const panel = document.getElementById('cf-order-summary');
       const chevron = document.getElementById('cf-chevron');
       const btn = document.getElementById('cf-summary-btn');
-      const isOpen = !panel.classList.contains('hidden');
+      const isOpen = panel.style.maxHeight && panel.style.maxHeight !== '0px';
       if (isOpen) {
-        panel.classList.add('hidden');
+        panel.style.maxHeight = '0';
         chevron.style.transform = '';
         btn.setAttribute('aria-expanded', 'false');
       } else {
@@ -840,7 +904,7 @@
             <span class="text-[#2A1A0F] font-light">${it.name.replace(/</g,'&lt;')} <span class="text-[#9B8A72]">× ${it.qty}</span></span>
             <span class="font-medium text-[#2A1A0F] shrink-0 ml-3">${fmtComma(it.price * it.qty)}</span>
           </div>`).join('');
-        panel.classList.remove('hidden');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
         chevron.style.transform = 'rotate(180deg)';
         btn.setAttribute('aria-expanded', 'true');
       }
@@ -910,18 +974,17 @@
     function toggleDeliveryDropdown() {
       const dropdown = document.getElementById('cf-delivery-dropdown');
       const chevron  = document.getElementById('cf-delivery-chevron');
-      const isOpen   = !dropdown.classList.contains('hidden');
+      const isOpen   = dropdown.style.maxHeight && dropdown.style.maxHeight !== '0px';
       if (isOpen) {
-        dropdown.classList.add('hidden');
+        dropdown.style.maxHeight = '0';
         chevron.style.transform = '';
         if (cfPayMethod === 'cash' || cfPayMethod === 'card') {
           cfPayMethod = null;
           selectPayMethod('__none__');
         }
       } else {
-        dropdown.classList.remove('hidden');
+        dropdown.style.maxHeight = dropdown.scrollHeight + 'px';
         chevron.style.transform = 'rotate(180deg)';
-        // Ensure online is deselected visually
         selectPayMethod(cfPayMethod === 'cash' || cfPayMethod === 'card' ? cfPayMethod : 'cash');
       }
     }
@@ -1138,9 +1201,13 @@
     function showCfToast(msg) {
       const toast = document.getElementById('cf-toast');
       toast.querySelector('div').textContent = msg;
-      toast.classList.remove('hidden');
+      toast.classList.remove('hidden', 'toast-out');
+      void toast.offsetWidth;
       if (_toastTimer) clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => toast.classList.add('hidden'), 5000);
+      _toastTimer = setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 4700);
     }
 
     async function placeOrder() {
@@ -1272,6 +1339,10 @@
     async function openStripeOverlay(totalEuros) {
       const overlay = document.getElementById('stripe-overlay');
       overlay.classList.remove('hidden');
+      const panel = document.getElementById('stripe-modal-panel');
+      panel.classList.remove('enter-modal');
+      void panel.offsetWidth;
+      panel.classList.add('enter-modal');
       document.getElementById('stripe-error').classList.add('hidden');
       document.getElementById('stripe-pay-btn').disabled = true;
       document.getElementById('stripe-payment-element').innerHTML =
@@ -1576,12 +1647,27 @@
       _modalQty = 1;
       document.getElementById('modal-qty-display').textContent = '1';
 
-      document.getElementById('item-modal').classList.remove('hidden');
+      const modal = document.getElementById('item-modal');
+      modal.classList.remove('hidden');
+      const panel = document.getElementById('item-modal-panel');
+      panel.classList.remove('enter-modal');
+      void panel.offsetWidth;
+      panel.classList.add('enter-modal');
       document.body.style.overflow = 'hidden';
     }
 
     function closeItemModal() {
-      document.getElementById('item-modal').classList.add('hidden');
+      const modal = document.getElementById('item-modal');
+      const panel = document.getElementById('item-modal-panel');
+      panel.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+      panel.style.opacity = '0';
+      panel.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        panel.style.transition = '';
+        panel.style.opacity = '';
+        panel.style.transform = '';
+      }, 200);
       document.body.style.overflow = '';
       _modalItemId = null;
     }
@@ -1681,7 +1767,7 @@
   <div id="item-modal" role="dialog" aria-modal="true" aria-labelledby="item-modal-title"
        class="fixed inset-0 z-[800] flex items-end sm:items-center justify-center hidden">
     <div class="absolute inset-0 bg-[#2A1A0F]/50 backdrop-blur-sm" onclick="closeItemModal()"></div>
-    <div class="relative w-full sm:max-w-md bg-[#F2E6CE] rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92dvh] overflow-y-auto z-10">
+    <div id="item-modal-panel" class="relative w-full sm:max-w-md bg-[#F2E6CE] rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92dvh] overflow-y-auto z-10">
       <button onclick="closeItemModal()" aria-label="Tancar"
         class="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-[#E6D5B0] hover:bg-[#C4B08A]/50 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -1746,7 +1832,7 @@
 
   <!-- Stripe payment overlay -->
   <div id="stripe-overlay" class="hidden fixed inset-0 z-[9000] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4">
-    <div class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+    <div id="stripe-modal-panel" class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
       <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#E6D5B0]">
         <div>
           <p class="font-['Lilita_One'] tracking-tight text-lg text-[#2A1A0F]">Pagament segur</p>
