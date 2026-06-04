@@ -1253,11 +1253,13 @@
         if (json.error) throw new Error(json.error);
 
         if (!_stripe) _stripe = Stripe(STRIPE_PK);
-        _stripeElements = _stripe.elements({ clientSecret: json.clientSecret, locale: 'ca' });
+        _stripeElements = _stripe.elements({
+          clientSecret: json.clientSecret,
+          locale: 'ca',
+          paymentMethodOrder: ['google_pay', 'apple_pay', 'card'],
+        });
         const pe = _stripeElements.create('payment', {
-          fields: {
-            billingDetails: { name: 'never', email: 'never', phone: 'never' }
-          }
+          layout: { type: 'accordion', defaultCollapsed: false, radios: false },
         });
         document.getElementById('stripe-payment-element').innerHTML = '';
         pe.mount('#stripe-payment-element');
@@ -1291,15 +1293,6 @@
       const { error, paymentIntent } = await _stripe.confirmPayment({
         elements: _stripeElements,
         redirect: 'if_required',
-        confirmParams: {
-          payment_method_data: {
-            billing_details: {
-              name:  _pendingOrderData?.name  || '',
-              email: _pendingOrderData?.email || undefined,
-              phone: _pendingOrderData?.phone || undefined,
-            }
-          }
-        }
       });
 
       if (error) {
