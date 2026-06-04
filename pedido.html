@@ -1225,9 +1225,13 @@
         confirmParams: {
           payment_method_data: {
             billing_details: {
-              name:  _pendingOrderData?.name  || '',
-              email: _pendingOrderData?.email || undefined,
-              phone: _pendingOrderData?.phone || undefined,
+              name:    _pendingOrderData?.name  || '',
+              email:   _pendingOrderData?.email || undefined,
+              phone:   _pendingOrderData?.phone || undefined,
+              address: {
+                postal_code: _pendingOrderData?.postalCode || '',
+                country: 'ES',
+              }
             }
           }
         }
