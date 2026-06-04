@@ -19,30 +19,7 @@
       background-color: rgba(226,63,46,0.08);
       color: #E23F2E !important;
     }
-    /* Outer wrapper gives the visual border/bg — doesn't depend on shadow DOM access */
-    #pp-address-mount {
-      background: #ffffff;
-      border: 1px solid rgba(196,176,138,0.4);
-      border-radius: 0.75rem;
-      overflow: hidden;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    #pp-address-mount:focus-within {
-      border-color: #E23F2E;
-      box-shadow: 0 0 0 1px rgba(226,63,46,0.3);
-    }
-    gmp-place-autocomplete {
-      display: block;
-      width: 100%;
-      /* CSS custom properties — removes Google's own border/bg if respected */
-      --gmpx-color-surface: #ffffff;
-      --gmpx-color-on-surface: #2A1A0F;
-      --gmpx-color-on-surface-variant: #9B8A72;
-      --gmpx-color-primary: #E23F2E;
-      --gmpx-color-outline: transparent;
-      --gmpx-font-family-base: 'DM Sans', sans-serif;
-      --gmpx-font-size-base: 14px;
-    }
+    gmp-place-autocomplete { display: block; width: 100%; }
   </style>
 </head>
 <body class="bg-[#DDD0B3] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased selection:bg-[#E23F2E]/20">
@@ -622,35 +599,6 @@
       ac.includedRegionCodes = ["es"];
 
       document.getElementById("pp-address-mount").appendChild(ac);
-
-      // Inject styles into shadow DOM to match other form inputs
-      setTimeout(() => {
-        if (!ac.shadowRoot) return;
-        const s = document.createElement('style');
-        s.textContent = `
-          input, input[type="text"] {
-            background: #ffffff !important;
-            border: 1px solid rgba(196,176,138,0.4) !important;
-            border-radius: 0.75rem !important;
-            padding: 0.75rem 1rem !important;
-            color: #2A1A0F !important;
-            font-size: 0.875rem !important;
-            font-family: 'DM Sans', sans-serif !important;
-            line-height: 1.5 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-            outline: none !important;
-            box-shadow: none !important;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
-          }
-          input::placeholder { color: #9B8A72 !important; }
-          input:focus {
-            border-color: #E23F2E !important;
-            box-shadow: 0 0 0 1px rgba(226,63,46,0.3) !important;
-          }
-        `;
-        ac.shadowRoot.appendChild(s);
-      }, 100);
 
       let acabaDeSeleccionar = false;
 
