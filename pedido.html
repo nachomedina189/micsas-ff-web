@@ -1185,7 +1185,11 @@
 
         if (!_stripe) _stripe = Stripe(STRIPE_PK);
         _stripeElements = _stripe.elements({ clientSecret: json.clientSecret, locale: 'ca' });
-        const pe = _stripeElements.create('payment');
+        const pe = _stripeElements.create('payment', {
+          fields: {
+            billingDetails: { name: 'never', email: 'never', phone: 'never', address: 'never' }
+          }
+        });
         document.getElementById('stripe-payment-element').innerHTML = '';
         pe.mount('#stripe-payment-element');
         pe.on('ready', () => {
@@ -1218,6 +1222,15 @@
       const { error, paymentIntent } = await _stripe.confirmPayment({
         elements: _stripeElements,
         redirect: 'if_required',
+        confirmParams: {
+          payment_method_data: {
+            billing_details: {
+              name:  _pendingOrderData?.name  || '',
+              email: _pendingOrderData?.email || undefined,
+              phone: _pendingOrderData?.phone || undefined,
+            }
+          }
+        }
       });
 
       if (error) {
