@@ -1346,8 +1346,8 @@
       if (delivCard) delivCard.setAttribute('aria-checked','false');
       const dropdown = document.getElementById('cf-delivery-dropdown');
       if (dropdown) dropdown.classList.add('hidden');
-      const chevron = document.getElementById('cf-delivery-chevron');
-      if (chevron) chevron.style.transform = '';
+      const delivChevron = document.getElementById('cf-delivery-chevron');
+      if (delivChevron) delivChevron.style.transform = '';
       const subtitle = document.getElementById('cf-delivery-subtitle');
       if (subtitle) subtitle.textContent = 'En efectiu o targeta';
       ['online','delivery','cash','card'].forEach(m => {
