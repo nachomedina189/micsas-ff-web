@@ -337,7 +337,6 @@
                 <p class="text-sm font-medium text-[#2A1A0F]">Pagar ara</p>
                 <p class="text-xs font-light text-[#5A3E28]">Targeta, Apple Pay o Google Pay</p>
               </div>
-              <span class="text-[10px] font-medium bg-[#C4B08A]/20 text-[#5A3E28] px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">Properament</span>
               <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-online">
                 <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-online-dot"></div>
               </div>
@@ -671,6 +670,14 @@
       const item = [...MENU.casa, ...MENU.classics].find(i => i.id === id);
       if (item) addToCartSilent(item.id, item.name, item.price);
     }
+
+    // ── Stripe ──
+    const STRIPE_PK = 'pk_test_51TcBlsHCWGaW6otGqKjATxNmaUfpfUWgcU5aldKaN0RqcuKBGI7pTCxc01ng8z21OPaiXkwVsqkbALxBG2qx9tek00YP4DfyLS';
+    const EDGE_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/create-payment-intent';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
+    let _stripe = null;
+    let _stripeElements = null;
+    let _pendingOrderData = null;
 
     // ── Checkout Fullscreen State ──
     let cfPayMethod = null;
@@ -1042,9 +1049,10 @@
       if (!validateCheckout()) return;
       if (cart.length === 0) return;
 
-      // Online payment: show informational toast, do not save order
+      // Online payment: collect order data and open Stripe
       if (cfPayMethod === 'online') {
-        showCfToast("Pagament en línia properament disponible. Si us plau, tria 'Targeta al repartidor' o 'Efectiu' per ara.");
+        _pendingOrderData = _collectOrderData();
+        openStripeOverlay(_pendingOrderData.total);
         return;
       }
 
@@ -1053,101 +1061,11 @@
       btn.textContent = 'Processant...';
       btn.disabled = true;
 
-      const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-      let name, email, phone;
-      if (cfClientComplete) {
-        name  = cfClientName;
-        email = cfClientEmail || null;
-        phone = cfClientPhone;
-      } else {
-        name  = g('cf-name');
-        email = g('cf-email') || null;  // required by form but keep null fallback
-        const prefix   = document.getElementById('cf-phone-prefix');
-        const phoneRaw = g('cf-phone');
-        phone = (prefix ? prefix.value : '+34') + ' ' + phoneRaw;
-      }
-      const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
-      const floor      = sessionStorage.getItem('micsas_floor')   || null;
-      const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '08230';
-      const delivNotes = g('cf-notes') || null;
-      const timeNote = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
-      const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
-      const paymentMethod = cfPayMethod === 'cash' ? 'cash' : 'card_delivery';
+      const d = _collectOrderData();
 
-      // Zone was validated in pre-pedido.html — skip re-check
-
-      const sb = window.supabase;
       try {
-        // 1. Customer — upsert if logged in, insert as guest otherwise
-        let customerId;
-        if (currentUser) {
-          const { data: existingCust } = await sb.from('customers')
-            .select('id').eq('auth_user_id', currentUser.id).limit(1).maybeSingle();
-          if (existingCust) {
-            await sb.from('customers').update({ name, phone, email: currentUser.email }).eq('id', existingCust.id);
-            customerId = existingCust.id;
-          } else {
-            const { data: nc, error: ne } = await sb.from('customers')
-              .insert({ name, phone, email: currentUser.email, auth_user_id: currentUser.id }).select().single();
-            if (ne) throw ne;
-            customerId = nc.id;
-          }
-        } else {
-          const { data: nc, error: ne } = await sb.from('customers')
-            .insert({ name, phone, email }).select().single();
-          if (ne) throw ne;
-          customerId = nc.id;
-        }
+        await _saveOrderToSupabase(d, 'pending');
 
-        // 2. Address
-        const { data: address, error: addrErr } = await sb
-          .from('addresses')
-          .insert({
-            customer_id: customerId,
-            street,
-            number: '',
-            floor,
-            postal_code: postalCode,
-            city: 'Matadepera',
-            notes: delivNotes,
-          })
-          .select()
-          .single();
-        if (addrErr) throw addrErr;
-
-        // 3. Order
-        const { data: order, error: orderErr } = await sb
-          .from('orders')
-          .insert({
-            customer_id:    customerId,
-            address_id:     address.id,
-            payment_method: paymentMethod,
-            payment_status: 'pending',
-            status:         'pending',
-            subtotal:       subtotal(),
-            delivery_fee:   0,
-            total:          total(),
-            notes:          finalNotes,
-            slot_time:      cfSelectedTime || null,
-            pizza_count:    cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0),
-          })
-          .select()
-          .single();
-        if (orderErr) throw orderErr;
-
-        // 4. Order items
-        const items = cart.map(it => ({
-          order_id:     order.id,
-          product_id:   null,
-          product_name: it.name,
-          unit_price:   it.price,
-          quantity:     it.qty,
-          notes:        it.note || null,
-        }));
-        const { error: itemsErr } = await sb.from('order_items').insert(items);
-        if (itemsErr) throw itemsErr;
-
-        // Show success screen
         document.getElementById('cf-global-err').classList.add('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
         const success = document.getElementById('cf-success');
@@ -1164,6 +1082,168 @@
         btn.textContent = originalLabel;
         btn.disabled = false;
         validateCheckout();
+      }
+    }
+
+    function _collectOrderData() {
+      const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      let name, email, phone;
+      if (cfClientComplete) {
+        name  = cfClientName;
+        email = cfClientEmail || null;
+        phone = cfClientPhone;
+      } else {
+        name  = g('cf-name');
+        email = g('cf-email') || null;
+        const prefix   = document.getElementById('cf-phone-prefix');
+        const phoneRaw = g('cf-phone');
+        phone = (prefix ? prefix.value : '+34') + ' ' + phoneRaw;
+      }
+      const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
+      const floor      = sessionStorage.getItem('micsas_floor')   || null;
+      const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '08230';
+      const delivNotes = g('cf-notes') || null;
+      const timeNote   = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
+      const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
+      const paymentMethod = cfPayMethod === 'cash' ? 'cash' : (cfPayMethod === 'online' ? 'online' : 'card_delivery');
+      return { name, email, phone, street, floor, postalCode, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal() };
+    }
+
+    async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
+      const sb = window.supabase;
+      let customerId;
+      if (currentUser) {
+        const { data: existingCust } = await sb.from('customers')
+          .select('id').eq('auth_user_id', currentUser.id).limit(1).maybeSingle();
+        if (existingCust) {
+          await sb.from('customers').update({ name: d.name, phone: d.phone, email: currentUser.email }).eq('id', existingCust.id);
+          customerId = existingCust.id;
+        } else {
+          const { data: nc, error: ne } = await sb.from('customers')
+            .insert({ name: d.name, phone: d.phone, email: currentUser.email, auth_user_id: currentUser.id }).select().single();
+          if (ne) throw ne;
+          customerId = nc.id;
+        }
+      } else {
+        const { data: nc, error: ne } = await sb.from('customers')
+          .insert({ name: d.name, phone: d.phone, email: d.email }).select().single();
+        if (ne) throw ne;
+        customerId = nc.id;
+      }
+      const { data: address, error: addrErr } = await sb.from('addresses')
+        .insert({ customer_id: customerId, street: d.street, number: '', floor: d.floor, postal_code: d.postalCode, city: 'Matadepera', notes: d.delivNotes })
+        .select().single();
+      if (addrErr) throw addrErr;
+
+      const { data: order, error: orderErr } = await sb.from('orders')
+        .insert({
+          customer_id:    customerId,
+          address_id:     address.id,
+          payment_method: d.paymentMethod,
+          payment_status: paymentStatus,
+          status:         'pending',
+          subtotal:       d.subtotal,
+          delivery_fee:   0,
+          total:          d.total,
+          notes:          d.finalNotes,
+          slot_time:      cfSelectedTime || null,
+          pizza_count:    cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0),
+        })
+        .select().single();
+      if (orderErr) throw orderErr;
+
+      const items = cart.map(it => ({
+        order_id:     order.id,
+        product_id:   null,
+        product_name: it.name,
+        unit_price:   it.price,
+        quantity:     it.qty,
+        notes:        it.note || null,
+      }));
+      const { error: itemsErr } = await sb.from('order_items').insert(items);
+      if (itemsErr) throw itemsErr;
+      return order;
+    }
+
+    async function openStripeOverlay(totalEuros) {
+      const overlay = document.getElementById('stripe-overlay');
+      overlay.classList.remove('hidden');
+      document.getElementById('stripe-error').classList.add('hidden');
+      document.getElementById('stripe-pay-btn').disabled = true;
+      document.getElementById('stripe-payment-element').innerHTML =
+        '<div class="flex items-center justify-center h-40"><svg class="animate-spin w-6 h-6 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg></div>';
+
+      try {
+        const amountCents = Math.round(totalEuros * 100);
+        const res = await fetch(EDGE_FN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ amount: amountCents, currency: 'eur' }),
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+
+        if (!_stripe) _stripe = Stripe(STRIPE_PK);
+        _stripeElements = _stripe.elements({ clientSecret: json.clientSecret, locale: 'ca' });
+        const pe = _stripeElements.create('payment');
+        document.getElementById('stripe-payment-element').innerHTML = '';
+        pe.mount('#stripe-payment-element');
+        pe.on('ready', () => {
+          document.getElementById('stripe-pay-btn').disabled = false;
+          const payBtn = document.getElementById('stripe-pay-btn');
+          payBtn.textContent = `Pagar ${totalEuros.toFixed(2).replace('.', ',')} €`;
+        });
+      } catch (err) {
+        console.error('[openStripeOverlay]', err);
+        document.getElementById('stripe-payment-element').innerHTML = '';
+        const errEl = document.getElementById('stripe-error');
+        errEl.textContent = 'Error al carregar el pagament. Torna-ho a intentar.';
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    function closeStripeOverlay() {
+      document.getElementById('stripe-overlay').classList.add('hidden');
+      _stripeElements = null;
+    }
+
+    async function confirmStripePayment() {
+      if (!_stripe || !_stripeElements) return;
+      const btn = document.getElementById('stripe-pay-btn');
+      const errEl = document.getElementById('stripe-error');
+      btn.disabled = true;
+      btn.textContent = 'Processant...';
+      errEl.classList.add('hidden');
+
+      const { error, paymentIntent } = await _stripe.confirmPayment({
+        elements: _stripeElements,
+        redirect: 'if_required',
+      });
+
+      if (error) {
+        btn.disabled = false;
+        btn.textContent = `Pagar ${(_pendingOrderData?.total || 0).toFixed(2).replace('.', ',')} €`;
+        errEl.textContent = error.message || 'Error al processar el pagament.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        try {
+          const d = { ..._pendingOrderData };
+          await _saveOrderToSupabase(d, 'paid');
+          closeStripeOverlay();
+          document.getElementById('cf-global-err').classList.add('hidden');
+          document.getElementById('cf-scroll').classList.add('hidden');
+          const success = document.getElementById('cf-success');
+          success.classList.remove('hidden');
+          success.classList.add('flex');
+        } catch (saveErr) {
+          console.error('[confirmStripePayment save]', saveErr);
+          errEl.textContent = 'Pagament correcte però error al guardar la comanda. Contacta amb nosaltres.';
+          errEl.classList.remove('hidden');
+          btn.disabled = false;
+        }
       }
     }
 
@@ -1544,6 +1624,37 @@
     </div>
   </div>
 
+  <!-- Stripe payment overlay -->
+  <div id="stripe-overlay" class="hidden fixed inset-0 z-[9000] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4">
+    <div class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#E6D5B0]">
+        <div>
+          <p class="font-['Lilita_One'] tracking-tight text-lg text-[#2A1A0F]">Pagament segur</p>
+          <p class="text-xs text-[#9B8A72] mt-0.5">Targeta · Apple Pay · Google Pay</p>
+        </div>
+        <button onclick="closeStripeOverlay()" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#F5EDE0] text-[#5A3E28] hover:bg-[#E6D5B0] transition-all text-sm font-medium">✕</button>
+      </div>
+      <div class="px-6 py-5">
+        <div id="stripe-payment-element" class="min-h-[200px]">
+          <div class="flex items-center justify-center h-40">
+            <svg class="animate-spin w-6 h-6 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+          </div>
+        </div>
+        <p id="stripe-error" class="hidden mt-3 text-xs text-[#E23F2E] text-center"></p>
+        <button id="stripe-pay-btn" onclick="confirmStripePayment()"
+          class="w-full mt-5 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-white bg-[#E23F2E] hover:bg-[#B82A1F] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled>
+          Pagar ara
+        </button>
+        <p class="text-[10px] text-[#9B8A72] text-center mt-3 flex items-center justify-center gap-1">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Pagament xifrat per Stripe
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://js.stripe.com/v3/"></script>
 
 </body>
 </html>
