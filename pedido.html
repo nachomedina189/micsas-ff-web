@@ -326,7 +326,7 @@
           <h2 class="font-['Lilita_One'] tracking-tight text-xl text-[#2A1A0F] mb-4">Mètode de pagament</h2>
           <div class="space-y-3">
 
-            <!-- Pagar ara (online) -->
+            <!-- Pagar ara (Stripe: targeta + Apple Pay + Google Pay) -->
             <div id="cf-pay-online" onclick="selectPayMethod('online')" role="radio" aria-checked="false" tabindex="0"
               onkeydown="if(event.key===' '||event.key==='Enter'){selectPayMethod('online')}"
               class="flex items-center gap-4 rounded-xl border border-[#C4B08A]/40 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
@@ -335,42 +335,65 @@
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-[#2A1A0F]">Pagar ara</p>
-                <p class="text-xs font-light text-[#5A3E28]">Targeta, Apple Pay o Google Pay</p>
+                <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                  <!-- Visa -->
+                  <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-[#1A1F71] h-5">
+                    <svg width="28" height="9" viewBox="0 0 56 18" fill="none"><path d="M21.2 1.2H17L13.4 12.6l-.5-2.4C11.9 7.4 9.5 4.5 6.8 3.1L10.1 17h4.3L21.2 1.2zM23.5 17h4.1L30.2 1.2h-4.1L23.5 17zM38.5 1.5c-.8-.3-2-.6-3.5-.6-3.9 0-6.6 2-6.6 4.8 0 2.1 1.9 3.2 3.4 3.9 1.5.7 2 1.1 2 1.8 0 1-.1.4-1.9 1.9-1.5 0-3.1-.4-4-.8l-.6-.3-.6 3.6c1 .4 2.8.8 4.7.8 4.1 0 6.8-2 6.8-5 0-1.7-1-3-3.3-4-.3-.7-2.2-1.2-2.2-1.9 0-.6.7-1.3 2.2-1.3 1.3 0 2.2.3 2.9.5l.4.2.3-3.6zM47.6 1.2h-3c-.9 0-1.6.3-2 1.2L36.3 17h4.3l.9-2.3h5.2l.5 2.3H51L47.6 1.2zm-5 10.3l2.1-5.6.5 2.5 1 3.1h-3.6z" fill="white"/></svg>
+                  </span>
+                  <!-- Mastercard -->
+                  <span class="inline-flex items-center justify-center h-5 w-8 rounded bg-[#252525]">
+                    <svg width="22" height="14" viewBox="0 0 22 14" fill="none"><circle cx="7" cy="7" r="7" fill="#EB001B"/><circle cx="15" cy="7" r="7" fill="#F79E1B"/><path d="M11 2.8A7 7 0 0 1 13.8 7 7 7 0 0 1 11 11.2 7 7 0 0 1 8.2 7 7 7 0 0 1 11 2.8z" fill="#FF5F00"/></svg>
+                  </span>
+                  <!-- Apple Pay -->
+                  <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black h-5">
+                    <svg width="8" height="10" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 405.8 0 279 0 158.1c0-121.3 58.9-185.2 110.7-185.2 36.1 0 66.3 24.6 88.9 24.6 21.4 0 54.9-26 97.1-26 148.4 0 261.9 102.9 261.9 291.7 0 15-1.3 71.3-3.2 85.4zm-164-121.9c-3.2-26.6-10.3-61.6-30.1-90.5-26-39.5-66.3-67.4-109.5-67.4-3.2 0-9.6.6-12.9.6 3.2 26 10.3 57.2 29.4 88.8 21.4 35.8 67.4 65.7 123.1 68.5z"/></svg>
+                    <span class="text-white text-[8px] font-medium tracking-tight">Pay</span>
+                  </span>
+                  <!-- Google Pay -->
+                  <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white border border-gray-200 h-5">
+                    <svg width="8" height="8" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    <span class="text-[#3C4043] text-[8px] font-medium tracking-tight">Pay</span>
+                  </span>
+                </div>
               </div>
               <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-online">
                 <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-online-dot"></div>
               </div>
             </div>
 
-            <!-- Targeta al repartidor -->
-            <div id="cf-pay-card" onclick="selectPayMethod('card')" role="radio" aria-checked="false" tabindex="0"
-              onkeydown="if(event.key===' '||event.key==='Enter'){selectPayMethod('card')}"
-              class="flex items-center gap-4 rounded-xl border border-[#C4B08A]/40 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
-              <div class="w-10 h-10 rounded-full bg-[#E6D5B0]/30 text-[#E23F2E] flex items-center justify-center shrink-0">
-                <iconify-icon icon="solar:card-2-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
+            <!-- Pagament al repartidor (dropdown) -->
+            <div id="cf-pay-delivery-wrapper" class="rounded-xl border border-[#C4B08A]/40 overflow-hidden transition-all">
+              <div id="cf-pay-delivery" onclick="toggleDeliveryDropdown()" role="radio" aria-checked="false" tabindex="0"
+                onkeydown="if(event.key===' '||event.key==='Enter'){toggleDeliveryDropdown()}"
+                class="flex items-center gap-4 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none">
+                <div class="w-10 h-10 rounded-full bg-[#E6D5B0]/30 text-[#E23F2E] flex items-center justify-center shrink-0">
+                  <iconify-icon icon="solar:delivery-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-[#2A1A0F]">Pagament al repartidor</p>
+                  <p id="cf-delivery-subtitle" class="text-xs font-light text-[#5A3E28]">En efectiu o targeta</p>
+                </div>
+                <svg id="cf-delivery-chevron" class="w-4 h-4 text-[#9B8A72] transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-delivery">
+                  <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-delivery-dot"></div>
+                </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#2A1A0F]">Targeta al repartidor</p>
-                <p class="text-xs font-light text-[#5A3E28]">Datàfon a l'entrega</p>
-              </div>
-              <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-card">
-                <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-card-dot"></div>
-              </div>
-            </div>
-
-            <!-- Efectiu al repartidor -->
-            <div id="cf-pay-cash" onclick="selectPayMethod('cash')" role="radio" aria-checked="false" tabindex="0"
-              onkeydown="if(event.key===' '||event.key==='Enter'){selectPayMethod('cash')}"
-              class="flex items-center gap-4 rounded-xl border border-[#C4B08A]/40 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
-              <div class="w-10 h-10 rounded-full bg-[#E6D5B0]/30 text-[#E23F2E] flex items-center justify-center shrink-0">
-                <iconify-icon icon="solar:banknote-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#2A1A0F]">Efectiu al repartidor</p>
-                <p class="text-xs font-light text-[#5A3E28]">Té el canvi just si pots</p>
-              </div>
-              <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-cash">
-                <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-cash-dot"></div>
+              <!-- Sub-opcions -->
+              <div id="cf-delivery-dropdown" class="hidden border-t border-[#E6D5B0] bg-[#FAF6F0]">
+                <div id="cf-pay-cash" onclick="selectDeliveryMethod('cash')" class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F0E8D8] transition-all">
+                  <iconify-icon icon="solar:banknote-linear" width="16" class="text-[#5A3E28] shrink-0"></iconify-icon>
+                  <span class="text-sm text-[#2A1A0F] flex-1">En efectiu</span>
+                  <div class="w-4 h-4 rounded-full border-2 border-[#C4B08A] flex items-center justify-center transition-all" id="cf-radio-cash">
+                    <div class="w-2 h-2 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-cash-dot"></div>
+                  </div>
+                </div>
+                <div id="cf-pay-card" onclick="selectDeliveryMethod('card')" class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F0E8D8] transition-all">
+                  <iconify-icon icon="solar:card-2-linear" width="16" class="text-[#5A3E28] shrink-0"></iconify-icon>
+                  <span class="text-sm text-[#2A1A0F] flex-1">En targeta al repartidor</span>
+                  <div class="w-4 h-4 rounded-full border-2 border-[#C4B08A] flex items-center justify-center transition-all" id="cf-radio-card">
+                    <div class="w-2 h-2 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-card-dot"></div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -811,27 +834,73 @@
 
     function selectPayMethod(method) {
       cfPayMethod = method;
-      ['online', 'card', 'cash'].forEach(m => {
-        const card  = document.getElementById('cf-pay-' + m);
-        const radio = document.getElementById('cf-radio-' + m);
-        const dot   = document.getElementById('cf-radio-' + m + '-dot');
-        const isSelected = m === method;
-        card.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-        if (isSelected) {
-          card.classList.add('border-[#E23F2E]/60', 'bg-[#E23F2E]/5');
-          card.classList.remove('border-[#C4B08A]/40');
-          radio.classList.add('border-[#E23F2E]');
-          radio.classList.remove('border-[#C4B08A]');
-          dot.classList.remove('opacity-0');
-        } else {
-          card.classList.remove('border-[#E23F2E]/60', 'bg-[#E23F2E]/5');
-          card.classList.add('border-[#C4B08A]/40');
-          radio.classList.remove('border-[#E23F2E]');
-          radio.classList.add('border-[#C4B08A]');
-          dot.classList.add('opacity-0');
-        }
+
+      // Online option
+      const onlineCard  = document.getElementById('cf-pay-online');
+      const onlineRadio = document.getElementById('cf-radio-online');
+      const onlineDot   = document.getElementById('cf-radio-online-dot');
+      const onlineSel   = method === 'online';
+      onlineCard.setAttribute('aria-checked', onlineSel ? 'true' : 'false');
+      onlineCard.classList.toggle('border-[#E23F2E]/60', onlineSel);
+      onlineCard.classList.toggle('bg-[#E23F2E]/5', onlineSel);
+      onlineCard.classList.toggle('border-[#C4B08A]/40', !onlineSel);
+      onlineRadio.classList.toggle('border-[#E23F2E]', onlineSel);
+      onlineRadio.classList.toggle('border-[#C4B08A]', !onlineSel);
+      onlineDot.classList.toggle('opacity-0', !onlineSel);
+
+      // Delivery wrapper
+      const deliveryCard  = document.getElementById('cf-pay-delivery');
+      const deliveryWrap  = document.getElementById('cf-pay-delivery-wrapper');
+      const deliveryRadio = document.getElementById('cf-radio-delivery');
+      const deliveryDot   = document.getElementById('cf-radio-delivery-dot');
+      const deliverySel   = method === 'cash' || method === 'card';
+      deliveryCard.setAttribute('aria-checked', deliverySel ? 'true' : 'false');
+      deliveryWrap.classList.toggle('border-[#E23F2E]/60', deliverySel);
+      deliveryWrap.classList.toggle('bg-[#E23F2E]/5', deliverySel);
+      deliveryWrap.classList.toggle('border-[#C4B08A]/40', !deliverySel);
+      deliveryRadio.classList.toggle('border-[#E23F2E]', deliverySel);
+      deliveryRadio.classList.toggle('border-[#C4B08A]', !deliverySel);
+      deliveryDot.classList.toggle('opacity-0', !deliverySel);
+
+      // Sub-options highlight
+      ['cash', 'card'].forEach(m => {
+        const sub = document.getElementById('cf-pay-' + m);
+        const r   = document.getElementById('cf-radio-' + m);
+        const d   = document.getElementById('cf-radio-' + m + '-dot');
+        if (!sub) return;
+        const sel = method === m;
+        sub.classList.toggle('bg-[#E23F2E]/5', sel);
+        r.classList.toggle('border-[#E23F2E]', sel);
+        r.classList.toggle('border-[#C4B08A]', !sel);
+        d.classList.toggle('opacity-0', !sel);
       });
+
       validateCheckout();
+    }
+
+    function toggleDeliveryDropdown() {
+      const dropdown = document.getElementById('cf-delivery-dropdown');
+      const chevron  = document.getElementById('cf-delivery-chevron');
+      const isOpen   = !dropdown.classList.contains('hidden');
+      if (isOpen) {
+        dropdown.classList.add('hidden');
+        chevron.style.transform = '';
+        if (cfPayMethod === 'cash' || cfPayMethod === 'card') {
+          cfPayMethod = null;
+          selectPayMethod('__none__');
+        }
+      } else {
+        dropdown.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+        // Ensure online is deselected visually
+        selectPayMethod(cfPayMethod === 'cash' || cfPayMethod === 'card' ? cfPayMethod : 'cash');
+      }
+    }
+
+    function selectDeliveryMethod(method) {
+      const subtitle = document.getElementById('cf-delivery-subtitle');
+      subtitle.textContent = method === 'cash' ? 'En efectiu' : 'En targeta al repartidor';
+      selectPayMethod(method);
     }
 
     function validateCheckout() {
@@ -1269,11 +1338,21 @@
       });
       const oa = document.getElementById('order-allergies'); if (oa) oa.value = '';
       // Reset payment options
-      ['online','card','cash'].forEach(m => {
-        const card  = document.getElementById('cf-pay-' + m);
+      const onlineCard = document.getElementById('cf-pay-online');
+      if (onlineCard) { onlineCard.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); onlineCard.classList.add('border-[#C4B08A]/40'); onlineCard.setAttribute('aria-checked','false'); }
+      const delivWrap = document.getElementById('cf-pay-delivery-wrapper');
+      if (delivWrap) { delivWrap.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); delivWrap.classList.add('border-[#C4B08A]/40'); }
+      const delivCard = document.getElementById('cf-pay-delivery');
+      if (delivCard) delivCard.setAttribute('aria-checked','false');
+      const dropdown = document.getElementById('cf-delivery-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+      const chevron = document.getElementById('cf-delivery-chevron');
+      if (chevron) chevron.style.transform = '';
+      const subtitle = document.getElementById('cf-delivery-subtitle');
+      if (subtitle) subtitle.textContent = 'En efectiu o targeta';
+      ['online','delivery','cash','card'].forEach(m => {
         const radio = document.getElementById('cf-radio-' + m);
         const dot   = document.getElementById('cf-radio-' + m + '-dot');
-        if (card)  { card.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); card.classList.add('border-[#C4B08A]/40'); card.setAttribute('aria-checked','false'); }
         if (radio) { radio.classList.remove('border-[#E23F2E]'); radio.classList.add('border-[#C4B08A]'); }
         if (dot)   dot.classList.add('opacity-0');
       });
