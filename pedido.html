@@ -1187,7 +1187,7 @@
         _stripeElements = _stripe.elements({ clientSecret: json.clientSecret, locale: 'ca' });
         const pe = _stripeElements.create('payment', {
           fields: {
-            billingDetails: { name: 'never', email: 'never', phone: 'never', address: 'never' }
+            billingDetails: { name: 'never', email: 'never', phone: 'never' }
           }
         });
         document.getElementById('stripe-payment-element').innerHTML = '';
@@ -1225,13 +1225,9 @@
         confirmParams: {
           payment_method_data: {
             billing_details: {
-              name:    _pendingOrderData?.name  || '',
-              email:   _pendingOrderData?.email || undefined,
-              phone:   _pendingOrderData?.phone || undefined,
-              address: {
-                postal_code: _pendingOrderData?.postalCode || '',
-                country: 'ES',
-              }
+              name:  _pendingOrderData?.name  || '',
+              email: _pendingOrderData?.email || undefined,
+              phone: _pendingOrderData?.phone || undefined,
             }
           }
         }
