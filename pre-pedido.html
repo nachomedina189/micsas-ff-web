@@ -598,7 +598,7 @@
       btn.disabled = true; btn.textContent = 'Verificant...';
 
       const { error } = await window.supabase.auth.verifyOtp({
-        email: _loginEmail, token: code, type: 'email'
+        email: _loginEmail, token: code, type: 'magiclink'
       });
 
       btn.disabled = false; btn.textContent = 'Verificar';

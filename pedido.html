@@ -1217,7 +1217,7 @@
       const { error } = await window.supabase.auth.verifyOtp({
         email: _loginEmail,
         token: code,
-        type: 'email'
+        type: 'magiclink'
       });
 
       btn.disabled = false;
