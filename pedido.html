@@ -1433,6 +1433,7 @@
       panel.classList.remove('enter-modal');
       void panel.offsetWidth;
       panel.classList.add('enter-modal');
+      document.getElementById('stripe-amount-label').textContent = fmtComma(totalEuros);
       document.getElementById('stripe-error').classList.add('hidden');
       document.getElementById('stripe-pay-btn').disabled = true;
       document.getElementById('stripe-payment-element').innerHTML =
@@ -1466,7 +1467,7 @@
               colorIconTabSelected: '#E23F2E',
               fontFamily: '"DM Sans", sans-serif',
               fontSizeBase: '14px',
-              spacingUnit: '4px',
+              spacingUnit: '3px',
               borderRadius: '10px',
             },
             rules: {
@@ -1971,30 +1972,30 @@
   </div>
 
   <!-- Stripe payment overlay -->
-  <div id="stripe-overlay" class="hidden fixed inset-0 z-[9000] bg-black/60 flex items-end md:items-center justify-center p-0 md:p-4">
-    <div id="stripe-modal-panel" class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-      <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#E6D5B0]">
-        <div>
-          <p class="font-['Lilita_One'] tracking-tight text-lg text-[#2A1A0F]">Pagament segur</p>
-          <p class="text-xs text-[#9B8A72] mt-0.5">Targeta · Apple Pay · Google Pay</p>
-        </div>
-        <button onclick="closeStripeOverlay()" class="w-8 h-8 flex items-center justify-center rounded-full bg-[#F5EDE0] text-[#5A3E28] hover:bg-[#E6D5B0] transition-all text-sm font-medium">✕</button>
+  <div id="stripe-overlay" class="hidden fixed inset-0 z-[9000] bg-[#2A1A0F]/50 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
+    <div id="stripe-modal-panel" class="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-sm overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <span id="stripe-amount-label" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">€0,00</span>
+        <button onclick="closeStripeOverlay()" aria-label="Tancar"
+          class="w-7 h-7 flex items-center justify-center text-[#9B8A72] hover:text-[#2A1A0F] transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
-      <div class="px-6 py-5">
-        <div id="stripe-payment-element" class="min-h-[200px]">
-          <div class="flex items-center justify-center h-40">
-            <svg class="animate-spin w-6 h-6 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+      <div class="px-5 pb-5">
+        <div id="stripe-payment-element" class="min-h-[180px]">
+          <div class="flex items-center justify-center h-36">
+            <svg class="animate-spin w-5 h-5 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
           </div>
         </div>
-        <p id="stripe-error" class="hidden mt-3 text-xs text-[#E23F2E] text-center"></p>
+        <p id="stripe-error" class="hidden mt-2 text-xs text-[#E23F2E]"></p>
         <button id="stripe-pay-btn" onclick="confirmStripePayment()"
-          class="w-full mt-5 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-white bg-[#E23F2E] hover:bg-[#B82A1F] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full mt-4 py-3.5 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-white bg-[#E23F2E] hover:bg-[#B82A1F] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           disabled>
           Pagar ara
         </button>
-        <p class="text-[10px] text-[#9B8A72] text-center mt-3 flex items-center justify-center gap-1">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          Pagament xifrat per Stripe
+        <p class="text-[10px] text-[#C4B08A] text-center mt-3 flex items-center justify-center gap-1">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Stripe
         </p>
       </div>
     </div>
