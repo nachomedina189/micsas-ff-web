@@ -1110,16 +1110,21 @@
         .order('created_at', { ascending: false })
         .limit(1);
 
-      const cust = customers && customers[0];
-      if (cust) {
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
-        // Pre-fill form in case card is not shown (fallback)
-        setVal('cf-name',  cust.name);
-        setVal('cf-phone', cust.phone ? cust.phone.replace(/^\+\d+\s?/, '') : '');
-        setVal('cf-email', cust.email || user.email);
+      // Fallback to user_metadata if no customer record yet (new user, no orders)
+      const meta = user.user_metadata || {};
+      const cust = (customers && customers[0]) || null;
+      const name  = (cust && cust.name)  || meta.name  || '';
+      const phone = (cust && cust.phone) || meta.phone || '';
+      const email = (cust && cust.email) || user.email || '';
 
-        if (cust.name && cust.phone) {
-          showClientCard(cust.name, cust.email || user.email, cust.phone);
+      if (name || phone) {
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        setVal('cf-name',  name);
+        setVal('cf-phone', phone.replace(/^\+\d+\s?/, ''));
+        setVal('cf-email', email);
+
+        if (name && phone) {
+          showClientCard(name, email, phone);
         } else {
           validateCheckout();
         }
