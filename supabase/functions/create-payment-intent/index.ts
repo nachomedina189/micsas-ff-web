@@ -29,6 +29,7 @@ Deno.serve(async (req) => {
       amount: Math.round(amount),
       currency,
       automatic_payment_methods: { enabled: true, allow_redirects: "never" },
+      payment_method_options: { link: { display_preference: { preference: "none" } } },
       metadata: { order_id: orderId ?? "" },
     });
 
