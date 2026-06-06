@@ -1453,6 +1453,56 @@
           clientSecret: json.clientSecret,
           locale: 'ca',
           paymentMethodOrder: ['google_pay', 'apple_pay', 'card'],
+          appearance: {
+            theme: 'flat',
+            variables: {
+              colorPrimary: '#E23F2E',
+              colorBackground: '#ffffff',
+              colorText: '#2A1A0F',
+              colorDanger: '#E23F2E',
+              colorTextSecondary: '#5A3E28',
+              colorTextPlaceholder: '#9B8A72',
+              colorIconTab: '#9B8A72',
+              colorIconTabSelected: '#E23F2E',
+              fontFamily: '"DM Sans", sans-serif',
+              fontSizeBase: '14px',
+              spacingUnit: '4px',
+              borderRadius: '10px',
+            },
+            rules: {
+              '.Input': {
+                border: '1px solid #C4B08A',
+                boxShadow: 'none',
+                padding: '10px 14px',
+              },
+              '.Input:focus': {
+                border: '1px solid #E23F2E',
+                boxShadow: '0 0 0 1px #E23F2E',
+                outline: 'none',
+              },
+              '.Label': {
+                fontSize: '12px',
+                fontWeight: '500',
+                color: '#2A1A0F',
+                marginBottom: '6px',
+              },
+              '.Tab': {
+                border: '1px solid #C4B08A',
+                boxShadow: 'none',
+                backgroundColor: '#ffffff',
+              },
+              '.Tab:hover': {
+                border: '1px solid #E23F2E',
+                color: '#E23F2E',
+              },
+              '.Tab--selected': {
+                border: '1px solid #E23F2E',
+                backgroundColor: '#fff5f4',
+                color: '#E23F2E',
+                boxShadow: 'none',
+              },
+            },
+          },
         });
         const pe = _stripeElements.create('payment', {
           layout: { type: 'accordion', defaultCollapsed: false, radios: false },
