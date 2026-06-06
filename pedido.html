@@ -1185,57 +1185,22 @@
 
       const { error } = await window.supabase.auth.signInWithOtp({
         email,
-        options: { shouldCreateUser: false }
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: window.location.origin + '/pedido.html'
+        }
       });
 
       btn.disabled = false;
       btn.textContent = 'Continuar';
 
       if (!error) {
-        document.getElementById('login-otp-email').textContent = email;
-        document.getElementById('login-otp-err').classList.add('hidden');
-        document.getElementById('login-otp-input').value = '';
-        showLoginView('otp');
+        document.getElementById('login-ok-title').textContent = 'Comprova el teu correu';
+        document.getElementById('login-ok-msg').textContent = "T'hem enviat un enllaç a " + email + ". Clica'l per entrar al teu compte.";
+        showLoginView('ok');
       } else {
         showLoginView('register');
       }
-    }
-
-    async function submitOtp() {
-      const code = document.getElementById('login-otp-input').value.trim();
-      const errEl = document.getElementById('login-otp-err');
-      if (code.length !== 6) {
-        errEl.textContent = 'Introdueix els 6 dígits del codi.';
-        errEl.classList.remove('hidden');
-        return;
-      }
-      errEl.classList.add('hidden');
-      const btn = document.getElementById('login-otp-btn');
-      btn.disabled = true;
-      btn.textContent = 'Verificant...';
-
-      const { error } = await window.supabase.auth.verifyOtp({
-        email: _loginEmail,
-        token: code,
-        type: 'magiclink'
-      });
-
-      btn.disabled = false;
-      btn.textContent = 'Verificar';
-
-      if (error) {
-        errEl.textContent = 'Codi incorrecte o caducat. Torna-ho a intentar.';
-        errEl.classList.remove('hidden');
-      }
-      // On success, onAuthStateChange fires SIGNED_IN → closeLoginModal
-    }
-
-    async function resendOtp() {
-      await window.supabase.auth.signInWithOtp({
-        email: _loginEmail,
-        options: { shouldCreateUser: false }
-      });
-      showCfToast('Codi reenviat a ' + _loginEmail);
     }
 
     async function submitRegister() {
