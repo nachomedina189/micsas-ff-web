@@ -831,6 +831,20 @@
       }
     }
 
+    function _restoreGuestData() {
+      if (currentUser) return;
+      try {
+        const raw = localStorage.getItem('micsas_guest');
+        if (!raw) return;
+        const { name, email, phone } = JSON.parse(raw);
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
+        setVal('cf-name', name);
+        setVal('cf-email', email);
+        setVal('cf-phone', phone);
+        validateCheckout();
+      } catch(e) {}
+    }
+
     function openCheckout() {
       closeCartDrawer();
       // Sync total display before opening
@@ -871,6 +885,7 @@
       document.body.style.overflow = 'hidden';
       ensureAutocomplete();
       validateCheckout();
+      _restoreGuestData();
       // Fire event so repeat-cart banner can show
       document.dispatchEvent(new Event('checkout-opened'));
     }
@@ -1118,14 +1133,21 @@
       // onAuthStateChange fires SIGNED_OUT and clears state
     }
 
+    let _loginEmail = '';
+
+    function showLoginView(view) {
+      ['email','otp','register','ok'].forEach(v => {
+        const el = document.getElementById('login-' + v + '-view');
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById('login-' + view + '-view');
+      if (target) target.classList.remove('hidden');
+    }
+
     function openLoginModal() {
-      // Reset to form view
-      document.getElementById('login-form-view').classList.remove('hidden');
-      document.getElementById('login-ok-view').classList.add('hidden');
+      showLoginView('email');
       document.getElementById('login-email-input').value = '';
       document.getElementById('login-err').classList.add('hidden');
-      document.getElementById('login-send-btn').disabled = false;
-      document.getElementById('login-send-btn').textContent = 'Enviar enllaç';
       const m = document.getElementById('login-modal');
       m.classList.remove('hidden');
       setTimeout(() => {
@@ -1140,33 +1162,117 @@
       setTimeout(() => m.classList.add('hidden'), 200);
     }
 
-    async function sendMagicLink() {
-      const emailVal = document.getElementById('login-email-input').value.trim();
+    async function checkEmail() {
+      const email = document.getElementById('login-email-input').value.trim();
       const errEl = document.getElementById('login-err');
-      if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         errEl.textContent = 'Introdueix un correu vàlid.';
         errEl.classList.remove('hidden');
         return;
       }
       errEl.classList.add('hidden');
-      const btn = document.getElementById('login-send-btn');
+      const btn = document.getElementById('login-check-btn');
       btn.disabled = true;
-      btn.textContent = 'Enviant...';
+      btn.textContent = 'Comprovant...';
+      _loginEmail = email;
+
       const { error } = await window.supabase.auth.signInWithOtp({
-        email: emailVal,
-        options: { emailRedirectTo: window.location.origin + '/pedido.html' }
+        email,
+        options: { shouldCreateUser: false }
       });
-      if (error) {
-        errEl.textContent = "Error en enviar l'enllaç. Torna-ho a intentar.";
-        errEl.classList.remove('hidden');
-        btn.disabled = false;
-        btn.textContent = 'Enviar enllaç';
+
+      btn.disabled = false;
+      btn.textContent = 'Continuar';
+
+      if (!error) {
+        document.getElementById('login-otp-email').textContent = email;
+        document.getElementById('login-otp-err').classList.add('hidden');
+        document.getElementById('login-otp-input').value = '';
+        showLoginView('otp');
       } else {
-        document.getElementById('login-sent-email').textContent = emailVal;
-        document.getElementById('login-form-view').classList.add('hidden');
-        document.getElementById('login-ok-view').classList.remove('hidden');
+        showLoginView('register');
       }
     }
+
+    async function submitOtp() {
+      const code = document.getElementById('login-otp-input').value.trim();
+      const errEl = document.getElementById('login-otp-err');
+      if (code.length !== 6) {
+        errEl.textContent = 'Introdueix els 6 dígits del codi.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      errEl.classList.add('hidden');
+      const btn = document.getElementById('login-otp-btn');
+      btn.disabled = true;
+      btn.textContent = 'Verificant...';
+
+      const { error } = await window.supabase.auth.verifyOtp({
+        email: _loginEmail,
+        token: code,
+        type: 'email'
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Verificar';
+
+      if (error) {
+        errEl.textContent = 'Codi incorrecte o caducat. Torna-ho a intentar.';
+        errEl.classList.remove('hidden');
+      }
+      // On success, onAuthStateChange fires SIGNED_IN → closeLoginModal
+    }
+
+    async function resendOtp() {
+      await window.supabase.auth.signInWithOtp({
+        email: _loginEmail,
+        options: { shouldCreateUser: false }
+      });
+      showCfToast('Codi reenviat a ' + _loginEmail);
+    }
+
+    async function submitRegister() {
+      const name   = document.getElementById('login-name-input').value.trim();
+      const phone  = document.getElementById('login-phone-input').value.trim();
+      const postal = document.getElementById('login-postal-input').value.trim();
+      const errEl  = document.getElementById('login-reg-err');
+      if (!name || !phone) {
+        errEl.textContent = 'Nom i telèfon són obligatoris.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      errEl.classList.add('hidden');
+      const btn = document.getElementById('login-reg-btn');
+      btn.disabled = true;
+      btn.textContent = 'Creant compte...';
+
+      const { error: signUpErr } = await window.supabase.auth.signUp({
+        email: _loginEmail,
+        options: { data: { name, phone, postal_code: postal } }
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Crear compte i continuar';
+
+      if (signUpErr) {
+        errEl.textContent = signUpErr.message;
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      // Send OTP to verify new account
+      await window.supabase.auth.signInWithOtp({
+        email: _loginEmail,
+        options: { shouldCreateUser: false }
+      });
+
+      document.getElementById('login-otp-email').textContent = _loginEmail;
+      document.getElementById('login-otp-err').classList.add('hidden');
+      document.getElementById('login-otp-input').value = '';
+      showLoginView('otp');
+    }
+
+    async function sendMagicLink() { await checkEmail(); }
 
     async function initAuth() {
       const sb = window.supabase;
@@ -1236,6 +1342,11 @@
 
       try {
         await _saveOrderToSupabase(d, 'pending');
+
+        // Save guest data for next visit
+        if (!currentUser) {
+          try { localStorage.setItem('micsas_guest', JSON.stringify({ name: d.name, email: d.email, phone: d.phone })); } catch(e) {}
+        }
 
         document.getElementById('cf-global-err').classList.add('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
@@ -1865,21 +1976,21 @@
         <iconify-icon icon="solar:close-linear" width="18"></iconify-icon>
       </button>
 
-      <!-- Form view -->
-      <div id="login-form-view">
+      <!-- Vista 1: Email -->
+      <div id="login-email-view">
         <h2 id="login-modal-title" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Inicia sessió</h2>
-        <p class="text-sm font-light text-[#5A3E28] mb-5 leading-relaxed">T'enviarem un enllaç al teu correu per entrar sense contrasenya.</p>
+        <p class="text-sm font-light text-[#5A3E28] mb-5 leading-relaxed">Introdueix el teu correu i t'enviem un codi.</p>
         <div class="space-y-4">
           <div>
             <label for="login-email-input" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">Correu electrònic</label>
             <input id="login-email-input" type="email" autocomplete="email" placeholder="correu@exemple.com"
               class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]"
-              onkeydown="if(event.key==='Enter') sendMagicLink()">
+              onkeydown="if(event.key==='Enter') checkEmail()">
           </div>
           <p id="login-err" class="hidden text-xs text-[#E23F2E]"></p>
-          <button onclick="sendMagicLink()" id="login-send-btn"
+          <button onclick="checkEmail()" id="login-check-btn"
             class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
-            Enviar enllaç
+            Continuar
           </button>
           <button onclick="closeLoginModal()"
             class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#E6D5B0]/30 transition-all">
@@ -1888,17 +1999,72 @@
         </div>
       </div>
 
-      <!-- Success view -->
+      <!-- Vista 2: Codi OTP -->
+      <div id="login-otp-view" class="hidden">
+        <button onclick="showLoginView('email')" class="flex items-center gap-1.5 text-xs text-[#9B8A72] hover:text-[#2A1A0F] transition-colors mb-4">
+          <iconify-icon icon="solar:arrow-left-linear" width="14"></iconify-icon> Enrere
+        </button>
+        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Introdueix el codi</h2>
+        <p class="text-sm font-light text-[#5A3E28] mb-5 leading-relaxed">Hem enviat un codi de 6 dígits a <strong id="login-otp-email" class="font-medium text-[#2A1A0F]"></strong></p>
+        <div class="space-y-4">
+          <div>
+            <label for="login-otp-input" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">Codi de verificació</label>
+            <input id="login-otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456"
+              class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] tracking-widest text-center text-lg font-medium"
+              onkeydown="if(event.key==='Enter') submitOtp()">
+          </div>
+          <p id="login-otp-err" class="hidden text-xs text-[#E23F2E]"></p>
+          <button onclick="submitOtp()" id="login-otp-btn"
+            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+            Verificar
+          </button>
+          <button onclick="resendOtp()" class="w-full text-xs text-[#9B8A72] hover:text-[#E23F2E] transition-colors">
+            No has rebut el codi? Reenviar
+          </button>
+        </div>
+      </div>
+
+      <!-- Vista 3: Registre -->
+      <div id="login-register-view" class="hidden">
+        <button onclick="showLoginView('email')" class="flex items-center gap-1.5 text-xs text-[#9B8A72] hover:text-[#2A1A0F] transition-colors mb-4">
+          <iconify-icon icon="solar:arrow-left-linear" width="14"></iconify-icon> Enrere
+        </button>
+        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Crea el teu compte</h2>
+        <p class="text-sm font-light text-[#5A3E28] mb-5 leading-relaxed">Primera vegada a Micsas! Omple les teves dades per continuar.</p>
+        <div class="space-y-3">
+          <div>
+            <label for="login-name-input" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">Nom <span class="text-[#E23F2E]">*</span></label>
+            <input id="login-name-input" type="text" autocomplete="given-name" placeholder="El teu nom"
+              class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+          </div>
+          <div>
+            <label for="login-phone-input" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">Telèfon <span class="text-[#E23F2E]">*</span></label>
+            <input id="login-phone-input" type="tel" autocomplete="tel" placeholder="6XX XXX XXX"
+              class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+          </div>
+          <div>
+            <label for="login-postal-input" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">Codi postal</label>
+            <input id="login-postal-input" type="text" inputmode="numeric" maxlength="5" placeholder="08XXX"
+              class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+          </div>
+          <p id="login-reg-err" class="hidden text-xs text-[#E23F2E]"></p>
+          <button onclick="submitRegister()" id="login-reg-btn"
+            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm mt-1">
+            Crear compte i continuar
+          </button>
+        </div>
+      </div>
+
+      <!-- Vista 4: Èxit -->
       <div id="login-ok-view" class="hidden text-center py-2">
         <div class="w-16 h-16 rounded-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center mx-auto mb-4">
           <iconify-icon icon="solar:check-circle-bold" width="36"></iconify-icon>
         </div>
-        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-2">Hem enviat l'enllaç!</h2>
-        <p class="text-sm font-light text-[#5A3E28] mb-1">Hem enviat un enllaç a <strong id="login-sent-email" class="font-medium text-[#2A1A0F]"></strong></p>
-        <p class="text-sm font-light text-[#5A3E28] mb-6">Obre el teu correu i clica per entrar.</p>
+        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-2">Benvingut!</h2>
+        <p class="text-sm font-light text-[#5A3E28] mb-6">Ja estàs connectat al teu compte de Micsas.</p>
         <button onclick="closeLoginModal()"
           class="px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#2A1A0F] hover:bg-[#1a1009] transition-all">
-          D'acord
+          Continuar
         </button>
       </div>
     </div>
