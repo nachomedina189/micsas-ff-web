@@ -1221,9 +1221,10 @@
         return;
       }
 
-      // Wallet (Google Pay / Apple Pay): placeholder
+      // Wallet (Google Pay / Apple Pay)
       if (cfPayMethod === 'wallet') {
-        showCfToast('Google Pay i Apple Pay properament disponibles. Tria una altra opció per ara.');
+        _pendingOrderData = _collectOrderData();
+        await openWalletPayment(_pendingOrderData.total);
         return;
       }
 
@@ -1334,6 +1335,95 @@
       const { error: itemsErr } = await sb.from('order_items').insert(items);
       if (itemsErr) throw itemsErr;
       return order;
+    }
+
+    async function openWalletPayment(totalEuros) {
+      const btn = document.getElementById('cf-submit');
+      btn.textContent = 'Obrint pagament...';
+      btn.disabled = true;
+
+      try {
+        if (!_stripe) _stripe = Stripe(STRIPE_PK);
+
+        const pr = _stripe.paymentRequest({
+          country: 'ES',
+          currency: 'eur',
+          total: { label: 'micsas.ff', amount: Math.round(totalEuros * 100) },
+          requestPayerName: true,
+          requestPayerEmail: false,
+        });
+
+        const canPay = await pr.canMakePayment();
+        if (!canPay) {
+          showCfToast('El teu dispositiu no suporta Google Pay ni Apple Pay. Tria targeta o repartidor.');
+          btn.textContent = 'Pagar ' + fmtComma(totalEuros);
+          btn.disabled = false;
+          return;
+        }
+
+        // Create PaymentIntent
+        const res = await fetch(EDGE_FN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ amount: Math.round(totalEuros * 100), currency: 'eur' }),
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+
+        pr.on('paymentmethod', async (ev) => {
+          const { paymentIntent, error: confirmErr } = await _stripe.confirmCardPayment(
+            json.clientSecret,
+            { payment_method: ev.paymentMethod.id },
+            { handleActions: false }
+          );
+
+          if (confirmErr) {
+            ev.complete('fail');
+            showCfToast('Error al processar el pagament. Torna-ho a intentar.');
+            btn.textContent = 'Pagar ' + fmtComma(totalEuros);
+            btn.disabled = false;
+            return;
+          }
+
+          ev.complete('success');
+
+          // Handle 3DS if needed
+          if (paymentIntent.status === 'requires_action') {
+            const { error } = await _stripe.confirmCardPayment(json.clientSecret);
+            if (error) {
+              showCfToast('Autenticació fallida. Torna-ho a intentar.');
+              btn.textContent = 'Pagar ' + fmtComma(totalEuros);
+              btn.disabled = false;
+              return;
+            }
+          }
+
+          // Payment succeeded — save order
+          try {
+            const d = { ..._pendingOrderData };
+            await _saveOrderToSupabase(d, 'paid');
+            document.getElementById('cf-global-err').classList.add('hidden');
+            document.getElementById('cf-scroll').classList.add('hidden');
+            const success = document.getElementById('cf-success');
+            success.classList.remove('hidden');
+            success.classList.add('flex');
+            resetCart();
+          } catch (saveErr) {
+            console.error('[wallet save]', saveErr);
+            showCfToast('Pagament OK però error en guardar. Contacta amb nosaltres.');
+          }
+        });
+
+        pr.show();
+        btn.textContent = 'Pagar ' + fmtComma(totalEuros);
+        btn.disabled = false;
+
+      } catch (err) {
+        console.error('[openWalletPayment]', err);
+        showCfToast('Error al iniciar el pagament. Torna-ho a intentar.');
+        btn.textContent = 'Pagar ' + fmtComma(totalEuros);
+        btn.disabled = false;
+      }
     }
 
     async function openStripeOverlay(totalEuros) {
