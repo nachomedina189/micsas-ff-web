@@ -305,8 +305,17 @@
 
       <!-- Perfil tab -->
       <div id="pp-section-perfil" class="px-6 md:px-10 py-8 max-w-xl">
-        <h2 class="font-['Lilita_One'] tracking-tight text-3xl text-[#2A1A0F] mb-6">El meu perfil</h2>
-        <div class="bg-[#F2E6CE] rounded-2xl border border-[#C4B08A]/30 overflow-hidden divide-y divide-[#C4B08A]/20">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-['Lilita_One'] tracking-tight text-3xl text-[#2A1A0F]">El meu perfil</h2>
+          <button id="pp-edit-btn" onclick="toggleProfileEdit()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/20 transition-all font-['Inter',sans-serif]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar
+          </button>
+        </div>
+
+        <!-- Vista -->
+        <div id="pp-prof-view" class="bg-[#F2E6CE] rounded-2xl border border-[#C4B08A]/30 overflow-hidden divide-y divide-[#C4B08A]/20">
           <div class="px-6 py-5">
             <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Nom complet</p>
             <p id="pp-prof-name-row" class="text-lg text-[#2A1A0F] font-medium">—</p>
@@ -318,6 +327,43 @@
           <div class="px-6 py-5">
             <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Telèfon</p>
             <p id="pp-prof-phone" class="text-lg text-[#2A1A0F]">—</p>
+          </div>
+        </div>
+
+        <!-- Edició -->
+        <div id="pp-prof-edit" class="hidden space-y-4">
+          <div class="bg-[#F2E6CE] rounded-2xl border border-[#C4B08A]/30 overflow-hidden divide-y divide-[#C4B08A]/20">
+            <div class="px-6 py-4">
+              <label class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] block mb-2">Nom</label>
+              <input id="pp-edit-name" type="text" autocomplete="given-name"
+                class="w-full bg-[#E6D5B0]/30 border border-[#C4B08A]/40 rounded-xl px-4 py-2.5 text-[#2A1A0F] text-base outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+            </div>
+            <div class="px-6 py-4">
+              <label class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] block mb-2">Cognoms</label>
+              <input id="pp-edit-surname" type="text" autocomplete="family-name"
+                class="w-full bg-[#E6D5B0]/30 border border-[#C4B08A]/40 rounded-xl px-4 py-2.5 text-[#2A1A0F] text-base outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+            </div>
+            <div class="px-6 py-4">
+              <label class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] block mb-2">Telèfon</label>
+              <input id="pp-edit-phone" type="tel" autocomplete="tel"
+                class="w-full bg-[#E6D5B0]/30 border border-[#C4B08A]/40 rounded-xl px-4 py-2.5 text-[#2A1A0F] text-base outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+            </div>
+            <div class="px-6 py-4">
+              <label class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] block mb-2">Codi postal</label>
+              <input id="pp-edit-postal" type="text" inputmode="numeric" maxlength="5"
+                class="w-full bg-[#E6D5B0]/30 border border-[#C4B08A]/40 rounded-xl px-4 py-2.5 text-[#2A1A0F] text-base outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+            </div>
+          </div>
+          <p id="pp-edit-err" class="hidden text-sm text-[#E23F2E]"></p>
+          <div class="flex gap-3">
+            <button onclick="saveProfileData()"
+              class="flex-1 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+              Guardar canvis
+            </button>
+            <button onclick="toggleProfileEdit()"
+              class="flex-1 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#C4B08A]/20 transition-all">
+              Cancel·lar
+            </button>
           </div>
         </div>
       </div>
@@ -512,6 +558,66 @@
       const phoneEl = document.getElementById('pp-prof-phone'); if (phoneEl) phoneEl.textContent = phone;
       const initEl  = document.getElementById('pp-prof-initials'); if (initEl) initEl.textContent = fullName.charAt(0).toUpperCase();
       updateNavAuth();
+    }
+
+    function toggleProfileEdit() {
+      const view = document.getElementById('pp-prof-view');
+      const edit = document.getElementById('pp-prof-edit');
+      const btn  = document.getElementById('pp-edit-btn');
+      const isEditing = !edit.classList.contains('hidden');
+      if (isEditing) {
+        edit.classList.add('hidden');
+        view.classList.remove('hidden');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar';
+      } else {
+        // Pre-fill edit fields with current values
+        const meta = ppCurrentUser?.user_metadata || {};
+        document.getElementById('pp-edit-name').value    = ppCustomer?.name   || meta.name    || '';
+        document.getElementById('pp-edit-surname').value = meta.surname || (ppCustomer?.name?.split(' ').slice(1).join(' ')) || '';
+        document.getElementById('pp-edit-phone').value   = ppCustomer?.phone  || meta.phone   || '';
+        document.getElementById('pp-edit-postal').value  = meta.postal_code   || '';
+        document.getElementById('pp-edit-err').classList.add('hidden');
+        view.classList.add('hidden');
+        edit.classList.remove('hidden');
+        btn.innerHTML = '✕ Cancel·lar';
+      }
+    }
+
+    async function saveProfileData() {
+      const name    = document.getElementById('pp-edit-name').value.trim();
+      const surname = document.getElementById('pp-edit-surname').value.trim();
+      const phone   = document.getElementById('pp-edit-phone').value.trim();
+      const postal  = document.getElementById('pp-edit-postal').value.trim();
+      const errEl   = document.getElementById('pp-edit-err');
+
+      if (!name || !phone) {
+        errEl.textContent = 'Nom i telèfon són obligatoris.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      errEl.classList.add('hidden');
+
+      const fullName = name + (surname ? ' ' + surname : '');
+      const btn = document.querySelector('#pp-prof-edit button');
+
+      // Update Supabase Auth user_metadata
+      const { error } = await window.supabase.auth.updateUser({
+        data: { name, surname, full_name: fullName, phone, postal_code: postal }
+      });
+
+      if (error) { errEl.textContent = error.message; errEl.classList.remove('hidden'); return; }
+
+      // Update customers table if record exists
+      if (ppCustomer) {
+        await window.supabase.from('customers')
+          .update({ name: fullName, phone })
+          .eq('auth_user_id', ppCurrentUser.id);
+      }
+
+      // Refresh displayed data
+      ppCurrentUser = (await window.supabase.auth.getUser()).data.user;
+      await loadProfileData();
+      toggleProfileEdit();
     }
 
     async function loadOrderHistory() {
