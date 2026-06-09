@@ -482,11 +482,20 @@
         .eq('auth_user_id', ppCurrentUser.id)
         .order('created_at', { ascending: false }).limit(1).maybeSingle();
       ppCustomer = data;
-      const name = data?.name || '—';
-      ['pp-prof-name','pp-prof-name-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = name; });
+
+      // Fallback to user_metadata for users who haven't placed an order yet
+      const meta = ppCurrentUser.user_metadata || {};
+      const fullName = data?.name
+        || (meta.name && meta.surname ? meta.name + ' ' + meta.surname : null)
+        || meta.full_name
+        || meta.name
+        || '—';
+      const phone = data?.phone || meta.phone || '—';
+
+      ['pp-prof-name','pp-prof-name-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = fullName; });
       ['pp-prof-email','pp-prof-email-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ppCurrentUser.email; });
-      const phoneEl = document.getElementById('pp-prof-phone'); if (phoneEl) phoneEl.textContent = data?.phone || '—';
-      const initEl  = document.getElementById('pp-prof-initials'); if (initEl) initEl.textContent = name.charAt(0).toUpperCase();
+      const phoneEl = document.getElementById('pp-prof-phone'); if (phoneEl) phoneEl.textContent = phone;
+      const initEl  = document.getElementById('pp-prof-initials'); if (initEl) initEl.textContent = fullName.charAt(0).toUpperCase();
       updateNavAuth();
     }
 
