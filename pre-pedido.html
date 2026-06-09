@@ -259,64 +259,75 @@
   <script src="transicion.js"></script>
 
   <!-- ════ PROFILE PANEL ════ -->
-  <div id="pp-profile-panel" class="hidden fixed inset-0 z-[820] bg-[#DDD0B3] flex flex-col translate-x-full transition-transform duration-300 ease-out">
+  <div id="pp-profile-panel" class="hidden fixed inset-0 z-[820] bg-[#DDD0B3] flex flex-col md:flex-row translate-x-full transition-transform duration-300 ease-out">
 
-    <!-- Header -->
-    <div class="shrink-0 flex items-center px-5 py-4 border-b border-[#C4B08A]/30 bg-[#DDD0B3]">
-      <button onclick="closeProfilePanel()" class="flex items-center gap-1.5 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors p-1 rounded-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        <span class="text-sm font-medium font-['Inter',sans-serif]">Enrere</span>
-      </button>
-      <h1 class="font-['Lilita_One'] tracking-tight text-xl text-[#2A1A0F] mx-auto">El meu compte</h1>
-    </div>
+    <!-- SIDEBAR -->
+    <div class="md:w-72 shrink-0 flex flex-col bg-[#C9B89A] md:h-full border-b md:border-b-0 md:border-r border-[#C4B08A]/40">
 
-    <!-- Avatar + name -->
-    <div class="shrink-0 flex flex-col items-center pt-8 pb-5 px-6">
-      <div class="w-20 h-20 rounded-full bg-[#E23F2E] flex items-center justify-center mb-3">
-        <span id="pp-prof-initials" class="font-['Lilita_One'] text-3xl text-[#F2E6CE]">?</span>
+      <!-- Logo + close -->
+      <div class="flex items-center justify-between px-6 py-5">
+        <span class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F]">micsas.ff</span>
+        <button onclick="closeProfilePanel()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#C4B08A]/30 text-[#5A3E28] hover:text-[#2A1A0F] transition-colors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
-      <p id="pp-prof-name" class="font-['Lilita_One'] text-2xl text-[#2A1A0F]">—</p>
-      <p id="pp-prof-email" class="text-sm font-light text-[#5A3E28] mt-0.5"></p>
+
+      <!-- Avatar + info -->
+      <div class="flex flex-col items-center px-6 pb-6 pt-2">
+        <div class="w-20 h-20 rounded-full bg-[#E23F2E] flex items-center justify-center mb-4 shadow-md">
+          <span id="pp-prof-initials" class="font-['Lilita_One'] text-3xl text-[#F2E6CE]">?</span>
+        </div>
+        <p id="pp-prof-name" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] text-center">—</p>
+        <p id="pp-prof-email" class="text-sm font-light text-[#5A3E28] mt-1 text-center break-all"></p>
+        <button onclick="doSignOut()"
+          class="mt-4 px-5 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/30 transition-all font-['Inter',sans-serif]">
+          Tancar sessió
+        </button>
+      </div>
+
+      <!-- Tab list -->
+      <nav class="flex flex-col px-4 pb-6 gap-1">
+        <button id="pp-tab-perfil" onclick="showProfileTab('perfil')"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#2A1A0F] bg-[#DDD0B3] shadow-sm transition-all font-['Inter',sans-serif]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          El meu perfil
+        </button>
+        <button id="pp-tab-historial" onclick="showProfileTab('historial')"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#9B8A72] hover:bg-[#C4B08A]/20 transition-all font-['Inter',sans-serif]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+          Historial de pedidos
+        </button>
+      </nav>
     </div>
 
-    <!-- Tabs -->
-    <div class="shrink-0 flex border-b border-[#C4B08A]/30 px-6">
-      <button id="pp-tab-perfil" onclick="showProfileTab('perfil')"
-        class="py-3 pr-6 text-sm font-medium border-b-2 border-[#E23F2E] text-[#E23F2E] transition-colors font-['Inter',sans-serif]">
-        Perfil
-      </button>
-      <button id="pp-tab-historial" onclick="showProfileTab('historial')"
-        class="py-3 px-6 text-sm font-medium text-[#9B8A72] transition-colors font-['Inter',sans-serif]">
-        Historial de pedidos
-      </button>
-    </div>
-
-    <!-- Content -->
-    <div class="flex-1 overflow-y-auto">
+    <!-- CONTENT -->
+    <div class="flex-1 overflow-y-auto bg-[#DDD0B3]">
 
       <!-- Perfil tab -->
-      <div id="pp-section-perfil" class="px-6 py-6 space-y-0 max-w-lg mx-auto">
+      <div id="pp-section-perfil" class="px-6 md:px-10 py-8 max-w-xl">
+        <h2 class="font-['Lilita_One'] tracking-tight text-3xl text-[#2A1A0F] mb-6">El meu perfil</h2>
         <div class="bg-[#F2E6CE] rounded-2xl border border-[#C4B08A]/30 overflow-hidden divide-y divide-[#C4B08A]/20">
-          <div class="px-5 py-4">
-            <p class="text-[10px] font-semibold uppercase tracking-widest text-[#9B8A72] mb-1">Nom</p>
-            <p id="pp-prof-name-row" class="text-sm text-[#2A1A0F] font-medium">—</p>
+          <div class="px-6 py-5">
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Nom complet</p>
+            <p id="pp-prof-name-row" class="text-lg text-[#2A1A0F] font-medium">—</p>
           </div>
-          <div class="px-5 py-4">
-            <p class="text-[10px] font-semibold uppercase tracking-widest text-[#9B8A72] mb-1">Correu</p>
-            <p id="pp-prof-email-row" class="text-sm text-[#2A1A0F]">—</p>
+          <div class="px-6 py-5">
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Correu electrònic</p>
+            <p id="pp-prof-email-row" class="text-lg text-[#2A1A0F]">—</p>
           </div>
-          <div class="px-5 py-4">
-            <p class="text-[10px] font-semibold uppercase tracking-widest text-[#9B8A72] mb-1">Telèfon</p>
-            <p id="pp-prof-phone" class="text-sm text-[#2A1A0F]">—</p>
+          <div class="px-6 py-5">
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Telèfon</p>
+            <p id="pp-prof-phone" class="text-lg text-[#2A1A0F]">—</p>
           </div>
         </div>
-        <p class="text-xs text-center text-[#9B8A72] pt-4 font-light">Per modificar les teves dades, contacta'ns per Instagram.</p>
+        <p class="text-sm text-[#9B8A72] mt-4 font-light">Per modificar les teves dades, contacta'ns per Instagram.</p>
       </div>
 
       <!-- Historial tab -->
-      <div id="pp-section-historial" class="hidden px-6 py-6 max-w-lg mx-auto">
+      <div id="pp-section-historial" class="hidden px-6 md:px-10 py-8 max-w-xl">
+        <h2 class="font-['Lilita_One'] tracking-tight text-3xl text-[#2A1A0F] mb-6">Historial de pedidos</h2>
         <div id="pp-order-list" class="space-y-3">
-          <p class="text-sm text-[#9B8A72] text-center py-8">Carregant...</p>
+          <p class="text-base text-[#9B8A72] text-center py-8">Carregant...</p>
         </div>
       </div>
 
@@ -466,11 +477,16 @@
 
     function showProfileTab(tab) {
       ['perfil','historial'].forEach(t => {
-        document.getElementById('pp-tab-' + t).classList.toggle('border-b-2', t === tab);
-        document.getElementById('pp-tab-' + t).classList.toggle('border-[#E23F2E]', t === tab);
-        document.getElementById('pp-tab-' + t).classList.toggle('text-[#E23F2E]', t === tab);
-        document.getElementById('pp-tab-' + t).classList.toggle('text-[#9B8A72]', t !== tab);
-        document.getElementById('pp-section-' + t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('pp-tab-' + t);
+        const sec = document.getElementById('pp-section-' + t);
+        if (t === tab) {
+          btn.classList.add('bg-[#DDD0B3]', 'text-[#2A1A0F]', 'shadow-sm');
+          btn.classList.remove('text-[#9B8A72]', 'bg-transparent');
+        } else {
+          btn.classList.remove('bg-[#DDD0B3]', 'text-[#2A1A0F]', 'shadow-sm');
+          btn.classList.add('text-[#9B8A72]');
+        }
+        sec.classList.toggle('hidden', t !== tab);
       });
       if (tab === 'historial') loadOrderHistory();
     }
