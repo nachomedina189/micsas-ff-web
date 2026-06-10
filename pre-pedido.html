@@ -328,6 +328,10 @@
             <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Telèfon</p>
             <p id="pp-prof-phone" class="text-lg text-[#2A1A0F]">—</p>
           </div>
+          <div class="px-6 py-5">
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#9B8A72] mb-1.5">Codi postal</p>
+            <p id="pp-prof-postal" class="text-lg text-[#2A1A0F]">—</p>
+          </div>
         </div>
 
         <!-- Edició -->
@@ -555,8 +559,9 @@
 
       ['pp-prof-name','pp-prof-name-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = fullName; });
       ['pp-prof-email','pp-prof-email-row'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ppCurrentUser.email; });
-      const phoneEl = document.getElementById('pp-prof-phone'); if (phoneEl) phoneEl.textContent = phone;
-      const initEl  = document.getElementById('pp-prof-initials'); if (initEl) initEl.textContent = fullName.charAt(0).toUpperCase();
+      const phoneEl  = document.getElementById('pp-prof-phone');  if (phoneEl)  phoneEl.textContent  = phone;
+      const postalEl = document.getElementById('pp-prof-postal'); if (postalEl) postalEl.textContent = data?.postal_code || meta.postal_code || '—';
+      const initEl   = document.getElementById('pp-prof-initials'); if (initEl) initEl.textContent = fullName.charAt(0).toUpperCase();
       updateNavAuth();
     }
 
