@@ -65,40 +65,38 @@
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
     <!-- ──── NAV ──── -->
-    <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 transition-all duration-500 border-b" id="navbar">
-      <div class="max-w-6xl mx-auto flex justify-between items-center">
-        <a href="#" class="font-['Lilita_One'] tracking-tighter text-2xl text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">
-          micsas.ff
+    <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b" id="navbar">
+      <a href="#" class="font-['Lilita_One'] tracking-tighter text-2xl text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">
+        micsas.ff
+      </a>
+
+      <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-[var(--foreground)] backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[var(--border)]/30 bg-[#F2E6CE]/70">
+        <a href="#nosaltres" class="relative transition-opacity hover:opacity-60" data-i18n="nav_historia">
+          Història
         </a>
+        <a href="menu.html" class="relative transition-opacity hover:opacity-60">
+          Carta
+        </a>
+        <a href="micsas-events.html" class="relative transition-opacity hover:opacity-60">
+          Micsas Events
+        </a>
+        <a href="#shop" class="relative transition-opacity hover:opacity-60">
+          Shop
+        </a>
+      </div>
 
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--foreground)] backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[var(--border)]/30 bg-[#F2E6CE]/70">
-          <a href="#nosaltres" class="relative transition-opacity hover:opacity-60" data-i18n="nav_historia">
-            Història
-          </a>
-          <a href="menu.html" class="relative transition-opacity hover:opacity-60">
-            Carta
-          </a>
-          <a href="micsas-events.html" class="relative transition-opacity hover:opacity-60">
-            Micsas Events
-          </a>
-          <a href="#shop" class="relative transition-opacity hover:opacity-60">
-            Shop
-          </a>
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+          <span class="text-[#C4B08A]/60 select-none">|</span>
+          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
         </div>
-
-        <div class="flex items-center gap-3">
-          <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
-            <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
-            <span class="text-[#C4B08A]/60 select-none">|</span>
-            <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
-          </div>
-          <a href="pre-pedido.html" class="hidden md:flex items-center gap-2 px-6 py-3 rounded-full text-[16px] leading-[1.5] font-['Inter',sans-serif] font-medium text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] transition-all liquid-glass" data-i18n="demana">
-            Demana ja! →
-          </a>
-          <button class="md:hidden p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" onclick="toggleMobileMenu()" aria-label="Menú">
-            <iconify-icon icon="solar:hamburger-menu-linear" width="24" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
-          </button>
-        </div>
+        <a href="pre-pedido.html" class="hidden md:flex items-center gap-2 px-6 py-3 rounded-full text-[16px] leading-[1.5] font-['Inter',sans-serif] font-medium text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] transition-all liquid-glass" data-i18n="demana">
+          Demana ja! →
+        </a>
+        <button class="md:hidden p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" onclick="toggleMobileMenu()" aria-label="Menú">
+          <iconify-icon icon="solar:hamburger-menu-linear" width="24" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
+        </button>
       </div>
     </nav>
 
