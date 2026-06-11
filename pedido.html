@@ -755,7 +755,8 @@
 
     // ── Stripe ──
     const STRIPE_PK = 'pk_live_51TcBleHPwXguCJTGAbO8RwS1Rg5rAmFbBUftbszSePrjKJW2o4Gwqarsppa0gTkSuxZ1QvcqQBbhDDVHZEwO2SFG00ZfcQ2Hlg';
-    const EDGE_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/create-payment-intent';
+    const EDGE_FN_URL       = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/create-payment-intent';
+    const PLACE_ORDER_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/place-order';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
     let _stripe = null;
     let _stripeElements = null;
@@ -1310,7 +1311,43 @@
       const d = _collectOrderData();
 
       try {
-        await _saveOrderToSupabase(d, 'pending');
+        // Use Edge Function to bypass browser-side RLS restrictions
+        const payload = {
+          name:          d.name,
+          email:         d.email,
+          phone:         d.phone,
+          street:        d.street,
+          floor:         d.floor,
+          postalCode:    d.postalCode,
+          delivNotes:    d.delivNotes,
+          finalNotes:    d.finalNotes,
+          paymentMethod: d.paymentMethod,
+          paymentStatus: 'pending',
+          total:         d.total,
+          subtotal:      d.subtotal,
+          authUserId:    currentUser ? currentUser.id : null,
+          slotTime:      cfSelectedTime || null,
+          pizzaCount:    cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0),
+          items:         cart.map(it => ({
+            product_name: it.name,
+            unit_price:   it.price,
+            quantity:     it.qty,
+            notes:        it.note || null,
+          })),
+        };
+
+        const res = await fetch(PLACE_ORDER_FN_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || `Error ${res.status}`);
 
         // Save guest data for next visit
         if (!currentUser) {
