@@ -86,7 +86,7 @@
 
   <!-- HEADER -->
   <section class="py-12 md:py-16 px-6 md:px-12 text-center">
-    <h1 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#2A1A0F] mb-3">Enviament gratuït, sense comanda mínima!</h1>
+    <h1 class="font-['Lilita_One'] tracking-tight text-4xl md:text-5xl text-[#F2D7B8] mb-3">Enviament gratuït, sense comanda mínima!</h1>
   </section>
 
   <!-- MENU -->
@@ -95,26 +95,26 @@
 
       <!-- Pizzes Clàssiques -->
       <div class="mb-16">
-        <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes Clàssiques</h2>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">tradició napolitana</p>
+        <div class="border-b border-[#F2D7B8]/40 pb-4 mb-6">
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#F2D7B8]">Pizzes Clàssiques</h2>
+          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#F2D7B8]/70">tradició napolitana</p>
         </div>
         <div id="menu-casa"></div>
       </div>
 
       <!-- Pizzes de la casa -->
       <div class="mb-16">
-        <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Pizzes de la casa</h2>
-          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#E23F2E]">les nostres creacions</p>
+        <div class="border-b border-[#F2D7B8]/40 pb-4 mb-6">
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#F2D7B8]">Pizzes de la casa</h2>
+          <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#F2D7B8]/70">les nostres creacions</p>
         </div>
         <div id="menu-classics"></div>
       </div>
 
       <!-- Begudes & Postres -->
       <div class="mb-16">
-        <div class="border-b border-[#C4B08A]/40 pb-4 mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#2A1A0F]">Begudes</h2>
+        <div class="border-b border-[#F2D7B8]/40 pb-4 mb-6">
+          <h2 class="font-['Lilita_One'] tracking-tight text-2xl md:text-3xl text-[#F2D7B8]">Begudes</h2>
         </div>
         <div class="space-y-1" id="menu-drinks"></div>
       </div>
@@ -553,13 +553,13 @@
     function menuRow(item, last, showNote = true) {
       const safeName = item.name.replace(/'/g,"\\'");
       return `
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between px-2 py-4 ${last ? '' : 'border-b border-[#C4B08A]/20'} group hover:bg-[#E6D5B0]/10 transition-colors rounded-lg" data-pizza-row="${item.id}">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between px-2 py-4 ${last ? '' : 'border-b border-[#F2D7B8]/20'} group hover:bg-[#E6D5B0]/10 transition-colors rounded-lg" data-pizza-row="${item.id}">
           <div class="flex-1 min-w-0 pr-4">
-            <span class="font-medium text-base text-[#2A1A0F] block mb-0.5">${item.name}</span>
-            <span class="block text-xs font-light text-[#5A3E28] leading-relaxed">${item.desc}</span>
+            <span class="font-medium text-base text-[#F2D7B8] block mb-0.5">${item.name}</span>
+            <span class="block text-xs font-light text-[#F2D7B8]/70 leading-relaxed">${item.desc}</span>
           </div>
           <div class="flex items-center gap-4 shrink-0">
-            <span class="font-normal text-sm text-[#2A1A0F]">€${item.price.toFixed(2)}</span>
+            <span class="font-normal text-sm text-[#F2D7B8]">€${item.price.toFixed(2)}</span>
             <div class="flex flex-col items-end">
               <div class="relative" data-ctrl-wrap="${item.id}">
                 <button type="button" data-btn-add="${item.id}" class="bg-[#F2E6CE] text-[#E23F2E] border border-[#C4B08A]/40 px-4 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 whitespace-nowrap hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-transparent" onclick="addToCartSilent('${item.id}','${safeName}',${item.price})">Afegir</button>
