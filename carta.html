@@ -60,7 +60,9 @@
     </style>
   </head>
   <body class="text-[var(--foreground)] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
-    <video class="fixed top-0 left-0 w-[100vw] h-[100vh] object-cover z-[-1] pointer-events-none opacity-[0.35]" autoplay="" muted="" loop="" playsinline="" preload="metadata" aria-hidden="true" src="https://micsas-ff-web-11g9.vercel.app/hero%20section%20real.mp4"></video>
+    <div class="video-background-container fixed top-0 w-full h-screen -z-10 opacity-30" data-alpha-mask="16" style="; mask-image: linear-gradient(to bottom, transparent, black 0%, black 16%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 16%, transparent)">
+      <video src="https://micsas-ff-web-11g9.vercel.app/micsas-hero-F1E5CD.mp4" autoplay="" loop="" muted="" playsinline="" class="w-full h-full object-cover" id="aura-video"></video>
+    </div>
     <!-- Paper texture -->
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
@@ -124,21 +126,34 @@
 
     <!-- ──── HERO ──── -->
     <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-24 pb-48 bg-[#F7E8CC]/85 overflow-hidden">
-      <h1 class="reveal leading-tight text-[var(--foreground)] sm:text-6xl md:text-5xl text-4xl tracking-tight font-serif max-w-6xl z-10 mr-auto mb-10 ml-auto relative visible">
-        PIZZA
-        <em class="not-italic text-[var(--primary)]">NAPOLITANA</em>
-        TRADICIONAL
-      </h1>
-      <div class="flex flex-col sm:flex-row items-center gap-4 reveal visible justify-center w-full relative z-10">
-        <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--primary-foreground)] bg-[var(--foreground)] hover:bg-[var(--foreground)]/90" data-i18n="hero_carta">
-          La nostra carta
-        </a>
-        <a href="micsas-events.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border-2 border-[var(--foreground)]">
-          Micsas Events
-        </a>
-        <a href="pre-pedido.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm transition-all hover:bg-[var(--muted-foreground)] hover:-translate-y-0.5" data-i18n="demana">
-          Demana ja! →
-        </a>
+      <div class="absolute top-0 left-0 w-full bg-black/10 z-0 h-full"></div>
+      <div class="flex flex-col items-center reveal visible relative z-10">
+        <p class="text-[#2A1E16] uppercase mb-6 flex items-center gap-3 font-['Bebas_Neue',sans-serif] text-[20px] sm:text-[24px] leading-[1.2] font-normal">
+          <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#2A1E16]/50"></span>
+          Micsas Friends &amp; Family
+          <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#2A1E16]/50"></span>
+        </p>
+
+        <h1 class="leading-none select-none sm:text-7xl md:text-8xl lg:text-9xl text-6xl font-normal text-[#E23F2E] tracking-normal font-['Lilita_One',sans-serif] mb-12 drop-shadow-[0_0_40px_rgba(226,63,46,0.15)]">
+          micsas.ff
+        </h1>
+
+        <div class="flex flex-col items-center gap-4 w-full">
+          <div class="flex flex-col sm:flex-row items-center gap-4 justify-center w-full">
+            <a href="#shop" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border-2 border-[var(--foreground)]">
+              Shop
+            </a>
+            <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--primary-foreground)] bg-[var(--foreground)] hover:bg-[var(--foreground)]/90" data-i18n="hero_carta">
+              Veure la Carta
+            </a>
+            <a href="micsas-events.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border-2 border-[var(--foreground)]">
+              Micsas Events
+            </a>
+          </div>
+          <a href="pre-pedido.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm transition-all hover:bg-[var(--muted-foreground)] hover:-translate-y-0.5" data-i18n="demana">
+            Demana ja! →
+          </a>
+        </div>
       </div>
       <a href="#les-preferides" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10">
         <span class="uppercase text-[var(--foreground)] text-sm font-bold tracking-widest font-serif" data-i18n="descobreix">
