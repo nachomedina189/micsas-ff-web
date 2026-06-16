@@ -57,6 +57,27 @@
     <style>
       :root { --background: #F7E8CC; --foreground: #2A1E16; --muted: #E6D5B0; --muted-foreground: #8E2A15; --primary: #E23F2E; --primary-foreground: #F7E8CC; --border: #E6D5B0; }
       .liquid-glass { background: rgba(230, 213, 176, 0.2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(226, 63, 46, 0.15); box-shadow: 0 4px 6px rgba(42, 30, 22, 0.05); position: relative; overflow: hidden; }
+      /* Once the navbar background turns red on scroll, the logo/CTA/icons
+         (dark brown / red-orange, designed for the beige state) need to
+         switch to peach so they stay legible against #c80a07. */
+      #navbar.nav-scrolled > a:first-child,
+      #navbar.nav-scrolled a[data-i18n="demana"],
+      #navbar.nav-scrolled [data-lang] {
+        color: #F2D7B8 !important;
+      }
+      #navbar.nav-scrolled a[data-i18n="demana"]:hover {
+        background: #F2D7B8 !important;
+        color: #c80a07 !important;
+      }
+      #navbar.nav-scrolled .lang-pill {
+        border-color: rgba(242, 215, 184, 0.4) !important;
+      }
+      #navbar.nav-scrolled .lang-pill > span {
+        color: rgba(242, 215, 184, 0.5) !important;
+      }
+      #navbar.nav-scrolled button[aria-label="Menú"] iconify-icon {
+        color: #F2D7B8 !important;
+      }
     </style>
   </head>
   <body class="text-[var(--foreground)] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
@@ -88,7 +109,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+        <div class="lang-pill hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
           <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
           <span class="text-[#C4B08A]/60 select-none">|</span>
           <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
@@ -438,10 +459,10 @@
       const navbar = document.getElementById('navbar');
       window.addEventListener('scroll', () => {
         if (window.scrollY > 40) {
-          navbar.classList.add('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2D7B8]/30', 'shadow-sm');
+          navbar.classList.add('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2D7B8]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.remove('border-transparent');
         } else {
-          navbar.classList.remove('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2D7B8]/30', 'shadow-sm');
+          navbar.classList.remove('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2D7B8]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.add('border-transparent');
         }
       }, { passive: true });
