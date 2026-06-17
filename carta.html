@@ -78,6 +78,10 @@
       #navbar.nav-scrolled button[aria-label="Menú"] iconify-icon {
         color: #F2D7B8 !important;
       }
+      #navbar.nav-scrolled img.nav-logo {
+        filter: brightness(10) !important;
+        mix-blend-mode: normal !important;
+      }
     </style>
   </head>
   <body class="text-[var(--foreground)] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
@@ -89,9 +93,7 @@
 
     <!-- ──── NAV ──── -->
     <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b" id="navbar">
-      <a href="#" class="font-['Bagel_Fat_One'] tracking-tighter text-2xl text-[var(--foreground)] hover:text-[var(--primary)] transition-colors">
-        micsas
-      </a>
+      <a href="#"><img src="logo micsas.png" alt="micsas" class="nav-logo h-8 w-auto" style="mix-blend-mode:multiply"></a>
 
       <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-[var(--foreground)] backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[var(--border)]/30 bg-[#F2E6CE]/70">
         <a href="#nosaltres" class="relative transition-opacity hover:opacity-60" data-i18n="nav_historia">
@@ -155,8 +157,8 @@
           <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#2A1E16]/50"></span>
         </p>
 
-        <h1 class="leading-none select-none sm:text-7xl md:text-8xl lg:text-9xl text-6xl font-normal text-[#E23F2E] tracking-normal font-['Bagel_Fat_One',sans-serif] mb-12 drop-shadow-[0_0_40px_rgba(226,63,46,0.15)]">
-          micsas
+        <h1 class="mb-12">
+          <img src="micsas hero nombre.png" alt="micsas" class="max-w-sm w-full mx-auto drop-shadow-[0_0_40px_rgba(226,63,46,0.15)]" style="mix-blend-mode:multiply">
         </h1>
       </div>
 
