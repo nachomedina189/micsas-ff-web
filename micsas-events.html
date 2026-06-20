@@ -8,7 +8,7 @@
   <script defer="" src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&family=Bagel+Fat+One&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="transicion.css">
   <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
   <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
@@ -33,6 +33,14 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
     .submit-spinner { animation: spin 0.7s linear infinite; }
+    #navbar.nav-scrolled > a:first-child,
+    #navbar.nav-scrolled [data-lang] { color: #F2D7B8 !important; }
+    #navbar.nav-scrolled .lang-pill { border-color: rgba(242,215,184,0.4) !important; }
+    #navbar.nav-scrolled .lang-pill > span { color: rgba(242,215,184,0.5) !important; }
+    #navbar.nav-scrolled img.nav-logo {
+      filter: invert(1) hue-rotate(207deg) saturate(0.68) brightness(1.24) !important;
+      mix-blend-mode: screen !important;
+    }
   </style>
 </head>
 <body class="bg-transparent text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
@@ -40,17 +48,17 @@
 
   <!-- ──── NAV ──── -->
   <nav class="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-4 flex items-center justify-between border-b transition-all duration-300" id="navbar">
-  <a href="carta.html" class="font-['Lilita_One'] text-2xl text-[#2A1A0F] tracking-tight leading-none">micsas.ff</a>
+  <a href="carta.html"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto" style="mix-blend-mode:multiply"></a>
   <div class="flex items-center gap-3">
-    <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
-      <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E" class="">CA</button>
+    <div class="lang-pill hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+      <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
       <span class="text-[#C4B08A]/60 select-none">|</span>
-      <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16" class="">ES</button>
+      <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
     </div>
-    <a href="carta.html" class="flex items-center gap-2 font-['Inter',sans-serif] text-[16px] leading-[1.5] font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors px-6 py-3 rounded-full border border-[#C4B08A]/40 hover:border-[#E23F2E]/40">
-      <span data-i18n="ev_tornar" class="">Tornar</span>
+    <a href="carta.html" class="flex items-center gap-2 font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors px-6 py-3 rounded-full border border-[#C4B08A]/40 hover:border-[#E23F2E]/40">
+      <span data-i18n="ev_tornar">Tornar</span>
     </a>
-    <a href="pre-pedido.html" class="flex items-center gap-2 font-['Inter',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#E23F2E] px-6 py-3 rounded-full shadow-sm hover:bg-[#B82A1F] transition-all" data-i18n="demana">
+    <a href="pre-pedido.html" class="flex items-center gap-2 font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#E23F2E] px-6 py-3 rounded-full shadow-sm hover:bg-[#B82A1F] transition-all" data-i18n="demana">
       Demana ja!
     </a>
   </div>
@@ -450,10 +458,10 @@
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       if (window.scrollY > 40) {
-        navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+        navbar.classList.add('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2D7B8]/30', 'shadow-sm', 'nav-scrolled');
         navbar.classList.remove('border-transparent');
       } else {
-        navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+        navbar.classList.remove('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2D7B8]/30', 'shadow-sm', 'nav-scrolled');
         navbar.classList.add('border-transparent');
       }
     }, { passive: true });
