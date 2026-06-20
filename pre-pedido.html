@@ -43,13 +43,13 @@
     <div class="flex items-center gap-3">
       <!-- Logged out -->
       <button id="nav-login-btn" onclick="openLoginModal()"
-        class="text-sm font-medium underline underline-offset-2 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors font-['Inter',sans-serif]">
+        class="text-sm font-medium underline underline-offset-2 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
         Inicia sessió o registra't
       </button>
       <!-- Logged in -->
       <div id="nav-user-wrap" class="hidden items-center gap-3">
-        <span class="text-sm font-medium text-[#2A1A0F] font-['Inter',sans-serif]">Benvingut, <span id="nav-user-name" class="text-[#E23F2E]"></span></span>
-        <button onclick="doSignOut()" class="text-xs font-medium text-[#9B8A72] hover:text-[#E23F2E] transition-colors underline underline-offset-2 font-['Inter',sans-serif]">Tancar sessió</button>
+        <span class="text-sm font-medium text-[#2A1A0F] font-['League_Spartan',sans-serif]">Benvingut, <span id="nav-user-name" class="text-[#E23F2E]"></span></span>
+        <button onclick="doSignOut()" class="text-xs font-medium text-[#9B8A72] hover:text-[#E23F2E] transition-colors underline underline-offset-2 font-['League_Spartan',sans-serif]">Tancar sessió</button>
       </div>
     </div>
   </nav>
@@ -61,12 +61,12 @@
     <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-6 transition-opacity duration-250">
       <p class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl md:text-4xl text-[#2A1A0F] leading-snug text-center" style="max-width:26rem">Ha arribat el moment,<br class="hidden md:block"> descobreix el secret de micsas.</p>
       <button onclick="openOrderCard()"
-        class="px-10 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#E23F2E] shadow-lg hover:bg-[#B82A1F] hover:-translate-y-0.5 active:scale-95 transition-all">
+        class="px-10 py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#E23F2E] shadow-lg hover:bg-[#B82A1F] hover:-translate-y-0.5 active:scale-95 transition-all">
         Ho vull ARA!
       </button>
       <p class="text-xs font-light text-[#9B8A72] italic -mt-3">Avís: pot causar addicció extrema</p>
       <!-- Shown only when logged in -->
-      <button id="pp-profile-btn" onclick="openProfilePanel()" class="hidden px-10 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#5A3E28] shadow-lg hover:bg-[#2A1A0F] hover:-translate-y-0.5 active:scale-95 transition-all">
+      <button id="pp-profile-btn" onclick="openProfilePanel()" class="hidden px-10 py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#5A3E28] shadow-lg hover:bg-[#2A1A0F] hover:-translate-y-0.5 active:scale-95 transition-all">
         El meu perfil
       </button>
     </div>
@@ -126,7 +126,7 @@
         <!-- CTA -->
         <div class="pt-1">
           <button id="pp-cta" disabled onclick="goToMenu()"
-            class="w-full py-3.5 rounded-xl font-['Inter',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
+            class="w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
             Demana
           </button>
           <p class="text-xs text-center font-light text-[#9B8A72] mt-3">Podràs triar les teves pizzes al següent pas</p>
@@ -231,8 +231,8 @@
       const btn = document.getElementById('pp-cta');
       btn.disabled = !ok;
       btn.className = ok
-        ? "w-full py-3.5 rounded-xl font-['Inter',sans-serif] font-medium text-[15px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] transition-all cursor-pointer"
-        : "w-full py-3.5 rounded-xl font-['Inter',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
+        ? "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] transition-all cursor-pointer"
+        : "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
     }
 
     function goToMenu() {
@@ -280,7 +280,7 @@
         <p id="pp-prof-name" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] text-center">—</p>
         <p id="pp-prof-email" class="text-sm font-light text-[#5A3E28] mt-1 text-center break-all"></p>
         <button onclick="doSignOut()"
-          class="mt-4 px-5 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/30 transition-all font-['Inter',sans-serif]">
+          class="mt-4 px-5 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/30 transition-all font-['League_Spartan',sans-serif]">
           Tancar sessió
         </button>
       </div>
@@ -288,12 +288,12 @@
       <!-- Tab list -->
       <nav class="flex flex-col px-4 pb-6 gap-1">
         <button id="pp-tab-perfil" onclick="showProfileTab('perfil')"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#2A1A0F] bg-[#DDD0B3] shadow-sm transition-all font-['Inter',sans-serif]">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#2A1A0F] bg-[#DDD0B3] shadow-sm transition-all font-['League_Spartan',sans-serif]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           El meu perfil
         </button>
         <button id="pp-tab-historial" onclick="showProfileTab('historial')"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#9B8A72] hover:bg-[#C4B08A]/20 transition-all font-['Inter',sans-serif]">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#9B8A72] hover:bg-[#C4B08A]/20 transition-all font-['League_Spartan',sans-serif]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
           Historial de pedidos
         </button>
@@ -308,7 +308,7 @@
         <div class="flex items-center justify-between mb-6">
           <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F]">El meu perfil</h2>
           <button id="pp-edit-btn" onclick="toggleProfileEdit()"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/20 transition-all font-['Inter',sans-serif]">
+            class="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/20 transition-all font-['League_Spartan',sans-serif]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Editar
           </button>
@@ -361,11 +361,11 @@
           <p id="pp-edit-err" class="hidden text-sm text-[#E23F2E]"></p>
           <div class="flex gap-3">
             <button onclick="saveProfileData()"
-              class="flex-1 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+              class="flex-1 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
               Guardar canvis
             </button>
             <button onclick="toggleProfileEdit()"
-              class="flex-1 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#C4B08A]/20 transition-all">
+              class="flex-1 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#C4B08A]/20 transition-all">
               Cancel·lar
             </button>
           </div>
@@ -406,11 +406,11 @@
           </div>
           <p id="pp-login-err" class="hidden text-xs text-[#E23F2E]"></p>
           <button onclick="checkEmail()" id="pp-login-check-btn"
-            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+            class="w-full py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
             Continuar
           </button>
           <button onclick="closeLoginModal()"
-            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#E6D5B0]/30 transition-all">
+            class="w-full py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#E6D5B0]/30 transition-all">
             Cancel·lar
           </button>
         </div>
@@ -429,7 +429,7 @@
             onkeydown="if(event.key==='Enter') submitOtp()">
           <p id="pp-login-otp-err" class="hidden text-xs text-[#E23F2E]"></p>
           <button onclick="submitOtp()" id="pp-login-otp-btn"
-            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+            class="w-full py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
             Verificar
           </button>
           <button onclick="resendOtp()" class="w-full text-xs text-[#9B8A72] hover:text-[#E23F2E] transition-colors">
@@ -456,7 +456,7 @@
             class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
           <p id="pp-login-reg-err" class="hidden text-xs text-[#E23F2E]"></p>
           <button onclick="submitRegister()" id="pp-login-reg-btn"
-            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+            class="w-full py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
             Crear compte i continuar
           </button>
         </div>
@@ -470,7 +470,7 @@
         <h2 id="pp-login-ok-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-2">Benvingut!</h2>
         <p id="pp-login-ok-msg" class="text-sm font-light text-[#5A3E28] mb-6">Ja estàs connectat al teu compte de Micsas.</p>
         <button onclick="closeLoginModal()"
-          class="px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#2A1A0F] hover:bg-[#1a1009] transition-all">
+          class="px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#2A1A0F] hover:bg-[#1a1009] transition-all">
           D'acord
         </button>
       </div>

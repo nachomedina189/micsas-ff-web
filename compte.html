@@ -26,7 +26,7 @@
     <a href="index.html" class="font-['League_Spartan',sans-serif] font-black tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
-    <a href="pedido.html" class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors font-['Inter',sans-serif]">
+    <a href="pedido.html" class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
       <iconify-icon icon="solar:arrow-left-linear" width="16" style="stroke-width:1.5;"></iconify-icon>
       Tornar a la carta
     </a>
@@ -49,7 +49,7 @@
       <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-2">Has d'iniciar sessió</h2>
       <p class="text-sm font-light text-[#5A3E28] mb-8">Inicia sessió per veure les teves dades i comandes.</p>
       <a href="pedido.html"
-        class="inline-block px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+        class="inline-block px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
         Anar a la comanda
       </a>
     </div>
@@ -90,7 +90,7 @@
           </div>
           <p id="ac-err" class="hidden text-xs text-[#E23F2E]"></p>
           <button onclick="saveProfile()"
-            class="w-full py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+            class="w-full py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
             Desar canvis
           </button>
         </div>
@@ -107,14 +107,14 @@
         <div id="orders-empty" class="hidden px-6 py-10 text-center">
           <iconify-icon icon="solar:bag-heart-linear" width="36" style="color:#C4B08A;" class="mb-3 block mx-auto"></iconify-icon>
           <p class="text-sm font-light text-[#5A3E28]">Encara no has fet cap comanda.</p>
-          <a href="pedido.html" class="inline-block mt-4 text-sm font-medium text-[#E23F2E] hover:underline font-['Inter',sans-serif]">Fer la primera comanda →</a>
+          <a href="pedido.html" class="inline-block mt-4 text-sm font-medium text-[#E23F2E] hover:underline font-['League_Spartan',sans-serif]">Fer la primera comanda →</a>
         </div>
       </section>
 
       <!-- ── Tancar sessió ── -->
       <section class="text-center pt-2 pb-4">
         <button onclick="signOutAndRedirect()"
-          class="px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#E6D5B0]/30 transition-all">
+          class="px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#5A3E28] border border-[#C4B08A]/40 hover:bg-[#E6D5B0]/30 transition-all">
           Tancar sessió
         </button>
       </section>
@@ -208,7 +208,7 @@
           <div class="flex items-start justify-between gap-3 flex-wrap">
             <div class="space-y-0.5">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs font-medium text-[#9B8A72] font-['Inter',sans-serif]">#${order.id.slice(0,8)}</span>
+                <span class="text-xs font-medium text-[#9B8A72] font-['League_Spartan',sans-serif]">#${order.id.slice(0,8)}</span>
                 <span class="text-xs px-2 py-0.5 rounded-full font-medium ${badgeCls}">${badgeLabel}</span>
               </div>
               <p class="text-xs font-light text-[#9B8A72]">${fmtDate(order.created_at)}</p>
@@ -220,11 +220,11 @@
           </div>
           <div class="flex gap-2 mt-3 flex-wrap">
             <button onclick="toggleDetails('${detailsId}', this)"
-              class="text-xs font-medium text-[#5A3E28] border border-[#C4B08A]/40 px-3 py-1.5 rounded-full hover:bg-[#E6D5B0]/30 transition-colors font-['Inter',sans-serif]">
+              class="text-xs font-medium text-[#5A3E28] border border-[#C4B08A]/40 px-3 py-1.5 rounded-full hover:bg-[#E6D5B0]/30 transition-colors font-['League_Spartan',sans-serif]">
               Veure detalls
             </button>
             <button onclick='repeatOrder(${itemsData})'
-              class="text-xs font-medium text-[#E23F2E] border border-[#E23F2E]/30 px-3 py-1.5 rounded-full hover:bg-[#E23F2E]/5 transition-colors font-['Inter',sans-serif]">
+              class="text-xs font-medium text-[#E23F2E] border border-[#E23F2E]/30 px-3 py-1.5 rounded-full hover:bg-[#E23F2E]/5 transition-colors font-['League_Spartan',sans-serif]">
               Repetir comanda
             </button>
           </div>
