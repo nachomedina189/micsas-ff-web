@@ -20,6 +20,16 @@
     <style>
       .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
       .reveal.visible { opacity: 1; transform: translateY(0); }
+      /* Logo visible on red background (default state) */
+      #navbar img.nav-logo {
+        filter: invert(1) hue-rotate(207deg) saturate(0.68) brightness(1.24) !important;
+        mix-blend-mode: screen !important;
+      }
+      /* Logo normal on beige nav (scrolled state) */
+      #navbar.nav-scrolled img.nav-logo {
+        filter: none !important;
+        mix-blend-mode: multiply !important;
+      }
     </style>
   </head>
   <body class="bg-[#c80a07] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
@@ -27,7 +37,7 @@
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
     <!-- ════ NAV ════ -->
-    <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b bg-[#F2E6CE]/60" id="navbar">
+    <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
       <a href="carta.html"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto" style="mix-blend-mode:multiply"></a>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
