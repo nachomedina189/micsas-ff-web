@@ -584,10 +584,10 @@
       const navbar = document.getElementById('navbar');
       window.addEventListener('scroll', () => {
         if (window.scrollY > 40) {
-          navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+          navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.remove('border-transparent');
         } else {
-          navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm');
+          navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.add('border-transparent');
         }
       }, { passive: true });
