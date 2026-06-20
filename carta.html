@@ -85,6 +85,29 @@
         filter: invert(1) hue-rotate(207deg) saturate(0.68) brightness(1.24) !important;
         mix-blend-mode: screen !important;
       }
+      @keyframes btn-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+      }
+      @keyframes arrow-slide {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(5px); }
+      }
+      .btn-demana {
+        animation: btn-float 2.4s ease-in-out infinite;
+      }
+      .btn-demana:hover {
+        animation: none;
+        transform: translateY(-2px);
+      }
+      .btn-demana .arrow {
+        display: inline-block;
+        animation: arrow-slide 2.4s ease-in-out infinite;
+      }
+      .btn-demana:hover .arrow {
+        animation: none;
+        transform: translateX(4px);
+      }
     </style>
   </head>
   <body class="text-[var(--foreground)] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
@@ -167,20 +190,24 @@
       </div>
 
       <div class="flex flex-col items-center gap-4 w-full relative z-10">
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-          <a href="#shop" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border-2 border-[var(--foreground)]">
-            Shop
+        <!-- Primary CTAs: vertically stacked -->
+        <div class="flex flex-col items-center gap-3 w-full">
+          <a href="pre-pedido.html" class="btn-demana inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm w-full max-w-[240px]" data-i18n="demana">
+            Demana ja! <span class="arrow">→</span>
           </a>
-          <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--primary-foreground)] bg-[var(--foreground)] hover:bg-[var(--foreground)]/90" data-i18n="hero_carta">
+          <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--primary-foreground)] bg-[var(--foreground)] hover:bg-[var(--foreground)]/90 w-full max-w-[240px]" data-i18n="hero_carta">
             Veure la Carta
           </a>
-          <a href="micsas-events.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border-2 border-[var(--foreground)]">
+        </div>
+        <!-- Secondary buttons: horizontal row -->
+        <div class="flex flex-row items-center justify-center gap-3">
+          <a href="#shop" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border border-[var(--foreground)]/30">
+            Shop
+          </a>
+          <a href="micsas-events.html" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border border-[var(--foreground)]/30">
             Micsas Events
           </a>
         </div>
-        <a href="pre-pedido.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm transition-all hover:bg-[var(--muted-foreground)] hover:-translate-y-0.5" data-i18n="demana">
-          Demana ja! →
-        </a>
       </div>
       <a href="#les-preferides" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10">
         <span class="uppercase text-[var(--foreground)] text-sm font-bold tracking-widest" data-i18n="descobreix">
