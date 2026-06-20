@@ -9,7 +9,7 @@
   <script defer src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="transicion.css">
   <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
   <link rel="prefetch" href="pedido.html">
@@ -33,11 +33,11 @@
     }
   </style>
 </head>
-<body class="bg-[#DDD0B3] text-[#2A1A0F] font-['DM_Sans',sans-serif] antialiased selection:bg-[#E23F2E]/20">
+<body class="bg-[#DDD0B3] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased selection:bg-[#E23F2E]/20">
 
   <!-- NAV -->
   <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#DDD0B3]/95 backdrop-blur-md border-b border-[#C4B08A]/40 shadow-sm">
-    <a href="index.html" class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
+    <a href="index.html" class="font-['League_Spartan',sans-serif] font-black tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
     <div class="flex items-center gap-3">
@@ -59,7 +59,7 @@
 
     <!-- LANDING -->
     <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-6 transition-opacity duration-250">
-      <p class="font-['Lilita_One'] tracking-tight text-3xl md:text-4xl text-[#2A1A0F] leading-snug text-center" style="max-width:26rem">Ha arribat el moment,<br class="hidden md:block"> descobreix el secret de micsas.</p>
+      <p class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl md:text-4xl text-[#2A1A0F] leading-snug text-center" style="max-width:26rem">Ha arribat el moment,<br class="hidden md:block"> descobreix el secret de micsas.</p>
       <button onclick="openOrderCard()"
         class="px-10 py-4 rounded-full font-['Inter',sans-serif] font-medium text-[17px] text-[#F2E6CE] bg-[#E23F2E] shadow-lg hover:bg-[#B82A1F] hover:-translate-y-0.5 active:scale-95 transition-all">
         Ho vull ARA!
@@ -76,7 +76,7 @@
 
       <!-- Card header -->
       <div class="px-6 pt-7 pb-5 border-b border-[#C4B08A]/20">
-        <h1 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F]">Quan i on et portem la pizza?</h1>
+        <h1 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">Quan i on et portem la pizza?</h1>
       </div>
 
       <div class="px-6 py-5 space-y-5">
@@ -266,7 +266,7 @@
 
       <!-- Logo + close -->
       <div class="flex items-center justify-between px-6 py-5">
-        <span class="font-['Lilita_One'] tracking-tighter text-2xl text-[#2A1A0F]">micsas.ff</span>
+        <span class="font-['League_Spartan',sans-serif] font-black tracking-tighter text-2xl text-[#2A1A0F]">micsas.ff</span>
         <button onclick="closeProfilePanel()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#C4B08A]/30 text-[#5A3E28] hover:text-[#2A1A0F] transition-colors">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -275,9 +275,9 @@
       <!-- Avatar + info -->
       <div class="flex flex-col items-center px-6 pb-6 pt-2">
         <div class="w-20 h-20 rounded-full bg-[#E23F2E] flex items-center justify-center mb-4 shadow-md">
-          <span id="pp-prof-initials" class="font-['Lilita_One'] text-3xl text-[#F2E6CE]">?</span>
+          <span id="pp-prof-initials" class="font-['League_Spartan',sans-serif] font-black text-3xl text-[#F2E6CE]">?</span>
         </div>
-        <p id="pp-prof-name" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] text-center">—</p>
+        <p id="pp-prof-name" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] text-center">—</p>
         <p id="pp-prof-email" class="text-sm font-light text-[#5A3E28] mt-1 text-center break-all"></p>
         <button onclick="doSignOut()"
           class="mt-4 px-5 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/30 transition-all font-['Inter',sans-serif]">
@@ -306,7 +306,7 @@
       <!-- Perfil tab -->
       <div id="pp-section-perfil" class="px-6 md:px-10 py-8 max-w-xl">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="font-['Lilita_One'] tracking-tight text-3xl text-[#2A1A0F]">El meu perfil</h2>
+          <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F]">El meu perfil</h2>
           <button id="pp-edit-btn" onclick="toggleProfileEdit()"
             class="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-[#5A3E28] border border-[#C4B08A]/60 hover:bg-[#C4B08A]/20 transition-all font-['Inter',sans-serif]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -374,7 +374,7 @@
 
       <!-- Historial tab -->
       <div id="pp-section-historial" class="hidden px-6 md:px-10 py-8 max-w-xl">
-        <h2 class="font-['Lilita_One'] tracking-tight text-3xl text-[#2A1A0F] mb-6">Historial de pedidos</h2>
+        <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F] mb-6">Historial de pedidos</h2>
         <div id="pp-order-list" class="space-y-3">
           <p class="text-base text-[#9B8A72] text-center py-8">Carregant...</p>
         </div>
@@ -395,7 +395,7 @@
 
       <!-- Vista 1: Email -->
       <div id="pp-login-email-view">
-        <h2 id="pp-login-title" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Inicia sessió</h2>
+        <h2 id="pp-login-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-1">Inicia sessió</h2>
         <p class="text-sm font-light text-[#5A3E28] mb-5 leading-relaxed">Introdueix el teu correu i t'enviem un codi.</p>
         <div class="space-y-4">
           <div>
@@ -421,7 +421,7 @@
         <button onclick="showLoginView('email')" class="flex items-center gap-1.5 text-xs text-[#9B8A72] hover:text-[#2A1A0F] transition-colors mb-4">
           ← Enrere
         </button>
-        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Introdueix el codi</h2>
+        <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-1">Introdueix el codi</h2>
         <p class="text-sm font-light text-[#5A3E28] mb-5">Hem enviat un codi de 6 dígits a <strong id="pp-login-otp-email" class="font-medium text-[#2A1A0F]"></strong></p>
         <div class="space-y-4">
           <input id="pp-login-otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456"
@@ -443,7 +443,7 @@
         <button onclick="showLoginView('email')" class="flex items-center gap-1.5 text-xs text-[#9B8A72] hover:text-[#2A1A0F] transition-colors mb-4">
           ← Enrere
         </button>
-        <h2 class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-1">Crea el teu compte</h2>
+        <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-1">Crea el teu compte</h2>
         <p class="text-sm font-light text-[#5A3E28] mb-5">Primera vegada a Micsas! Omple les teves dades.</p>
         <div class="space-y-3">
           <input id="pp-login-name" type="text" autocomplete="given-name" placeholder="Nom *"
@@ -467,7 +467,7 @@
         <div class="w-16 h-16 rounded-full bg-[#10B981]/10 text-[#10B981] flex items-center justify-center mx-auto mb-4">
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <h2 id="pp-login-ok-title" class="font-['Lilita_One'] tracking-tight text-2xl text-[#2A1A0F] mb-2">Benvingut!</h2>
+        <h2 id="pp-login-ok-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-2">Benvingut!</h2>
         <p id="pp-login-ok-msg" class="text-sm font-light text-[#5A3E28] mb-6">Ja estàs connectat al teu compte de Micsas.</p>
         <button onclick="closeLoginModal()"
           class="px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#2A1A0F] hover:bg-[#1a1009] transition-all">
@@ -661,7 +661,7 @@
             ${o.slot_time ? `<p class="text-xs text-[#9B8A72]">Hora: ${o.slot_time}</p>` : ''}
             <div class="flex justify-between items-center pt-1 border-t border-[#C4B08A]/20">
               <span class="text-xs font-light text-[#5A3E28]">${o.payment_method === 'cash' ? 'Efectiu' : 'Targeta'}</span>
-              <span class="font-['Lilita_One'] text-base text-[#E23F2E]">€${(o.total || 0).toFixed(2).replace('.',',')}</span>
+              <span class="font-['League_Spartan',sans-serif] font-black text-base text-[#E23F2E]">€${(o.total || 0).toFixed(2).replace('.',',')}</span>
             </div>
           </div>`;
       }).join('');
