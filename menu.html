@@ -508,75 +508,80 @@
         <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#F7E8CC]/85 to-transparent pointer-events-none z-10"></div>
       </div>
     </section>
-    <footer class="pt-16 pb-8 px-6 md:px-12 bg-[#F7E8CC]/85 border-t border-[#E6D5B0]/30 relative overflow-hidden z-10">
-      <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
-        <!-- Horaris Card -->
-        <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F7E8CC]/85 border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
-          <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
-            <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
-            <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-wider text-lg text-[#2A1A0F] uppercase" data-i18n="horaris">
-              Horaris
-            </h3>
+    <footer class="relative overflow-hidden z-10">
+      <!-- Upper: red bg matching menu page -->
+      <div class="pt-16 pb-0 px-6 md:px-12 bg-[#c80a07]">
+        <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
+          <!-- Horaris Card -->
+          <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#c80a07] border border-[#F2D7B8]/20 w-full max-w-[280px] mt-8">
+            <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
+              <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
+              <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-wider text-lg text-[#F2D7B8] uppercase" data-i18n="horaris">
+                Horaris
+              </h3>
+            </div>
+            <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#F2D7B8]/70">
+              <p>
+                <span data-i18n="hor_dl">Dl – Dj:</span>
+                <span class="text-[#F2D7B8]/40" data-i18n="hor_tancat">Tancat</span>
+              </p>
+              <p>
+                <span data-i18n="hor_dv">Dv – Dg:</span>
+                <span class="text-[#E23F2E]">20:30 – 23:30</span>
+              </p>
+            </div>
           </div>
-          <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
-            <p>
-              <span data-i18n="hor_dl">Dl – Dj:</span>
-              <span class="text-[#2A1A0F]/40" data-i18n="hor_tancat">Tancat</span>
-            </p>
-            <p>
-              <span data-i18n="hor_dv">Dv – Dg:</span>
-              <span class="text-[#E23F2E]">20:30 – 23:30</span>
-            </p>
+
+          <!-- Horizontal row of actions -->
+          <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
+            <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#F2D7B8]/40 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#F2D7B8] shrink-0" aria-label="Instagram">
+              <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
+            </a>
+            <a href="tel:+34600000000" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
+              Contacte
+            </a>
+            <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#F2D7B8]/40 text-sm shrink-0">
+              <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+              <span class="text-[#F2D7B8]/40 select-none">|</span>
+              <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#F2D7B8">ES</button>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- Horizontal row of actions -->
-        <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
-          <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
-            <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
-          </a>
-          <a href="tel:+34600000000" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
-            Contacte
-          </a>
-          <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">
-            <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
-            <span class="text-[#C4B08A]/60 select-none">|</span>
-            <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+      <!-- Lower: beige contrasting bg, border-t is the divider line -->
+      <div class="pt-12 pb-8 px-6 md:px-12 bg-[#F7E8CC]/85 border-t border-[#C4B08A]/30">
+        <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
+          <!-- Brand Wordmark -->
+          <div class="w-full flex justify-center items-center overflow-visible mb-12">
+            <a href="#" class="text-[16vw] leading-[0.8] hover:text-[#E23F2E] transition-colors select-none block md:text-[9vw] lg:text-[130px] xl:text-[160px] text-[#c80a07] tracking-wide font-['League_Spartan',sans-serif] font-black text-center w-full">
+              micsas.ff
+            </a>
           </div>
+
+          <!-- Copyright -->
+          <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">
+            © 2025 micsas.ff · Tots els drets reservats
+          </p>
+
+          <!-- Legal Links -->
+          <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
+            <a href="#" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+              Cookies
+            </a>
+            <span>·</span>
+            <a href="#" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all" data-i18n="privacitat">
+              Privacitat
+            </a>
+          </div>
+
+          <!-- Made By -->
+          <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
+            Made for micsas.ff with
+            <iconify-icon icon="solar:heart-bold" class="text-[#E23F2E] inline-block align-text-bottom" width="14"></iconify-icon>
+            by UnitedOps
+          </p>
         </div>
-
-        <!-- Divider -->
-        <div class="w-full h-px bg-[#C4B08A]/30"></div>
-
-        <!-- Brand Wordmark -->
-        <div class="w-full flex justify-center items-center overflow-visible mt-12 mb-12">
-          <a href="#" class="text-[16vw] leading-[0.8] hover:text-[#E23F2E] transition-colors select-none block md:text-[9vw] lg:text-[130px] xl:text-[160px] text-[#c80a07] tracking-wide font-['League_Spartan',sans-serif] font-black text-center w-full">
-            micsas.ff
-          </a>
-        </div>
-
-        <!-- Copyright -->
-        <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">
-          © 2025 micsas.ff · Tots els drets reservats
-        </p>
-
-        <!-- Legal Links -->
-        <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
-          <a href="#" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
-            Cookies
-          </a>
-          <span>·</span>
-          <a href="#" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all" data-i18n="privacitat">
-            Privacitat
-          </a>
-        </div>
-
-        <!-- Made By -->
-        <p class="text-[11px] font-light text-[#5A3E28]/60 text-center">
-          Made for micsas.ff with
-          <iconify-icon icon="solar:heart-bold" class="text-[#E23F2E] inline-block align-text-bottom" width="14"></iconify-icon>
-          by UnitedOps
-        </p>
       </div>
     </footer>
 
