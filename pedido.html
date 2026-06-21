@@ -996,8 +996,6 @@
       const timeStep = document.getElementById('cf-time-step');
       if (!timeStep.classList.contains('hidden')) {
         closeCheckout();
-      } else if (sessionStorage.getItem('micsas_time')) {
-        closeCheckout();
       } else {
         const scroll = document.getElementById('cf-scroll');
         scroll.style.opacity = '0';
@@ -1009,6 +1007,7 @@
           timeStep.classList.remove('hidden');
           timeStep.classList.add('enter-step-left');
           cfSelectedTime = null;
+          selectDeliveryDay(cfDeliveryDate === todayISO() ? 'today' : 'other');
           setTimeout(() => timeStep.classList.remove('enter-step-left'), 400);
         }, 180);
       }
