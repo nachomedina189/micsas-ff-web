@@ -78,11 +78,6 @@
     .enter-step-left { animation: stepSlideInLeft 0.35s cubic-bezier(0.16,1,0.3,1) both; }
 
     /* ── Smooth dropdowns (max-height trick) ── */
-    #cf-delivery-dropdown {
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1);
-    }
     #cf-order-summary {
       overflow: hidden;
       max-height: 0;
@@ -530,38 +525,20 @@
               </div>
             </div>
 
-            <!-- Pagament al repartidor (dropdown) -->
+            <!-- Pagament al repartidor (efectiu) -->
             <div id="cf-pay-delivery-wrapper" class="rounded-xl border border-[#C4B08A]/40 overflow-hidden transition-all">
-              <div id="cf-pay-delivery" onclick="toggleDeliveryDropdown()" role="radio" aria-checked="false" tabindex="0"
-                onkeydown="if(event.key===' '||event.key==='Enter'){toggleDeliveryDropdown()}"
+              <div id="cf-pay-delivery" onclick="selectPayMethod('cash')" role="radio" aria-checked="false" tabindex="0"
+                onkeydown="if(event.key===' '||event.key==='Enter'){selectPayMethod('cash')}"
                 class="flex items-center gap-4 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none">
                 <div class="w-10 h-10 rounded-full bg-[#E6D5B0]/30 text-[#E23F2E] flex items-center justify-center shrink-0">
                   <iconify-icon icon="solar:delivery-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-[#2A1A0F]">Pagament al repartidor</p>
-                  <p id="cf-delivery-subtitle" class="text-xs font-light text-[#5A3E28]">En efectiu o targeta</p>
+                  <p id="cf-delivery-subtitle" class="text-xs font-light text-[#5A3E28]">En efectiu</p>
                 </div>
-                <svg id="cf-delivery-chevron" class="w-4 h-4 text-[#9B8A72] transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-delivery">
                   <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-delivery-dot"></div>
-                </div>
-              </div>
-              <!-- Sub-opcions -->
-              <div id="cf-delivery-dropdown" class="border-t border-[#E6D5B0] bg-[#FAF6F0]">
-                <div id="cf-pay-cash" onclick="selectDeliveryMethod('cash')" class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F0E8D8] transition-all">
-                  <iconify-icon icon="solar:banknote-linear" width="16" class="text-[#5A3E28] shrink-0"></iconify-icon>
-                  <span class="text-sm text-[#2A1A0F] flex-1">En efectiu</span>
-                  <div class="w-4 h-4 rounded-full border-2 border-[#C4B08A] flex items-center justify-center transition-all" id="cf-radio-cash">
-                    <div class="w-2 h-2 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-cash-dot"></div>
-                  </div>
-                </div>
-                <div id="cf-pay-card" onclick="selectDeliveryMethod('card')" class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#F0E8D8] transition-all">
-                  <iconify-icon icon="solar:card-2-linear" width="16" class="text-[#5A3E28] shrink-0"></iconify-icon>
-                  <span class="text-sm text-[#2A1A0F] flex-1">En targeta al repartidor</span>
-                  <div class="w-4 h-4 rounded-full border-2 border-[#C4B08A] flex items-center justify-center transition-all" id="cf-radio-card">
-                    <div class="w-2 h-2 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-card-dot"></div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1078,12 +1055,12 @@
         walletDot.classList.toggle('opacity-0', !walletSel);
       }
 
-      // Delivery wrapper
+      // Delivery wrapper (cash on delivery)
       const deliveryCard  = document.getElementById('cf-pay-delivery');
       const deliveryWrap  = document.getElementById('cf-pay-delivery-wrapper');
       const deliveryRadio = document.getElementById('cf-radio-delivery');
       const deliveryDot   = document.getElementById('cf-radio-delivery-dot');
-      const deliverySel   = method === 'cash' || method === 'card';
+      const deliverySel   = method === 'cash';
       deliveryCard.setAttribute('aria-checked', deliverySel ? 'true' : 'false');
       deliveryWrap.classList.toggle('border-[#E23F2E]/60', deliverySel);
       deliveryWrap.classList.toggle('bg-[#E23F2E]/5', deliverySel);
@@ -1092,44 +1069,7 @@
       deliveryRadio.classList.toggle('border-[#C4B08A]', !deliverySel);
       deliveryDot.classList.toggle('opacity-0', !deliverySel);
 
-      // Sub-options highlight
-      ['cash', 'card'].forEach(m => {
-        const sub = document.getElementById('cf-pay-' + m);
-        const r   = document.getElementById('cf-radio-' + m);
-        const d   = document.getElementById('cf-radio-' + m + '-dot');
-        if (!sub) return;
-        const sel = method === m;
-        sub.classList.toggle('bg-[#E23F2E]/5', sel);
-        r.classList.toggle('border-[#E23F2E]', sel);
-        r.classList.toggle('border-[#C4B08A]', !sel);
-        d.classList.toggle('opacity-0', !sel);
-      });
-
       validateCheckout();
-    }
-
-    function toggleDeliveryDropdown() {
-      const dropdown = document.getElementById('cf-delivery-dropdown');
-      const chevron  = document.getElementById('cf-delivery-chevron');
-      const isOpen   = dropdown.style.maxHeight && dropdown.style.maxHeight !== '0px';
-      if (isOpen) {
-        dropdown.style.maxHeight = '0';
-        chevron.style.transform = '';
-        if (cfPayMethod === 'cash' || cfPayMethod === 'card') {
-          cfPayMethod = null;
-          selectPayMethod('__none__');
-        }
-      } else {
-        dropdown.style.maxHeight = dropdown.scrollHeight + 'px';
-        chevron.style.transform = 'rotate(180deg)';
-        selectPayMethod(cfPayMethod === 'cash' || cfPayMethod === 'card' ? cfPayMethod : 'cash');
-      }
-    }
-
-    function selectDeliveryMethod(method) {
-      const subtitle = document.getElementById('cf-delivery-subtitle');
-      subtitle.textContent = method === 'cash' ? 'En efectiu' : 'En targeta al repartidor';
-      selectPayMethod(method);
     }
 
     function validateCheckout() {
@@ -1792,8 +1732,8 @@
       const delivChevron = document.getElementById('cf-delivery-chevron');
       if (delivChevron) delivChevron.style.transform = '';
       const subtitle = document.getElementById('cf-delivery-subtitle');
-      if (subtitle) subtitle.textContent = 'En efectiu o targeta';
-      ['online','wallet','delivery','cash','card'].forEach(m => {
+      if (subtitle) subtitle.textContent = 'En efectiu';
+      ['online','wallet','delivery','cash'].forEach(m => {
         const radio = document.getElementById('cf-radio-' + m);
         const dot   = document.getElementById('cf-radio-' + m + '-dot');
         if (radio) { radio.classList.remove('border-[#E23F2E]'); radio.classList.add('border-[#C4B08A]'); }
