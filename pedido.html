@@ -331,8 +331,13 @@
       <div class="max-w-lg mx-auto px-4 py-10 space-y-6 pb-12">
         <div class="text-center">
           <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F] mb-2">Quan vols rebre la pizza?</h2>
-          <p class="text-sm font-light text-[#5A3E28]">Tria una franja horària</p>
+          <p class="text-sm font-light text-[#5A3E28]">Tria el dia i una franja horària</p>
         </div>
+        <div class="flex gap-2 justify-center">
+          <button type="button" onclick="selectDeliveryDay('today')" id="cf-day-today" class="px-5 py-2.5 rounded-full border text-sm font-medium transition-all">Avui</button>
+          <button type="button" onclick="selectDeliveryDay('other')" id="cf-day-other" class="px-5 py-2.5 rounded-full border text-sm font-medium transition-all">Un altre dia</button>
+        </div>
+        <input type="date" id="cf-delivery-date" class="hidden w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]" onchange="onDeliveryDateChange(this.value)">
         <div id="cf-time-slots" class="space-y-3"></div>
       </div>
     </div>
@@ -887,9 +892,69 @@
     let currentUser = null;
     let cfClientComplete = false;
     let cfClientName = '', cfClientPhone = '', cfClientEmail = '';
+    function todayISO() { return new Date().toISOString().split('T')[0]; }
+    let cfDeliveryDate = todayISO();
+    let _slotCounts = {};
+
+    async function loadSlotCountsFor(date) {
+      _slotCounts = {};
+      if (!window.supabase) return;
+      const { data } = await window.supabase
+        .from('orders')
+        .select('slot_time, pizza_count')
+        .eq('delivery_date', date)
+        .neq('status', 'cancelled');
+      if (!data) return;
+      data.forEach(row => {
+        if (!row.slot_time) return;
+        _slotCounts[row.slot_time] = (_slotCounts[row.slot_time] || 0) + (row.pizza_count || 0);
+      });
+    }
+
+    function selectDeliveryDay(which) {
+      const todayBtn  = document.getElementById('cf-day-today');
+      const otherBtn  = document.getElementById('cf-day-other');
+      const dateInput = document.getElementById('cf-delivery-date');
+      const isToday   = which === 'today';
+      todayBtn.classList.toggle('border-[#E23F2E]', isToday);
+      todayBtn.classList.toggle('bg-[#E23F2E]/10', isToday);
+      todayBtn.classList.toggle('text-[#E23F2E]', isToday);
+      todayBtn.classList.toggle('border-[#C4B08A]/40', !isToday);
+      otherBtn.classList.toggle('border-[#E23F2E]', !isToday);
+      otherBtn.classList.toggle('bg-[#E23F2E]/10', !isToday);
+      otherBtn.classList.toggle('text-[#E23F2E]', !isToday);
+      otherBtn.classList.toggle('border-[#C4B08A]/40', isToday);
+      if (isToday) {
+        dateInput.classList.add('hidden');
+        cfDeliveryDate = todayISO();
+        refreshTimeSlots();
+      } else {
+        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+        const maxDate  = new Date(); maxDate.setDate(maxDate.getDate() + 13);
+        dateInput.min = tomorrow.toISOString().split('T')[0];
+        dateInput.max = maxDate.toISOString().split('T')[0];
+        dateInput.classList.remove('hidden');
+        if (!dateInput.value) dateInput.value = dateInput.min;
+        dateInput.focus();
+        cfDeliveryDate = dateInput.value;
+        refreshTimeSlots();
+      }
+    }
+
+    function onDeliveryDateChange(val) {
+      if (!val) return;
+      cfDeliveryDate = val;
+      refreshTimeSlots();
+    }
+
+    async function refreshTimeSlots() {
+      await loadSlotCountsFor(cfDeliveryDate);
+      renderTimeSlots();
+    }
 
     function renderTimeSlots() {
-      const slots = ['Cuanto antes'];
+      const isToday = cfDeliveryDate === todayISO();
+      const slots = isToday ? ['Cuanto antes'] : [];
       for (let h = 20; h <= 23; h++) {
         const startM = h === 20 ? 30 : 0;
         for (let m = startM; m < 60; m += 15) {
@@ -900,11 +965,12 @@
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
       container.innerHTML = slots.map((s, i) => {
-        const isFirst = i === 0;
-        return `<button type="button" onclick="selectTimeSlot('${s}')"
-          class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border border-[#C4B08A]/40 font-medium text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] transition-all text-${isFirst ? 'lg' : 'base'}">
+        const isFirst = isToday && i === 0;
+        const full = (_slotCounts[s] || 0) >= 6;
+        return `<button type="button" ${full ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
+          class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isFirst ? 'lg' : 'base'} ${full ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
           <iconify-icon icon="${isFirst ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isFirst ? 20 : 16}" style="color:${isFirst ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
-          ${s}
+          ${s}${full ? ' · Complet' : ''}
         </button>`;
       }).join('');
     }
@@ -1016,7 +1082,7 @@
         cfSelectedTime = null;
         document.getElementById('cf-time-step').classList.remove('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
-        renderTimeSlots();
+        selectDeliveryDay('today');
       }
       document.getElementById('cf-success').classList.add('hidden');
       document.getElementById('cf-success').classList.remove('flex');
@@ -1467,7 +1533,7 @@
       const timeNote   = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
       const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
       const paymentMethod = cfPayMethod === 'cash' ? 'cash' : (cfPayMethod === 'online' ? 'online' : 'card_delivery');
-      return { name, email, phone, street, floor, postalCode, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount };
+      return { name, email, phone, street, floor, postalCode, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate };
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
@@ -1509,6 +1575,7 @@
           total:          d.total,
           notes:          d.finalNotes,
           slot_time:      cfSelectedTime || null,
+          delivery_date:  d.deliveryDate || todayISO(),
           pizza_count:    cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0),
         })
         .select().single();
@@ -1767,6 +1834,9 @@
       const tipCustom = document.getElementById('cf-tip-custom');
       if (tipCustom) { tipCustom.value = ''; tipCustom.classList.add('hidden'); }
       if (typeof selectTip === 'function') selectTip(0);
+      cfDeliveryDate = todayISO();
+      const deliveryDateInput = document.getElementById('cf-delivery-date');
+      if (deliveryDateInput) { deliveryDateInput.value = ''; deliveryDateInput.classList.add('hidden'); }
       // Reset form fields
       ['cf-name','cf-email','cf-phone','cf-notes'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';

@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       paymentMethod, paymentStatus,
       total, subtotal, tipAmount,
       authUserId,
-      slotTime, pizzaCount,
+      slotTime, pizzaCount, deliveryDate,
       items,
     } = await req.json();
 
@@ -94,6 +94,7 @@ Deno.serve(async (req) => {
         notes:          finalNotes ?? null,
         slot_time:      slotTime ?? null,
         pizza_count:    pizzaCount ?? 0,
+        delivery_date:  deliveryDate ?? null,
       })
       .select("id")
       .single();
