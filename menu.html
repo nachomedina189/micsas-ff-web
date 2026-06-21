@@ -82,20 +82,20 @@
         .pizza-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
+          gap: 20px;
         }
         @media (max-width: 1023px) and (min-width: 768px) {
-          .pizza-grid { grid-template-columns: repeat(2, 1fr); }
+          .pizza-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
         }
         @media (max-width: 767px) {
-          .pizza-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+          .pizza-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; gap: 16px; }
         }
 
         /* Flip hint finger */
         .flip-hint {
           position: absolute;
-          bottom: 14px;
-          right: 14px;
+          bottom: 12px;
+          right: 12px;
           z-index: 10;
           pointer-events: none;
           display: flex;
@@ -106,13 +106,13 @@
           transition: opacity 0.4s;
         }
         .flip-hint.hide { opacity: 0; }
-        .flip-hint svg { width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
+        .flip-hint svg { width: 24px; height: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
         .flip-hint span {
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 600;
           letter-spacing: 0.05em;
-          color: #2A1A0F;
-          background: rgba(242,230,206,0.85);
+          color: #3a2e25;
+          background: rgba(242,230,206,0.92);
           padding: 2px 7px;
           border-radius: 20px;
           white-space: nowrap;
@@ -128,8 +128,15 @@
         .pizza-grid-card {
           position: relative;
           perspective: 1000px;
-          height: 340px;
+          height: 380px;
           cursor: pointer;
+          border-radius: 16px;
+          box-shadow: 0 6px 28px rgba(30,8,4,0.32);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .pizza-grid-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 16px 44px rgba(30,8,4,0.46);
         }
         .pizza-grid-card-inner {
           position: relative;
@@ -146,9 +153,8 @@
           width: 100%; height: 100%;
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
-          background: #E8DCC4;
-          border-radius: 20px;
-          box-shadow: 0 4px 20px rgba(42,26,15,0.09);
+          background: #F2E6CE;
+          border-radius: 16px;
           overflow: hidden;
         }
         .pizza-card-front {
@@ -158,12 +164,12 @@
         .pizza-card-back {
           transform: rotateY(180deg);
           padding: 0;
-          background: #E8DCC4;
+          background: #F2E6CE;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
           scrollbar-width: thin;
-          scrollbar-color: #E6D5B0 transparent;
+          scrollbar-color: #C4B08A transparent;
         }
         @keyframes photoReveal {
           from { clip-path: inset(0 0 100% 0); opacity: 0; }
@@ -171,11 +177,11 @@
           to   { clip-path: inset(0 0 0% 0); opacity: 1; }
         }
         .pizza-card-photo {
-          width: 100%; height: 65%;
+          width: 100%; height: 70%;
           object-fit: cover;
           display: block;
           flex-shrink: 0;
-          background: #E6D5B0;
+          background: #F2E6CE;
           animation: photoReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
           animation-play-state: paused;
           animation-delay: var(--photo-delay, 0s);
@@ -184,51 +190,53 @@
           animation-play-state: running;
         }
         .pizza-card-photo-back {
-          width: 100%; height: 50%;
+          width: 100%; height: 48%;
           object-fit: cover;
           display: block;
           flex-shrink: 0;
-          background: #E6D5B0;
+          background: #F2E6CE;
         }
         .pizza-card-body {
-          padding: 12px 14px 12px;
+          padding: 10px 14px 14px;
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify-content: flex-start;
+          justify-content: center;
+          background: #F2E6CE;
         }
         .pizza-grid-price {
           font-family: 'League Spartan', sans-serif;
-          font-size: 1.1rem; font-weight: 600;
-          color: #E23F2E;
-          display: block; margin-bottom: 2px;
+          font-size: 1.15rem; font-weight: 700;
+          color: #c80a07;
+          display: block; margin-bottom: 3px;
         }
         .pizza-grid-name {
-          font-family: 'League Spartan', sans-serif; font-weight: 800;
-          font-size: 0.95rem; letter-spacing: -0.02em;
-          color: #2A1A0F; line-height: 1.15;
+          font-family: 'League Spartan', sans-serif; font-weight: 600;
+          font-size: 0.78rem; letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #3a2e25; line-height: 1.25;
           display: block;
         }
         .pizza-grid-subtitle {
           font-family: 'League Spartan', sans-serif;
-          font-size: 0.68rem; font-weight: 300;
-          color: #5A3E28; text-transform: uppercase;
-          letter-spacing: 0.05em;
-          display: block; margin-top: 2px;
+          font-size: 0.65rem; font-weight: 400;
+          color: #7a6355; text-transform: uppercase;
+          letter-spacing: 0.07em;
+          display: block; margin-top: 3px;
         }
         .pizza-allergens-row {
           display: flex; flex-wrap: wrap; gap: 4px;
           margin-top: auto;
-          padding-top: 16px;
+          padding-top: 14px;
         }
         .pizza-allergen-chip {
-          background: #F2E6CE; border: 1px solid #C4B08A;
+          background: rgba(196,176,138,0.18); border: 1px solid #C4B08A;
           border-radius: 999px; padding: 2px 8px;
-          font-size: 0.68rem; color: #5A3E28;
+          font-size: 0.65rem; color: #5A3E28;
           font-family: 'League Spartan', sans-serif;
         }
         .pizza-card-body-back {
-          padding: 16px;
+          padding: 14px 16px 16px;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -237,10 +245,10 @@
         }
         .pizza-back-desc {
           font-family: 'League Spartan', sans-serif;
-          font-size: 0.85rem;
+          font-size: 0.82rem;
           font-weight: 400;
           color: #2A1A0F;
-          line-height: 1.4;
+          line-height: 1.45;
           text-align: center;
           margin: 0;
         }
