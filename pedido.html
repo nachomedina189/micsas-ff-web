@@ -248,13 +248,21 @@
         </p>
 
         <!-- Legal Links -->
-        <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12">
-          <a href="#" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+        <div class="flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] mb-12 flex-wrap">
+          <a href="cookies.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
             Cookies
           </a>
           <span>·</span>
-          <a href="#" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all" data-i18n="privacitat">
+          <a href="privacidad.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all" data-i18n="privacitat">
             Privacitat
+          </a>
+          <span>·</span>
+          <a href="aviso-legal.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+            Avís legal
+          </a>
+          <span>·</span>
+          <a href="terminos.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+            Termes i condicions
           </a>
         </div>
 
@@ -572,9 +580,22 @@
           <input type="checkbox" id="cf-tnc"
             class="mt-0.5 w-4 h-4 rounded border-[#C4B08A] accent-[#E23F2E] cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
           <span class="text-sm font-light text-[#5A3E28] leading-relaxed group-hover:text-[#2A1A0F] transition-colors">
-            Accepto els <a href="#" class="underline text-[#E23F2E] hover:text-[#B82A1F]" onclick="event.stopPropagation()">Termes i Condicions</a>
+            Accepto els <a href="terminos.html" target="_blank" class="underline text-[#E23F2E] hover:text-[#B82A1F]" onclick="event.stopPropagation()">Termes i Condicions</a>
           </span>
         </label>
+
+        <!-- Privacy consent -->
+        <label class="flex items-start gap-3 cursor-pointer group">
+          <input type="checkbox" id="cf-privacy"
+            class="mt-0.5 w-4 h-4 rounded border-[#C4B08A] accent-[#E23F2E] cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
+          <span class="text-sm font-light text-[#5A3E28] leading-relaxed group-hover:text-[#2A1A0F] transition-colors">
+            He llegit i accepto la <a href="privacidad.html" target="_blank" class="underline text-[#E23F2E] hover:text-[#B82A1F]" onclick="event.stopPropagation()">Política de Privacitat</a>
+          </span>
+        </label>
+        <p class="text-xs font-light text-[#9B8A72] leading-relaxed -mt-1">
+          Responsable: [[NOMBRE_COMPLETO]]. Finalitat: gestionar la teva comanda. Pots exercir els teus drets a
+          <a href="privacidad.html" target="_blank" class="underline">privacidad.html</a>.
+        </p>
 
         <!-- Submit button -->
         <button id="cf-submit" onclick="placeOrder()" disabled
@@ -1188,6 +1209,7 @@
 
     function validateCheckout() {
       const tnc = document.getElementById('cf-tnc') && document.getElementById('cf-tnc').checked;
+      const privacy = document.getElementById('cf-privacy') && document.getElementById('cf-privacy').checked;
       let clientOk = cfClientComplete;
       if (!clientOk) {
         const name  = (document.getElementById('cf-name')  || {}).value || '';
@@ -1198,7 +1220,7 @@
         const phoneOk = phone.replace(/\D/g, '').length >= 9;
         clientOk = nameOk && emailOk && phoneOk;
       }
-      const allOk = clientOk && tnc && cfPayMethod !== null;
+      const allOk = clientOk && tnc && privacy && cfPayMethod !== null;
 
       const btn = document.getElementById('cf-submit');
       if (!btn) return allOk;
@@ -1870,6 +1892,7 @@
       if (clientForm) clientForm.classList.remove('hidden');
       // Reset T&C
       const tnc = document.getElementById('cf-tnc'); if (tnc) tnc.checked = false;
+      const privacyCb = document.getElementById('cf-privacy'); if (privacyCb) privacyCb.checked = false;
       // Reset order summary panel
       const summary = document.getElementById('cf-order-summary'); if (summary) summary.classList.add('hidden');
       const chevron = document.getElementById('cf-chevron'); if (chevron) chevron.style.transform = '';
@@ -1984,7 +2007,7 @@
     });
 
     document.addEventListener('change', e => {
-      if (e.target && e.target.id === 'cf-tnc') validateCheckout();
+      if (e.target && (e.target.id === 'cf-tnc' || e.target.id === 'cf-privacy')) validateCheckout();
     });
 
     renderCart(false);
