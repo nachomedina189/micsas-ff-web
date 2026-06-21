@@ -1068,9 +1068,11 @@
       refreshTotals();
       // Read pre-pedido data from sessionStorage (if coming from pre-pedido.html)
       const _ssTime  = sessionStorage.getItem('micsas_time');
+      const _ssDate  = sessionStorage.getItem('micsas_delivery_date');
       const _ssAddr  = sessionStorage.getItem('micsas_address');
       const _ssZip   = sessionStorage.getItem('micsas_zip');
       const _ssFloor = sessionStorage.getItem('micsas_floor');
+      if (_ssDate) cfDeliveryDate = _ssDate;
       if (_ssTime && !cfSelectedTime) cfSelectedTime = _ssTime;
 
       // Skip time step if already selected (from pre-pedido or previous selection)
