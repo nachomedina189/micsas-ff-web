@@ -73,10 +73,13 @@
 
   <!-- NAV -->
   <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#F2E6CE]/95 backdrop-blur-md border-b border-[#C4B08A]/30 shadow-sm">
-    <a href="index.html" class="font-['League_Spartan',sans-serif] font-black tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
-      micsas.ff
-    </a>
-    <div class="flex items-center gap-2">
+    <a href="carta.html"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto" style="mix-blend-mode:multiply"></a>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+        <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+        <span class="text-[#C4B08A]/60 select-none">|</span>
+        <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+      </div>
       <button onclick="openCartDrawer()" class="relative p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" aria-label="Cistella">
         <iconify-icon icon="solar:cart-large-2-linear" width="22" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
         <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 rounded-full text-xs font-medium flex items-center justify-center text-[#F2E6CE] bg-[#E23F2E] hidden">0</span>
