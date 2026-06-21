@@ -26,10 +26,17 @@
     <a href="index.html" class="font-['League_Spartan',sans-serif] font-black tracking-tighter text-2xl text-[#2A1A0F] hover:text-[#E23F2E] transition-colors">
       micsas.ff
     </a>
-    <a href="pedido.html" class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
-      <iconify-icon icon="solar:arrow-left-linear" width="16" style="stroke-width:1.5;"></iconify-icon>
-      Tornar a la carta
-    </a>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+        <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+        <span class="text-[#C4B08A]/60 select-none">|</span>
+        <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+      </div>
+      <a href="pedido.html" class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
+        <iconify-icon icon="solar:arrow-left-linear" width="16" style="stroke-width:1.5;"></iconify-icon>
+        Tornar a la carta
+      </a>
+    </div>
   </nav>
 
   <!-- MAIN CONTENT -->
@@ -353,6 +360,7 @@
     }
   </script>
 
+  <script src="i18n.js"></script>
   <script src="transicion.js"></script>
 
   <script type="module">

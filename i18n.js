@@ -70,6 +70,11 @@
       ev_f_nom: 'Nom o Empresa', ev_f_data: 'Data event', ev_f_inv: 'Nº Convidats',
       ev_f_det: 'Més detalls', ev_f_nom_ph: 'El teu nom',
       ev_f_det_ph: "Lloc, tipus d'event...", ev_f_btn: 'Demanar pressupost',
+      // PEDIDO ITEM MODAL
+      modal_rm_ingr: 'Vols treure algun ingredient?',
+      modal_allergy: 'Al·lèrgies o intoleràncies?',
+      modal_allergy_ph: 'Escriu aquí qualsevol al·lèrgia o intolerància...',
+      modal_drink: 'Vols afegir una beguda?',
     },
     es: {
       // SHARED
@@ -141,6 +146,11 @@
       ev_f_nom: 'Nombre o Empresa', ev_f_data: 'Fecha del evento', ev_f_inv: 'Nº Invitados',
       ev_f_det: 'Más detalles', ev_f_nom_ph: 'Tu nombre',
       ev_f_det_ph: "Lugar, tipo de evento...", ev_f_btn: 'Pedir presupuesto',
+      // PEDIDO ITEM MODAL
+      modal_rm_ingr: '¿Quieres quitar algún ingrediente?',
+      modal_allergy: '¿Alergias o intolerancias?',
+      modal_allergy_ph: 'Escribe aquí cualquier alergia o intolerancia...',
+      modal_drink: '¿Quieres añadir bebida?',
     }
   };
 

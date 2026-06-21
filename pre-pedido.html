@@ -45,6 +45,11 @@
       <img src="logo micsas.png" alt="micsas" class="h-10 w-auto" style="mix-blend-mode:multiply">
     </a>
     <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
+        <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+        <span class="text-[#C4B08A]/60 select-none">|</span>
+        <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+      </div>
       <!-- Logged out -->
       <button id="nav-login-btn" onclick="openLoginModal()"
         class="text-sm font-medium underline underline-offset-2 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
@@ -173,8 +178,8 @@
     function todayISO() { return new Date().toISOString().split('T')[0]; }
     let ppDeliveryDate = todayISO();
 
-    // Generate time slots: Cuanto antes + 20:30 → 23:30 every 15 min
-    const PP_SLOTS = ['Cuanto antes'];
+    // Generate time slots: Com més aviat millor + 20:30 → 23:30 every 15 min
+    const PP_SLOTS = ['Com més aviat millor'];
     for (let h = 20; h <= 23; h++) {
       const startM = h === 20 ? 30 : 0;
       for (let m = startM; m < 60; m += 15) {
@@ -220,9 +225,9 @@
 
       if (isToday) {
         if (asap) {
-          html += `<option value="cuanto-antes">Cuanto antes</option>`;
+          html += `<option value="cuanto-antes">Com més aviat millor</option>`;
         } else {
-          html += `<option value="" disabled>Cuanto antes (sense disponibilitat)</option>`;
+          html += `<option value="" disabled>Com més aviat millor (sense disponibilitat)</option>`;
         }
         html += `<option value="" disabled>──────────────</option>`;
       }
@@ -316,6 +321,7 @@
     await initAuth();
   </script>
 
+  <script src="i18n.js"></script>
   <script src="transicion.js"></script>
 
   <!-- ════ PROFILE PANEL ════ -->
