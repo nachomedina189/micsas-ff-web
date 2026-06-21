@@ -22,14 +22,17 @@
     gmp-place-autocomplete { display: block; width: 100%; }
     main.hero-bg {
       background-image: url('images/pre-pedido-mobile.jpg');
-      background-size: cover;
+      background-size: contain;
       background-position: center bottom;
       background-repeat: no-repeat;
+      background-color: #cdbc9e;
     }
     @media (min-width: 768px) {
       main.hero-bg {
         background-image: url('72cdca59b4cd1170a781c95b9b8ae632_1780566795908.jpeg');
+        background-size: cover;
         background-position: right center;
+        background-color: transparent;
       }
     }
   </style>
@@ -56,7 +59,7 @@
   </nav>
 
   <!-- MAIN -->
-  <main class="hero-bg min-h-[calc(100dvh-65px)] flex items-center justify-center px-4 py-10 md:py-14">
+  <main class="hero-bg min-h-[calc(100dvh-65px)] flex items-start md:items-center justify-center px-4 pt-16 pb-10 md:pt-14 md:pb-14">
 
     <!-- LANDING -->
     <div id="pp-landing" class="w-full max-w-md flex flex-col items-center text-center gap-6 transition-opacity duration-250">
