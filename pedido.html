@@ -61,6 +61,23 @@
       opacity: 0;
       transform: translateY(10px);
     }
+    /* Logo visible on red background (default state) */
+    #navbar img.nav-logo {
+      filter: invert(1) hue-rotate(303deg) saturate(0.15) brightness(1.25) !important;
+      mix-blend-mode: screen !important;
+    }
+    /* Logo normal on beige nav (scrolled state) */
+    #navbar.nav-scrolled img.nav-logo {
+      filter: none !important;
+      mix-blend-mode: multiply !important;
+    }
+    /* Cart icon flips dark<->light to stay legible on red vs beige nav */
+    #navbar button[aria-label="Cistella"] iconify-icon {
+      color: #F2E6CE !important;
+    }
+    #navbar.nav-scrolled button[aria-label="Cistella"] iconify-icon {
+      color: #2A1A0F !important;
+    }
   </style>
 </head>
 
@@ -72,7 +89,7 @@
   </div>
 
   <!-- NAV -->
-  <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#F2E6CE]/95 backdrop-blur-md border-b border-[#C4B08A]/30 shadow-sm">
+  <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
     <a href="carta.html"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto" style="mix-blend-mode:multiply"></a>
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
@@ -81,14 +98,14 @@
         <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
       </div>
       <button onclick="openCartDrawer()" class="relative p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" aria-label="Cistella">
-        <iconify-icon icon="solar:cart-large-2-linear" width="22" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
+        <iconify-icon icon="solar:cart-large-2-linear" width="22" style="stroke-width:1.5;"></iconify-icon>
         <span id="cart-badge" class="absolute top-0 right-0 w-4 h-4 rounded-full text-xs font-medium flex items-center justify-center text-[#F2E6CE] bg-[#E23F2E] hidden">0</span>
       </button>
     </div>
   </nav>
 
   <!-- HEADER -->
-  <section class="py-12 md:py-16 px-6 md:px-12 text-center">
+  <section class="pt-32 md:pt-36 pb-12 md:pb-16 px-6 md:px-12 text-center">
     <h1 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-4xl md:text-5xl text-[#F2E6CE] mb-3">Enviament gratuït, sense comanda mínima!</h1>
   </section>
 
@@ -552,6 +569,17 @@
   </div>
 
   <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 40) {
+        navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm', 'nav-scrolled');
+        navbar.classList.remove('border-transparent');
+      } else {
+        navbar.classList.remove('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm', 'nav-scrolled');
+        navbar.classList.add('border-transparent');
+      }
+    }, { passive: true });
+
     const MENU = {
       casa: [
         { id:'margherita-1889',       name:'Margherita 1889',       desc:'Tomàquet San Marzano DOP, Fior di latte, Parmigiano, Alfàbrega',        ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Alfàbrega fresca','Parmigiano (curat 24 mesos)',"Oli d'oliva verge extra"], img:'images/margherita-1889.webp', price:9  },
