@@ -472,6 +472,22 @@
           </div>
         </section>
 
+        <!-- Propina -->
+        <section>
+          <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-xl text-[#2A1A0F] mb-2">Propina pel repartidor</h2>
+          <p class="text-xs font-light text-[#5A3E28] mb-4">100% per a qui et porta la pizza. Totalment opcional.</p>
+          <div class="flex flex-wrap gap-2" id="cf-tip-chips">
+            <button type="button" data-tip="0" onclick="selectTip(0)" class="cf-tip-chip border-[#E23F2E] bg-[#E23F2E]/10 text-[#E23F2E] px-4 py-2 rounded-full border text-sm font-medium transition-all">Cap</button>
+            <button type="button" data-tip="1" onclick="selectTip(1)" class="cf-tip-chip border-[#C4B08A]/40 text-[#2A1A0F] px-4 py-2 rounded-full border text-sm font-medium transition-all hover:border-[#C4B08A]/70">1€</button>
+            <button type="button" data-tip="2" onclick="selectTip(2)" class="cf-tip-chip border-[#C4B08A]/40 text-[#2A1A0F] px-4 py-2 rounded-full border text-sm font-medium transition-all hover:border-[#C4B08A]/70">2€</button>
+            <button type="button" data-tip="3" onclick="selectTip(3)" class="cf-tip-chip border-[#C4B08A]/40 text-[#2A1A0F] px-4 py-2 rounded-full border text-sm font-medium transition-all hover:border-[#C4B08A]/70">3€</button>
+            <button type="button" data-tip="custom" onclick="selectTip('custom')" class="cf-tip-chip border-[#C4B08A]/40 text-[#2A1A0F] px-4 py-2 rounded-full border text-sm font-medium transition-all hover:border-[#C4B08A]/70">Altra</button>
+          </div>
+          <input id="cf-tip-custom" type="number" min="0" step="0.5" placeholder="Import en €" inputmode="decimal"
+            class="hidden mt-3 w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]"
+            oninput="setCustomTip(this.value)">
+        </section>
+
         <!-- Payment section -->
         <section>
           <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-xl text-[#2A1A0F] mb-4">Mètode de pagament</h2>
@@ -629,7 +645,7 @@
     function fmt(n) { return '€' + n.toFixed(2); }
     function fmtComma(n) { return '€' + n.toFixed(2).replace('.', ','); }
     function subtotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
-    function total() { return cart.length ? subtotal() + DELIVERY_FEE : 0; }
+    function total() { return cart.length ? subtotal() + DELIVERY_FEE + cfTipAmount : 0; }
     function totalCount() { return cart.reduce((s, i) => s + i.qty, 0); }
     function getCartItem(id) { return cart.find(i => i.id === id); }
 
@@ -863,6 +879,7 @@
 
     // ── Checkout Fullscreen State ──
     let cfPayMethod = null;
+    let cfTipAmount = 0;
     let cfPlacesAddress = '';
     let cfSelectedTime = null;
     let currentZone = null;
@@ -945,15 +962,45 @@
       } catch(e) {}
     }
 
+    function selectTip(val) {
+      document.querySelectorAll('.cf-tip-chip').forEach(c => {
+        const sel = c.dataset.tip === String(val);
+        c.classList.toggle('border-[#E23F2E]', sel);
+        c.classList.toggle('bg-[#E23F2E]/10', sel);
+        c.classList.toggle('text-[#E23F2E]', sel);
+        c.classList.toggle('border-[#C4B08A]/40', !sel);
+        c.classList.toggle('text-[#2A1A0F]', !sel);
+      });
+      const customInput = document.getElementById('cf-tip-custom');
+      if (val === 'custom') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+        cfTipAmount = parseFloat(customInput.value) || 0;
+      } else {
+        customInput.classList.add('hidden');
+        customInput.value = '';
+        cfTipAmount = Number(val);
+      }
+      refreshTotals();
+    }
+    function setCustomTip(val) {
+      cfTipAmount = parseFloat(val) || 0;
+      refreshTotals();
+    }
+    function refreshTotals() {
+      const totalEl = document.getElementById('cf-total-display');
+      const submitBtn = document.getElementById('cf-submit');
+      if (totalEl) totalEl.textContent = fmtComma(total());
+      if (submitBtn) submitBtn.textContent = 'Pagar ' + fmtComma(total());
+    }
+
     function openCheckout() {
       closeCartDrawer();
       // Sync total display before opening
-      document.getElementById('cf-total-display').textContent = fmtComma(total());
       document.getElementById('cf-subtotal-display').textContent = fmtComma(subtotal());
       const count = totalCount();
       document.getElementById('cf-items-count').textContent = count + (count === 1 ? ' article' : ' articles');
-      // Update submit button label
-      document.getElementById('cf-submit').textContent = 'Pagar ' + fmtComma(total());
+      refreshTotals();
       // Read pre-pedido data from sessionStorage (if coming from pre-pedido.html)
       const _ssTime  = sessionStorage.getItem('micsas_time');
       const _ssAddr  = sessionStorage.getItem('micsas_address');
@@ -1420,7 +1467,7 @@
       const timeNote   = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
       const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
       const paymentMethod = cfPayMethod === 'cash' ? 'cash' : (cfPayMethod === 'online' ? 'online' : 'card_delivery');
-      return { name, email, phone, street, floor, postalCode, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal() };
+      return { name, email, phone, street, floor, postalCode, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount };
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
@@ -1458,6 +1505,7 @@
           status:         'pending',
           subtotal:       d.subtotal,
           delivery_fee:   0,
+          tip_amount:     d.tipAmount || 0,
           total:          d.total,
           notes:          d.finalNotes,
           slot_time:      cfSelectedTime || null,
@@ -1715,6 +1763,10 @@
     function resetCart() {
       cart = []; renderCart(false); cfPayMethod = null; cfPlacesAddress = ''; cfSelectedTime = null; orderAllergies = '';
       cfClientComplete = false; cfClientName = ''; cfClientPhone = ''; cfClientEmail = '';
+      cfTipAmount = 0;
+      const tipCustom = document.getElementById('cf-tip-custom');
+      if (tipCustom) { tipCustom.value = ''; tipCustom.classList.add('hidden'); }
+      if (typeof selectTip === 'function') selectTip(0);
       // Reset form fields
       ['cf-name','cf-email','cf-phone','cf-notes'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';
