@@ -65,7 +65,7 @@
       ev_s2_t: 'Pressupost a mida', ev_s2_d: "En menys de 24h tens la nostra proposta detallada.",
       ev_s3_t: 'Fem la festa', ev_s3_d: "Anem al teu event, muntem el forn i fem pizzes al moment.",
       ev_galeria: 'Així són els nostres events',
-      ev_cta_t: 'Tens un event a la vista?', ev_cta_d: "Contacta'ns i et fem pressupost sense comòs.",
+      ev_cta_t: 'Tens un event a la vista?', ev_cta_d: "Contacta'ns i et fem pressupost sense compromís.",
       ev_tel: 'Telèfon de contacte', ev_inst: 'Escriu-nos per Insta',
       ev_f_nom: 'Nom o Empresa', ev_f_data: 'Data event', ev_f_inv: 'Nº Convidats',
       ev_f_det: 'Més detalls', ev_f_nom_ph: 'El teu nom',
