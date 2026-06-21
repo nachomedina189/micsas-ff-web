@@ -78,6 +78,7 @@
     <!-- ════ LA CARTA ════ -->
     <main id="menu-pizzes" class="py-16 pb-32" style="background-color:#c80a07;">
       <style>
+        :root { --card-bg: #F2E6CE; }
         /* ── Pizza Grid ── */
         .pizza-grid {
           display: grid;
@@ -153,7 +154,7 @@
           width: 100%; height: 100%;
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
-          background: #F2E6CE;
+          background: var(--card-bg);
           border-radius: 16px;
           overflow: hidden;
         }
@@ -164,7 +165,7 @@
         .pizza-card-back {
           transform: rotateY(180deg);
           padding: 0;
-          background: #F2E6CE;
+          background: var(--card-bg);
           overflow-y: auto;
           display: flex;
           flex-direction: column;
@@ -181,7 +182,7 @@
           object-fit: cover;
           display: block;
           flex-shrink: 0;
-          background: #F2E6CE;
+          background: var(--card-bg);
           animation: photoReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
           animation-play-state: paused;
           animation-delay: var(--photo-delay, 0s);
@@ -194,7 +195,7 @@
           object-fit: cover;
           display: block;
           flex-shrink: 0;
-          background: #F2E6CE;
+          background: var(--card-bg);
         }
         .pizza-card-body {
           padding: 10px 14px 14px;
@@ -202,7 +203,7 @@
           display: flex;
           flex-direction: column;
           justify-content: center;
-          background: #F2E6CE;
+          background: var(--card-bg);
         }
         .pizza-grid-price {
           font-family: 'League Spartan', sans-serif;
@@ -279,14 +280,14 @@
               </div>
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5f02febf-c3ac-4d03-8b90-d93063e81a6d_800w.png" alt="MARGHERITA 1889" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/margherita-1889.png" alt="MARGHERITA 1889" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">9€</span>
                     <span class="pizza-grid-name">MARGHERITA 1889</span>
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5f02febf-c3ac-4d03-8b90-d93063e81a6d_800w.png" alt="MARGHERITA 1889" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/margherita-1889.png" alt="MARGHERITA 1889" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
@@ -304,14 +305,14 @@
             <div class="pizza-grid-card" data-id="marinara-olivata">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/564cf6e8-c423-4e41-97c4-e532d6170927_800w.png" alt="MARINARA OLIVATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/marinara-olivata.png" alt="MARINARA OLIVATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">8€</span>
                     <span class="pizza-grid-name">MARINARA OLIVATA</span>
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/564cf6e8-c423-4e41-97c4-e532d6170927_800w.png" alt="MARINARA OLIVATA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/marinara-olivata.png" alt="MARINARA OLIVATA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
@@ -330,7 +331,7 @@
             <div class="pizza-grid-card" data-id="bianca-suprema">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/96229985-0c2f-49ef-9b97-4176c853ed01_800w.png" alt="BIANCA SUPREMA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/bianca-suprema.png" alt="BIANCA SUPREMA" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">11€</span>
                     <span class="pizza-grid-name">BIANCA SUPREMA</span>
@@ -338,7 +339,7 @@
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/96229985-0c2f-49ef-9b97-4176c853ed01_800w.png" alt="BIANCA SUPREMA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/bianca-suprema.png" alt="BIANCA SUPREMA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
@@ -357,7 +358,7 @@
             <div class="pizza-grid-card" data-id="sottobosco">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8cc52fad-0f29-44e5-8157-8c79e7f3ff30_800w.jpg" alt="SOTTOBOSCO" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/sottobosco.png" alt="SOTTOBOSCO" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">11€</span>
                     <span class="pizza-grid-name">SOTTOBOSCO</span>
@@ -365,7 +366,7 @@
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8cc52fad-0f29-44e5-8157-8c79e7f3ff30_800w.jpg" alt="SOTTOBOSCO" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/sottobosco.png" alt="SOTTOBOSCO" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
@@ -400,14 +401,14 @@
             <div class="pizza-grid-card" data-id="inferno-di-nduja">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3c561ade-eeb8-400d-84de-ebf32f00a736_800w.png" alt="INFERNO DI 'NDUJA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/inferno-di-nduja.png" alt="INFERNO DI 'NDUJA" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">INFERNO DI 'NDUJA</span>
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3c561ade-eeb8-400d-84de-ebf32f00a736_800w.png" alt="INFERNO DI 'NDUJA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/inferno-di-nduja.png" alt="INFERNO DI 'NDUJA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Sobrassada</strong> picant (Nduja), Formatge
@@ -426,14 +427,14 @@
             <div class="pizza-grid-card" data-id="caramella-affumicata">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bf41b53-9048-4867-b0d2-7b05f13c46a7_800w.png" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/caramella-affumicata.png" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">CARAMELLA AFFUMICATA</span>
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bf41b53-9048-4867-b0d2-7b05f13c46a7_800w.png" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/caramella-affumicata.png" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> datterino caramella, Formatge fumat (Provola),
@@ -451,14 +452,14 @@
             <div class="pizza-grid-card" data-id="antidiavola">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png" alt="ANTIDIAVOLA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/antidiavola.png" alt="ANTIDIAVOLA" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">ANTIDIAVOLA</span>
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png" alt="ANTIDIAVOLA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/antidiavola.png" alt="ANTIDIAVOLA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
@@ -477,14 +478,14 @@
             <div class="pizza-grid-card" data-id="nutellina">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="NUTELLINA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <img src="/images/nutellina.png" alt="NUTELLINA" loading="lazy" width="800" height="800" class="pizza-card-photo">
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">NUTELLINA</span>
                   </div>
                 </div>
                 <div class="pizza-card-back">
-                  <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="NUTELLINA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
+                  <img src="/images/nutellina.png" alt="NUTELLINA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       Base de crema de xocolata i avellanes
