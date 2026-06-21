@@ -3,7 +3,7 @@
     ca: {
       // SHARED
       demana: 'Demana ja! →', contacte: 'Contacte', horaris: 'Horaris',
-      hor_dl: 'Dl – Dj:', hor_tancat: 'Tancat', hor_dv: 'Dv – Dg:',
+      hor_dl: 'Dl – Dj:', hor_tancat: 'Tancat', hor_dv: 'Div i Diu:',
       copyright: '© 2025 micsas.ff · Tots els drets reservats', privacitat: 'Privacitat',
       // INDEX
       idx_demana: 'Demana aquí! →', idx_carta: 'Experiència micsas',
@@ -74,7 +74,7 @@
     es: {
       // SHARED
       demana: '¡Pide ya! →', contacte: 'Contacto', horaris: 'Horarios',
-      hor_dl: 'Lun – Jue:', hor_tancat: 'Cerrado', hor_dv: 'Vie – Dom:',
+      hor_dl: 'Lun – Jue:', hor_tancat: 'Cerrado', hor_dv: 'Vie y Dom:',
       copyright: '© 2025 micsas.ff · Todos los derechos reservados', privacitat: 'Privacidad',
       // INDEX
       idx_demana: '¡Pide aquí! →', idx_carta: 'Experiencia micsas',
