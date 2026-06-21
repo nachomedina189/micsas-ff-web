@@ -85,6 +85,20 @@
           grid-template-columns: repeat(4, 1fr);
           gap: 20px;
         }
+        @media (min-width: 1024px) {
+          .pizza-grid-classics {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(242,230,206,0.4) transparent;
+            padding-bottom: 4px;
+          }
+          .pizza-grid-classics .pizza-grid-card {
+            flex: 0 0 calc((100% - 60px) / 4);
+            max-width: calc((100% - 60px) / 4);
+          }
+        }
         @media (max-width: 1023px) and (min-width: 768px) {
           .pizza-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
         }
