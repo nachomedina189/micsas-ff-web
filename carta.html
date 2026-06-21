@@ -93,8 +93,18 @@
         0%, 100% { transform: translateX(0); }
         50% { transform: translateX(5px); }
       }
+      @keyframes hero-fade-up {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .hero-item { animation: hero-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+      .hero-subtitle       { animation-delay: 0.1s; }
+      .hero-title          { animation-delay: 0.35s; }
+      .hero-ctas-primary   { animation-delay: 0.6s; }
+      .hero-ctas-secondary { animation-delay: 0.8s; }
+      .hero-scroll         { animation-delay: 1.0s; }
       .btn-demana {
-        animation: btn-float 2.4s ease-in-out infinite;
+        animation: btn-float 2.4s ease-in-out 1.4s infinite;
       }
       .btn-demana:hover {
         animation: none;
@@ -102,7 +112,7 @@
       }
       .btn-demana .arrow {
         display: inline-block;
-        animation: arrow-slide 2.4s ease-in-out infinite;
+        animation: arrow-slide 2.4s ease-in-out 1.4s infinite;
       }
       .btn-demana:hover .arrow {
         animation: none;
@@ -177,13 +187,13 @@
     <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-24 pb-48 bg-[#F7E8CC]/85 overflow-hidden">
       <div class="absolute top-0 left-0 w-full bg-black/10 z-0 h-full"></div>
       <div class="flex flex-col items-center reveal visible relative z-10">
-        <p class="text-[#2A1E16] uppercase mb-6 flex items-center gap-3 font-['League_Spartan',sans-serif] text-[14px] sm:text-[16px] leading-[1.2] font-medium tracking-[0.2em]">
+        <p class="hero-item hero-subtitle text-[#2A1E16] uppercase mb-6 flex items-center gap-3 font-['League_Spartan',sans-serif] text-[14px] sm:text-[16px] leading-[1.2] font-medium tracking-[0.2em]">
           <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#2A1E16]/50"></span>
           Micsas Friends &amp; Family
           <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#2A1E16]/50"></span>
         </p>
 
-        <h1 class="mb-6 relative w-full" aria-label="micsas" style="height:clamp(180px,38vw,360px);">
+        <h1 class="hero-item hero-title mb-6 relative w-full" aria-label="micsas" style="height:clamp(180px,38vw,360px);">
           <img src="micsas hero nombre (2).png" alt="micsas"
                style="position:absolute;left:50%;top:50%;height:clamp(300px,62vw,600px);width:auto;transform:translate(-50%,-50%) rotate(-90deg);mix-blend-mode:multiply;">
         </h1>
@@ -191,7 +201,7 @@
 
       <div class="flex flex-col items-center gap-4 w-full relative z-10">
         <!-- Primary CTAs: vertically stacked -->
-        <div class="flex flex-col items-center gap-3 w-full">
+        <div class="hero-item hero-ctas-primary flex flex-col items-center gap-3 w-full">
           <a href="pre-pedido.html" class="btn-demana inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm w-full max-w-[240px]" data-i18n="demana">
             Demana ja! <span class="arrow">→</span>
           </a>
@@ -200,7 +210,7 @@
           </a>
         </div>
         <!-- Secondary buttons: horizontal row -->
-        <div class="flex flex-row items-center justify-center gap-3">
+        <div class="hero-item hero-ctas-secondary flex flex-row items-center justify-center gap-3">
           <a href="#shop" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[var(--foreground)] bg-[#F2E6CE] hover:bg-[#E6D5B0] border border-[var(--foreground)]/30">
             Shop
           </a>
@@ -209,7 +219,7 @@
           </a>
         </div>
       </div>
-      <a href="#les-preferides" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10">
+      <a href="#les-preferides" class="hero-item hero-scroll absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-pointer z-10">
         <span class="uppercase text-[var(--foreground)] text-sm font-bold tracking-widest" data-i18n="descobreix">
           Descobreix
         </span>
