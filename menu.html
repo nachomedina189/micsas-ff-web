@@ -233,6 +233,32 @@
           border-radius: 14px;
           box-sizing: border-box;
         }
+        .pizza-grid-card.pizza-out-of-carta { cursor: default; }
+        .pizza-grid-card.pizza-out-of-carta .pizza-card-photo,
+        .pizza-grid-card.pizza-out-of-carta .pizza-card-photo-back {
+          filter: grayscale(0.85) brightness(0.92);
+        }
+        .pizza-out-of-carta-stamp {
+          position: absolute;
+          top: 38%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-10deg);
+          z-index: 5;
+          border: 3px solid #c80a07;
+          border-radius: 6px;
+          padding: 6px 16px;
+          background: rgba(242,230,206,0.9);
+          color: #c80a07;
+          font-family: 'League Spartan', sans-serif;
+          font-weight: 900;
+          font-size: 13px;
+          line-height: 1.2;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          text-align: center;
+          pointer-events: none;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
         .pizza-card-photo-back {
           width: 100%; height: 48%;
           object-fit: cover;
@@ -496,10 +522,11 @@
             </div>
 
             <!-- CARAMELLA AFFUMICATA -->
-            <div class="pizza-grid-card" data-id="caramella-affumicata">
+            <div class="pizza-grid-card pizza-out-of-carta" data-id="caramella-affumicata">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
                   <img src="images/caramella-affumicata.webp" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
+                  <div class="pizza-out-of-carta-stamp">Tornem<br>aviat!</div>
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">CARAMELLA AFFUMICATA</span>
@@ -690,6 +717,7 @@
       const flipHint = document.getElementById('flip-hint');
       document.querySelectorAll('.pizza-grid-card').forEach(card => {
         card.addEventListener('click', () => {
+          if (card.classList.contains('pizza-out-of-carta')) return;
           card.classList.toggle('is-flipped');
           if (flipHint) { flipHint.classList.add('hide'); }
         });
