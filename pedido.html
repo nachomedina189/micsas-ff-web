@@ -660,17 +660,17 @@
         : `<div class="w-full h-full flex items-center justify-center bg-[#E6D5B0]"><iconify-icon icon="solar:pizza-slice-bold-duotone" width="48" style="color:#C4B08A;opacity:0.5;"></iconify-icon></div>`;
       const priceStr = item.price.toFixed(2).replace('.', ',') + ' €';
       return `
-        <div class="cursor-pointer flex flex-row items-stretch rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[160px] lg:min-h-[180px]" data-pizza-row="${item.id}" data-pizza-card onclick="openItemModal('${item.id}')">
+        <div class="cursor-pointer flex flex-row items-stretch rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[180px] lg:min-h-[200px]" data-pizza-row="${item.id}" data-pizza-card onclick="openItemModal('${item.id}')">
           <div class="flex-1 min-w-0 p-6 lg:p-7 flex flex-col justify-between">
             <div>
               <span class="font-['League_Spartan',sans-serif] font-black text-lg lg:text-xl tracking-tight text-[#2A1A0F] uppercase block mb-2">${item.name}</span>
-              <span class="text-sm lg:text-sm font-light text-[#5A3E28] leading-relaxed block">${item.desc}</span>
+              <span class="text-base lg:text-base font-medium text-[#5A3E28] leading-relaxed block">${item.desc}</span>
             </div>
             <div class="flex items-center justify-between mt-4">
               <span class="font-medium text-base lg:text-base text-[#E23F2E]">${priceStr}</span>
             </div>
           </div>
-          <div class="w-[38%] shrink-0">${imgHtml}</div>
+          <div class="w-[48%] shrink-0">${imgHtml}</div>
         </div>`;
     }
 
