@@ -186,23 +186,12 @@
           scrollbar-width: thin;
           scrollbar-color: #C4B08A transparent;
         }
-        @keyframes photoReveal {
-          from { clip-path: inset(0 0 100% 0); opacity: 0; }
-          40%  { opacity: 1; }
-          to   { clip-path: inset(0 0 0% 0); opacity: 1; }
-        }
         .pizza-card-photo {
           width: 100%; height: 70%;
           object-fit: cover;
           display: block;
           flex-shrink: 0;
           background: var(--card-bg);
-          animation: photoReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
-          animation-play-state: paused;
-          animation-delay: var(--photo-delay, 0s);
-        }
-        .pizza-grid-card.photo-playing .pizza-card-photo {
-          animation-play-state: running;
         }
         .pizza-card-photo-back {
           width: 100%; height: 48%;
@@ -654,19 +643,6 @@
       }
       window.addEventListener('scroll', doReveal, { passive: true });
       doReveal();
-
-      const cardObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          const card = entry.target;
-          const grid = card.closest('.pizza-grid');
-          const col = grid ? Array.from(grid.children).indexOf(card) % 4 : 0;
-          card.style.setProperty('--photo-delay', `${col * 0.1}s`);
-          card.classList.add('photo-playing');
-          cardObserver.unobserve(card);
-        });
-      }, { threshold: 0.1 });
-      document.querySelectorAll('.pizza-grid-card').forEach(c => cardObserver.observe(c));
 
       const flipHint = document.getElementById('flip-hint');
       document.querySelectorAll('.pizza-grid-card').forEach(card => {
