@@ -48,6 +48,10 @@
         <span id="order-count" class="px-2.5 py-1 rounded-full bg-[#E23F2E] text-xs font-bold"></span>
       </div>
       <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 pr-3 border-r border-[#F2E6CE]/15">
+          <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 transition-all">Avui (pase)</button>
+          <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 transition-all">Setmana</button>
+        </div>
         <button onclick="setFilter('active')" id="filter-active" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 transition-all">Actives</button>
         <button onclick="setFilter('all')" id="filter-all" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 transition-all">Totes</button>
         <button onclick="doLogout()" class="px-4 py-2 rounded-full text-sm font-medium text-[#F2E6CE]/60 hover:text-[#F2E6CE] transition-colors">
@@ -69,9 +73,11 @@
     const STATUS_NEXT_LABEL = { pending: 'Començar a preparar', preparing: 'Marcar com llest', ready: 'Marcar com entregat' };
 
     let currentFilter = 'active';
+    let currentDateScope = 'today';
     let ordersCache = [];
 
     function fmt(n) { return (Number(n) || 0).toFixed(2).replace('.', ',') + ' €'; }
+    function todayISO() { return new Date().toISOString().split('T')[0]; }
 
     async function doLogin() {
       const email = document.getElementById('login-email').value.trim();
@@ -107,6 +113,16 @@
     }
     window.setFilter = setFilter;
 
+    function setDateScope(s) {
+      currentDateScope = s;
+      document.getElementById('scope-today').classList.toggle('bg-[#F2E6CE]', s === 'today');
+      document.getElementById('scope-today').classList.toggle('text-[#2A1A0F]', s === 'today');
+      document.getElementById('scope-week').classList.toggle('bg-[#F2E6CE]', s === 'week');
+      document.getElementById('scope-week').classList.toggle('text-[#2A1A0F]', s === 'week');
+      renderOrders();
+    }
+    window.setDateScope = setDateScope;
+
     async function checkAccessAndStart() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -120,6 +136,7 @@
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('kitchen-screen').classList.remove('hidden');
       setFilter('active');
+      setDateScope('today');
       await loadOrders();
       subscribeRealtime();
     }
@@ -143,7 +160,15 @@
     }
 
     function renderOrders() {
+      const today = todayISO();
+      const weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() + 6);
+      const weekEndStr = weekEnd.toISOString().split('T')[0];
       const visible = ordersCache.filter(o => {
+        if (currentDateScope === 'today') {
+          if (o.delivery_date !== today) return false;
+        } else if (currentDateScope === 'week') {
+          if (!o.delivery_date || o.delivery_date < today || o.delivery_date > weekEndStr) return false;
+        }
         if (currentFilter === 'all') return true;
         return o.status !== 'delivered' && o.status !== 'cancelled';
       });

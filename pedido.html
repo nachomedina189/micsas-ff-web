@@ -975,23 +975,29 @@
 
     function renderTimeSlots() {
       const isToday = cfDeliveryDate === todayISO();
-      const slots = isToday ? ['Com més aviat millor'] : [];
+      const realSlots = [];
       for (let h = 20; h <= 23; h++) {
         const startM = h === 20 ? 30 : 0;
         for (let m = startM; m < 60; m += 15) {
           if (h === 23 && m > 30) break;
-          slots.push(`${h}:${String(m).padStart(2,'0')}`);
+          realSlots.push(`${h}:${String(m).padStart(2,'0')}`);
         }
       }
+      const slots = isToday ? ['Com més aviat millor', ...realSlots] : realSlots;
+      const earliestSlot = realSlots.find(s => (_slotCounts[s] || 0) < 6) || null;
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
       container.innerHTML = slots.map((s, i) => {
         const isFirst = isToday && i === 0;
-        const full = (_slotCounts[s] || 0) >= 6;
+        const isAsap = s === 'Com més aviat millor';
+        const full = !isAsap && (_slotCounts[s] || 0) >= 6;
+        const label = isAsap
+          ? `${s}${earliestSlot ? ` <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>` : ''}`
+          : `${s}${full ? ' · Complet' : ''}`;
         return `<button type="button" ${full ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
           class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isFirst ? 'lg' : 'base'} ${full ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
           <iconify-icon icon="${isFirst ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isFirst ? 20 : 16}" style="color:${isFirst ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
-          ${s}${full ? ' · Complet' : ''}
+          ${label}
         </button>`;
       }).join('');
     }
@@ -1527,7 +1533,7 @@
       } catch (err) {
         console.error('[placeOrder]', err);
         const errEl = document.getElementById('cf-global-err');
-        errEl.textContent = 'Hi ha hagut un error al guardar la comanda. Torna-ho a intentar.';
+        errEl.textContent = err.message || 'Hi ha hagut un error al guardar la comanda. Torna-ho a intentar.';
         errEl.classList.remove('hidden');
         btn.textContent = originalLabel;
         btn.disabled = false;
@@ -1560,66 +1566,37 @@
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
-      const sb = window.supabase;
-      // IDs are generated client-side (instead of relying on Postgres RETURNING)
-      // because guest/anon rows aren't visible under the SELECT RLS policies
-      // immediately after insert — generating + passing the id avoids ever
-      // needing to read the row back.
-      let customerId;
-      if (currentUser) {
-        const { data: existingCust } = await sb.from('customers')
-          .select('id').eq('auth_user_id', currentUser.id).limit(1).maybeSingle();
-        if (existingCust) {
-          await sb.from('customers').update({ name: d.name, phone: d.phone, email: currentUser.email }).eq('id', existingCust.id);
-          customerId = existingCust.id;
-        } else {
-          customerId = crypto.randomUUID();
-          const { error: ne } = await sb.from('customers')
-            .insert({ id: customerId, name: d.name, phone: d.phone, email: currentUser.email, auth_user_id: currentUser.id });
-          if (ne) throw ne;
-        }
-      } else {
-        customerId = crypto.randomUUID();
-        const { error: ne } = await sb.from('customers')
-          .insert({ id: customerId, name: d.name, phone: d.phone, email: d.email });
-        if (ne) throw ne;
-      }
-      const addressId = crypto.randomUUID();
-      const { error: addrErr } = await sb.from('addresses')
-        .insert({ id: addressId, customer_id: customerId, street: d.street, number: '', floor: d.floor, postal_code: d.postalCode, city: 'Matadepera', notes: d.delivNotes });
-      if (addrErr) throw addrErr;
-
-      const orderId = crypto.randomUUID();
-      const order = {
-        id:             orderId,
-        customer_id:    customerId,
-        address_id:     addressId,
-        payment_method: d.paymentMethod,
-        payment_status: paymentStatus,
-        status:         'pending',
-        subtotal:       d.subtotal,
-        delivery_fee:   0,
-        tip_amount:     d.tipAmount || 0,
-        total:          d.total,
-        notes:          d.finalNotes,
-        slot_time:      cfSelectedTime || null,
-        delivery_date:  d.deliveryDate || todayISO(),
-        pizza_count:    cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0),
-      };
-      const { error: orderErr } = await sb.from('orders').insert(order);
-      if (orderErr) throw orderErr;
-
+      // Order creation (customer + address + order + items) and slot-capacity
+      // validation happen server-side in the place-order Edge Function
+      // (service_role, bypasses RLS) so the 6-pizzas-per-slot cap can't be
+      // bypassed by calling the client insert path directly.
       const items = cart.map(it => ({
-        order_id:     orderId,
-        product_id:   null,
         product_name: it.name,
         unit_price:   it.price,
         quantity:     it.qty,
         notes:        it.note || null,
       }));
-      const { error: itemsErr } = await sb.from('order_items').insert(items);
-      if (itemsErr) throw itemsErr;
-      return order;
+      const pizzaCount = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
+
+      const res = await fetch(PLACE_ORDER_FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({
+          name: d.name, email: d.email, phone: d.phone,
+          street: d.street, floor: d.floor, postalCode: d.postalCode,
+          delivNotes: d.delivNotes, finalNotes: d.finalNotes,
+          paymentMethod: d.paymentMethod, paymentStatus,
+          total: d.total, subtotal: d.subtotal, tipAmount: d.tipAmount,
+          authUserId: currentUser ? currentUser.id : null,
+          slotTime: cfSelectedTime || null,
+          pizzaCount,
+          deliveryDate: d.deliveryDate || todayISO(),
+          items,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'Error desant la comanda');
+      return json;
     }
 
     async function openWalletPayment(totalEuros) {

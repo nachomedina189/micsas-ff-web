@@ -27,6 +27,25 @@ Deno.serve(async (req) => {
       items,
     } = await req.json();
 
+    // Capacity check: max 6 pizzas per (deliveryDate, slotTime), enforced
+    // server-side so it can't be bypassed by calling the API directly.
+    if (deliveryDate && slotTime) {
+      const { data: existing, error: capErr } = await sb
+        .from("orders")
+        .select("pizza_count")
+        .eq("delivery_date", deliveryDate)
+        .eq("slot_time", slotTime)
+        .neq("status", "cancelled");
+      if (capErr) throw capErr;
+      const currentCount = (existing ?? []).reduce((sum: number, o: { pizza_count: number }) => sum + (o.pizza_count || 0), 0);
+      if (currentCount + (pizzaCount ?? 0) > 6) {
+        return new Response(JSON.stringify({ error: "Aquesta franja horària ja està completa. Si us plau, tria una altra franja." }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Find or create customer
     let customerId: string;
 
