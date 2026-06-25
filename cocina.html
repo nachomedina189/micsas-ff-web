@@ -330,13 +330,14 @@
     // propi rang de dates (Des de / Fins a), independent del filtre Avui/Setmana
     // del tauler, per poder buscar qualsevol període passat. ──
     function openHistory() {
+      // Recalcula el rang per defecte (últims 7 dies fins avui) cada vegada
+      // que s'obre, encara que la tablet porti dies oberta sense recarregar
+      // — així sempre inclou el dia actual real, no es queda "congelat".
       const fromEl = document.getElementById('history-from');
       const toEl   = document.getElementById('history-to');
-      if (!fromEl.value) {
-        const from = new Date(); from.setDate(from.getDate() - 7);
-        fromEl.value = from.toISOString().split('T')[0];
-      }
-      if (!toEl.value) toEl.value = todayISO();
+      const from = new Date(); from.setDate(from.getDate() - 7);
+      fromEl.value = from.toISOString().split('T')[0];
+      toEl.value = todayISO();
       document.getElementById('history-modal').classList.remove('hidden');
       renderHistoryList();
     }
