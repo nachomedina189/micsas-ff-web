@@ -50,6 +50,7 @@
       background: transparent;
       border: none;
       cursor: pointer;
+      touch-action: manipulation;
     }
     .pp-suggestion-item:hover,
     .pp-suggestion-item.active {
@@ -1024,7 +1025,9 @@
         const main      = p.mainText ? p.mainText.text : p.text.text;
         const secondary = p.secondaryText ? p.secondaryText.text : '';
         return `
-          <button type="button" class="pp-suggestion-item${i === ppActiveIndex ? ' active' : ''}" data-idx="${i}" onclick="_ppSelectSuggestion(${i})">
+          <button type="button" class="pp-suggestion-item${i === ppActiveIndex ? ' active' : ''}" data-idx="${i}"
+            onclick="_ppSelectSuggestion(${i})"
+            ontouchend="event.preventDefault(); _ppSelectSuggestion(${i});">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" style="color:#9B8A72"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span class="truncate">${_ppEscape(main)}${secondary ? `<span class="pp-sugg-secondary">${_ppEscape(secondary)}</span>` : ''}</span>
           </button>`;
