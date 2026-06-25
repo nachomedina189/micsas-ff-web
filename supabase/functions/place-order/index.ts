@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
 
     const {
       name, email, phone,
-      street, floor, postalCode, delivNotes, finalNotes,
+      street, floor, postalCode, city, delivNotes, finalNotes,
       paymentMethod, paymentStatus,
       total, subtotal, tipAmount,
       authUserId,
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
         number: "",
         floor: floor ?? null,
         postal_code: postalCode,
-        city: "Matadepera",
+        city: city || "Matadepera",
         notes: delivNotes ?? null,
       })
       .select("id")

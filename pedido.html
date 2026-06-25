@@ -1558,11 +1558,12 @@
       const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
       const floor      = sessionStorage.getItem('micsas_floor')   || null;
       const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '08230';
+      const city       = sessionStorage.getItem('micsas_city')    || 'Matadepera';
       const delivNotes = g('cf-notes') || null;
       const timeNote   = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
       const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
       const paymentMethod = cfPayMethod === 'cash' ? 'cash' : (cfPayMethod === 'online' ? 'online' : 'card_delivery');
-      return { name, email, phone, street, floor, postalCode, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate };
+      return { name, email, phone, street, floor, postalCode, city, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate };
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
@@ -1583,7 +1584,7 @@
         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           name: d.name, email: d.email, phone: d.phone,
-          street: d.street, floor: d.floor, postalCode: d.postalCode,
+          street: d.street, floor: d.floor, postalCode: d.postalCode, city: d.city,
           delivNotes: d.delivNotes, finalNotes: d.finalNotes,
           paymentMethod: d.paymentMethod, paymentStatus,
           total: d.total, subtotal: d.subtotal, tipAmount: d.tipAmount,
