@@ -1030,12 +1030,10 @@
           </button>`;
       }).join('');
       // "Powered by Google" obligatorio: mostramos predicciones de Google sin
-      // su mapa/UI, así que hay que incluir el logo a mano. TODO(propietario):
-      // descarga el logo oficial (enlace en los pasos manuales) y guárdalo en
-      // images/powered-by-google.png — mientras no exista, se ve el texto.
+      // su mapa/UI, así que hay que incluir su logo oficial (sin modificarlo).
       box.innerHTML = rows + `
         <div class="pp-suggestions-attrib">
-          <img src="images/powered-by-google.png" alt="Powered by Google" style="height:14px"
+          <img src="images/powered-by-google.svg" alt="Powered by Google" style="height:14px"
             onerror="this.outerHTML='&lt;span style=&quot;font-size:11px;color:#9B8A72&quot;&gt;Powered by Google&lt;/span&gt;'">
         </div>`;
       box.classList.remove('hidden');
