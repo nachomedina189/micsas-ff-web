@@ -85,6 +85,23 @@
         filter: invert(1) hue-rotate(303deg) saturate(0.15) brightness(1.25) !important;
         mix-blend-mode: screen !important;
       }
+      /* Botó "Demana ja" centrat al header, NOMÉS mòbil: apareix amb
+         transició quan es fa scroll (al desktop el botó ja és sempre
+         visible a la dreta del header, no cal duplicar-lo). */
+      #mobile-demana-scroll {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0.85);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+      }
+      #navbar.nav-scrolled #mobile-demana-scroll {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        pointer-events: auto;
+      }
       @keyframes btn-float {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-5px); }
@@ -138,6 +155,11 @@
     <!-- ──── NAV ──── -->
     <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
       <a href="#"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto" style="mix-blend-mode:multiply"></a>
+
+      <a href="pre-pedido.html" id="mobile-demana-scroll" data-i18n="demana"
+        class="md:hidden flex items-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium font-['League_Spartan',sans-serif] bg-[#F2E6CE] text-[#c80a07] hover:bg-[#e8c9a0] shadow-sm">
+        Demana ja! →
+      </a>
 
       <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-[var(--foreground)] backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[var(--border)]/30 bg-[#F2E6CE]/70">
         <a href="#nosaltres" class="relative transition-opacity hover:opacity-60" data-i18n="nav_historia">
