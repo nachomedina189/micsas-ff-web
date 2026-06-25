@@ -297,9 +297,14 @@
         html += `<option value="" disabled>──────────────</option>`;
       }
 
+      const nowMins = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
       PP_SLOTS.slice(1).forEach(s => {
+        const [h, m] = s.split(':').map(Number);
+        const isPast = isToday && (h * 60 + m) <= nowMins;
         const full = (_slotCounts[s] || 0) >= 6;
-        html += full
+        html += isPast
+          ? `<option value="" disabled>${s} — Ja ha passat</option>`
+          : full
           ? `<option value="" disabled>${s} — Complet</option>`
           : `<option value="${s}">${s}</option>`;
       });
@@ -364,8 +369,27 @@
         : "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
     }
 
+    // Comprova que la franja triada encara no hagi passat — pot quedar
+    // obsoleta si el client ha trigat una estona omplint la resta del
+    // formulari abans de prémer "Demana".
+    function isSlotStillValid() {
+      if (!ppSelectedTime || ppDeliveryDate !== todayISO()) return true;
+      const m = /^(\d{1,2}):(\d{2})$/.exec(ppSelectedTime);
+      if (!m) return true;
+      const now = new Date();
+      return (Number(m[1]) * 60 + Number(m[2])) > (now.getHours() * 60 + now.getMinutes());
+    }
+
     function goToMenu() {
       if (!ppSelectedTime || !ppAddressValid) return;
+      if (!isSlotStillValid()) {
+        alert('Aquesta franja horària ja ha passat. Tria una franja horària diferent.');
+        ppSelectedTime = null;
+        document.getElementById('pp-time-select').value = '';
+        loadSlotCounts().then(renderTimeSlots);
+        validateForm();
+        return;
+      }
       sessionStorage.setItem('micsas_time',          ppSelectedTime);
       sessionStorage.setItem('micsas_delivery_date', ppDeliveryDate);
       sessionStorage.setItem('micsas_address', window._ppFormattedAddress || '');

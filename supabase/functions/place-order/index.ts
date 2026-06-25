@@ -27,19 +27,47 @@ Deno.serve(async (req) => {
       items,
     } = await req.json();
 
-    // Capacity check: max 6 pizzas per (deliveryDate, slotTime), enforced
-    // server-side so it can't be bypassed by calling the API directly.
+    // Mateixes franges de 15 min que pedido.html / pre-pedido.html (20:30–23:30).
+    const REAL_SLOTS: string[] = (() => {
+      const slots: string[] = [];
+      for (let h = 20; h <= 23; h++) {
+        const startM = h === 20 ? 30 : 0;
+        for (let m = startM; m < 60; m += 15) {
+          if (h === 23 && m > 30) break;
+          slots.push(`${h}:${String(m).padStart(2, "0")}`);
+        }
+      }
+      return slots;
+    })();
+
+    // Capacitat: màx. 6 pizzes per franja. Si la franja demanada ja està
+    // plena (algú s'ha avançat entre que el client la va veure i va confirmar),
+    // en lloc de rebutjar la comanda s'assigna automàticament la SEGÜENT
+    // franja del mateix dia amb lloc — comprovat aquí en servidor perquè no
+    // es pugui saltar trucant a l'API directament.
+    let finalSlotTime: string | null = slotTime ?? null;
+
     if (deliveryDate && slotTime) {
-      const { data: existing, error: capErr } = await sb
+      const { data: dayOrders, error: dayErr } = await sb
         .from("orders")
-        .select("pizza_count")
+        .select("slot_time, pizza_count")
         .eq("delivery_date", deliveryDate)
-        .eq("slot_time", slotTime)
         .neq("status", "cancelled");
-      if (capErr) throw capErr;
-      const currentCount = (existing ?? []).reduce((sum: number, o: { pizza_count: number }) => sum + (o.pizza_count || 0), 0);
-      if (currentCount + (pizzaCount ?? 0) > 6) {
-        return new Response(JSON.stringify({ error: "Aquesta franja horària ja està completa. Si us plau, tria una altra franja." }), {
+      if (dayErr) throw dayErr;
+
+      const counts: Record<string, number> = {};
+      (dayOrders ?? []).forEach((o: { slot_time: string | null; pizza_count: number }) => {
+        if (!o.slot_time) return;
+        counts[o.slot_time] = (counts[o.slot_time] ?? 0) + (o.pizza_count ?? 0);
+      });
+
+      const requestedIndex = REAL_SLOTS.indexOf(slotTime);
+      const candidates = requestedIndex >= 0 ? REAL_SLOTS.slice(requestedIndex) : REAL_SLOTS;
+
+      finalSlotTime = candidates.find((s) => (counts[s] ?? 0) + (pizzaCount ?? 0) <= 6) ?? null;
+
+      if (!finalSlotTime) {
+        return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
           status: 409,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -111,7 +139,7 @@ Deno.serve(async (req) => {
         tip_amount:     tipAmount ?? 0,
         total,
         notes:          finalNotes ?? null,
-        slot_time:      slotTime ?? null,
+        slot_time:      finalSlotTime ?? slotTime ?? null,
         pizza_count:    pizzaCount ?? 0,
         delivery_date:  deliveryDate ?? null,
       })
@@ -134,7 +162,7 @@ Deno.serve(async (req) => {
       if (itemsErr) throw itemsErr;
     }
 
-    return new Response(JSON.stringify({ orderId: order.id }), {
+    return new Response(JSON.stringify({ orderId: order.id, slotTime: finalSlotTime ?? slotTime ?? null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: unknown) {

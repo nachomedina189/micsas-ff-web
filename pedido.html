@@ -616,6 +616,7 @@
       </div>
       <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-4xl mb-3 text-[#E23F2E]">Gràcies!</h2>
       <p class="text-lg tracking-tight mb-2 text-[#2A1A0F]">La teva comanda és en camí.</p>
+      <p id="cf-success-reassigned" class="hidden text-xs font-medium mb-2 text-[#E23F2E]"></p>
       <p id="cf-success-estimate" class="text-sm font-light mb-1 text-[#5A3E28]"></p>
       <p class="text-sm font-light mb-10 text-[#5A3E28]">El Riki et trucarà per confirmar quan surti.</p>
       <button onclick="closeCheckout(); resetCart();"
@@ -995,12 +996,14 @@
       container.innerHTML = slots.map((s, i) => {
         const isFirst = isToday && i === 0;
         const isAsap = s === 'Com més aviat millor';
-        const full = !isAsap && (_slotCounts[s] || 0) >= 6;
+        const isPast = isToday && !isAsap && (() => { const [h, m] = s.split(':').map(Number); return h * 60 + m <= nowMins; })();
+        const full = !isAsap && !isPast && (_slotCounts[s] || 0) >= 6;
+        const blocked = full || isPast;
         const label = isAsap
           ? `${s}${earliestSlot ? ` <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>` : ''}`
-          : `${s}${full ? ' · Complet' : ''}`;
-        return `<button type="button" ${full ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
-          class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isFirst ? 'lg' : 'base'} ${full ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
+          : `${s}${isPast ? ' · Ja ha passat' : full ? ' · Complet' : ''}`;
+        return `<button type="button" ${blocked ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
+          class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isFirst ? 'lg' : 'base'} ${blocked ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
           <iconify-icon icon="${isFirst ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isFirst ? 20 : 16}" style="color:${isFirst ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
           ${label}
         </button>`;
@@ -1027,6 +1030,15 @@
     function updateSuccessDeliveryEstimate() {
       const el = document.getElementById('cf-success-estimate');
       if (el) el.innerHTML = computeDeliveryEstimateText();
+      const reassignedEl = document.getElementById('cf-success-reassigned');
+      if (reassignedEl) {
+        if (window._cfSlotReassigned) {
+          reassignedEl.textContent = `La franja que havies triat s'havia omplert — t'hem assignat la franja de les ${cfSelectedTime}.`;
+          reassignedEl.classList.remove('hidden');
+        } else {
+          reassignedEl.classList.add('hidden');
+        }
+      }
     }
 
     function selectTimeSlot(time) {
@@ -1519,9 +1531,30 @@
       }, 4700);
     }
 
+    // Comprova que la franja triada encara no hagi passat — pot quedar
+    // obsoleta si el client ha trigat una estona emplenant el formulari
+    // abans de prémer "Demana".
+    function isSlotStillValid() {
+      if (!cfSelectedTime || cfDeliveryDate !== todayISO()) return true;
+      const m = /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
+      if (!m) return true;
+      const now = new Date();
+      return (Number(m[1]) * 60 + Number(m[2])) > (now.getHours() * 60 + now.getMinutes());
+    }
+
     async function placeOrder() {
       if (!validateCheckout()) return;
       if (cart.length === 0) return;
+
+      if (!isSlotStillValid()) {
+        cfSelectedTime = null;
+        document.getElementById('cf-global-err').textContent = 'Aquesta franja horària ja ha passat. Tria una franja horària diferent.';
+        document.getElementById('cf-global-err').classList.remove('hidden');
+        document.getElementById('cf-scroll').classList.add('hidden');
+        document.getElementById('cf-time-step').classList.remove('hidden');
+        selectDeliveryDay(cfDeliveryDate === todayISO() ? 'today' : 'other');
+        return;
+      }
 
       // Online payment: collect order data and open Stripe
       if (cfPayMethod === 'online') {
@@ -1628,6 +1661,11 @@
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || 'Error desant la comanda');
+      // El servidor pot haver assignat una franja diferent de la demanada si
+      // s'ha omplert just abans de confirmar (rollover automàtic a la
+      // següent franja amb lloc) — reflectim aquí la franja real assignada.
+      window._cfSlotReassigned = !!(json.slotTime && json.slotTime !== cfSelectedTime);
+      if (json.slotTime) cfSelectedTime = json.slotTime;
       return json;
     }
 
