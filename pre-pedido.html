@@ -995,22 +995,6 @@
     let ppActiveIndex    = -1;
     let _ppDebounceTimer = null;
 
-    // ── TEMP DEBUG (quitar después de diagnosticar el bug en iOS) ──
-    function _ppDebugLog(msg) {
-      let box = document.getElementById('pp-debug-box');
-      if (!box) {
-        box = document.createElement('div');
-        box.id = 'pp-debug-box';
-        box.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow-y:auto;background:rgba(0,0,0,0.85);color:#0f0;font-size:11px;font-family:monospace;padding:8px;z-index:9999;white-space:pre-wrap;';
-        document.body.appendChild(box);
-      }
-      const line = document.createElement('div');
-      line.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
-      box.appendChild(line);
-      box.scrollTop = box.scrollHeight;
-    }
-    window._ppDebugLog = _ppDebugLog;
-
     async function _ppGetPlacesLib() {
       if (!_ppAutocompleteSuggestionCtor) {
         const lib = await google.maps.importLibrary("places");
@@ -1042,9 +1026,8 @@
         const secondary = p.secondaryText ? p.secondaryText.text : '';
         return `
           <button type="button" class="pp-suggestion-item${i === ppActiveIndex ? ' active' : ''}" data-idx="${i}"
-            ontouchstart="_ppDebugLog('touchstart en sugerencia ${i}')"
-            onclick="_ppDebugLog('click en sugerencia ${i}'); _ppSelectSuggestion(${i})"
-            ontouchend="_ppDebugLog('touchend en sugerencia ${i}'); event.preventDefault(); _ppSelectSuggestion(${i});">
+            onclick="_ppSelectSuggestion(${i})"
+            ontouchend="event.preventDefault(); _ppSelectSuggestion(${i});">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" style="color:#9B8A72"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span class="truncate">${_ppEscape(main)}${secondary ? `<span class="pp-sugg-secondary">${_ppEscape(secondary)}</span>` : ''}</span>
           </button>`;
@@ -1118,20 +1101,17 @@
     });
 
     async function _ppSelectSuggestion(idx) {
-      _ppDebugLog('_ppSelectSuggestion(' + idx + ') llamada, ppSuggestions.length=' + ppSuggestions.length);
       const suggestion = ppSuggestions[idx];
-      if (!suggestion || !suggestion.placePrediction) { _ppDebugLog('ABORTA: no hay suggestion/placePrediction en idx ' + idx); return; }
+      if (!suggestion || !suggestion.placePrediction) return;
       const prediction = suggestion.placePrediction;
       document.getElementById("pp-address-input").value = prediction.text.text;
       _ppHideSuggestions();
-      _ppDebugLog('texto puesto, llamando a toPlace().fetchFields()...');
 
       try {
         const place = prediction.toPlace();
         // El session token de la búsqueda se incluye automáticamente en esta
         // primera llamada a fetchFields (PlacePrediction.toPlace + fetchFields).
         await place.fetchFields({ fields: ["addressComponents", "formattedAddress", "location"] });
-        _ppDebugLog('fetchFields OK');
         const comps = place.addressComponents || [];
         const find  = type => comps.find(c => c.types.includes(type));
 
@@ -1147,16 +1127,13 @@
         window._ppLng = place.location ? place.location.lng() : null;
 
         ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
-        _ppDebugLog('zip extraído: ' + window._ppExtractedZip);
         if (window._ppExtractedZip) {
           await _ppValidateZone(window._ppExtractedZip);
-          _ppDebugLog('ppAddressValid tras validar zona: ' + ppAddressValid);
         } else {
           _ppResetZoneFeedback();
           if (typeof validateForm === "function") validateForm();
         }
       } catch (e) {
-        _ppDebugLog('ERROR: ' + (e && e.message ? e.message : String(e)));
         console.error("Error obteniendo lugar:", e);
         _ppClearPlaceData();
       } finally {
