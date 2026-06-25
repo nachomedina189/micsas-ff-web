@@ -10,31 +10,31 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Cuina">
-  <meta name="theme-color" content="#c80a07">
+  <meta name="theme-color" content="#0F1115">
+  <meta name="color-scheme" content="dark">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#2A1A0F] text-[#F2E6CE] font-['League_Spartan',sans-serif] antialiased min-h-screen">
+<body class="bg-[#0F1115] text-[#E8EAED] font-['Inter',sans-serif] antialiased min-h-screen">
 
   <!-- ════ LOGIN SCREEN ════ -->
   <div id="login-screen" class="min-h-screen flex items-center justify-center px-6">
-    <div class="w-full max-w-sm bg-[#F2E6CE] text-[#2A1A0F] rounded-3xl shadow-2xl p-8 space-y-5">
+    <div class="w-full max-w-sm bg-[#F7F8FA] text-[#14171C] rounded-2xl shadow-2xl p-8 space-y-5">
       <div class="text-center">
         <h1 class="font-black tracking-tight text-3xl">Cuina</h1>
-        <p class="text-sm font-light text-[#5A3E28] mt-1">micsas.ff · panell intern</p>
+        <p class="text-sm text-[#6B7280] mt-1">micsas.ff · panell intern</p>
       </div>
       <div class="space-y-3">
         <input id="login-email" type="email" placeholder="Email" autocomplete="username"
-          class="w-full bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+          class="w-full bg-white border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
         <input id="login-password" type="password" placeholder="Contrasenya" autocomplete="current-password"
-          class="w-full bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+          class="w-full bg-white border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
       </div>
-      <p id="login-error" class="hidden text-xs text-[#E23F2E] text-center"></p>
+      <p id="login-error" class="hidden text-xs text-[#DC2626] text-center"></p>
       <button id="login-btn" onclick="doLogin()"
-        class="w-full py-3.5 rounded-full font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
+        class="w-full py-3.5 rounded-xl font-semibold text-[15px] text-white bg-[#2563EB] hover:bg-[#1D4ED8] transition-all shadow-sm">
         Entrar
       </button>
     </div>
@@ -42,18 +42,18 @@
 
   <!-- ════ KITCHEN SCREEN ════ -->
   <div id="kitchen-screen" class="hidden min-h-screen">
-    <header class="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-[#2A1A0F] border-b border-[#F2E6CE]/15">
+    <header class="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-[#15181D] border-b border-white/8">
       <div class="flex items-center gap-3">
         <h1 class="font-black tracking-tight text-2xl">Comandes</h1>
-        <span id="order-count" class="px-2.5 py-1 rounded-full bg-[#E23F2E] text-xs font-bold"></span>
+        <span id="order-count" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 pr-3 border-r border-[#F2E6CE]/15">
-          <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 transition-all">Avui (pase)</button>
-          <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 transition-all">Setmana</button>
+        <div class="flex items-center gap-2 pr-3 border-r border-white/10">
+          <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Avui (pase)</button>
+          <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Setmana</button>
         </div>
-        <button onclick="openHistory()" class="px-4 py-2 rounded-full text-sm font-medium border border-[#F2E6CE]/30 hover:bg-[#F2E6CE]/10 transition-all">Historial</button>
-        <button onclick="doLogout()" class="px-4 py-2 rounded-full text-sm font-medium text-[#F2E6CE]/60 hover:text-[#F2E6CE] transition-colors">
+        <button onclick="openHistory()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 hover:bg-white/5 transition-all">Historial</button>
+        <button onclick="doLogout()" class="px-4 py-2 rounded-lg text-sm font-semibold text-[#8B93A1] hover:text-[#E8EAED] transition-colors">
           Sortir
         </button>
       </div>
@@ -61,38 +61,38 @@
 
     <!-- ════ TABLER (KANBAN): Sense afegir → Preparant ════ -->
     <main class="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 items-start">
-      <section class="bg-[#1F130A] rounded-2xl p-4 md:p-5 border border-[#F2E6CE]/10">
+      <section class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span> Sense afegir
-          <span id="count-pending" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#F2E6CE]/10 text-sm font-bold">0</span>
+          <span id="count-pending" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#F59E0B]/15 text-[#F59E0B] text-sm font-bold">0</span>
         </h2>
         <div id="col-pending" class="space-y-4"></div>
       </section>
-      <section class="bg-[#1F130A] rounded-2xl p-4 md:p-5 border border-[#F2E6CE]/10">
+      <section class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#3B82F6] border-x border-b border-white/8">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#E23F2E]"></span> Preparant
-          <span id="count-preparing" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#F2E6CE]/10 text-sm font-bold">0</span>
+          <span class="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></span> Preparant
+          <span id="count-preparing" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 text-[#3B82F6] text-sm font-bold">0</span>
         </h2>
         <div id="col-preparing" class="space-y-4"></div>
       </section>
     </main>
-    <p id="orders-empty" class="hidden text-center text-[#F2E6CE]/50 py-24 text-lg">No hi ha comandes ara mateix.</p>
+    <p id="orders-empty" class="hidden text-center text-[#5B6270] py-24 text-lg">No hi ha comandes ara mateix.</p>
   </div>
 
   <!-- ════ HISTORIAL (modal) ════ -->
-  <div id="history-modal" class="hidden fixed inset-0 z-[900] bg-black/50 flex items-end md:items-center justify-center">
-    <div class="bg-[#F2E6CE] text-[#2A1A0F] w-full md:max-w-2xl md:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-[#C4B08A]/30 shrink-0">
+  <div id="history-modal" class="hidden fixed inset-0 z-[900] bg-black/60 flex items-end md:items-center justify-center">
+    <div class="bg-[#F7F8FA] text-[#14171C] w-full md:max-w-2xl md:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] shrink-0">
         <h2 class="font-black tracking-tight text-2xl">Historial</h2>
-        <button onclick="closeHistory()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#C4B08A]/20 text-[#5A3E28] hover:text-[#2A1A0F] transition-colors">✕</button>
+        <button onclick="closeHistory()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#E5E7EB] text-[#6B7280] hover:text-[#14171C] transition-colors">✕</button>
       </div>
-      <div class="px-6 py-3 border-b border-[#C4B08A]/20 flex items-center gap-3 flex-wrap shrink-0">
-        <label class="text-xs font-medium text-[#5A3E28]">Des de</label>
+      <div class="px-6 py-3 border-b border-[#E5E7EB] flex items-center gap-3 flex-wrap shrink-0">
+        <label class="text-xs font-semibold text-[#6B7280]">Des de</label>
         <input type="date" id="history-from" onchange="renderHistoryList()"
-          class="bg-white border border-[#C4B08A]/40 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#E23F2E]">
-        <label class="text-xs font-medium text-[#5A3E28]">Fins a</label>
+          class="bg-white border border-[#D1D5DB] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#2563EB]">
+        <label class="text-xs font-semibold text-[#6B7280]">Fins a</label>
         <input type="date" id="history-to" onchange="renderHistoryList()"
-          class="bg-white border border-[#C4B08A]/40 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#E23F2E]">
+          class="bg-white border border-[#D1D5DB] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#2563EB]">
       </div>
       <div id="history-list" class="flex-1 overflow-y-auto p-6 space-y-3"></div>
     </div>
@@ -140,10 +140,10 @@
 
     function setDateScope(s) {
       currentDateScope = s;
-      document.getElementById('scope-today').classList.toggle('bg-[#F2E6CE]', s === 'today');
-      document.getElementById('scope-today').classList.toggle('text-[#2A1A0F]', s === 'today');
-      document.getElementById('scope-week').classList.toggle('bg-[#F2E6CE]', s === 'week');
-      document.getElementById('scope-week').classList.toggle('text-[#2A1A0F]', s === 'week');
+      document.getElementById('scope-today').classList.toggle('bg-white', s === 'today');
+      document.getElementById('scope-today').classList.toggle('text-[#14171C]', s === 'today');
+      document.getElementById('scope-week').classList.toggle('bg-white', s === 'week');
+      document.getElementById('scope-week').classList.toggle('text-[#14171C]', s === 'week');
       renderOrders();
     }
     window.setDateScope = setDateScope;
@@ -207,7 +207,7 @@
       const empty = document.getElementById('orders-empty');
       empty.classList.toggle('hidden', groups.length > 0);
 
-      const noneMsg = '<p class="text-sm text-[#F2E6CE]/40 text-center py-10">Cap comanda</p>';
+      const noneMsg = '<p class="text-sm text-[#5B6270] text-center py-10">Cap comanda</p>';
       document.getElementById('col-pending').innerHTML   = pendingGroups.length   ? pendingGroups.map(renderOrderCard).join('')   : noneMsg;
       document.getElementById('col-preparing').innerHTML = preparingGroups.length ? preparingGroups.map(renderOrderCard).join('') : noneMsg;
     }
@@ -239,11 +239,11 @@
       const idsJs = ids.join("','");
       const nextStatus = stage === 'pending' ? 'preparing' : 'delivered';
       const nextLabel  = stage === 'pending' ? 'Afegit a Aronium' : 'Llest';
-      const nextColor  = stage === 'pending' ? 'bg-[#E23F2E] hover:bg-[#B82A1F]' : 'bg-[#5FA86A] hover:bg-[#4c8a56]';
+      const nextColor  = stage === 'pending' ? 'bg-[#2563EB] hover:bg-[#1D4ED8]' : 'bg-[#16A34A] hover:bg-[#15803D]';
       return `
         <div class="flex gap-2">
-          <button onclick="advanceStatusBulk(['${idsJs}'],'${nextStatus}')" class="flex-1 ${pad} rounded-full ${nextColor} text-[#F2E6CE] font-medium transition-all">${nextLabel}</button>
-          <button onclick="advanceStatusBulk(['${idsJs}'],'cancelled')" class="px-4 ${pad} rounded-full border border-[#C4B08A]/40 text-[#9B8A72] hover:border-[#E23F2E]/40 hover:text-[#E23F2E] transition-all">✕</button>
+          <button onclick="advanceStatusBulk(['${idsJs}'],'${nextStatus}')" class="flex-1 ${pad} rounded-lg ${nextColor} text-white font-semibold transition-all">${nextLabel}</button>
+          <button onclick="advanceStatusBulk(['${idsJs}'],'cancelled')" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
         </div>`;
     }
 
@@ -256,57 +256,59 @@
       const dateLabel = first.delivery_date ? new Date(first.delivery_date + 'T00:00:00').toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' }) : '';
       const timeLabel = first.slot_time || '';
       const grandTotal = group.reduce((s, o) => s + (Number(o.total) || 0), 0);
+      const stage = stageOfGroup(group);
+      const headerBand = !allSameStatus ? 'bg-[#6B7280]' : (stage === 'pending' ? 'bg-[#F59E0B]' : 'bg-[#3B82F6]');
 
       const ordersHtml = group.map((o, idx) => {
         const items = o.order_items || [];
         const itemsHtml = items.map(it => `
           <div class="flex justify-between gap-2 text-sm">
-            <span>${it.quantity}× ${it.product_name}${it.notes ? `<span class="block text-xs text-[#E23F2E] font-medium">⚠ ${escapeHtml(it.notes)}</span>` : ''}</span>
-            <span class="shrink-0 text-[#5A3E28]">${fmt(it.unit_price * it.quantity)}</span>
+            <span>${it.quantity}× ${it.product_name}${it.notes ? `<span class="block text-xs text-[#DC2626] font-semibold">⚠ ${escapeHtml(it.notes)}</span>` : ''}</span>
+            <span class="shrink-0 text-[#6B7280]">${fmt(it.unit_price * it.quantity)}</span>
           </div>
         `).join('');
         return `
           <div class="space-y-2">
-            ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#9B8A72]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + (STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
+            ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + (STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
             <div class="space-y-1.5">${itemsHtml}</div>
             <div class="flex items-center justify-between text-sm">
-              <span class="text-[#5A3E28]">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : 'Pagat online'}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
+              <span class="text-[#6B7280]">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : 'Pagat online'}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
               <span class="font-bold">${fmt(o.total)}</span>
             </div>
-            ${o.notes ? `<p class="text-xs italic text-[#5A3E28]">${escapeHtml(o.notes)}</p>` : ''}
+            ${o.notes ? `<p class="text-xs italic text-[#6B7280]">${escapeHtml(o.notes)}</p>` : ''}
             ${isGroup && !allSameStatus ? actionsRow([o.id], stageOf(o), 'sm') : ''}
           </div>
         `;
-      }).join(isGroup ? '<div class="border-t border-dashed border-[#C4B08A]/30"></div>' : '');
+      }).join(isGroup ? '<div class="border-t border-dashed border-[#E5E7EB]"></div>' : '');
 
       const headerStatus = allSameStatus ? (STATUS_LABEL[first.status] || first.status) : 'Diverses comandes';
 
       return `
-        <div class="bg-[#F2E6CE] text-[#2A1A0F] rounded-2xl border-2 border-[#E23F2E]/40 shadow-lg overflow-hidden">
-          <div class="px-5 py-3 flex items-center justify-between bg-[#2A1A0F]/5 border-b border-[#C4B08A]/30">
+        <div class="bg-[#F7F8FA] text-[#14171C] rounded-2xl shadow-lg overflow-hidden">
+          <div class="px-5 py-3 flex items-center justify-between ${headerBand} text-white">
             <span class="font-black text-sm uppercase tracking-wide">${headerStatus}${isGroup ? ` · ${group.length} comandes` : ''}</span>
-            <span class="text-xs font-medium text-[#5A3E28]">${dateLabel} ${timeLabel}</span>
+            <span class="text-xs font-semibold opacity-90">${dateLabel} ${timeLabel}</span>
           </div>
           <div class="p-5 space-y-4">
             <div>
               <p class="font-bold text-lg">${escapeHtml(cust.name || 'Client')}</p>
-              <a href="tel:${escapeHtml(cust.phone || '')}" class="text-sm text-[#E23F2E] font-medium">${escapeHtml(cust.phone || '')}</a>
+              <a href="tel:${escapeHtml(cust.phone || '')}" class="text-sm text-[#2563EB] font-semibold">${escapeHtml(cust.phone || '')}</a>
             </div>
-            <div class="text-sm text-[#5A3E28] leading-relaxed">
+            <div class="text-sm text-[#4B5563] leading-relaxed">
               ${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}<br>
               ${escapeHtml(addr.postal_code || '')} ${escapeHtml(addr.city || '')}
               ${addr.notes ? `<br><span class="italic">${escapeHtml(addr.notes)}</span>` : ''}
             </div>
-            <div class="border-t border-[#C4B08A]/30 pt-3 space-y-3">
+            <div class="border-t border-[#E5E7EB] pt-3 space-y-3">
               ${ordersHtml}
             </div>
             ${isGroup ? `
-              <div class="border-t border-[#C4B08A]/30 pt-3 flex items-center justify-between text-sm">
-                <span class="text-[#5A3E28] font-medium">Total combinat</span>
+              <div class="border-t border-[#E5E7EB] pt-3 flex items-center justify-between text-sm">
+                <span class="text-[#4B5563] font-semibold">Total combinat</span>
                 <span class="font-black text-lg">${fmt(grandTotal)}</span>
               </div>
             ` : ''}
-            ${allSameStatus ? `<div class="border-t border-[#C4B08A]/30 pt-3">${actionsRow(group.map(o => o.id), stageOfGroup(group), 'lg')}</div>` : ''}
+            ${allSameStatus ? `<div class="border-t border-[#E5E7EB] pt-3">${actionsRow(group.map(o => o.id), stage, 'lg')}</div>` : ''}
           </div>
         </div>
       `;
@@ -352,7 +354,7 @@
 
       const list = document.getElementById('history-list');
       if (!hist.length) {
-        list.innerHTML = '<p class="text-center text-[#9B8A72] py-10">Sense comandes completades en aquest període.</p>';
+        list.innerHTML = '<p class="text-center text-[#6B7280] py-10">Sense comandes completades en aquest període.</p>';
         return;
       }
 
@@ -367,10 +369,10 @@
 
       list.innerHTML = Array.from(byDay.entries()).map(([day, orders]) => `
         <div>
-          <h3 class="text-xs font-bold uppercase tracking-widest text-[#9B8A72] mb-2">${formatDayLabel(day)} · ${orders.length} comanda${orders.length > 1 ? 's' : ''}</h3>
+          <h3 class="text-xs font-bold uppercase tracking-widest text-[#6B7280] mb-2">${formatDayLabel(day)} · ${orders.length} comanda${orders.length > 1 ? 's' : ''}</h3>
           <div class="space-y-2">${orders.map(renderHistoryRow).join('')}</div>
         </div>
-      `).join('<div class="border-t border-[#C4B08A]/20 my-4"></div>');
+      `).join('<div class="border-t border-[#E5E7EB] my-4"></div>');
     }
     window.renderHistoryList = renderHistoryList;
 
@@ -391,17 +393,17 @@
       const items = o.order_items || [];
       const itemsText = items.map(it => `${it.quantity}× ${it.product_name}`).join(', ');
       const time = new Date(o.created_at).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
-      const statusColor = o.status === 'cancelled' ? 'text-[#E23F2E]' : 'text-[#5FA86A]';
+      const statusColor = o.status === 'cancelled' ? 'text-[#DC2626]' : 'text-[#16A34A]';
       const addressText = [addr.street, addr.floor].filter(Boolean).join(', ');
       return `
-        <div class="border border-[#C4B08A]/30 rounded-xl px-4 py-3">
+        <div class="border border-[#E5E7EB] rounded-xl px-4 py-3">
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="font-bold">${escapeHtml(cust.name || 'Client')}</span>
             <span class="text-xs font-bold uppercase ${statusColor}">${STATUS_LABEL[o.status] || o.status}</span>
           </div>
-          <p class="text-xs text-[#9B8A72] mb-1">${escapeHtml(o.slot_time || '')} · entrat a les ${time} · ${fmt(o.total)}</p>
-          ${addressText ? `<p class="text-sm text-[#5A3E28]">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
-          ${itemsText ? `<p class="text-sm text-[#2A1A0F]/70 mt-1">${escapeHtml(itemsText)}</p>` : ''}
+          <p class="text-xs text-[#6B7280] mb-1">${escapeHtml(o.slot_time || '')} · entrat a les ${time} · ${fmt(o.total)}</p>
+          ${addressText ? `<p class="text-sm text-[#4B5563]">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
+          ${itemsText ? `<p class="text-sm text-[#374151] mt-1">${escapeHtml(itemsText)}</p>` : ''}
         </div>`;
     }
 
