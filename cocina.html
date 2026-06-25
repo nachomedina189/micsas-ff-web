@@ -66,6 +66,7 @@
 
   <script type="module">
     import { supabase } from './js/supabase.js';
+    window.supabase = supabase; // permite depurar consultas desde la consola
 
     const STATUS_FLOW = ['pending', 'preparing', 'ready', 'delivered'];
     const STATUS_LABEL = { pending: 'Pendent', preparing: 'En preparació', ready: 'Llest', delivered: 'Entregat', cancelled: 'Cancel·lat' };
