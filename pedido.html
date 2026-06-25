@@ -616,7 +616,7 @@
       </div>
       <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-4xl mb-3 text-[#E23F2E]">Gràcies!</h2>
       <p class="text-lg tracking-tight mb-2 text-[#2A1A0F]">La teva comanda és en camí.</p>
-      <p class="text-sm font-light mb-1 text-[#5A3E28]">Temps estimat d'entrega: <strong class="font-medium">30–45 minuts</strong></p>
+      <p id="cf-success-estimate" class="text-sm font-light mb-1 text-[#5A3E28]"></p>
       <p class="text-sm font-light mb-10 text-[#5A3E28]">El Riki et trucarà per confirmar quan surti.</p>
       <button onclick="closeCheckout(); resetCart();"
         class="px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
@@ -1005,6 +1005,28 @@
           ${label}
         </button>`;
       }).join('');
+    }
+
+    // Calcula una franja estimada de entrega a partir de la hora de la franja
+    // y el nombre de pizzas del pedido (cada pizza extra suma algo de margen).
+    // Es una estimación simple en el cliente; un cálculo más preciso (cola
+    // real de cocina, repartidor ya en ruta, etc.) requeriría una automatización
+    // en servidor (ej. n8n) que no tenemos todavía.
+    function computeDeliveryEstimateText() {
+      const m = cfSelectedTime && /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
+      if (!m) return `Temps estimat d'entrega: <strong class="font-medium">30–45 minuts</strong>`;
+      const pizzaCount = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
+      const extraMin = Math.min(Math.max(pizzaCount - 1, 0) * 2, 10);
+      const windowMin = 10 + extraMin;
+      const start = new Date(); start.setHours(Number(m[1]), Number(m[2]), 0, 0);
+      const end = new Date(start.getTime() + windowMin * 60000);
+      const fmtH = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+      return `Rebràs la comanda entre les <strong class="font-medium">${fmtH(start)}</strong> i les <strong class="font-medium">${fmtH(end)}</strong>`;
+    }
+
+    function updateSuccessDeliveryEstimate() {
+      const el = document.getElementById('cf-success-estimate');
+      if (el) el.innerHTML = computeDeliveryEstimateText();
     }
 
     function selectTimeSlot(time) {
@@ -1532,6 +1554,7 @@
 
         document.getElementById('cf-global-err').classList.add('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
+        updateSuccessDeliveryEstimate();
         const success = document.getElementById('cf-success');
         success.classList.remove('hidden');
         success.classList.add('flex');
@@ -1675,6 +1698,7 @@
             await _saveOrderToSupabase(d, 'paid');
             document.getElementById('cf-global-err').classList.add('hidden');
             document.getElementById('cf-scroll').classList.add('hidden');
+            updateSuccessDeliveryEstimate();
             const success = document.getElementById('cf-success');
             success.classList.remove('hidden');
             success.classList.add('flex');
@@ -1829,6 +1853,7 @@
           closeStripeOverlay();
           document.getElementById('cf-global-err').classList.add('hidden');
           document.getElementById('cf-scroll').classList.add('hidden');
+          updateSuccessDeliveryEstimate();
           const success = document.getElementById('cf-success');
           success.classList.remove('hidden');
           success.classList.add('flex');
