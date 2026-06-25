@@ -321,10 +321,29 @@
       const hist = ordersCache
         .filter(o => inDateScope(o) && (o.status === 'delivered' || o.status === 'cancelled'))
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
       const list = document.getElementById('history-list');
-      list.innerHTML = hist.length
-        ? hist.map(renderHistoryRow).join('')
-        : '<p class="text-center text-[#9B8A72] py-10">Sense comandes completades en aquest període.</p>';
+      if (!hist.length) {
+        list.innerHTML = '<p class="text-center text-[#9B8A72] py-10">Sense comandes completades en aquest període.</p>';
+        document.getElementById('history-modal').classList.remove('hidden');
+        return;
+      }
+
+      // Agrupa per dia d'entrega, amb capçalera de data — més fàcil de
+      // repassar que una llista plana barrejant dies diferents.
+      const byDay = new Map();
+      hist.forEach(o => {
+        const day = o.delivery_date || 'sense-data';
+        if (!byDay.has(day)) byDay.set(day, []);
+        byDay.get(day).push(o);
+      });
+
+      list.innerHTML = Array.from(byDay.entries()).map(([day, orders]) => `
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-widest text-[#9B8A72] mb-2">${formatDayLabel(day)} · ${orders.length} comanda${orders.length > 1 ? 's' : ''}</h3>
+          <div class="space-y-2">${orders.map(renderHistoryRow).join('')}</div>
+        </div>
+      `).join('<div class="border-t border-[#C4B08A]/20 my-4"></div>');
       document.getElementById('history-modal').classList.remove('hidden');
     }
     window.openHistory = openHistory;
@@ -334,20 +353,29 @@
     }
     window.closeHistory = closeHistory;
 
+    function formatDayLabel(day) {
+      if (day === 'sense-data') return 'Sense data';
+      const label = new Date(day + 'T00:00:00').toLocaleDateString('ca-ES', { weekday: 'long', day: '2-digit', month: 'long' });
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    }
+
     function renderHistoryRow(o) {
       const cust = o.customers || {};
+      const addr = o.addresses || {};
       const items = o.order_items || [];
       const itemsText = items.map(it => `${it.quantity}× ${it.product_name}`).join(', ');
-      const time = new Date(o.created_at).toLocaleString('ca-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      const time = new Date(o.created_at).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
       const statusColor = o.status === 'cancelled' ? 'text-[#E23F2E]' : 'text-[#5FA86A]';
+      const addressText = [addr.street, addr.floor].filter(Boolean).join(', ');
       return `
         <div class="border border-[#C4B08A]/30 rounded-xl px-4 py-3">
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="font-bold">${escapeHtml(cust.name || 'Client')}</span>
             <span class="text-xs font-bold uppercase ${statusColor}">${STATUS_LABEL[o.status] || o.status}</span>
           </div>
-          <p class="text-xs text-[#9B8A72] mb-1">${time} · ${escapeHtml(o.slot_time || '')} · ${fmt(o.total)}</p>
-          ${itemsText ? `<p class="text-sm text-[#5A3E28]">${escapeHtml(itemsText)}</p>` : ''}
+          <p class="text-xs text-[#9B8A72] mb-1">${escapeHtml(o.slot_time || '')} · entrat a les ${time} · ${fmt(o.total)}</p>
+          ${addressText ? `<p class="text-sm text-[#5A3E28]">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
+          ${itemsText ? `<p class="text-sm text-[#2A1A0F]/70 mt-1">${escapeHtml(itemsText)}</p>` : ''}
         </div>`;
     }
 
