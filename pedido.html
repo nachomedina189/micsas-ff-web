@@ -984,7 +984,12 @@
         }
       }
       const slots = isToday ? ['Com més aviat millor', ...realSlots] : realSlots;
-      const earliestSlot = realSlots.find(s => (_slotCounts[s] || 0) < 6) || null;
+      const nowMins = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
+      const earliestSlot = realSlots.find(s => {
+        const [h, m] = s.split(':').map(Number);
+        return h * 60 + m > nowMins && (_slotCounts[s] || 0) < 6;
+      }) || null;
+      window._cfEarliestSlot = earliestSlot;
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
       container.innerHTML = slots.map((s, i) => {
@@ -1003,7 +1008,10 @@
     }
 
     function selectTimeSlot(time) {
-      cfSelectedTime = time;
+      // "Com més aviat millor" es resol a una franja real abans de desar-se
+      // — si es guardés el text literal, aquesta comanda no comptaria per a
+      // l'aforo de cap franja real (vegeu pre-pedido.html, que ja ho fa bé).
+      cfSelectedTime = time === 'Com més aviat millor' ? (window._cfEarliestSlot || time) : time;
       const timeStep = document.getElementById('cf-time-step');
       const scroll   = document.getElementById('cf-scroll');
       timeStep.style.opacity = '0';
