@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quan i on · micsas.ff</title>
   <meta name="description" content="Tria quan vols rebre la teva pizza i on te la portem.">
+  <meta name="color-scheme" content="light">
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +15,11 @@
   <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
   <link rel="prefetch" href="pedido.html">
   <style>
+    /* Evita que el desplegable nativo de <select> (franja horària) se
+       renderice en negro la primera vez que se abre en iOS con modo oscuro
+       activado — el picker nativo respeta color-scheme, no las clases de
+       Tailwind del <select>. */
+    html { color-scheme: light; }
     .slot-btn.selected {
       border-color: #E23F2E !important;
       background-color: rgba(226,63,46,0.08);
