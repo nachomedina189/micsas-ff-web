@@ -610,19 +610,73 @@
     </div>
 
     <!-- Success screen -->
-    <div id="cf-success" class="hidden flex-1 flex-col items-center justify-center text-center px-8 py-12">
-      <div class="w-24 h-24 rounded-full bg-[#E23F2E]/10 text-[#E23F2E] flex items-center justify-center mb-6">
-        <iconify-icon icon="solar:check-circle-bold" width="48"></iconify-icon>
+    <div id="cf-success" class="hidden flex-1 flex-col bg-[#EFE5D1]" role="status" aria-live="polite">
+
+      <!-- 1. Header -->
+      <div class="flex items-center gap-3 px-5 pt-5 pb-1 shrink-0">
+        <button onclick="closeCheckout(); resetCart();" aria-label="Tornar a l'inici"
+          class="w-10 h-10 flex items-center justify-center rounded-full text-[#2D241D] hover:bg-[#E2D3B4]/50 transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <h1 class="font-['League_Spartan',sans-serif] font-bold text-lg text-[#2D241D]">La teva comanda</h1>
       </div>
-      <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-4xl mb-3 text-[#E23F2E]">Gràcies!</h2>
-      <p class="text-lg tracking-tight mb-2 text-[#2A1A0F]">La teva comanda és en camí.</p>
-      <p id="cf-success-reassigned" class="hidden text-xs font-medium mb-2 text-[#E23F2E]"></p>
-      <p id="cf-success-estimate" class="text-sm font-light mb-1 text-[#5A3E28]"></p>
-      <p class="text-sm font-light mb-10 text-[#5A3E28]">El Riki et trucarà per confirmar quan surti.</p>
-      <button onclick="closeCheckout(); resetCart();"
-        class="px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#2A1A0F] transition-all hover:bg-[#1a1009]">
-        Tornar a l'inici
-      </button>
+
+      <div class="flex-1 flex flex-col items-center text-center px-6 pb-8 overflow-y-auto">
+
+        <!-- 2. Hero media (reservat per a vídeo/transició futura) + check de confirmació -->
+        <div id="hero-media" class="w-full" aria-hidden="true">
+          <!-- TODO: vídeo / transición -->
+        </div>
+        <div class="w-24 h-24 rounded-full bg-[#D24A33] flex items-center justify-center mt-6 mb-6" role="img" aria-label="Comanda confirmada">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#EFE5D1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+
+        <!-- 3. Titular -->
+        <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-4xl text-[#D24A33] mb-2">Gràcies!</h2>
+
+        <!-- 4. Subtítol -->
+        <p class="text-sm text-[#8C7A58] mb-7 max-w-xs">S'està preparant la teva comanda amb carinyo.</p>
+
+        <!-- 5. Caixa d'estimació -->
+        <div class="w-full max-w-sm bg-[#F6EFDD] rounded-2xl px-5 py-4 mb-8">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-[#8C7A58] mb-1">Arriba aprox.</p>
+          <!-- TODO: n8n tiempo real -->
+          <p id="cf-success-estimate" class="text-lg font-semibold text-[#2D241D]"></p>
+          <p id="cf-success-reassigned" class="hidden text-xs font-medium text-[#D24A33] mt-2"></p>
+        </div>
+
+        <!-- 6. Barra de progrés (4 estats, controlada per estatComanda) -->
+        <div id="cf-progress" class="w-full max-w-sm mb-8" role="list" aria-label="Estat de la comanda"></div>
+
+        <!-- 7. CTA Instagram (substitueix el bloc de contacte anterior) -->
+        <a id="cf-instagram-cta" href="#" target="_blank" rel="noopener noreferrer"
+          class="w-full max-w-sm bg-[#F6EFDD] rounded-2xl px-5 py-4 mb-2 flex items-center gap-3 text-left hover:bg-[#EFE0C5] transition-colors">
+          <span class="w-10 h-10 rounded-full bg-[#D24A33] flex items-center justify-center shrink-0" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EFE5D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.3" cy="6.7" r="0.6" fill="#EFE5D1" stroke="none"/>
+            </svg>
+          </span>
+          <span>
+            <span class="block text-sm font-semibold text-[#2D241D]">Segueix-nos a Instagram</span>
+            <span id="cf-instagram-handle" class="block text-xs text-[#8C7A58]"></span>
+          </span>
+        </a>
+
+      </div>
+
+      <!-- 8. Botó principal -->
+      <div class="px-6 pb-6 shrink-0">
+        <button onclick="closeCheckout(); resetCart();"
+          class="w-full py-3.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#EFE5D1] bg-[#2D241D] transition-all hover:bg-[#1c1712]">
+          Tornar a l'inici
+        </button>
+      </div>
     </div>
 
     </div> <!-- /card wrapper -->
@@ -1010,26 +1064,63 @@
       }).join('');
     }
 
+    // ════ Pantalla de confirmació — punts d'integració ════
+    // estimacioEntrega: string mostrat a la caixa "Arriba aprox.". Ara mateix
+    // ve del càlcul client-side de més avall (franja + marge segons pizzes).
+    // TODO: n8n tiempo real — substituir per un valor calculat en servidor
+    // amb cua real de cuina / repartidor en ruta.
+    let estimacioEntrega = '';
+
+    // estatComanda: pas actiu de la barra de progrés (1=Comanda rebuda,
+    // 2=Al forn, 3=En camí, 4=Delivery fet). Fixat a 1 — el actualitzarà
+    // n8n en temps real més endavant.
+    let estatComanda = 1;
+
+    // INSTAGRAM_URL: enllaç del CTA d'Instagram a la pantalla de confirmació.
+    const INSTAGRAM_URL = "https://instagram.com/REEMPLAZAR_HANDLE";
+
+    const CF_PROGRESS_STEPS = ['Comanda rebuda', 'Al forn', 'En camí', 'Delivery fet'];
+
+    function renderProgressBar() {
+      const container = document.getElementById('cf-progress');
+      if (!container) return;
+      container.innerHTML = `
+        <div class="relative flex justify-between">
+          <div class="absolute top-[9px] left-0 right-0 h-0.5 bg-[#E2D3B4]"></div>
+          ${CF_PROGRESS_STEPS.map((label, i) => {
+            const stepNum = i + 1;
+            const active = stepNum <= estatComanda;
+            return `
+              <div class="relative z-10 flex flex-col items-center gap-2 flex-1" role="listitem" aria-current="${stepNum === estatComanda ? 'step' : 'false'}">
+                <span class="w-[18px] h-[18px] rounded-full border-2 border-[#EFE5D1] ${active ? 'bg-[#D24A33]' : 'bg-[#E2D3B4]'}"></span>
+                <span class="text-[10px] leading-tight text-center ${active ? 'font-semibold text-[#2D241D]' : 'text-[#8C7A58]'}" style="max-width:64px">${label}</span>
+              </div>`;
+          }).join('')}
+        </div>`;
+    }
+
     // Calcula una franja estimada de entrega a partir de la hora de la franja
     // y el nombre de pizzas del pedido (cada pizza extra suma algo de margen).
     // Es una estimación simple en el cliente; un cálculo más preciso (cola
     // real de cocina, repartidor ya en ruta, etc.) requeriría una automatización
     // en servidor (ej. n8n) que no tenemos todavía.
-    function computeDeliveryEstimateText() {
+    function computeEstimacioEntrega() {
       const m = cfSelectedTime && /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
-      if (!m) return `Temps estimat d'entrega: <strong class="font-medium">30–45 minuts</strong>`;
+      if (!m) return '30–45 minuts';
       const pizzaCount = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
       const extraMin = Math.min(Math.max(pizzaCount - 1, 0) * 2, 10);
       const windowMin = 10 + extraMin;
       const start = new Date(); start.setHours(Number(m[1]), Number(m[2]), 0, 0);
       const end = new Date(start.getTime() + windowMin * 60000);
       const fmtH = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-      return `Rebràs la comanda entre les <strong class="font-medium">${fmtH(start)}</strong> i les <strong class="font-medium">${fmtH(end)}</strong>`;
+      return `${fmtH(start)}–${fmtH(end)}`;
     }
 
     function updateSuccessDeliveryEstimate() {
+      estimacioEntrega = computeEstimacioEntrega();
       const el = document.getElementById('cf-success-estimate');
-      if (el) el.innerHTML = computeDeliveryEstimateText();
+      if (el) el.textContent = estimacioEntrega;
+
       const reassignedEl = document.getElementById('cf-success-reassigned');
       if (reassignedEl) {
         if (window._cfSlotReassigned) {
@@ -1038,6 +1129,16 @@
         } else {
           reassignedEl.classList.add('hidden');
         }
+      }
+
+      renderProgressBar();
+
+      const igLink = document.getElementById('cf-instagram-cta');
+      const igHandle = document.getElementById('cf-instagram-handle');
+      if (igLink) igLink.href = INSTAGRAM_URL;
+      if (igHandle) {
+        const handle = INSTAGRAM_URL.split('/').filter(Boolean).pop() || '';
+        igHandle.textContent = handle ? '@' + handle : '';
       }
     }
 
