@@ -449,8 +449,8 @@
   </footer>
 
   <script>
-    const AIRTABLE_ENDPOINT = "PENDENT_AFEGIR";
-    const AIRTABLE_TOKEN = "PENDENT_AFEGIR";
+    const EVENT_REQUEST_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/event-request';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
 
     // ───── Navbar scroll behaviour ─────
     const navbar = document.getElementById('navbar');
@@ -496,24 +496,21 @@
       submitSpinner.classList.remove('hidden');
 
       try {
-        if (AIRTABLE_ENDPOINT !== "PENDENT_AFEGIR") {
-          const data = {
-            fields: {
-              Nom: document.getElementById('f-nom').value,
-              Telefon: document.getElementById('f-tel').value,
-              Email: document.getElementById('f-email').value,
-              Data: document.getElementById('f-data').value,
-              Convidats: parseInt(document.getElementById('f-inv').value) || 0,
-              Detalls: document.getElementById('f-det').value,
-            }
-          };
-          const res = await fetch(AIRTABLE_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          });
-          if (!res.ok) throw new Error(`Airtable: ${res.status}`);
-        }
+        const data = {
+          nom: document.getElementById('f-nom').value,
+          telefon: document.getElementById('f-tel').value,
+          email: document.getElementById('f-email').value,
+          data: document.getElementById('f-data').value,
+          convidats: parseInt(document.getElementById('f-inv').value) || null,
+          detalls: document.getElementById('f-det').value,
+        };
+        const res = await fetch(EVENT_REQUEST_FN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify(data),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || `Error ${res.status}`);
         document.getElementById('event-form').classList.add('hidden');
         document.getElementById('form-success').classList.remove('hidden');
       } catch (err) {
