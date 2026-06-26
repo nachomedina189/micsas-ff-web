@@ -146,20 +146,19 @@
 
         <!-- Time -->
         <div>
-          <label for="pp-time-select" class="block text-xs font-semibold uppercase tracking-widest text-[#2A1A0F] mb-2">Quan vols rebre-la?</label>
+          <label for="pp-time-select-btn" class="block text-xs font-semibold uppercase tracking-widest text-[#2A1A0F] mb-2">Quan vols rebre-la?</label>
           <div class="flex gap-2 mb-2">
             <button type="button" onclick="selectDeliveryDay('today')" id="pp-day-today" class="flex-1 px-4 py-2 rounded-full border text-sm font-medium transition-all">Avui</button>
             <button type="button" onclick="selectDeliveryDay('other')" id="pp-day-other" class="flex-1 px-4 py-2 rounded-full border text-sm font-medium transition-all">Un altre dia</button>
           </div>
           <input type="date" id="pp-delivery-date" class="hidden w-full bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none mb-2 focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]" onchange="onDeliveryDateChange(this.value)">
           <div class="relative">
-            <select id="pp-time-select" onchange="selectTimeFromSelect(this.value)"
-              class="w-full appearance-none bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 pr-10 text-[#2A1A0F] text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all cursor-pointer">
-              <option value="" disabled selected>Tria una franja horària...</option>
-            </select>
-            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#9B8A72]">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </div>
+            <button type="button" id="pp-time-select-btn" onclick="_ppToggleTimeDropdown()"
+              class="w-full flex items-center justify-between bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all cursor-pointer text-left">
+              <span id="pp-time-select-label" class="text-[#9B8A72]">Tria una franja horària...</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#9B8A72] shrink-0 ml-2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div id="pp-time-dropdown" class="hidden pp-suggestions" style="max-height:280px;overflow-y:auto;"></div>
           </div>
         </div>
 
@@ -282,19 +281,25 @@
       return null;
     }
 
+    // El desplegable de franja horària és HTML/CSS propi (no un <select>
+    // natiu): a iOS, el picker natiu d'un <select> a vegades es renderitza
+    // en negre el primer cop que s'obre quan el sistema està en mode fosc
+    // (un bug de WebKit que ni color-scheme:light arregla del tot). Construint
+    // la llista nosaltres mateixos, no depenem d'aquest component natiu.
+    let ppTimeOptions = [];
+
     function renderTimeSlots() {
       const isToday = ppDeliveryDate === todayISO();
       const asap = resolveAsap();
-      const sel  = document.getElementById('pp-time-select');
-      let html   = '<option value="" disabled selected>Tria una franja horària...</option>';
+      const options = [];
 
       if (isToday) {
         if (asap) {
-          html += `<option value="cuanto-antes">Com més aviat millor (cap a les ${asap})</option>`;
+          options.push({ value: 'cuanto-antes', label: `Com més aviat millor (cap a les ${asap})` });
         } else {
-          html += `<option value="" disabled>Com més aviat millor (sense disponibilitat)</option>`;
+          options.push({ value: '', label: 'Com més aviat millor (sense disponibilitat)', disabled: true });
         }
-        html += `<option value="" disabled>──────────────</option>`;
+        options.push({ separator: true });
       }
 
       const nowMins = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
@@ -302,15 +307,53 @@
         const [h, m] = s.split(':').map(Number);
         const isPast = isToday && (h * 60 + m) <= nowMins;
         const full = (_slotCounts[s] || 0) >= 6;
-        html += isPast
-          ? `<option value="" disabled>${s} — Ja ha passat</option>`
-          : full
-          ? `<option value="" disabled>${s} — Complet</option>`
-          : `<option value="${s}">${s}</option>`;
+        if (isPast) options.push({ value: '', label: `${s} — Ja ha passat`, disabled: true });
+        else if (full) options.push({ value: '', label: `${s} — Complet`, disabled: true });
+        else options.push({ value: s, label: s });
       });
 
-      sel.innerHTML = html;
+      ppTimeOptions = options;
+      _ppRenderTimeDropdown();
     }
+
+    function _ppRenderTimeDropdown() {
+      const box = document.getElementById('pp-time-dropdown');
+      if (!box) return;
+      box.innerHTML = ppTimeOptions.map(opt => {
+        if (opt.separator) return `<div style="border-top:1px solid rgba(196,176,138,0.3);margin:4px 0;"></div>`;
+        if (opt.disabled) {
+          return `<div class="pp-suggestion-item" style="opacity:0.5;cursor:not-allowed;">${_ppEscape(opt.label)}</div>`;
+        }
+        return `<button type="button" class="pp-suggestion-item" onclick="selectTimeFromSelect('${opt.value}')" ontouchend="event.preventDefault(); selectTimeFromSelect('${opt.value}');">${_ppEscape(opt.label)}</button>`;
+      }).join('');
+    }
+
+    function _ppToggleTimeDropdown() {
+      const box = document.getElementById('pp-time-dropdown');
+      if (!box) return;
+      if (box.classList.contains('hidden')) {
+        _ppRenderTimeDropdown();
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+    window._ppToggleTimeDropdown = _ppToggleTimeDropdown;
+
+    function _ppResetTimeLabel() {
+      const labelEl = document.getElementById('pp-time-select-label');
+      if (!labelEl) return;
+      labelEl.textContent = 'Tria una franja horària...';
+      labelEl.classList.add('text-[#9B8A72]');
+      labelEl.classList.remove('text-[#2A1A0F]');
+    }
+
+    document.addEventListener('click', (e) => {
+      const btn = document.getElementById('pp-time-select-btn');
+      const box = document.getElementById('pp-time-dropdown');
+      if (!btn || !box || box.classList.contains('hidden')) return;
+      if (e.target !== btn && !btn.contains(e.target) && !box.contains(e.target)) box.classList.add('hidden');
+    });
 
     function selectDeliveryDay(which) {
       const todayBtn  = document.getElementById('pp-day-today');
@@ -326,6 +369,7 @@
       otherBtn.classList.toggle('text-[#E23F2E]', !isToday);
       otherBtn.classList.toggle('border-[#C4B08A]/40', isToday);
       ppSelectedTime = null;
+      _ppResetTimeLabel();
       if (isToday) {
         dateInput.classList.add('hidden');
         ppDeliveryDate = todayISO();
@@ -347,6 +391,7 @@
       if (!val) return;
       ppDeliveryDate = val;
       ppSelectedTime = null;
+      _ppResetTimeLabel();
       loadSlotCounts().then(renderTimeSlots);
       validateForm();
     }
@@ -354,8 +399,20 @@
     function selectTimeFromSelect(val) {
       const resolved = val === 'cuanto-antes' ? resolveAsap() : val;
       ppSelectedTime = resolved || null;
+      const labelEl = document.getElementById('pp-time-select-label');
+      if (labelEl) {
+        const chosen = ppTimeOptions.find(o => o.value === val);
+        if (chosen) {
+          labelEl.textContent = chosen.label;
+          labelEl.classList.remove('text-[#9B8A72]');
+          labelEl.classList.add('text-[#2A1A0F]');
+        }
+      }
+      const dropdown = document.getElementById('pp-time-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
       validateForm();
     }
+    window.selectTimeFromSelect = selectTimeFromSelect;
 
     // ppAddressValid will be set to true by the Places integration once an address is selected
     let ppAddressValid = false;
@@ -385,7 +442,7 @@
       if (!isSlotStillValid()) {
         alert('Aquesta franja horària ja ha passat. Tria una franja horària diferent.');
         ppSelectedTime = null;
-        document.getElementById('pp-time-select').value = '';
+        _ppResetTimeLabel();
         loadSlotCounts().then(renderTimeSlots);
         validateForm();
         return;
