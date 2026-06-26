@@ -730,7 +730,6 @@
     };
     const DELIVERY_FEE = 0;
     let cart = [];
-    let orderAllergies = '';
 
     function fmt(n) { return '€' + n.toFixed(2); }
     function fmtComma(n) { return '€' + n.toFixed(2).replace('.', ','); }
@@ -973,7 +972,6 @@
     let cfPlacesAddress = '';
     let cfSelectedTime = null;
     let currentZone = null;
-    let _zipDebounceTimer = null;
     let currentUser = null;
     let cfClientComplete = false;
     let cfClientName = '', cfClientPhone = '', cfClientEmail = '';
@@ -1430,22 +1428,14 @@
       const outEl = document.getElementById('cf-auth-out');
       const inEl  = document.getElementById('cf-auth-in');
       const emailEl = document.getElementById('cf-auth-email');
-      const navLoginBtn = document.getElementById('nav-login-btn');
-      const navUserWrap = document.getElementById('nav-user-wrap');
-      const navUserName = document.getElementById('nav-user-name');
       if (!outEl || !inEl) return;
       if (currentUser) {
         outEl.classList.add('hidden');
         inEl.classList.remove('hidden'); inEl.classList.add('flex');
         if (emailEl) emailEl.textContent = currentUser.email;
-        if (navLoginBtn) navLoginBtn.classList.add('hidden');
-        if (navUserWrap) { navUserWrap.classList.remove('hidden'); navUserWrap.classList.add('flex'); }
-        if (navUserName) navUserName.textContent = currentUser.email.split('@')[0];
       } else {
         inEl.classList.add('hidden'); inEl.classList.remove('flex');
         outEl.classList.remove('hidden');
-        if (navLoginBtn) navLoginBtn.classList.remove('hidden');
-        if (navUserWrap) { navUserWrap.classList.add('hidden'); navUserWrap.classList.remove('flex'); }
       }
     }
 
@@ -2019,7 +2009,7 @@
     }
 
     function resetCart() {
-      cart = []; renderCart(false); cfPayMethod = null; cfPlacesAddress = ''; cfSelectedTime = null; orderAllergies = '';
+      cart = []; renderCart(false); cfPayMethod = null; cfPlacesAddress = ''; cfSelectedTime = null;
       cfClientComplete = false; cfClientName = ''; cfClientPhone = ''; cfClientEmail = '';
       cfTipAmount = 0;
       const tipCustom = document.getElementById('cf-tip-custom');
@@ -2032,7 +2022,6 @@
       ['cf-name','cf-email','cf-phone','cf-notes'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';
       });
-      const oa = document.getElementById('order-allergies'); if (oa) oa.value = '';
       // Reset payment options
       const onlineCard = document.getElementById('cf-pay-online');
       if (onlineCard) { onlineCard.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); onlineCard.classList.add('border-[#C4B08A]/40'); onlineCard.setAttribute('aria-checked','false'); }
@@ -2040,10 +2029,6 @@
       if (delivWrap) { delivWrap.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); delivWrap.classList.add('border-[#C4B08A]/40'); }
       const delivCard = document.getElementById('cf-pay-delivery');
       if (delivCard) delivCard.setAttribute('aria-checked','false');
-      const dropdown = document.getElementById('cf-delivery-dropdown');
-      if (dropdown) dropdown.classList.add('hidden');
-      const delivChevron = document.getElementById('cf-delivery-chevron');
-      if (delivChevron) delivChevron.style.transform = '';
       const subtitle = document.getElementById('cf-delivery-subtitle');
       if (subtitle) subtitle.textContent = 'En efectiu';
       ['online','wallet','delivery','cash'].forEach(m => {
@@ -2074,66 +2059,6 @@
       [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
     }
 
-    async function validateZone(cp) {
-      if (!window.supabase) { currentZone = null; validateCheckout(); return; }
-      const input   = document.getElementById('cf-zip');
-      const spinner = document.getElementById('cf-zip-spinner');
-      const errEl   = document.getElementById('cf-zone-err');
-      const okEl    = document.getElementById('cf-zone-ok');
-      const clean   = (cp || '').replace(/\s/g, '');
-
-      const resetBorder = () => {
-        if (input) { input.style.borderColor = ''; input.style.boxShadow = ''; }
-      };
-      const successBorder = () => {
-        if (input) { input.style.borderColor = 'rgba(16,185,129,0.7)'; input.style.boxShadow = '0 0 0 1px rgba(16,185,129,0.35)'; }
-      };
-      const errorBorder = () => {
-        if (input) { input.style.borderColor = '#E23F2E'; input.style.boxShadow = '0 0 0 1px rgba(226,63,46,0.3)'; }
-      };
-
-      // Too short — clear everything silently
-      if (clean.length < 5) {
-        currentZone = null;
-        resetBorder();
-        if (errEl) errEl.classList.add('hidden');
-        if (okEl)  okEl.classList.add('hidden');
-        validateCheckout();
-        return;
-      }
-
-      if (spinner) spinner.classList.remove('hidden');
-      if (errEl)   errEl.classList.add('hidden');
-      if (okEl)    okEl.classList.add('hidden');
-
-      try {
-        const { data } = await window.supabase
-          .from('delivery_zones')
-          .select('*')
-          .eq('postal_code', clean)
-          .eq('active', true)
-          .maybeSingle();
-
-        if (data) {
-          currentZone = data;
-          successBorder();
-          if (okEl)  okEl.classList.remove('hidden');
-        } else {
-          currentZone = null;
-          errorBorder();
-          if (errEl) errEl.classList.remove('hidden');
-        }
-      } catch (err) {
-        console.error('[validateZone]', err);
-        currentZone = null;
-        errorBorder();
-        if (errEl) errEl.classList.remove('hidden');
-      } finally {
-        if (spinner) spinner.classList.add('hidden');
-        validateCheckout();
-      }
-    }
-
     // Places Autocomplete eliminat — incompatible amb inputs dins d'overlays fixed.
     // El camp d'adreça és text lliure; el codi postal valida la zona de repartiment.
     function initAutocomplete() {}
@@ -2142,7 +2067,6 @@
     // Real-time validation on checkout inputs
     document.addEventListener('input', e => {
       const id = e.target && e.target.id;
-      if (id === 'order-allergies') { orderAllergies = e.target.value; return; }
       if (!id || !id.startsWith('cf-')) return;
       if (id === 'cf-address') cfPlacesAddress = e.target.value; // kept in sync; Places overwrites on selection
       validateCheckout();
@@ -2157,21 +2081,6 @@
       if (id === 'cf-phone') {
         const digits = e.target.value.replace(/\D/g,'');
         showFieldErr('cf-phone', digits.length > 0 && digits.length < 9);
-      }
-      if (id === 'cf-zip') {
-        clearTimeout(_zipDebounceTimer);
-        const v = e.target.value.trim();
-        if (v.length < 5) {
-          // Reset zone state immediately when CP gets too short
-          currentZone = null;
-          const inp = document.getElementById('cf-zip');
-          if (inp) { inp.style.borderColor = ''; inp.style.boxShadow = ''; }
-          document.getElementById('cf-zone-err').classList.add('hidden');
-          document.getElementById('cf-zone-ok').classList.add('hidden');
-          validateCheckout();
-        } else {
-          _zipDebounceTimer = setTimeout(() => validateZone(v), 400);
-        }
       }
     });
 
