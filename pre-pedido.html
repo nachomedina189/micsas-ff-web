@@ -1048,11 +1048,21 @@
       if (typeof validateForm === 'function') validateForm();
     }
 
-    // Comprova que la ciutat retornada per Google Places sigui Matadepera.
-    // Si Google no retorna ciutat (passa amb algunes adreces), no bloquegem
-    // només per això — es deixa decidir a la comprovació de codi postal.
-    function _ppCityAllowed(city) {
-      return !city || _ppNormalize(city) === _ppNormalize(PP_ALLOWED_CITY);
+    // Comprova que "Matadepera" aparegui en algun component de l'adreça que
+    // retorna Google Places. NO ens fiem només del component "locality": per
+    // a alguns municipis petits Google etiqueta la ciutat com
+    // "postal_town", "administrative_area_level_3" o "administrative_area_level_4"
+    // en lloc de "locality" — si només miréssim "locality" i no hi fos,
+    // deixaríem passar adreces d'altres pobles sense voler (ja ha passat amb
+    // una adreça d'Argentona). Per això es revisen TOTS els components, i si
+    // "Matadepera" no hi apareix enlloc, es rebutja directament — no hi ha
+    // cap cas en què calgui ser permissius aquí.
+    function _ppAddressIsInMatadepera(addressComponents) {
+      const target = _ppNormalize(PP_ALLOWED_CITY);
+      return (addressComponents || []).some(c => {
+        const text = c.longText || c.shortText || '';
+        return _ppNormalize(text) === target;
+      });
     }
 
     async function _ppValidateZone(zip) {
@@ -1245,8 +1255,9 @@
         window._ppLng = place.location ? place.location.lng() : null;
 
         ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
-        if (!_ppCityAllowed(window._ppExtractedCity)) {
-          // Ciutat fora de Matadepera — no cal ni consultar delivery_zones.
+        if (!_ppAddressIsInMatadepera(comps)) {
+          // "Matadepera" no apareix en cap component de l'adreça — es rebutja
+          // directament, no cal ni consultar delivery_zones.
           _ppShowZoneError(window._ppExtractedZip, `Només fem entregues a ${PP_ALLOWED_CITY}.`);
         } else if (window._ppExtractedZip) {
           await _ppValidateZone(window._ppExtractedZip);
