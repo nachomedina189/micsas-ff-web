@@ -592,8 +592,17 @@
             He llegit i accepto la <a href="privacidad.html" target="_blank" class="underline text-[#E23F2E] hover:text-[#B82A1F]" onclick="event.stopPropagation()">Política de Privacitat</a>
           </span>
         </label>
+        <!-- Marketing consent (opcional, no bloqueja l'enviament) -->
+        <label class="flex items-start gap-3 cursor-pointer group">
+          <input type="checkbox" id="cf-marketing"
+            class="mt-0.5 w-4 h-4 rounded border-[#C4B08A] accent-[#E23F2E] cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
+          <span class="text-sm font-light text-[#5A3E28] leading-relaxed group-hover:text-[#2A1A0F] transition-colors">
+            Vull rebre ofertes i novetats de micsas.ff per email <span class="text-[#9B8A72]">(opcional)</span>
+          </span>
+        </label>
+
         <p class="text-xs font-light text-[#9B8A72] leading-relaxed -mt-1">
-          Responsable: [[NOMBRE_COMPLETO]]. Finalitat: gestionar la teva comanda. Pots exercir els teus drets a
+          Responsable: Pol Bonastre Company. Finalitat: gestionar la teva comanda. Pots exercir els teus drets a
           <a href="privacidad.html" target="_blank" class="underline">privacidad.html</a>.
         </p>
 
@@ -1728,7 +1737,11 @@
       const timeNote   = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
       const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
       const paymentMethod = cfPayMethod === 'cash' ? 'cash' : (cfPayMethod === 'online' ? 'online' : 'card_delivery');
-      return { name, email, phone, street, floor, postalCode, city, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate };
+      // marketingConsent es captura aquí (booleà) per a ús futur — encara no
+      // s'envia ni es desa a Supabase, ja que la taula 'customers' no té cap
+      // columna per a això i no tenim accés a la BD per afegir-la des d'aquí.
+      const marketingConsent = !!(document.getElementById('cf-marketing') && document.getElementById('cf-marketing').checked);
+      return { name, email, phone, street, floor, postalCode, city, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate, marketingConsent };
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
@@ -2048,6 +2061,7 @@
       // Reset T&C
       const tnc = document.getElementById('cf-tnc'); if (tnc) tnc.checked = false;
       const privacyCb = document.getElementById('cf-privacy'); if (privacyCb) privacyCb.checked = false;
+      const marketingCb = document.getElementById('cf-marketing'); if (marketingCb) marketingCb.checked = false;
       // Reset order summary panel
       const summary = document.getElementById('cf-order-summary'); if (summary) summary.classList.add('hidden');
       const chevron = document.getElementById('cf-chevron'); if (chevron) chevron.style.transform = '';
@@ -2507,6 +2521,7 @@
 
   <script src="https://js.stripe.com/v3/"></script>
   <script src="i18n.js"></script>
+  <script src="cookie-consent.js" defer></script>
 
 </body>
 </html>
