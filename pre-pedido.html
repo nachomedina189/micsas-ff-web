@@ -961,12 +961,41 @@
     window._ppLat = null;
     window._ppLng = null;
 
+    // micsas.ff només reparteix a Matadepera. La taula delivery_zones ja
+    // filtra per codi postal, però com a segona barrera comprovem també el
+    // nom de la ciutat que retorna Google Places — evita falsos positius si
+    // algun dia un CP coincident d'un altre municipi acaba a la taula per error.
+    const PP_ALLOWED_CITY = 'Matadepera';
+    const PP_ZONE_ERR_DEFAULT = 'No fem entregues a aquesta zona';
+    function _ppNormalize(s) {
+      return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+    }
+
     function _ppResetZoneFeedback() {
       document.getElementById('pp-zone-feedback').classList.add('hidden');
       document.getElementById('pp-zip-badge').textContent  = '';
       document.getElementById('pp-zone-ok').classList.add('hidden');
       document.getElementById('pp-zone-err').classList.add('hidden');
       document.getElementById('pp-zone-spin').classList.add('hidden');
+    }
+
+    function _ppShowZoneError(zip, message) {
+      document.getElementById('pp-zone-feedback').classList.remove('hidden');
+      document.getElementById('pp-zip-badge').textContent = zip || '';
+      document.getElementById('pp-zone-ok').classList.add('hidden');
+      document.getElementById('pp-zone-spin').classList.add('hidden');
+      const errEl = document.getElementById('pp-zone-err');
+      errEl.textContent = '· ' + message;
+      errEl.classList.remove('hidden');
+      ppAddressValid = false;
+      if (typeof validateForm === 'function') validateForm();
+    }
+
+    // Comprova que la ciutat retornada per Google Places sigui Matadepera.
+    // Si Google no retorna ciutat (passa amb algunes adreces), no bloquegem
+    // només per això — es deixa decidir a la comprovació de codi postal.
+    function _ppCityAllowed(city) {
+      return !city || _ppNormalize(city) === _ppNormalize(PP_ALLOWED_CITY);
     }
 
     async function _ppValidateZone(zip) {
@@ -979,6 +1008,7 @@
       badgeEl.textContent = zip;
       feedbackEl.classList.remove('hidden');
       okEl.classList.add('hidden');
+      errEl.textContent = '· ' + PP_ZONE_ERR_DEFAULT;
       errEl.classList.add('hidden');
       spinEl.classList.remove('hidden');
 
@@ -1158,7 +1188,10 @@
         window._ppLng = place.location ? place.location.lng() : null;
 
         ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
-        if (window._ppExtractedZip) {
+        if (!_ppCityAllowed(window._ppExtractedCity)) {
+          // Ciutat fora de Matadepera — no cal ni consultar delivery_zones.
+          _ppShowZoneError(window._ppExtractedZip, `Només fem entregues a ${PP_ALLOWED_CITY}.`);
+        } else if (window._ppExtractedZip) {
           await _ppValidateZone(window._ppExtractedZip);
         } else {
           _ppResetZoneFeedback();
