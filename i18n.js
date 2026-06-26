@@ -22,8 +22,8 @@
       banner_sub: "Sense pressa, només amor i temps. L'olor de la massa al matí, el so de les motos al vespre, la calor del forn de pedra. Així és Micsas. Així és el nostre barri.",
       // NOSALTRES
       nos_label: 'la meva història', nos_t1: 'Nascuts a Matadepera,', nos_t2: 'fets', nos_t3: 'per compartir.',
-      nos_p1: "Micsas neix a Matadepera, d'un grup d'amics obsessionats amb la pizza napolitana de veritat: massa fermentada 72 hores i ingredients escollits un per un. Sense app, sense intermediaris.",
-      nos_p2: "Cuinem i entreguem nosaltres mateixos perquè la caixa arribi al teu portal encara calenta. També tenim el servei d'esdeveniments, per tot aquell públic que vol la pizza tradicional napolitana en la seva festa.",
+      nos_p1: "Micsas neix a Matadepera, d'un noi obsessionat per la pizza napolitana de veritat: massa fermentada 30 hores i ingredients de proximitat escollits un per un.",
+      nos_p2: "Cuinem i entreguem nosaltres mateixos perquè la pizza arribi al teu portal encara calenta. També tenim el servei d'esdeveniments, per a tot aquell públic que vol la pizza tradicional napolitana en la seva festa.",
       // SHOP
       shop_desc: "Aviat tindreu novetats sobre la nostra botiga. Estigueu atents al nostre Instagram @micsas.ff!",
       shop_wip: 'En construcció',
@@ -98,8 +98,8 @@
       banner_sub: "Sin prisa, solo amor y tiempo. El olor de la masa por la mañana, el sonido de las motos al atardecer, el calor del horno de piedra. Así es Micsas. Así es nuestro barrio.",
       // NOSALTRES
       nos_label: 'mi historia', nos_t1: 'Nacidos en Matadepera,', nos_t2: 'hechos', nos_t3: 'para compartir.',
-      nos_p1: "Micsas nace en Matadepera, de un grupo de amigos obsesionados con la pizza napolitana de verdad: masa fermentada 72 horas e ingredientes elegidos uno a uno. Sin app, sin intermediarios.",
-      nos_p2: "Cocinamos y entregamos nosotros mismos para que la caja llegue a tu puerta todavía caliente. También tenemos el servicio de eventos, para todo aquel público que quiera la pizza napolitana tradicional en su fiesta.",
+      nos_p1: "Micsas nace en Matadepera, de un chico obsesionado con la pizza napolitana de verdad: masa fermentada 30 horas e ingredientes de proximidad elegidos uno a uno.",
+      nos_p2: "Cocinamos y entregamos nosotros mismos para que la pizza llegue a tu puerta todavía caliente. También tenemos el servicio de eventos, para todo aquel público que quiera la pizza napolitana tradicional en su fiesta.",
       // SHOP
       shop_desc: "Pronto tendréis novedades sobre nuestra tienda. ¡Estad atentos a nuestro Instagram @micsas.ff!",
       shop_wip: 'En construcción',
