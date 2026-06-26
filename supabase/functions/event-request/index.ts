@@ -1,9 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 // Email del propietari del negoci que ha de rebre l'avís de cada nova
 // petició de pressupost (formulari "Demana el teu pressupost" a
@@ -11,6 +7,7 @@ const corsHeaders = {
 const CLIENT_NOTIFICATION_EMAIL = "polbonastre@gmail.com";
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
