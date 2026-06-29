@@ -221,6 +221,10 @@
   </footer>
 
   <script>
+    function _ppEscape(s) {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     function openOrderCard() {
       const landing = document.getElementById('pp-landing');
       const card    = document.getElementById('pp-card');
