@@ -1545,8 +1545,15 @@
         document.getElementById('login-ok-title').textContent = 'Comprova el teu correu';
         document.getElementById('login-ok-msg').textContent = "T'hem enviat un enllaç a " + email + ". Clica'l per entrar al teu compte.";
         showLoginView('ok');
-      } else {
+      } else if (/signups not allowed for otp/i.test(error.message || '')) {
+        // Aquest és l'únic error que realment significa "aquest correu encara
+        // no té compte" — qualsevol altre error (fallada d'enviament SMTP,
+        // rate limit, etc.) NO ho significa, i no s'ha de portar el client a
+        // la pantalla de crear compte si ja en té un.
         showLoginView('register');
+      } else {
+        errEl.textContent = 'Hi ha hagut un error enviant el correu. Torna-ho a provar en uns minuts.';
+        errEl.classList.remove('hidden');
       }
     }
 
