@@ -529,31 +529,6 @@
               </div>
             </div>
 
-            <!-- Google Pay / Apple Pay (placeholder) -->
-            <div id="cf-pay-wallet" onclick="selectPayMethod('wallet')" role="radio" aria-checked="false" tabindex="0"
-              onkeydown="if(event.key===' '||event.key==='Enter'){selectPayMethod('wallet')}"
-              class="flex items-center gap-4 rounded-xl border border-[#C4B08A]/40 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
-              <div class="w-10 h-10 rounded-full bg-[#E6D5B0]/30 flex items-center justify-center shrink-0">
-                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#2A1A0F]">Google Pay / Apple Pay</p>
-                <div class="flex items-center gap-1.5 mt-1.5">
-                  <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white border border-gray-200 h-5">
-                    <svg width="8" height="8" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                    <span class="text-[#3C4043] text-[8px] font-medium">Pay</span>
-                  </span>
-                  <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black h-5">
-                    <svg width="8" height="10" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 405.8 0 279 0 158.1c0-121.3 58.9-185.2 110.7-185.2 36.1 0 66.3 24.6 88.9 24.6 21.4 0 54.9-26 97.1-26 148.4 0 261.9 102.9 261.9 291.7 0 15-1.3 71.3-3.2 85.4zm-164-121.9c-3.2-26.6-10.3-61.6-30.1-90.5-26-39.5-66.3-67.4-109.5-67.4-3.2 0-9.6.6-12.9.6 3.2 26 10.3 57.2 29.4 88.8 21.4 35.8 67.4 65.7 123.1 68.5z"/></svg>
-                    <span class="text-white text-[8px] font-medium">Pay</span>
-                  </span>
-                </div>
-              </div>
-              <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-wallet">
-                <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-wallet-dot"></div>
-              </div>
-            </div>
-
             <!-- Pagament al repartidor (efectiu) -->
             <div id="cf-pay-delivery-wrapper" class="rounded-xl border border-[#C4B08A]/40 overflow-hidden transition-all">
               <div id="cf-pay-delivery" onclick="selectPayMethod('cash')" role="radio" aria-checked="false" tabindex="0"
@@ -1331,21 +1306,6 @@
       onlineRadio.classList.toggle('border-[#C4B08A]', !onlineSel);
       onlineDot.classList.toggle('opacity-0', !onlineSel);
 
-      // Wallet (Google Pay / Apple Pay) option
-      const walletCard  = document.getElementById('cf-pay-wallet');
-      const walletRadio = document.getElementById('cf-radio-wallet');
-      const walletDot   = document.getElementById('cf-radio-wallet-dot');
-      const walletSel   = method === 'wallet';
-      if (walletCard) {
-        walletCard.setAttribute('aria-checked', walletSel ? 'true' : 'false');
-        walletCard.classList.toggle('border-[#E23F2E]/60', walletSel);
-        walletCard.classList.toggle('bg-[#E23F2E]/5', walletSel);
-        walletCard.classList.toggle('border-[#C4B08A]/40', !walletSel);
-        walletRadio.classList.toggle('border-[#E23F2E]', walletSel);
-        walletRadio.classList.toggle('border-[#C4B08A]', !walletSel);
-        walletDot.classList.toggle('opacity-0', !walletSel);
-      }
-
       // Delivery wrapper (cash on delivery)
       const deliveryCard  = document.getElementById('cf-pay-delivery');
       const deliveryWrap  = document.getElementById('cf-pay-delivery-wrapper');
@@ -1670,12 +1630,6 @@
         return;
       }
 
-      // Wallet (Google Pay / Apple Pay)
-      if (cfPayMethod === 'wallet') {
-        _pendingOrderData = _collectOrderData();
-        await openStripeOverlay(_pendingOrderData.total, true);
-        return;
-      }
 
       const btn = document.getElementById('cf-submit');
       const originalLabel = btn.textContent;
@@ -2092,7 +2046,7 @@
       if (delivCard) delivCard.setAttribute('aria-checked','false');
       const subtitle = document.getElementById('cf-delivery-subtitle');
       if (subtitle) subtitle.textContent = 'En efectiu';
-      ['online','wallet','delivery','cash'].forEach(m => {
+      ['online','delivery','cash'].forEach(m => {
         const radio = document.getElementById('cf-radio-' + m);
         const dot   = document.getElementById('cf-radio-' + m + '-dot');
         if (radio) { radio.classList.remove('border-[#E23F2E]'); radio.classList.add('border-[#C4B08A]'); }
