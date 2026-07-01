@@ -506,27 +506,22 @@
           <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-xl text-[#2A1A0F] mb-4">Mètode de pagament</h2>
           <div class="space-y-3">
 
-            <!-- Targeta (Stripe) -->
-            <div id="cf-pay-online" onclick="selectPayMethod('online')" role="radio" aria-checked="false" tabindex="0"
-              onkeydown="if(event.key===' '||event.key==='Enter'){selectPayMethod('online')}"
-              class="flex items-center gap-4 rounded-xl border border-[#C4B08A]/40 px-5 py-4 cursor-pointer transition-all hover:border-[#C4B08A]/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E23F2E]">
-              <div class="w-10 h-10 rounded-full bg-[#E6D5B0]/30 text-[#E23F2E] flex items-center justify-center shrink-0">
-                <iconify-icon icon="solar:card-linear" width="20" style="stroke-width:1.5;"></iconify-icon>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-[#2A1A0F]">Targeta de crèdit / dèbit</p>
-                <div class="flex items-center gap-1.5 mt-1.5">
-                  <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-[#1A1F71] h-5">
-                    <svg width="28" height="9" viewBox="0 0 56 18" fill="none"><path d="M21.2 1.2H17L13.4 12.6l-.5-2.4C11.9 7.4 9.5 4.5 6.8 3.1L10.1 17h4.3L21.2 1.2zM23.5 17h4.1L30.2 1.2h-4.1L23.5 17zM38.5 1.5c-.8-.3-2-.6-3.5-.6-3.9 0-6.6 2-6.6 4.8 0 2.1 1.9 3.2 3.4 3.9 1.5.7 2 1.1 2 1.8 0 1-.1.4-1.9 1.9-1.5 0-3.1-.4-4-.8l-.6-.3-.6 3.6c1 .4 2.8.8 4.7.8 4.1 0 6.8-2 6.8-5 0-1.7-1(3-3.3-4-.3-.7-2.2-1.2-2.2-1.9 0-.6.7-1.3 2.2-1.3 1.3 0 2.2.3 2.9.5l.4.2.3-3.6zM47.6 1.2h-3c-.9 0-1.6.3-2 1.2L36.3 17h4.3l.9-2.3h5.2l.5 2.3H51L47.6 1.2zm-5 10.3l2.1-5.6.5 2.5 1 3.1h-3.6z" fill="white"/></svg>
-                  </span>
-                  <span class="inline-flex items-center justify-center h-5 w-8 rounded bg-[#252525]">
-                    <svg width="22" height="14" viewBox="0 0 22 14" fill="none"><circle cx="7" cy="7" r="7" fill="#EB001B"/><circle cx="15" cy="7" r="7" fill="#F79E1B"/><path d="M11 2.8A7 7 0 0 1 13.8 7 7 7 0 0 1 11 11.2 7 7 0 0 1 8.2 7 7 7 0 0 1 11 2.8z" fill="#FF5F00"/></svg>
-                  </span>
-                </div>
-              </div>
-              <div class="w-5 h-5 rounded-full border-2 border-[#C4B08A] shrink-0 flex items-center justify-center transition-all" id="cf-radio-online">
-                <div class="w-2.5 h-2.5 rounded-full bg-[#E23F2E] opacity-0 transition-opacity" id="cf-radio-online-dot"></div>
-              </div>
+            <!-- Wallet button (Apple Pay / Google Pay) — hidden until Stripe confirms support -->
+            <div id="checkout-wallet-container" class="hidden">
+              <div id="checkout-payment-request-button"></div>
+            </div>
+
+            <!-- Card button -->
+            <button id="checkout-card-btn" onclick="payWithCard()"
+              class="w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] text-white bg-[#E23F2E] hover:bg-[#B82A1F] active:bg-[#9A1F12] transition-all">
+              Pagar amb targeta
+            </button>
+
+            <!-- Separator -->
+            <div class="flex items-center gap-3">
+              <div class="flex-1 h-px bg-[#E6D5B0]"></div>
+              <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#8E6A4A;">o bé</span>
+              <div class="flex-1 h-px bg-[#E6D5B0]"></div>
             </div>
 
             <!-- Pagament al repartidor (efectiu) -->
@@ -583,8 +578,8 @@
 
         <!-- Submit button -->
         <button id="cf-submit" onclick="placeOrder()" disabled
-          class="w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
-          Pagar 0,00 €
+          class="hidden w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
+          Confirmar comanda
         </button>
 
         <!-- Global error -->
@@ -940,6 +935,8 @@
     let _stripe = null;
     let _stripeElements = null;
     let _pendingOrderData = null;
+    let _paymentRequest = null;
+    let _walletInitialized = false;
 
     // ── Checkout Fullscreen State ──
     let cfPayMethod = null;
@@ -1206,9 +1203,96 @@
     }
     function refreshTotals() {
       const totalEl = document.getElementById('cf-total-display');
-      const submitBtn = document.getElementById('cf-submit');
       if (totalEl) totalEl.textContent = fmtComma(total());
-      if (submitBtn) submitBtn.textContent = 'Pagar ' + fmtComma(total());
+      if (_paymentRequest) {
+        try { _paymentRequest.update({ total: { label: 'Micsas', amount: Math.max(50, Math.round(total() * 100)) } }); } catch(_) {}
+      }
+    }
+
+    async function initStripeWallet() {
+      if (_walletInitialized) return;
+      _walletInitialized = true;
+      try {
+        if (!_stripe) _stripe = Stripe(STRIPE_PK);
+        _paymentRequest = _stripe.paymentRequest({
+          country: 'ES', currency: 'eur',
+          total: { label: 'Micsas', amount: Math.max(50, Math.round(total() * 100)) },
+          requestPayerName: true,
+        });
+        const canPay = await _paymentRequest.canMakePayment();
+        if (!canPay) return;
+        const walletEls = _stripe.elements();
+        const prBtn = walletEls.create('paymentRequestButton', {
+          paymentRequest: _paymentRequest,
+          style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '52px' } },
+        });
+        document.getElementById('checkout-payment-request-button').innerHTML = '';
+        prBtn.mount('#checkout-payment-request-button');
+        document.getElementById('checkout-wallet-container').classList.remove('hidden');
+        _paymentRequest.on('paymentmethod', async (ev) => {
+          const tnc     = document.getElementById('cf-tnc')?.checked;
+          const privacy = document.getElementById('cf-privacy')?.checked;
+          if (!cfClientComplete || !tnc || !privacy) {
+            ev.complete('fail');
+            showCfToast('Omple les teves dades i accepta les condicions primer.');
+            return;
+          }
+          _pendingOrderData = _collectOrderData();
+          try {
+            const res  = await fetch(EDGE_FN_URL + '/create-payment-intent', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY },
+              body: JSON.stringify({ amount: Math.round(_pendingOrderData.total * 100), currency: 'eur', orderId: '' }),
+            });
+            const json = await res.json();
+            const { error, paymentIntent } = await _stripe.confirmCardPayment(
+              json.clientSecret,
+              { payment_method: ev.paymentMethod.id },
+              { handleActions: false }
+            );
+            if (error) { ev.complete('fail'); showCfToast('Error al processar el pagament.'); return; }
+            ev.complete('success');
+            if (paymentIntent.status === 'requires_action') {
+              const { error: ae } = await _stripe.confirmCardPayment(json.clientSecret);
+              if (ae) { showCfToast('Autenticació fallida.'); return; }
+            }
+            await _saveOrderToSupabase(_pendingOrderData, 'paid');
+            document.getElementById('cf-global-err').classList.add('hidden');
+            document.getElementById('cf-scroll').classList.add('hidden');
+            updateSuccessDeliveryEstimate();
+            const success = document.getElementById('cf-success');
+            success.classList.remove('hidden'); success.classList.add('flex');
+          } catch (e) {
+            ev.complete('fail');
+            showCfToast('Error al processar el pagament. Torna-ho a intentar.');
+          }
+        });
+      } catch (e) {
+        console.warn('[wallet-init]', e);
+      }
+    }
+
+    async function payWithCard() {
+      const tnc     = document.getElementById('cf-tnc')?.checked;
+      const privacy = document.getElementById('cf-privacy')?.checked;
+      let clientOk  = cfClientComplete;
+      if (!clientOk) {
+        const name  = document.getElementById('cf-name')?.value  || '';
+        const email = document.getElementById('cf-email')?.value || '';
+        const phone = document.getElementById('cf-phone')?.value || '';
+        clientOk = name.trim().length >= 2 &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
+          phone.replace(/\D/g, '').length >= 9;
+      }
+      const errEl = document.getElementById('cf-global-err');
+      if (!clientOk || !tnc || !privacy) {
+        if (errEl) { errEl.textContent = 'Omple les teves dades i accepta les condicions primer.'; errEl.classList.remove('hidden'); }
+        document.getElementById('cf-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (errEl) errEl.classList.add('hidden');
+      _pendingOrderData = _collectOrderData();
+      openStripeOverlay(_pendingOrderData.total);
     }
 
     function openCheckout() {
@@ -1218,6 +1302,7 @@
       const count = totalCount();
       document.getElementById('cf-items-count').textContent = count + (count === 1 ? ' article' : ' articles');
       refreshTotals();
+      initStripeWallet();
       // Read pre-pedido data from sessionStorage (if coming from pre-pedido.html)
       const _ssTime  = sessionStorage.getItem('micsas_time');
       const _ssDate  = sessionStorage.getItem('micsas_delivery_date');
@@ -1336,16 +1421,22 @@
         const phoneOk = phone.replace(/\D/g, '').length >= 9;
         clientOk = nameOk && emailOk && phoneOk;
       }
-      const allOk = clientOk && tnc && privacy && cfPayMethod !== null;
+      const baseOk = clientOk && tnc && privacy;
+      const allOk  = baseOk && cfPayMethod === 'cash';
 
       const btn = document.getElementById('cf-submit');
       if (!btn) return allOk;
-      if (allOk) {
-        btn.disabled = false;
-        btn.className = 'w-full py-4 rounded-full font-[\'Inter\',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] hover:-translate-y-0.5 transition-all cursor-pointer';
+      if (cfPayMethod === 'cash') {
+        btn.classList.remove('hidden');
+        if (baseOk) {
+          btn.disabled = false;
+          btn.className = "w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] hover:-translate-y-0.5 transition-all cursor-pointer";
+        } else {
+          btn.disabled = true;
+          btn.className = "w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
+        }
       } else {
-        btn.disabled = true;
-        btn.className = 'w-full py-4 rounded-full font-[\'Inter\',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all';
+        btn.classList.add('hidden');
       }
       return allOk;
     }
@@ -2068,9 +2159,12 @@
       const summBtn = document.getElementById('cf-summary-btn'); if (summBtn) summBtn.setAttribute('aria-expanded','false');
       // Hide field errors
       document.querySelectorAll('.cf-field-err').forEach(e => e.classList.add('hidden'));
-      // Reset submit button
+      // Reset submit button and wallet state
       const btn = document.getElementById('cf-submit');
-      if (btn) { btn.textContent = 'Pagar 0,00 €'; btn.disabled = true; btn.className = 'w-full py-4 rounded-full font-[\'Inter\',sans-serif] font-medium text-[16px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all'; }
+      if (btn) { btn.textContent = 'Confirmar comanda'; btn.disabled = true; btn.classList.add('hidden'); }
+      _paymentRequest = null; _walletInitialized = false;
+      const wc = document.getElementById('checkout-wallet-container');
+      if (wc) { wc.classList.add('hidden'); document.getElementById('checkout-payment-request-button').innerHTML = ''; }
       [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
     }
 
