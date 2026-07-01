@@ -1673,7 +1673,7 @@
       // Wallet (Google Pay / Apple Pay)
       if (cfPayMethod === 'wallet') {
         _pendingOrderData = _collectOrderData();
-        await openWalletPayment(_pendingOrderData.total);
+        await openStripeOverlay(_pendingOrderData.total, true);
         return;
       }
 
@@ -1870,7 +1870,7 @@
       }
     }
 
-    async function openStripeOverlay(totalEuros) {
+    async function openStripeOverlay(totalEuros, walletOnly = false) {
       const overlay = document.getElementById('stripe-overlay');
       overlay.classList.remove('hidden');
       const panel = document.getElementById('stripe-modal-panel');
@@ -1957,11 +1957,20 @@
           requestPayerName: true,
         });
         const canPay = await pr.canMakePayment();
-        if (canPay) {
+
+        if (walletOnly) {
+          if (!canPay) {
+            closeStripeOverlay();
+            showCfToast('El teu dispositiu no suporta Apple Pay ni Google Pay.');
+            return;
+          }
+          document.getElementById('stripe-pay-btn').classList.add('hidden');
+          document.getElementById('stripe-wallet-separator').classList.add('hidden');
+          document.getElementById('stripe-payment-element').classList.add('hidden');
           document.getElementById('stripe-wallet-btn').classList.remove('hidden');
           const prBtn = _stripeElements.create('paymentRequestButton', {
             paymentRequest: pr,
-            style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '48px' } },
+            style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '52px' } },
           });
           document.getElementById('stripe-payment-request-button').innerHTML = '';
           prBtn.mount('#stripe-payment-request-button');
@@ -1985,6 +1994,7 @@
             success.classList.remove('hidden');
             success.classList.add('flex');
           });
+          return;
         }
 
         const pe = _stripeElements.create('payment', {
@@ -2009,6 +2019,12 @@
 
     function closeStripeOverlay() {
       document.getElementById('stripe-overlay').classList.add('hidden');
+      document.getElementById('stripe-wallet-btn').classList.add('hidden');
+      document.getElementById('stripe-wallet-separator').classList.remove('hidden');
+      document.getElementById('stripe-payment-element').classList.remove('hidden');
+      document.getElementById('stripe-pay-btn').classList.remove('hidden');
+      document.getElementById('stripe-pay-btn').disabled = true;
+      document.getElementById('stripe-pay-btn').textContent = 'Pagar ara';
       _stripeElements = null;
     }
 
@@ -2456,7 +2472,7 @@
       <div class="px-5 pb-5">
         <div id="stripe-wallet-btn" class="hidden mb-4">
           <div id="stripe-payment-request-button"></div>
-          <div class="flex items-center gap-3 my-4">
+          <div id="stripe-wallet-separator" class="flex items-center gap-3 my-4">
             <div class="flex-1 h-px bg-[#E6D5B0]"></div>
             <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#8E6A4A;">o paga amb targeta</span>
             <div class="flex-1 h-px bg-[#E6D5B0]"></div>
