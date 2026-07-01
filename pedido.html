@@ -1951,7 +1951,7 @@
         });
         const pe = _stripeElements.create('payment', {
           layout: { type: 'accordion', defaultCollapsed: false, radios: false },
-          wallets: { googlePay: 'never', applePay: 'never' },
+          wallets: { googlePay: 'auto', applePay: 'auto' },
         });
         document.getElementById('stripe-payment-element').innerHTML = '';
         pe.mount('#stripe-payment-element');
