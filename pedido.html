@@ -1142,24 +1142,7 @@
     }
 
     function checkoutGoBack() {
-      const timeStep = document.getElementById('cf-time-step');
-      if (!timeStep.classList.contains('hidden')) {
-        closeCheckout();
-      } else {
-        const scroll = document.getElementById('cf-scroll');
-        scroll.style.opacity = '0';
-        scroll.style.transition = 'opacity 0.18s ease';
-        setTimeout(() => {
-          scroll.classList.add('hidden');
-          scroll.style.opacity = '';
-          scroll.style.transition = '';
-          timeStep.classList.remove('hidden');
-          timeStep.classList.add('enter-step-left');
-          cfSelectedTime = null;
-          selectDeliveryDay(cfDeliveryDate === todayISO() ? 'today' : 'other');
-          setTimeout(() => timeStep.classList.remove('enter-step-left'), 400);
-        }, 180);
-      }
+      closeCheckout();
     }
 
     function _restoreGuestData() {
