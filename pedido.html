@@ -181,12 +181,9 @@
 
   <!-- MOBILE CART BAR -->
   <div id="mobile-cart-bar" class="md:hidden fixed left-4 right-4 bottom-4 z-[580] translate-y-24 opacity-0 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-    <button type="button" onclick="openCartDrawer()" class="w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl bg-[#E23F2E] text-[#F2E6CE] shadow-lg border border-[#B82A1F]/30">
-      <div class="flex flex-col text-left">
-        <span id="mcb-summary" class="text-sm font-medium tracking-tight">0 pizzes · €0,00</span>
-        <span class="text-xs font-light opacity-90">Veure cistella</span>
-      </div>
-      <span class="text-sm font-medium">Veure cistella</span>
+    <button type="button" id="mcb-btn" onclick="openCartDrawer()" class="w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl bg-[#E23F2E] text-[#F2E6CE] shadow-lg border border-[#B82A1F]/30">
+      <span id="mcb-summary" class="text-sm font-medium tracking-tight">Demana 1 producte</span>
+      <span id="mcb-price" class="text-sm font-medium opacity-90">€0,00</span>
     </button>
   </div>
 
@@ -857,7 +854,9 @@
         bar.classList.remove('translate-y-0','opacity-100');
         return;
       }
-      summary.textContent = `${count === 1 ? '1 producte' : count + ' productes'} · ${fmtComma(total())}`;
+      summary.textContent = `Demana ${count === 1 ? '1 producte' : count + ' productes'}`;
+      const priceEl = document.getElementById('mcb-price');
+      if (priceEl) priceEl.textContent = fmtComma(total());
       const wasHidden = bar.classList.contains('opacity-0');
       bar.classList.remove('translate-y-24','opacity-0','pointer-events-none');
       bar.classList.add('translate-y-0','opacity-100');
