@@ -683,9 +683,9 @@
         { id:'marinara-olivata',      name:'Marinara Olivata',      desc:'Tomàquet San Marzano DOP, All, Orenga, Olives negres',                   ingredients:['Tomàquet San Marzano DOP','Orenga salvatge','All','Alfàbrega fresca','Olives negres',"Oli d'oliva verge extra"],          img:'images/marinara-olivata.webp', price:8  },
         { id:'bianca-suprema',        name:'Bianca Suprema',        desc:'Fior di latte, Pecorino, Gorgonzola dolç, Ricotta — 4 formatges',        ingredients:['Fior di latte artesana','Pecorino','Gorgonzola dolç','Ricotta artesana','Alfàbrega fresca',"Oli d'oliva verge extra"],    img:'images/bianca-suprema.webp', price:11 },
         { id:'sottobosco',            name:'Sottobosco',            desc:'Fior di latte, Xampinyons, Pernil dolç, Parmigiano',                     ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Parmigiano (curat 24 mesos)','Xampinyons','Pernil dolç','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'images/sottobosco.webp', price:11 },
-        { id:'carbonara',             name:'Carbonara',             desc:'Fior di latte, Parmigiano, Guanciale, crema de carbonara',               ingredients:['Fior di latte artesana Il Grande Desiderio','Formatge Parmigiano (curat 24 mesos)','Alfàbrega fresca','Crema de carbonara','Guanciale',"Oli AOVE intens d'alfàbrega"], img:'images/carbonara.webp', price:14.5 },
       ],
       classics: [
+        { id:'carbonara',             name:'Carbonara',             desc:'Fior di latte, Parmigiano, Guanciale, crema de carbonara',               ingredients:['Fior di latte artesana Il Grande Desiderio','Formatge Parmigiano (curat 24 mesos)','Alfàbrega fresca','Crema de carbonara','Guanciale',"Oli AOVE intens d'alfàbrega"], img:'images/carbonara.webp', price:14.5 },
         { id:'inferno-di-nduja',      name:"Inferno di 'Nduja",     desc:"Sobrassada picant (Nduja), Gorgonzola, Fior di latte, Parmigiano",       ingredients:["Sobrassada picant (Nduja)",'Gorgonzola picant','Fior di latte artesana','Parmigiano (curat 24 mesos)','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'images/inferno-di-nduja.webp', price:13 },
         { id:'caramella-affumicata',  name:'Caramella Affumicata',  desc:'Tomàquet datterino, Provola fumada, Caciocavallo, Fior di latte',         ingredients:['Tomàquet datterino caramella','Formatge fumat (Provola)','Fior di latte artesana','Alfàbrega fresca en cru','Caciocavallo',"Oli d'oliva verge extra"], img:'images/caramella-affumicata.webp', price:13 },
         { id:'antidiavola',           name:'Antidiavola',           desc:'Tomàquet San Marzano DOP, Xoriço ibèric Joselito, Fior di latte',         ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Xoriço ibèric de gla Joselito','Alfàbrega fresca','Parmigiano (curat 24 mesos)',"Oli d'oliva verge extra"], img:'images/antidiavola.webp', price:13 },
@@ -1202,6 +1202,7 @@
           requestPayerName: true,
         });
         const canPay = await _paymentRequest.canMakePayment();
+        console.log('[Stripe wallet] canMakePayment:', JSON.stringify(canPay));
         if (!canPay) return;
         const walletEls = _stripe.elements();
         const prBtn = walletEls.create('paymentRequestButton', {
@@ -1359,19 +1360,6 @@
 
     function selectPayMethod(method) {
       cfPayMethod = method;
-
-      // Online (card) option
-      const onlineCard  = document.getElementById('cf-pay-online');
-      const onlineRadio = document.getElementById('cf-radio-online');
-      const onlineDot   = document.getElementById('cf-radio-online-dot');
-      const onlineSel   = method === 'online';
-      onlineCard.setAttribute('aria-checked', onlineSel ? 'true' : 'false');
-      onlineCard.classList.toggle('border-[#E23F2E]/60', onlineSel);
-      onlineCard.classList.toggle('bg-[#E23F2E]/5', onlineSel);
-      onlineCard.classList.toggle('border-[#C4B08A]/40', !onlineSel);
-      onlineRadio.classList.toggle('border-[#E23F2E]', onlineSel);
-      onlineRadio.classList.toggle('border-[#C4B08A]', !onlineSel);
-      onlineDot.classList.toggle('opacity-0', !onlineSel);
 
       // Delivery wrapper (cash on delivery)
       const deliveryCard  = document.getElementById('cf-pay-delivery');
@@ -2111,8 +2099,6 @@
         const el = document.getElementById(id); if (el) el.value = '';
       });
       // Reset payment options
-      const onlineCard = document.getElementById('cf-pay-online');
-      if (onlineCard) { onlineCard.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); onlineCard.classList.add('border-[#C4B08A]/40'); onlineCard.setAttribute('aria-checked','false'); }
       const delivWrap = document.getElementById('cf-pay-delivery-wrapper');
       if (delivWrap) { delivWrap.classList.remove('border-[#E23F2E]/60','bg-[#E23F2E]/5'); delivWrap.classList.add('border-[#C4B08A]/40'); }
       const delivCard = document.getElementById('cf-pay-delivery');
