@@ -1246,24 +1246,18 @@
           }
           _pendingOrderData = _collectOrderData();
           try {
-            const res  = await fetch(EDGE_FN_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-              body: JSON.stringify({ amount: Math.round(_pendingOrderData.total * 100), currency: 'eur', orderId: '' }),
-            });
-            const json = await res.json();
+            const { clientSecret } = await createPendingOrderAndIntent(_pendingOrderData.total);
             const { error, paymentIntent } = await _stripe.confirmCardPayment(
-              json.clientSecret,
+              clientSecret,
               { payment_method: ev.paymentMethod.id },
               { handleActions: false }
             );
             if (error) { ev.complete('fail'); showCfToast('Error al processar el pagament.'); return; }
             ev.complete('success');
             if (paymentIntent.status === 'requires_action') {
-              const { error: ae } = await _stripe.confirmCardPayment(json.clientSecret);
+              const { error: ae } = await _stripe.confirmCardPayment(clientSecret);
               if (ae) { showCfToast('Autenticació fallida.'); return; }
             }
-            await _saveOrderToSupabase(_pendingOrderData, 'paid');
             document.getElementById('cf-global-err').classList.add('hidden');
             document.getElementById('cf-scroll').classList.add('hidden');
             updateSuccessDeliveryEstimate();
@@ -1834,6 +1828,25 @@
       return json;
     }
 
+    // Crea la comanda EN PRIMER LLOC (payment_status: 'processing', encara
+    // no s'ha cobrat res) i després demana el PaymentIntent lligant-lo a
+    // aquesta comanda (metadata.order_id). És el webhook de Stripe
+    // (stripe-webhook, event payment_intent.succeeded) qui marca la comanda
+    // com a 'paid' quan Stripe confirma el cobrament real — així un pagament
+    // que es completa però el navegador es penja abans d'acabar no es perd:
+    // la comanda ja existeix, només falta que el webhook la confirmi.
+    async function createPendingOrderAndIntent(totalEuros) {
+      const orderRes = await _saveOrderToSupabase({ ..._pendingOrderData }, 'processing');
+      const res = await fetch(EDGE_FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ amount: Math.round(totalEuros * 100), currency: 'eur', orderId: orderRes.orderId }),
+      });
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      return { clientSecret: json.clientSecret, orderId: orderRes.orderId };
+    }
+
     async function openWalletPayment(totalEuros) {
       const btn = document.getElementById('cf-submit');
       btn.textContent = 'Obrint pagament...';
@@ -1938,18 +1951,11 @@
         '<div class="flex items-center justify-center h-40"><svg class="animate-spin w-6 h-6 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg></div>';
 
       try {
-        const amountCents = Math.round(totalEuros * 100);
-        const res = await fetch(EDGE_FN_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ amount: amountCents, currency: 'eur' }),
-        });
-        const json = await res.json();
-        if (json.error) throw new Error(json.error);
+        const { clientSecret } = await createPendingOrderAndIntent(totalEuros);
 
         if (!_stripe) _stripe = Stripe(STRIPE_PK);
         _stripeElements = _stripe.elements({
-          clientSecret: json.clientSecret,
+          clientSecret,
           locale: 'ca',
           paymentMethodOrder: ['card'],
           appearance: {
@@ -2030,18 +2036,16 @@
           prBtn.mount('#stripe-payment-request-button');
           pr.on('paymentmethod', async (ev) => {
             const { error, paymentIntent } = await _stripe.confirmCardPayment(
-              json.clientSecret,
+              clientSecret,
               { payment_method: ev.paymentMethod.id },
               { handleActions: false }
             );
             if (error) { ev.complete('fail'); showCfToast('Error al processar el pagament. Torna-ho a intentar.'); return; }
             ev.complete('success');
             if (paymentIntent.status === 'requires_action') {
-              const { error: actionErr } = await _stripe.confirmCardPayment(json.clientSecret);
+              const { error: actionErr } = await _stripe.confirmCardPayment(clientSecret);
               if (actionErr) { showCfToast('Autenticació fallida.'); return; }
             }
-            const d = { ..._pendingOrderData };
-            await _saveOrderToSupabase(d, 'paid');
             closeStripeOverlay();
             updateSuccessDeliveryEstimate();
             const success = document.getElementById('cf-success');
@@ -2104,22 +2108,13 @@
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        try {
-          const d = { ..._pendingOrderData };
-          await _saveOrderToSupabase(d, 'paid');
-          closeStripeOverlay();
-          document.getElementById('cf-global-err').classList.add('hidden');
-          document.getElementById('cf-scroll').classList.add('hidden');
-          updateSuccessDeliveryEstimate();
-          const success = document.getElementById('cf-success');
-          success.classList.remove('hidden');
-          success.classList.add('flex');
-        } catch (saveErr) {
-          console.error('[confirmStripePayment save]', saveErr);
-          errEl.textContent = 'Pagament correcte però error al guardar la comanda. Contacta amb nosaltres.';
-          errEl.classList.remove('hidden');
-          btn.disabled = false;
-        }
+        closeStripeOverlay();
+        document.getElementById('cf-global-err').classList.add('hidden');
+        document.getElementById('cf-scroll').classList.add('hidden');
+        updateSuccessDeliveryEstimate();
+        const success = document.getElementById('cf-success');
+        success.classList.remove('hidden');
+        success.classList.add('flex');
       }
     }
 

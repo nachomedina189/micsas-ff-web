@@ -26,7 +26,8 @@ Deno.serve(async (req) => {
       amount: Math.round(amount),
       currency,
       automatic_payment_methods: { enabled: true, allow_redirects: "never" },
-      metadata: { order_id: orderId ?? "" },
+      // Stripe exigeix que els valors de metadata siguin strings.
+      metadata: { order_id: orderId != null ? String(orderId) : "" },
     });
 
     return new Response(

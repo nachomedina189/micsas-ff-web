@@ -1,0 +1,5 @@
+[functions.stripe-webhook]
+# Stripe truca directament aquest endpoint (no des del navegador) i no
+# envia cap JWT/apikey de Supabase — la verificació de seguretat real la fa
+# la firma de Stripe (STRIPE_WEBHOOK_SECRET) dins la pròpia funció.
+verify_jwt = false

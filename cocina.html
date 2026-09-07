@@ -271,7 +271,7 @@
             ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + (STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
             <div class="space-y-1.5">${itemsHtml}</div>
             <div class="flex items-center justify-between text-sm">
-              <span class="text-[#6B7280]">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : 'Pagat online'}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
+              <span class="${o.payment_method !== 'cash' && o.payment_status !== 'paid' ? 'text-[#DC2626] font-semibold' : 'text-[#6B7280]'}">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : (o.payment_status === 'paid' ? 'Pagat online' : '⚠ Verificant pagament…')}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
               <span class="font-bold">${fmt(o.total)}</span>
             </div>
             ${o.notes ? `<p class="text-xs italic text-[#6B7280]">${escapeHtml(o.notes)}</p>` : ''}
