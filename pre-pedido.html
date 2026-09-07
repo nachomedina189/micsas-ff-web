@@ -244,13 +244,22 @@
 
     let ppSelectedTime = null;
     function todayISO() { return new Date().toISOString().split('T')[0]; }
+    // Només s'accepten comandes per divendres (5) i diumenge (0).
+    function isValidOrderDay(dateStr) {
+      const day = new Date(`${dateStr}T00:00:00`).getDay();
+      return day === 5 || day === 0;
+    }
+    function nextValidDate(fromDateStr) {
+      const d = new Date(`${fromDateStr}T00:00:00`);
+      do { d.setDate(d.getDate() + 1); } while (!(d.getDay() === 5 || d.getDay() === 0));
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
     let ppDeliveryDate = todayISO();
 
-    // Generate time slots: Com més aviat millor + 20:30 → 23:30 every 15 min
+    // Generate time slots: Com més aviat millor + 20:00 → 23:30 every 15 min
     const PP_SLOTS = ['Com més aviat millor'];
     for (let h = 20; h <= 23; h++) {
-      const startM = h === 20 ? 30 : 0;
-      for (let m = startM; m < 60; m += 15) {
+      for (let m = 0; m < 60; m += 15) {
         if (h === 23 && m > 30) break;
         PP_SLOTS.push(`${h}:${String(m).padStart(2,'0')}`);
       }
@@ -363,7 +372,9 @@
       const todayBtn  = document.getElementById('pp-day-today');
       const otherBtn  = document.getElementById('pp-day-other');
       const dateInput = document.getElementById('pp-delivery-date');
-      const isToday   = which === 'today';
+      todayBtn.classList.toggle('hidden', !isValidOrderDay(todayISO()));
+      // "Avui" no és seleccionable si avui no és divendres ni diumenge.
+      const isToday = which === 'today' && isValidOrderDay(todayISO());
       todayBtn.classList.toggle('border-[#E23F2E]', isToday);
       todayBtn.classList.toggle('bg-[#E23F2E]/10', isToday);
       todayBtn.classList.toggle('text-[#E23F2E]', isToday);
@@ -380,10 +391,12 @@
       } else {
         const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
         const maxDate  = new Date(); maxDate.setDate(maxDate.getDate() + 13);
-        dateInput.min = tomorrow.toISOString().split('T')[0];
+        let minStr = tomorrow.toISOString().split('T')[0];
+        if (!isValidOrderDay(minStr)) minStr = nextValidDate(minStr);
+        dateInput.min = minStr;
         dateInput.max = maxDate.toISOString().split('T')[0];
         dateInput.classList.remove('hidden');
-        if (!dateInput.value) dateInput.value = dateInput.min;
+        if (!dateInput.value || !isValidOrderDay(dateInput.value)) dateInput.value = minStr;
         dateInput.focus();
         ppDeliveryDate = dateInput.value;
       }
@@ -393,6 +406,11 @@
 
     function onDeliveryDateChange(val) {
       if (!val) return;
+      if (!isValidOrderDay(val)) {
+        val = nextValidDate(val);
+        document.getElementById('pp-delivery-date').value = val;
+        alert('Només fem comandes per divendres i diumenge. T\'hem seleccionat el proper dia disponible.');
+      }
       ppDeliveryDate = val;
       ppSelectedTime = null;
       _ppResetTimeLabel();
@@ -443,6 +461,11 @@
 
     function goToMenu() {
       if (!ppSelectedTime || !ppAddressValid) return;
+      if (!isValidOrderDay(ppDeliveryDate)) {
+        alert('Només fem comandes per divendres i diumenge. Tria un altre dia.');
+        selectDeliveryDay('other');
+        return;
+      }
       if (!isSlotStillValid()) {
         alert('Aquesta franja horària ja ha passat. Tria una franja horària diferent.');
         ppSelectedTime = null;

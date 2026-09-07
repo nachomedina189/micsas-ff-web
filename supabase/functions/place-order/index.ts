@@ -24,18 +24,28 @@ Deno.serve(async (req) => {
       items,
     } = await req.json();
 
-    // Mateixes franges de 15 min que pedido.html / pre-pedido.html (20:30–23:30).
+    // Mateixes franges de 15 min que pedido.html / pre-pedido.html (20:00–23:30).
     const REAL_SLOTS: string[] = (() => {
       const slots: string[] = [];
       for (let h = 20; h <= 23; h++) {
-        const startM = h === 20 ? 30 : 0;
-        for (let m = startM; m < 60; m += 15) {
+        for (let m = 0; m < 60; m += 15) {
           if (h === 23 && m > 30) break;
           slots.push(`${h}:${String(m).padStart(2, "0")}`);
         }
       }
       return slots;
     })();
+
+    // Només s'accepten comandes amb data d'entrega en divendres (5) o diumenge (0).
+    // Es rebutja també si falta deliveryDate: no s'accepta cap comanda sense
+    // dia d'entrega vàlid (evita saltar-se la validació enviant-lo buit).
+    const deliveryDay = deliveryDate ? new Date(`${deliveryDate}T00:00:00`).getDay() : NaN;
+    if (deliveryDay !== 5 && deliveryDay !== 0) {
+      return new Response(JSON.stringify({ error: "Només s'accepten comandes per divendres i diumenge." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Capacitat: màx. 6 pizzes per franja. Si la franja demanada ja està
     // plena (algú s'ha avançat entre que el client la va veure i va confirmar),

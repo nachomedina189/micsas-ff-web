@@ -207,7 +207,7 @@
             </p>
             <p>
               <span data-i18n="hor_dv">Div i Diu:</span>
-              <span class="text-[#E23F2E]">20:30 – 23:30</span>
+              <span class="text-[#E23F2E]">20:00 – 23:30</span>
             </p>
           </div>
         </div>
@@ -947,6 +947,16 @@
     let cfClientComplete = false;
     let cfClientName = '', cfClientPhone = '', cfClientEmail = '';
     function todayISO() { return new Date().toISOString().split('T')[0]; }
+    // Només s'accepten comandes per divendres (5) i diumenge (0).
+    function isValidOrderDay(dateStr) {
+      const day = new Date(`${dateStr}T00:00:00`).getDay();
+      return day === 5 || day === 0;
+    }
+    function nextValidDate(fromDateStr) {
+      const d = new Date(`${fromDateStr}T00:00:00`);
+      do { d.setDate(d.getDate() + 1); } while (!(d.getDay() === 5 || d.getDay() === 0));
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
     let cfDeliveryDate = todayISO();
     let _slotCounts = {};
 
@@ -965,11 +975,18 @@
       });
     }
 
+    function updateDayAvailability() {
+      const todayBtn = document.getElementById('cf-day-today');
+      if (todayBtn) todayBtn.classList.toggle('hidden', !isValidOrderDay(todayISO()));
+    }
+
     function selectDeliveryDay(which) {
       const todayBtn  = document.getElementById('cf-day-today');
       const otherBtn  = document.getElementById('cf-day-other');
       const dateInput = document.getElementById('cf-delivery-date');
-      const isToday   = which === 'today';
+      updateDayAvailability();
+      // "Avui" no és seleccionable si avui no és divendres ni diumenge.
+      const isToday = which === 'today' && isValidOrderDay(todayISO());
       todayBtn.classList.toggle('border-[#E23F2E]', isToday);
       todayBtn.classList.toggle('bg-[#E23F2E]/10', isToday);
       todayBtn.classList.toggle('text-[#E23F2E]', isToday);
@@ -985,10 +1002,12 @@
       } else {
         const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
         const maxDate  = new Date(); maxDate.setDate(maxDate.getDate() + 13);
-        dateInput.min = tomorrow.toISOString().split('T')[0];
+        let minStr = tomorrow.toISOString().split('T')[0];
+        if (!isValidOrderDay(minStr)) minStr = nextValidDate(minStr);
+        dateInput.min = minStr;
         dateInput.max = maxDate.toISOString().split('T')[0];
         dateInput.classList.remove('hidden');
-        if (!dateInput.value) dateInput.value = dateInput.min;
+        if (!dateInput.value || !isValidOrderDay(dateInput.value)) dateInput.value = minStr;
         dateInput.focus();
         cfDeliveryDate = dateInput.value;
         refreshTimeSlots();
@@ -997,6 +1016,12 @@
 
     function onDeliveryDateChange(val) {
       if (!val) return;
+      if (!isValidOrderDay(val)) {
+        val = nextValidDate(val);
+        const dateInput = document.getElementById('cf-delivery-date');
+        dateInput.value = val;
+        showCfToast('Només fem comandes per divendres i diumenge. T\'hem seleccionat el proper dia disponible.');
+      }
       cfDeliveryDate = val;
       refreshTimeSlots();
     }
@@ -1010,8 +1035,7 @@
       const isToday = cfDeliveryDate === todayISO();
       const realSlots = [];
       for (let h = 20; h <= 23; h++) {
-        const startM = h === 20 ? 30 : 0;
-        for (let m = startM; m < 60; m += 15) {
+        for (let m = 0; m < 60; m += 15) {
           if (h === 23 && m > 30) break;
           realSlots.push(`${h}:${String(m).padStart(2,'0')}`);
         }
@@ -1294,6 +1318,11 @@
       const _ssFloor = sessionStorage.getItem('micsas_floor');
       if (_ssDate) cfDeliveryDate = _ssDate;
       if (_ssTime && !cfSelectedTime) cfSelectedTime = _ssTime;
+      // Defensa extra si sessionStorage porta una data no vàlida (viernes/domingo).
+      if (!isValidOrderDay(cfDeliveryDate)) {
+        cfDeliveryDate = isValidOrderDay(todayISO()) ? todayISO() : nextValidDate(todayISO());
+        cfSelectedTime = null;
+      }
 
       // Skip time step if already selected (from pre-pedido or previous selection)
       if (cfSelectedTime) {
@@ -1303,7 +1332,7 @@
         cfSelectedTime = null;
         document.getElementById('cf-time-step').classList.remove('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
-        selectDeliveryDay('today');
+        selectDeliveryDay(isValidOrderDay(todayISO()) ? 'today' : 'other');
       }
       document.getElementById('cf-success').classList.add('hidden');
       document.getElementById('cf-success').classList.remove('flex');
@@ -1673,6 +1702,16 @@
     async function placeOrder() {
       if (!validateCheckout()) return;
       if (cart.length === 0) return;
+
+      if (!isValidOrderDay(cfDeliveryDate)) {
+        cfSelectedTime = null;
+        document.getElementById('cf-global-err').textContent = 'Només fem comandes per divendres i diumenge. Tria un altre dia.';
+        document.getElementById('cf-global-err').classList.remove('hidden');
+        document.getElementById('cf-scroll').classList.add('hidden');
+        document.getElementById('cf-time-step').classList.remove('hidden');
+        selectDeliveryDay('other');
+        return;
+      }
 
       if (!isSlotStillValid()) {
         cfSelectedTime = null;
