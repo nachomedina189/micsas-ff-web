@@ -37,8 +37,6 @@
       <div class="space-y-3">
         <input id="login-email" type="email" placeholder="Email" autocomplete="username"
           class="w-full bg-white border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
-        <input id="login-password" type="password" placeholder="Contrasenya" autocomplete="current-password"
-          class="w-full bg-white border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
       </div>
       <p id="login-error" class="hidden text-xs text-[#DC2626] text-center"></p>
       <button id="login-btn" onclick="doLogin()"
@@ -137,17 +135,34 @@
     function fmt(n) { return (Number(n) || 0).toFixed(2).replace('.', ',') + ' €'; }
     function todayISO() { return new Date().toISOString().split('T')[0]; }
 
+    // Login simplificat a petició del propietari: el personal només
+    // escriu el seu email, sense cap contrasenya visible. Per darrere cal
+    // igualment iniciar sessió de veritat amb Supabase Auth — les
+    // polítiques RLS de "orders" exigeixen una sessió autenticada real
+    // (is_staff()) per poder llegir/actualitzar comandes — així que
+    // s'utilitza un compte fix amb la contrasenya escrita aquí mateix.
+    // Avís de seguretat conscient: qualsevol que inspeccioni el codi de
+    // la pàgina pot veure aquesta contrasenya i entrar-hi — es prioritza
+    // la simplicitat d'ús sobre la seguretat per a aquesta eina interna,
+    // decisió presa explícitament amb el propietari del negoci.
+    const STAFF_LOGIN_EMAIL = 'cocina@micsas.ff';
+    const STAFF_LOGIN_PASSWORD = 'o5qgPFmespyAh2--umwcwfd7';
+
     async function doLogin() {
       const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
       const errEl = document.getElementById('login-error');
       errEl.classList.add('hidden');
+      if (email.toLowerCase() !== STAFF_LOGIN_EMAIL) {
+        errEl.textContent = 'Email no autoritzat.';
+        errEl.classList.remove('hidden');
+        return;
+      }
       const btn = document.getElementById('login-btn');
       btn.disabled = true; btn.textContent = 'Entrant...';
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email: STAFF_LOGIN_EMAIL, password: STAFF_LOGIN_PASSWORD });
       btn.disabled = false; btn.textContent = 'Entrar';
       if (error) {
-        errEl.textContent = 'Email o contrasenya incorrectes.';
+        errEl.textContent = 'Error entrant. Torna-ho a intentar.';
         errEl.classList.remove('hidden');
         return;
       }
