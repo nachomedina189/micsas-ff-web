@@ -50,20 +50,27 @@
 
   <!-- ════ KITCHEN SCREEN ════ -->
   <div id="kitchen-screen" class="hidden min-h-screen">
-    <header class="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-[#15181D] border-b border-white/8">
-      <div class="flex items-center gap-3">
-        <h1 class="font-black tracking-tight text-2xl">Comandes</h1>
-        <span id="order-count" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
-      </div>
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 pr-3 border-r border-white/10">
-          <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Avui (pase)</button>
-          <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Setmana</button>
+    <header class="sticky top-0 z-20 bg-[#15181D] border-b border-white/8">
+      <div class="flex items-center justify-between px-6 py-4">
+        <div class="flex items-center gap-3">
+          <h1 class="font-black tracking-tight text-2xl">Comandes</h1>
+          <span id="order-count" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
         </div>
-        <button onclick="openHistory()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 hover:bg-white/5 transition-all">Historial</button>
-        <button onclick="doLogout()" class="px-4 py-2 rounded-lg text-sm font-semibold text-[#8B93A1] hover:text-[#E8EAED] transition-colors">
-          Sortir
-        </button>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 pr-3 border-r border-white/10">
+            <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Avui (pase)</button>
+            <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Setmana</button>
+          </div>
+          <button onclick="openHistory()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 hover:bg-white/5 transition-all">Historial</button>
+          <button onclick="doLogout()" class="px-4 py-2 rounded-lg text-sm font-semibold text-[#8B93A1] hover:text-[#E8EAED] transition-colors">
+            Sortir
+          </button>
+        </div>
+      </div>
+      <div class="md:hidden flex gap-2 px-6 pb-3 overflow-x-auto">
+        <a href="#section-pending" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F59E0B]/15 text-[#F59E0B]">Sense afegir</a>
+        <a href="#section-preparing" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#3B82F6]/15 text-[#3B82F6]">Preparant</a>
+        <a href="#section-ready" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#16A34A]/15 text-[#16A34A]">Llest</a>
       </div>
     </header>
 
