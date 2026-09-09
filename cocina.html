@@ -202,6 +202,30 @@
       return true;
     }
 
+    // Ordena els grups d'una columna per franja horària i insereix un
+    // subtítol cada vegada que la franja canvia — així durant una nit amb
+    // moltes franges a la vegada es veu d'un cop de vista què toca a cada
+    // hora, sense haver de canviar de filtre.
+    function renderColumnWithTimeHeaders(groups) {
+      if (!groups.length) return '<p class="text-sm text-[#5B6270] text-center py-10">Cap comanda</p>';
+      const sorted = [...groups].sort((a, b) => {
+        const ta = a[0].slot_time || '';
+        const tb = b[0].slot_time || '';
+        return ta.localeCompare(tb);
+      });
+      let html = '';
+      let lastTime = null;
+      sorted.forEach(group => {
+        const t = group[0].slot_time || 'Sense franja';
+        if (t !== lastTime) {
+          html += `<h3 class="text-xs font-bold uppercase tracking-widest text-[#5B6270] pt-2 first:pt-0">${escapeHtml(t)}</h3>`;
+          lastTime = t;
+        }
+        html += renderOrderCard(group);
+      });
+      return html;
+    }
+
     function renderOrders() {
       const board = ordersCache.filter(o => inDateScope(o) && o.status !== 'delivered' && o.status !== 'cancelled');
       const groups = groupOrders(board);
@@ -217,10 +241,9 @@
       const empty = document.getElementById('orders-empty');
       empty.classList.toggle('hidden', groups.length > 0);
 
-      const noneMsg = '<p class="text-sm text-[#5B6270] text-center py-10">Cap comanda</p>';
-      document.getElementById('col-pending').innerHTML   = pendingGroups.length   ? pendingGroups.map(renderOrderCard).join('')   : noneMsg;
-      document.getElementById('col-preparing').innerHTML = preparingGroups.length ? preparingGroups.map(renderOrderCard).join('') : noneMsg;
-      document.getElementById('col-ready').innerHTML     = readyGroups.length     ? readyGroups.map(renderOrderCard).join('')     : noneMsg;
+      document.getElementById('col-pending').innerHTML   = renderColumnWithTimeHeaders(pendingGroups);
+      document.getElementById('col-preparing').innerHTML = renderColumnWithTimeHeaders(preparingGroups);
+      document.getElementById('col-ready').innerHTML     = renderColumnWithTimeHeaders(readyGroups);
     }
 
     // Agrupa pedidos del mateix client (per telèfon) per a la mateixa
