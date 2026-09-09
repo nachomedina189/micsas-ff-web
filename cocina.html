@@ -12,6 +12,14 @@
   <meta name="apple-mobile-web-app-title" content="Cuina">
   <meta name="theme-color" content="#0F1115">
   <meta name="color-scheme" content="dark">
+  <!-- ════ GOOGLE MAPS LOADER (bootstrap oficial, mateixa clau que pre-pedido.html) ════ -->
+  <script>
+    const GOOGLE_MAPS_API_KEY = 'AIzaSyAkJQwY4LDMU-VwH0k_qG3O0-2IrQTWQsA';
+    (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+      key: GOOGLE_MAPS_API_KEY,
+      v: "weekly",
+    });
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -244,6 +252,7 @@
       document.getElementById('col-pending').innerHTML   = renderColumnWithTimeHeaders(pendingGroups);
       document.getElementById('col-preparing').innerHTML = renderColumnWithTimeHeaders(preparingGroups);
       document.getElementById('col-ready').innerHTML     = renderColumnWithTimeHeaders(readyGroups);
+      renderRoutePanel(readyGroups);
     }
 
     // Agrupa pedidos del mateix client (per telèfon) per a la mateixa
@@ -356,10 +365,95 @@
                 <span class="font-black text-lg">${fmt(grandTotal)}</span>
               </div>
             ` : ''}
+            ${stage === 'ready' ? `
+              <div class="flex gap-2 pt-1">
+                <a href="${buildMapsUrl(formatAddress(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🗺️ Maps</a>
+                <a href="${buildWazeUrl(formatAddress(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🚗 Waze</a>
+              </div>
+            ` : ''}
             ${allSameStatus ? `<div class="border-t border-[#E5E7EB] pt-3">${actionsRow(group.map(o => o.id), stage, 'lg')}</div>` : ''}
           </div>
         </div>
       `;
+    }
+
+    // ── Navegació del repartidor: adreces i enllaços de mapes ──
+    const KITCHEN_ORIGIN = "Carrer Coll d'Estenalles 24, 08230 Matadepera, Barcelona";
+
+    function formatAddress(order) {
+      const addr = order.addresses || {};
+      const line1 = [addr.street, addr.floor].filter(Boolean).join(', ');
+      const line2 = [addr.postal_code, addr.city].filter(Boolean).join(' ');
+      return [line1, line2].filter(Boolean).join(', ');
+    }
+    function buildMapsUrl(address) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}&travelmode=driving`;
+    }
+    function buildWazeUrl(address) {
+      return `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
+    }
+    function buildRouteWaypoints(readyGroups) {
+      return readyGroups
+        .map(group => ({
+          label: (group[0].customers && group[0].customers.name) || 'Client',
+          address: formatAddress(group[0]),
+        }))
+        .filter(w => w.address.trim().length > 0);
+    }
+    function buildMultiStopMapsUrl(origin, orderedStops) {
+      const originParam = encodeURIComponent(origin);
+      const destination = encodeURIComponent(orderedStops[orderedStops.length - 1].address);
+      const waypointsParam = orderedStops.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
+      let url = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${destination}&travelmode=driving`;
+      if (waypointsParam) url += `&waypoints=${waypointsParam}`;
+      return url;
+    }
+
+    let _routesLib = null;
+    async function _getRoutesLib() {
+      if (!_routesLib) _routesLib = await google.maps.importLibrary('routes');
+      return _routesLib;
+    }
+
+    // Calcula i mostra la ruta optimitzada entre les comandes de la columna
+    // "Llest" quan n'hi ha 2 o més a la vegada. Amb 0 o 1 no hi ha res a
+    // optimitzar — el panell es queda amagat. Si Google falla (adreça no
+    // localitzable, quota, sense connexió...) es mostra un avís curt i es
+    // continua funcionant amb la navegació individual de cada targeta —
+    // això mai bloqueja marcar comandes com llestes/entregades.
+    async function renderRoutePanel(readyGroups) {
+      const panel = document.getElementById('route-panel');
+      const stops = buildRouteWaypoints(readyGroups);
+      if (stops.length < 2) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+
+      panel.classList.remove('hidden');
+      panel.innerHTML = '<p class="text-xs text-[#8B93A1]">Calculant ruta...</p>';
+
+      try {
+        const { DirectionsService } = await _getRoutesLib();
+        const svc = new DirectionsService();
+        const waypoints = stops.slice(0, -1).map(s => ({ location: s.address, stopover: true }));
+        const result = await svc.route({
+          origin: KITCHEN_ORIGIN,
+          destination: stops[stops.length - 1].address,
+          waypoints,
+          optimizeWaypoints: true,
+          travelMode: google.maps.TravelMode.DRIVING,
+        });
+        const order = result.routes[0].waypoint_order;
+        const orderedStops = [...order.map(i => stops[i]), stops[stops.length - 1]];
+        const listHtml = orderedStops.map((s, i) => `<li>${i + 1}. ${escapeHtml(s.label)} — ${escapeHtml(s.address)}</li>`).join('');
+        const mapsUrl = buildMultiStopMapsUrl(KITCHEN_ORIGIN, orderedStops);
+        panel.innerHTML = `
+          <div class="bg-[#16A34A]/10 border border-[#16A34A]/30 rounded-xl p-3 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-wide text-[#16A34A]">Ruta suggerida</p>
+            <ol class="text-sm space-y-1 list-none">${listHtml}</ol>
+            <a href="${mapsUrl}" target="_blank" class="block text-center py-2.5 rounded-lg bg-[#16A34A] hover:bg-[#15803D] text-white font-semibold text-sm transition-all">🗺️ Navegar ruta completa</a>
+          </div>`;
+      } catch (e) {
+        console.error('[route]', e);
+        panel.innerHTML = '<p class="text-xs text-[#DC2626]">No s\'ha pogut calcular la ruta — utilitza la navegació individual de cada comanda.</p>';
+      }
     }
 
     function escapeHtml(s) {

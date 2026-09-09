@@ -482,7 +482,10 @@
     window.supabase = supabase;
     await loadSlotCounts();
     renderTimeSlots();
-    await initAuth();
+    // initAuth() desactivat temporalment (setmana de llançament): evita que
+    // una sessió antiga guardada al navegador es restauri sola. Veure branca
+    // backup/login-signup-2026-09.
+    // await initAuth();
   </script>
 
   <script src="i18n.js"></script>

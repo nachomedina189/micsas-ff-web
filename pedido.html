@@ -2326,7 +2326,11 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     window.supabase = supabase;
-    if (typeof initAuth === 'function') initAuth();
+    // initAuth() desactivat temporalment (setmana de llançament): si algú té
+    // una sessió antiga guardada al navegador (d'abans de retirar el login),
+    // no volem que es restauri i li ompli/amagui el formulari com si encara
+    // funcionés l'inici de sessió. Veure branca backup/login-signup-2026-09.
+    // if (typeof initAuth === 'function') initAuth();
   </script>
 
   <!-- ════ LOGIN MODAL ════ -->
