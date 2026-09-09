@@ -47,40 +47,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Capacitat: màx. 6 pizzes per franja. Si la franja demanada ja està
-    // plena (algú s'ha avançat entre que el client la va veure i va confirmar),
-    // en lloc de rebutjar la comanda s'assigna automàticament la SEGÜENT
-    // franja del mateix dia amb lloc — comprovat aquí en servidor perquè no
-    // es pugui saltar trucant a l'API directament.
-    let finalSlotTime: string | null = slotTime ?? null;
-
-    if (deliveryDate && slotTime) {
-      const { data: dayOrders, error: dayErr } = await sb
-        .from("orders")
-        .select("slot_time, pizza_count")
-        .eq("delivery_date", deliveryDate)
-        .neq("status", "cancelled");
-      if (dayErr) throw dayErr;
-
-      const counts: Record<string, number> = {};
-      (dayOrders ?? []).forEach((o: { slot_time: string | null; pizza_count: number }) => {
-        if (!o.slot_time) return;
-        counts[o.slot_time] = (counts[o.slot_time] ?? 0) + (o.pizza_count ?? 0);
-      });
-
-      const requestedIndex = REAL_SLOTS.indexOf(slotTime);
-      const candidates = requestedIndex >= 0 ? REAL_SLOTS.slice(requestedIndex) : REAL_SLOTS;
-
-      finalSlotTime = candidates.find((s) => (counts[s] ?? 0) + (pizzaCount ?? 0) <= 6) ?? null;
-
-      if (!finalSlotTime) {
-        return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
-          status: 409,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
-
     // Find or create customer
     let customerId: string;
 
@@ -132,33 +98,43 @@ Deno.serve(async (req) => {
       .single();
     if (addrErr) throw addrErr;
 
-    // Insert order
-    const { data: order, error: orderErr } = await sb
-      .from("orders")
-      .insert({
-        customer_id:    customerId,
-        address_id:     address.id,
-        payment_method: paymentMethod,
-        payment_status: paymentStatus ?? "pending",
-        status:         "pending",
-        subtotal,
-        delivery_fee:   0,
-        tip_amount:     tipAmount ?? 0,
-        total,
-        notes:          finalNotes ?? null,
-        slot_time:      finalSlotTime ?? slotTime ?? null,
-        pizza_count:    pizzaCount ?? 0,
-        delivery_date:  deliveryDate ?? null,
-      })
-      .select("id")
-      .single();
-    if (orderErr) throw orderErr;
+    // Comprova l'aforo (màx. 6 pizzes per franja) i insereix la comanda en
+    // una única transacció de servidor (veure migrations/20260909000000_atomic_order_slot.sql).
+    // Fer-ho tot dins la mateixa funció de BD, protegida amb un advisory
+    // lock per delivery_date, evita que dues comandes simultànies per la
+    // mateixa franja passin totes dues la comprovació d'aforo abans que
+    // cap de les dues s'hagi inserit.
+    const { data: rpcRows, error: rpcErr } = await sb.rpc("create_order_with_slot", {
+      p_customer_id:    customerId,
+      p_address_id:     address.id,
+      p_payment_method: paymentMethod,
+      p_payment_status: paymentStatus ?? "pending",
+      p_subtotal:       subtotal,
+      p_delivery_fee:   0,
+      p_tip_amount:     tipAmount ?? 0,
+      p_total:          total,
+      p_notes:          finalNotes ?? null,
+      p_requested_slot: slotTime ?? null,
+      p_pizza_count:    pizzaCount ?? 0,
+      p_delivery_date:  deliveryDate,
+      p_slots:          REAL_SLOTS,
+    });
+    if (rpcErr) throw rpcErr;
+
+    const orderRow = rpcRows?.[0] as { order_id: string; slot_time: string | null } | undefined;
+    if (slotTime && !orderRow) {
+      return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!orderRow) throw new Error("create_order_with_slot no ha retornat cap comanda");
 
     // Insert order items
     if (items && items.length > 0) {
       const { error: itemsErr } = await sb.from("order_items").insert(
         items.map((it: { product_name: string; unit_price: number; quantity: number; notes: string | null }) => ({
-          order_id:     order.id,
+          order_id:     orderRow.order_id,
           product_id:   null,
           product_name: it.product_name,
           unit_price:   it.unit_price,
@@ -169,7 +145,7 @@ Deno.serve(async (req) => {
       if (itemsErr) throw itemsErr;
     }
 
-    return new Response(JSON.stringify({ orderId: order.id, slotTime: finalSlotTime ?? slotTime ?? null }), {
+    return new Response(JSON.stringify({ orderId: orderRow.order_id, slotTime: orderRow.slot_time }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: unknown) {
