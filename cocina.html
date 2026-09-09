@@ -76,21 +76,21 @@
 
     <!-- ════ TABLER (KANBAN): Sense afegir → Preparant → Llest ════ -->
     <main class="p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
-      <section id="section-pending" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8">
+      <section id="section-pending" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8 scroll-mt-32">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span> Sense afegir
           <span id="count-pending" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#F59E0B]/15 text-[#F59E0B] text-sm font-bold">0</span>
         </h2>
         <div id="col-pending" class="space-y-4"></div>
       </section>
-      <section id="section-preparing" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#3B82F6] border-x border-b border-white/8">
+      <section id="section-preparing" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#3B82F6] border-x border-b border-white/8 scroll-mt-32">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></span> Preparant
           <span id="count-preparing" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 text-[#3B82F6] text-sm font-bold">0</span>
         </h2>
         <div id="col-preparing" class="space-y-4"></div>
       </section>
-      <section id="section-ready" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#16A34A] border-x border-b border-white/8">
+      <section id="section-ready" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#16A34A] border-x border-b border-white/8 scroll-mt-32">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#16A34A]"></span> Llest
           <span id="count-ready" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#16A34A]/15 text-[#16A34A] text-sm font-bold">0</span>
@@ -230,9 +230,10 @@
       if (error) { console.error(error); return; }
       const isFirstLoad = _seenOrderIds.size === 0;
       const newIds = detectNewPendingOrders(data || [], _seenOrderIds);
+      const newInScope = (data || []).some(o => newIds.includes(o.id) && inDateScope(o));
       ordersCache = data || [];
       renderOrders();
-      if (!isFirstLoad && newIds.length > 0) playNewOrderSound();
+      if (!isFirstLoad && newInScope) playNewOrderSound();
     }
 
     function subscribeRealtime() {
@@ -454,6 +455,7 @@
     }
 
     let _routesLib = null;
+    let _lastRouteKey = '';
     async function _getRoutesLib() {
       if (!_routesLib) _routesLib = await google.maps.importLibrary('routes');
       return _routesLib;
@@ -468,7 +470,11 @@
     async function renderRoutePanel(readyGroups) {
       const panel = document.getElementById('route-panel');
       const stops = buildRouteWaypoints(readyGroups);
-      if (stops.length < 2) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+      if (stops.length < 2) { panel.classList.add('hidden'); panel.innerHTML = ''; _lastRouteKey = ''; return; }
+
+      const key = stops.map(s => s.address).join('|');
+      if (key === _lastRouteKey && panel.innerHTML) return;
+      _lastRouteKey = key;
 
       panel.classList.remove('hidden');
       panel.innerHTML = '<p class="text-xs text-[#8B93A1]">Calculant ruta...</p>';
@@ -496,6 +502,7 @@
           </div>`;
       } catch (e) {
         console.error('[route]', e);
+        _lastRouteKey = '';
         panel.innerHTML = '<p class="text-xs text-[#DC2626]">No s\'ha pogut calcular la ruta — utilitza la navegació individual de cada comanda.</p>';
       }
     }
