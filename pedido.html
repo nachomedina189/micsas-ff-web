@@ -694,6 +694,7 @@
       ],
       drinks: [
         { id:'d3', name:'Cervesa artesana',  desc:'Producció local · 33 cl',           price:4   },
+        { id:'dtest', name:'⚠️ TEST PAGAMENT — NO DEMANAR', desc:'Article temporal per provar el cobrament. Elimina abans d\'obrir al públic.', price:0.5 },
       ],
     };
     const DELIVERY_FEE = 0;
@@ -928,7 +929,7 @@
     }
 
     // ── Stripe ──
-    const STRIPE_PK = 'pk_live_51TcBleHPwXguCJTGAbO8RwS1Rg5rAmFbBUftbszSePrjKJW2o4Gwqarsppa0gTkSuxZ1QvcqQBbhDDVHZEwO2SFG00ZfcQ2Hlg';
+    const STRIPE_PK = 'pk_live_51TdRAALe8eHOVxfS62ZSSTXk9mXkXdKWqzzKMu8geUYsXnPqyzz7OD8EIxRXhk2q6bVNm92UvSDLN9r7mDyFgJO100ZTAkOn0Z';
     const EDGE_FN_URL       = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/create-payment-intent';
     const PLACE_ORDER_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/place-order';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
