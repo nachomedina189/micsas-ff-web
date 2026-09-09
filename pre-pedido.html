@@ -104,8 +104,10 @@
         <span class="text-[#C4B08A]/60 select-none">|</span>
         <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
       </div>
+      <!-- Inici de sessió / registre desactivat temporalment (setmana de llançament) —
+           veure la branca git "backup/login-signup-2026-09" per restaurar-ho. -->
       <!-- Logged out -->
-      <button id="nav-login-btn" onclick="openLoginModal()"
+      <button id="nav-login-btn" onclick="openLoginModal()" hidden
         class="text-sm font-medium underline underline-offset-2 text-[#2A1A0F] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
         Inicia sessió o registra't
       </button>

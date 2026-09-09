@@ -388,8 +388,10 @@
           </button>
         </div>
 
-        <!-- Auth block -->
-        <div id="cf-auth-block" class="rounded-xl border border-[#C4B08A]/30 px-5 py-3.5 flex items-center justify-between gap-3 text-sm">
+        <!-- Auth block: inici de sessió / registre desactivat temporalment
+             (setmana de llançament) — veure la branca git
+             "backup/login-signup-2026-09" per restaurar-ho. -->
+        <div id="cf-auth-block" hidden class="rounded-xl border border-[#C4B08A]/30 px-5 py-3.5 flex items-center justify-between gap-3 text-sm">
           <div id="cf-auth-out" class="flex items-center gap-2 w-full justify-between">
             <span class="font-light text-[#5A3E28]">Ja tens compte?</span>
             <button onclick="openLoginModal()" class="text-[#E23F2E] font-medium hover:underline font-['League_Spartan',sans-serif]">Inicia sessió</button>
