@@ -59,21 +59,29 @@
       </div>
     </header>
 
-    <!-- ════ TABLER (KANBAN): Sense afegir → Preparant ════ -->
-    <main class="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 items-start">
-      <section class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8">
+    <!-- ════ TABLER (KANBAN): Sense afegir → Preparant → Llest ════ -->
+    <main class="p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
+      <section id="section-pending" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span> Sense afegir
           <span id="count-pending" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#F59E0B]/15 text-[#F59E0B] text-sm font-bold">0</span>
         </h2>
         <div id="col-pending" class="space-y-4"></div>
       </section>
-      <section class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#3B82F6] border-x border-b border-white/8">
+      <section id="section-preparing" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#3B82F6] border-x border-b border-white/8">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></span> Preparant
           <span id="count-preparing" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 text-[#3B82F6] text-sm font-bold">0</span>
         </h2>
         <div id="col-preparing" class="space-y-4"></div>
+      </section>
+      <section id="section-ready" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#16A34A] border-x border-b border-white/8">
+        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#16A34A]"></span> Llest
+          <span id="count-ready" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#16A34A]/15 text-[#16A34A] text-sm font-bold">0</span>
+        </h2>
+        <div id="route-panel" class="hidden mb-4"></div>
+        <div id="col-ready" class="space-y-4"></div>
       </section>
     </main>
     <p id="orders-empty" class="hidden text-center text-[#5B6270] py-24 text-lg">No hi ha comandes ara mateix.</p>
@@ -101,11 +109,12 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
 
-    // Tauler de 2 etapes actives (com un monitor de cuina tipus McDonald's):
-    // "pending" = encara no introduït a Aronium; "preparing"/"ready" = ja
-    // introduït i en marxa. En marcar "Llest" la comanda passa directament a
-    // "delivered" i desapareix del tauler — només queda consultable a l'Historial.
-    const STATUS_LABEL = { pending: 'Sense afegir', preparing: 'Preparant', ready: 'Preparant', delivered: 'Entregat', cancelled: 'Cancel·lat' };
+    // Tauler de 3 etapes actives (com un monitor de cuina tipus McDonald's):
+    // "pending" = encara no introduït a Aronium; "preparing" = ja introduït,
+    // fent-se; "ready" = feta, esperant sortir a repartir. En marcar
+    // "Entregat" des de "ready" la comanda passa a "delivered" i desapareix
+    // del tauler — només queda consultable a l'Historial.
+    const STATUS_LABEL = { pending: 'Sense afegir', preparing: 'Preparant', ready: 'Llest', delivered: 'Entregat', cancelled: 'Cancel·lat' };
 
     let currentDateScope = 'today';
     let ordersCache = [];
@@ -198,10 +207,12 @@
       const groups = groupOrders(board);
       const pendingGroups   = groups.filter(g => stageOfGroup(g) === 'pending');
       const preparingGroups = groups.filter(g => stageOfGroup(g) === 'preparing');
+      const readyGroups     = groups.filter(g => stageOfGroup(g) === 'ready');
 
       document.getElementById('order-count').textContent = groups.length;
       document.getElementById('count-pending').textContent = pendingGroups.length;
       document.getElementById('count-preparing').textContent = preparingGroups.length;
+      document.getElementById('count-ready').textContent = readyGroups.length;
 
       const empty = document.getElementById('orders-empty');
       empty.classList.toggle('hidden', groups.length > 0);
@@ -209,6 +220,7 @@
       const noneMsg = '<p class="text-sm text-[#5B6270] text-center py-10">Cap comanda</p>';
       document.getElementById('col-pending').innerHTML   = pendingGroups.length   ? pendingGroups.map(renderOrderCard).join('')   : noneMsg;
       document.getElementById('col-preparing').innerHTML = preparingGroups.length ? preparingGroups.map(renderOrderCard).join('') : noneMsg;
+      document.getElementById('col-ready').innerHTML     = readyGroups.length     ? readyGroups.map(renderOrderCard).join('')     : noneMsg;
     }
 
     // Agrupa pedidos del mateix client (per telèfon) per a la mateixa
@@ -226,22 +238,35 @@
       return Array.from(map.values());
     }
 
-    // Etapa visual d'una comanda individual: pending = encara no afegida a
-    // Aronium; qualsevol altra (preparing/ready) = ja en marxa.
-    function stageOf(o) { return o.status === 'pending' ? 'pending' : 'preparing'; }
-    // Etapa d'un grup: si encara queda alguna comanda sense afegir, el grup
-    // sencer es mostra a la columna "Sense afegir" (amb botons individuals).
-    function stageOfGroup(group) { return group.some(o => o.status === 'pending') ? 'pending' : 'preparing'; }
+    // Etapa visual d'una comanda individual: 3 etapes reals ara.
+    function stageOf(o) {
+      if (o.status === 'pending') return 'pending';
+      if (o.status === 'ready') return 'ready';
+      return 'preparing';
+    }
+    // Etapa d'un grup: es mostra a la columna menys avançada dels seus
+    // membres — si en queda algun sense afegir, tot el grup va a "Sense
+    // afegir"; si en queda algun preparant-se (no llest), tot va a
+    // "Preparant"; només si TOTS estan llestos, el grup va a "Llest".
+    function stageOfGroup(group) {
+      if (group.some(o => o.status === 'pending')) return 'pending';
+      if (group.some(o => o.status !== 'ready')) return 'preparing';
+      return 'ready';
+    }
+
+    const ACTIONS_NEXT = {
+      pending:   { status: 'preparing', label: 'Afegit a Aronium',   color: 'bg-[#2563EB] hover:bg-[#1D4ED8]' },
+      preparing: { status: 'ready',     label: 'Llest per repartir', color: 'bg-[#16A34A] hover:bg-[#15803D]' },
+      ready:     { status: 'delivered', label: 'Entregat',           color: 'bg-[#16A34A] hover:bg-[#15803D]' },
+    };
 
     function actionsRow(ids, stage, size) {
       const pad = size === 'sm' ? 'py-2 text-xs' : 'py-3 text-sm';
       const idsJs = ids.join("','");
-      const nextStatus = stage === 'pending' ? 'preparing' : 'delivered';
-      const nextLabel  = stage === 'pending' ? 'Afegit a Aronium' : 'Llest';
-      const nextColor  = stage === 'pending' ? 'bg-[#2563EB] hover:bg-[#1D4ED8]' : 'bg-[#16A34A] hover:bg-[#15803D]';
+      const next = ACTIONS_NEXT[stage];
       return `
         <div class="flex gap-2">
-          <button onclick="advanceStatusBulk(['${idsJs}'],'${nextStatus}')" class="flex-1 ${pad} rounded-lg ${nextColor} text-white font-semibold transition-all">${nextLabel}</button>
+          <button onclick="advanceStatusBulk(['${idsJs}'],'${next.status}')" class="flex-1 ${pad} rounded-lg ${next.color} text-white font-semibold transition-all">${next.label}</button>
           <button onclick="advanceStatusBulk(['${idsJs}'],'cancelled')" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
         </div>`;
     }
@@ -256,7 +281,8 @@
       const timeLabel = first.slot_time || '';
       const grandTotal = group.reduce((s, o) => s + (Number(o.total) || 0), 0);
       const stage = stageOfGroup(group);
-      const headerBand = !allSameStatus ? 'bg-[#6B7280]' : (stage === 'pending' ? 'bg-[#F59E0B]' : 'bg-[#3B82F6]');
+      const BAND_COLOR = { pending: 'bg-[#F59E0B]', preparing: 'bg-[#3B82F6]', ready: 'bg-[#16A34A]' };
+      const headerBand = !allSameStatus ? 'bg-[#6B7280]' : BAND_COLOR[stage];
 
       const ordersHtml = group.map((o, idx) => {
         const items = o.order_items || [];
