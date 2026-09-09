@@ -181,14 +181,51 @@
       subscribeRealtime();
     }
 
+    // Avís sonor quan arriba una comanda nova a "Sense afegir" — generat amb
+    // Web Audio API (dos tons curts), sense necessitar cap fitxer d'àudio.
+    // En alguns mòbils (sobretot iPhone/Safari) el navegador bloqueja l'àudio
+    // fins que hi ha hagut una interacció prèvia amb la pàgina — si falla,
+    // ho ignorem en silenci, mai talla el funcionament del tauler.
+    function playNewOrderSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const tone = (freq, delay) => setTimeout(() => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        }, delay);
+        tone(880, 0);
+        tone(1175, 180);
+      } catch (e) { /* àudio bloquejat o no suportat — silenci */ }
+    }
+
+    // Compara les comandes rebudes contra les ja vistes en aquesta sessió de
+    // pàgina i retorna els IDs de comandes "pending" genuïnament noves.
+    // Muta `seenIds` afegint-hi totes les IDs rebudes (noves i ja vistes).
+    function detectNewPendingOrders(newOrders, seenIds) {
+      const newIds = newOrders.filter(o => o.status === 'pending' && !seenIds.has(o.id)).map(o => o.id);
+      newOrders.forEach(o => seenIds.add(o.id));
+      return newIds;
+    }
+
+    const _seenOrderIds = new Set();
+
     async function loadOrders() {
       const { data, error } = await supabase
         .from('orders')
         .select('*, customers(name, phone, email), addresses(street, floor, postal_code, city, notes), order_items(*)')
         .order('created_at', { ascending: true });
       if (error) { console.error(error); return; }
+      const isFirstLoad = _seenOrderIds.size === 0;
+      const newIds = detectNewPendingOrders(data || [], _seenOrderIds);
       ordersCache = data || [];
       renderOrders();
+      if (!isFirstLoad && newIds.length > 0) playNewOrderSound();
     }
 
     function subscribeRealtime() {
