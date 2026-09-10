@@ -1099,8 +1099,10 @@
       const m = cfSelectedTime && /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
       if (!m) return '30–45 minuts';
       const pizzaCount = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
-      const extraMin = Math.min(Math.max(pizzaCount - 1, 0) * 2, 10);
-      const windowMin = 10 + extraMin;
+      // Marge de 15 min (1 pizza) fins a 20 min (6 pizzes, l'aforo màxim
+      // d'una franja) — cada pizza extra hi afegeix 1 min.
+      const extraMin = Math.min(Math.max(pizzaCount - 1, 0) * 1, 5);
+      const windowMin = 15 + extraMin;
       const start = new Date(); start.setHours(Number(m[1]), Number(m[2]), 0, 0);
       const end = new Date(start.getTime() + windowMin * 60000);
       const fmtH = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
