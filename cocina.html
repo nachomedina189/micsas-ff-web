@@ -100,8 +100,8 @@
       </section>
     </main>
 
-    <!-- ════ VISTA REPARTIMENT: Llest (amb ruta i navegació) → Entregat ════ -->
-    <main id="view-repartiment" class="hidden p-6 grid gap-6 grid-cols-1 md:grid-cols-2 items-start">
+    <!-- ════ VISTA REPARTIMENT: Llest (amb ruta) → En repartiment → Entregat ════ -->
+    <main id="view-repartiment" class="hidden p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
       <section id="section-ready-repartiment" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#16A34A] border-x border-b border-white/8">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
           <span class="w-2.5 h-2.5 rounded-full bg-[#16A34A]"></span> Llest
@@ -109,6 +109,13 @@
         </h2>
         <div id="route-panel" class="hidden mb-4"></div>
         <div id="col-ready-repartiment" class="space-y-4"></div>
+      </section>
+      <section id="section-out-for-delivery" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#0D9488] border-x border-b border-white/8">
+        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#0D9488]"></span> En repartiment
+          <span id="count-out-for-delivery" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#0D9488]/15 text-[#0D9488] text-sm font-bold">0</span>
+        </h2>
+        <div id="col-out-for-delivery" class="space-y-4"></div>
       </section>
       <section id="section-delivered" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#374151] border-x border-b border-white/8">
         <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
@@ -147,7 +154,7 @@
     // fent-se; "ready" = feta, esperant sortir a repartir. En marcar
     // "Entregat" des de "ready" la comanda passa a "delivered" i desapareix
     // del tauler — només queda consultable a l'Historial.
-    const STATUS_LABEL = { pending: 'Sense afegir', preparing: 'Preparant', ready: 'Llest', delivered: 'Entregat', cancelled: 'Cancel·lat' };
+    const STATUS_LABEL = { pending: 'Sense afegir', preparing: 'Preparant', ready: 'Llest', out_for_delivery: 'En repartiment', delivered: 'Entregat', cancelled: 'Cancel·lat' };
 
     let currentDateScope = 'today';
     let ordersCache = [];
@@ -237,6 +244,7 @@
       setView('cuina');
       await loadOrders();
       subscribeRealtime();
+      setInterval(updateElapsedCounters, 30000);
     }
 
     // Avís sonor quan arriba una comanda nova a "Sense afegir" — generat amb
@@ -333,9 +341,10 @@
     function renderOrders() {
       const board = ordersCache.filter(o => inDateScope(o) && o.status !== 'delivered' && o.status !== 'cancelled');
       const groups = groupOrders(board);
-      const pendingGroups   = groups.filter(g => stageOfGroup(g) === 'pending');
-      const preparingGroups = groups.filter(g => stageOfGroup(g) === 'preparing');
-      const readyGroups     = groups.filter(g => stageOfGroup(g) === 'ready');
+      const pendingGroups         = groups.filter(g => stageOfGroup(g) === 'pending');
+      const preparingGroups       = groups.filter(g => stageOfGroup(g) === 'preparing');
+      const readyGroups           = groups.filter(g => stageOfGroup(g) === 'ready');
+      const outForDeliveryGroups  = groups.filter(g => stageOfGroup(g) === 'out_for_delivery');
 
       // Les comandes entregades es calculen a part (no formen part del
       // "board" actiu) — són per a la columna "Entregat" de la vista
@@ -349,9 +358,10 @@
       document.getElementById('count-preparing').textContent = preparingGroups.length;
       document.getElementById('count-ready-cuina').textContent = readyGroups.length;
       document.getElementById('count-ready-repartiment').textContent = readyGroups.length;
+      document.getElementById('count-out-for-delivery').textContent = outForDeliveryGroups.length;
       document.getElementById('count-delivered').textContent = deliveredGroups.length;
       document.getElementById('tab-cuina-badge').textContent = pendingGroups.length + preparingGroups.length;
-      document.getElementById('tab-repartiment-badge').textContent = readyGroups.length;
+      document.getElementById('tab-repartiment-badge').textContent = readyGroups.length + outForDeliveryGroups.length;
 
       document.getElementById('col-pending').innerHTML   = renderColumnWithTimeHeaders(pendingGroups);
       document.getElementById('col-preparing').innerHTML = renderColumnWithTimeHeaders(preparingGroups);
@@ -361,8 +371,22 @@
       const readyHtml = renderColumnWithTimeHeaders(readyGroups);
       document.getElementById('col-ready-cuina').innerHTML      = readyHtml;
       document.getElementById('col-ready-repartiment').innerHTML = readyHtml;
+      document.getElementById('col-out-for-delivery').innerHTML = renderColumnWithTimeHeaders(outForDeliveryGroups);
       document.getElementById('col-delivered').innerHTML = renderColumnWithTimeHeaders(deliveredGroups);
       renderRoutePanel(readyGroups);
+      updateElapsedCounters();
+    }
+
+    // Actualitza el text de cada contador "⏱ Esperant..." sense refer tota
+    // la targeta — es crida cada 30s des d'un setInterval perquè el temps
+    // avanci encara que no arribi cap comanda nova via realtime.
+    function updateElapsedCounters() {
+      document.querySelectorAll('.js-elapsed').forEach(el => {
+        const since = Number(el.dataset.since);
+        if (!since) return;
+        const mins = Math.floor((Date.now() - since) / 60000);
+        el.textContent = mins <= 0 ? '⏱ Just ara' : `⏱ Esperant fa ${mins} min`;
+      });
     }
 
     // Agrupa pedidos del mateix client (per telèfon) per a la mateixa
@@ -380,29 +404,33 @@
       return Array.from(map.values());
     }
 
-    // Etapa visual d'una comanda individual: 4 etapes reals ara.
+    // Etapa visual d'una comanda individual: 5 etapes reals ara.
     function stageOf(o) {
       if (o.status === 'pending') return 'pending';
       if (o.status === 'preparing') return 'preparing';
       if (o.status === 'ready') return 'ready';
+      if (o.status === 'out_for_delivery') return 'out_for_delivery';
       return 'delivered';
     }
     // Etapa d'un grup: es mostra a la columna menys avançada dels seus
     // membres — si en queda algun sense afegir, tot el grup va a "Sense
     // afegir"; si en queda algun preparant-se, tot va a "Preparant"; si en
-    // queda algun llest (però no entregat), tot va a "Llest"; només si TOTS
+    // queda algun llest (però no entregat/agafat), tot va a "Llest"; si en
+    // queda algun en repartiment, tot va a "En repartiment"; només si TOTS
     // estan entregats, el grup va a "Entregat".
     function stageOfGroup(group) {
       if (group.some(o => o.status === 'pending')) return 'pending';
       if (group.some(o => o.status === 'preparing')) return 'preparing';
       if (group.some(o => o.status === 'ready')) return 'ready';
+      if (group.some(o => o.status === 'out_for_delivery')) return 'out_for_delivery';
       return 'delivered';
     }
 
     const ACTIONS_NEXT = {
-      pending:   { status: 'preparing', label: 'Preparar',          color: 'bg-[#2563EB] hover:bg-[#1D4ED8]' },
-      preparing: { status: 'ready',     label: 'Llest per repartir', color: 'bg-[#16A34A] hover:bg-[#15803D]' },
-      ready:     { status: 'delivered', label: 'Entregat',           color: 'bg-[#16A34A] hover:bg-[#15803D]' },
+      pending:           { status: 'preparing',        label: 'Preparar',           color: 'bg-[#2563EB] hover:bg-[#1D4ED8]' },
+      preparing:         { status: 'ready',             label: 'Llest per repartir', color: 'bg-[#16A34A] hover:bg-[#15803D]' },
+      ready:             { status: 'out_for_delivery',  label: 'En repartiment',     color: 'bg-[#0D9488] hover:bg-[#0F766E]' },
+      out_for_delivery:  { status: 'delivered',         label: 'Entregat',           color: 'bg-[#16A34A] hover:bg-[#15803D]' },
     };
 
     function actionsRow(ids, stage, size) {
@@ -426,7 +454,11 @@
       const timeLabel = first.slot_time || '';
       const grandTotal = group.reduce((s, o) => s + (Number(o.total) || 0), 0);
       const stage = stageOfGroup(group);
-      const BAND_COLOR = { pending: 'bg-[#F59E0B]', preparing: 'bg-[#3B82F6]', ready: 'bg-[#16A34A]', delivered: 'bg-[#374151]' };
+      const BAND_COLOR = { pending: 'bg-[#F59E0B]', preparing: 'bg-[#3B82F6]', ready: 'bg-[#16A34A]', out_for_delivery: 'bg-[#0D9488]', delivered: 'bg-[#374151]' };
+      // Contador ascendent: temps que fa que espera la comanda MÉS ANTIGA
+      // del grup (no la més nova), perquè el pizzero vegi el pitjor cas —
+      // el client que porta més estona esperant dins d'aquest grup.
+      const waitingSinceMs = Math.min(...group.map(o => new Date(o.created_at).getTime()).filter(t => !isNaN(t)));
       const headerBand = !allSameStatus ? 'bg-[#6B7280]' : BAND_COLOR[stage];
 
       const ordersHtml = group.map((o, idx) => {
@@ -478,6 +510,9 @@
             <span class="text-xs font-semibold opacity-90">${dateLabel} ${timeLabel}</span>
           </div>
           <div class="p-5 space-y-4">
+            ${!isNaN(waitingSinceMs) && stage !== 'delivered' ? `
+              <p class="js-elapsed text-xs font-bold text-[#6B7280]" data-since="${waitingSinceMs}">⏱ Esperant...</p>
+            ` : ''}
             ${bigOrderHtml}
             <div>
               <p class="font-bold text-lg">${escapeHtml(cust.name || 'Client')}</p>
@@ -497,7 +532,7 @@
                 <span class="font-black text-lg">${fmt(grandTotal)}</span>
               </div>
             ` : ''}
-            ${stage === 'ready' ? `
+            ${stage === 'ready' || stage === 'out_for_delivery' ? `
               <div class="flex gap-2 pt-1">
                 <a href="${buildMapsUrl(formatAddress(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🗺️ Maps</a>
                 <a href="${buildWazeUrl(formatAddress(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🚗 Waze</a>
