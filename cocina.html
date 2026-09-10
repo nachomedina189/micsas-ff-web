@@ -161,7 +161,6 @@
     let ordersCache = [];
 
     function fmt(n) { return (Number(n) || 0).toFixed(2).replace('.', ',') + ' €'; }
-    function todayISO() { return new Date().toISOString().split('T')[0]; }
     // Data local (no UTC) en format YYYY-MM-DD — toISOString() pot fer
     // saltar la data un dia enrere a la nit segons el fus horari.
     function localDateStr(d) {
@@ -170,6 +169,17 @@
       const m = String(dt.getMonth() + 1).padStart(2, '0');
       const day = String(dt.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
+    }
+    // El "dia de pase" (Avui/Setmana del tauler) comença a les 7:00 del
+    // matí, no a mitjanit — a petició del propietari, així el pizzero té
+    // un tall horari clar: abans de les 7:00 encara compta com el dia
+    // anterior (a la pràctica no importa, ningú mira la tablet llavors),
+    // però un cop passades les 7:00 del divendres/diumenge, "Avui (pase)"
+    // ja mostra de veritat les comandes d'aquell dia.
+    function businessDateISO(d = new Date()) {
+      const dt = new Date(d);
+      if (dt.getHours() < 7) dt.setDate(dt.getDate() - 1);
+      return localDateStr(dt);
     }
 
     // Login simplificat a petició del propietari: el personal només
@@ -314,11 +324,11 @@
     }
 
     function inDateScope(o) {
-      const today = todayISO();
+      const today = businessDateISO();
       if (currentDateScope === 'today') return o.delivery_date === today;
       if (currentDateScope === 'week') {
-        const d = new Date(); d.setDate(d.getDate() + 6);
-        const weekEndStr = d.toISOString().split('T')[0];
+        const weekEnd = new Date(today + 'T00:00:00'); weekEnd.setDate(weekEnd.getDate() + 6);
+        const weekEndStr = localDateStr(weekEnd);
         return !!o.delivery_date && o.delivery_date >= today && o.delivery_date <= weekEndStr;
       }
       return true;
