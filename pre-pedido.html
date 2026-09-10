@@ -259,16 +259,17 @@
 
     async function loadSlotCounts() {
       if (!window.supabase) return;
-      const { data } = await window.supabase
-        .from('orders')
-        .select('slot_time, pizza_count')
-        .eq('delivery_date', ppDeliveryDate)
-        .neq('status', 'cancelled');
-      if (!data) return;
+      // get_slot_capacity és una funció agregada (no exposa dades del
+      // client) accessible per a qualsevol usuari, a diferència d'un
+      // select directe a "orders" — bloquejat per RLS per a un client
+      // anònim, cosa que deixava _slotCounts sempre buit i cap franja es
+      // marcava mai com a completa.
+      const { data } = await window.supabase.rpc('get_slot_capacity', { p_delivery_date: ppDeliveryDate });
       _slotCounts = {};
+      if (!data) return;
       data.forEach(row => {
         if (!row.slot_time) return;
-        _slotCounts[row.slot_time] = (_slotCounts[row.slot_time] || 0) + (row.pizza_count || 0);
+        _slotCounts[row.slot_time] = row.pizza_count || 0;
       });
     }
 
