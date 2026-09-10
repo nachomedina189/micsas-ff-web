@@ -453,6 +453,24 @@
 
       const headerStatus = allSameStatus ? (STATUS_LABEL[first.status] || first.status) : 'Diverses comandes';
 
+      // Comanda gran: ocupa més d'una franja de forn (slot_allocations té
+      // més d'una clau). Avís destacat a dalt de tot de la targeta, amb el
+      // desglossament "Tanda 1 / Tanda 2" (quantes pizzes i a quina hora
+      // comença cada tanda) — així el pizzero sap d'un cop de vista que
+      // aquesta comanda necessita més d'un forn seguit i quan començar
+      // cada part, en lloc de descobrir-ho comptant els articles un a un.
+      const bigOrder = group.find(o => o.slot_allocations && Object.keys(o.slot_allocations).length > 1);
+      const bigOrderHtml = bigOrder ? (() => {
+        const rounds = Object.keys(bigOrder.slot_allocations).sort().map((s, i) =>
+          `Tanda ${i + 1}: ${bigOrder.slot_allocations[s]} pizzes des de les ${escapeHtml(s)}`
+        ).join(' · ');
+        return `
+          <div class="bg-[#F59E0B]/15 border border-[#F59E0B]/50 rounded-xl px-4 py-2.5">
+            <p class="text-xs font-black uppercase tracking-wide text-[#B45309]">⚠ Comanda gran — ${bigOrder.pizza_count} pizzes</p>
+            <p class="text-xs font-medium text-[#92400E] mt-1">${rounds}</p>
+          </div>`;
+      })() : '';
+
       return `
         <div class="bg-[#F7F8FA] text-[#14171C] rounded-2xl shadow-lg overflow-hidden">
           <div class="px-5 py-3 flex items-center justify-between ${headerBand} text-white">
@@ -460,6 +478,7 @@
             <span class="text-xs font-semibold opacity-90">${dateLabel} ${timeLabel}</span>
           </div>
           <div class="p-5 space-y-4">
+            ${bigOrderHtml}
             <div>
               <p class="font-bold text-lg">${escapeHtml(cust.name || 'Client')}</p>
               <a href="tel:${escapeHtml(cust.phone || '')}" class="text-sm text-[#2563EB] font-semibold">${escapeHtml(cust.phone || '')}</a>
