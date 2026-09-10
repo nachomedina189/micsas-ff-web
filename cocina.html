@@ -449,7 +449,7 @@
       return `
         <div class="flex gap-2">
           <button onclick="advanceStatusBulk(['${idsJs}'],'${next.status}')" class="flex-1 ${pad} rounded-lg ${next.color} text-white font-semibold transition-all">${next.label}</button>
-          <button onclick="advanceStatusBulk(['${idsJs}'],'cancelled')" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
+          <button onclick="confirmCancelOrder(['${idsJs}'])" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
         </div>`;
     }
 
@@ -648,6 +648,16 @@
       await loadOrders();
     }
     window.advanceStatusBulk = advanceStatusBulk;
+
+    // Cancel·lar és irreversible des de la UI (no hi ha manera de tornar
+    // enrere un cop marcada com a cancel·lada), així que demanem
+    // confirmació abans — evita cancel·lacions per un toc accidental.
+    function confirmCancelOrder(ids) {
+      if (confirm('Estàs segur que vols eliminar aquesta comanda?')) {
+        advanceStatusBulk(ids, 'cancelled');
+      }
+    }
+    window.confirmCancelOrder = confirmCancelOrder;
 
     // ── Historial: comandes ja entregades o cancel·lades, per consultar-les
     // si cal revisar algun problema — no apareixen al tauler actiu. Té el seu
