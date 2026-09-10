@@ -1020,6 +1020,12 @@
       renderTimeSlots();
     }
 
+    // Marge mínim (minuts) abans de poder oferir una franja com "Com més
+    // aviat millor" — sense això es podia arribar a oferir una franja que
+    // començava d'aquí a 2 minuts, temps insuficient per preparar-la de
+    // veritat.
+    const ASAP_LEAD_MIN = 20;
+
     function renderTimeSlots() {
       const isToday = cfDeliveryDate === todayISO();
       const realSlots = [];
@@ -1029,27 +1035,29 @@
           realSlots.push(`${h}:${String(m).padStart(2,'0')}`);
         }
       }
-      const slots = isToday ? ['Com més aviat millor', ...realSlots] : realSlots;
       const nowMins = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
       const earliestSlot = realSlots.find(s => {
         const [h, m] = s.split(':').map(Number);
-        return h * 60 + m > nowMins && (_slotCounts[s] || 0) < 6;
+        return h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6;
       }) || null;
       window._cfEarliestSlot = earliestSlot;
+      // Si avui ja no queda cap franja amb marge suficient, no oferim el
+      // botó "Com més aviat millor" — millor amagar-lo que deixar que es
+      // trenqui guardant el text literal com si fos una hora real.
+      const slots = (isToday && earliestSlot) ? ['Com més aviat millor', ...realSlots] : realSlots;
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
-      container.innerHTML = slots.map((s, i) => {
-        const isFirst = isToday && i === 0;
+      container.innerHTML = slots.map((s) => {
         const isAsap = s === 'Com més aviat millor';
         const isPast = isToday && !isAsap && (() => { const [h, m] = s.split(':').map(Number); return h * 60 + m <= nowMins; })();
         const full = !isAsap && !isPast && (_slotCounts[s] || 0) >= 6;
         const blocked = full || isPast;
         const label = isAsap
-          ? `${s}${earliestSlot ? ` <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>` : ''}`
+          ? `${s} <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>`
           : `${s}${isPast ? ' · Ja ha passat' : full ? ' · Complet' : ''}`;
         return `<button type="button" ${blocked ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
-          class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isFirst ? 'lg' : 'base'} ${blocked ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
-          <iconify-icon icon="${isFirst ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isFirst ? 20 : 16}" style="color:${isFirst ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
+          class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isAsap ? 'lg' : 'base'} ${blocked ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
+          <iconify-icon icon="${isAsap ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isAsap ? 20 : 16}" style="color:${isAsap ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
           ${label}
         </button>`;
       }).join('');
@@ -1139,7 +1147,13 @@
       // "Com més aviat millor" es resol a una franja real abans de desar-se
       // — si es guardés el text literal, aquesta comanda no comptaria per a
       // l'aforo de cap franja real (vegeu pre-pedido.html, que ja ho fa bé).
-      cfSelectedTime = time === 'Com més aviat millor' ? (window._cfEarliestSlot || time) : time;
+      // Amb ASAP_LEAD_MIN el botó només es mostra quan _cfEarliestSlot és
+      // una franja real, però mantenim el fallback com a xarxa de seguretat.
+      const isAsap = time === 'Com més aviat millor';
+      cfSelectedTime = isAsap ? (window._cfEarliestSlot || time) : time;
+      if (isAsap && window._cfEarliestSlot) {
+        showCfToast(`Començarem a preparar la teva comanda a les ${window._cfEarliestSlot}.`);
+      }
       const timeStep = document.getElementById('cf-time-step');
       const scroll   = document.getElementById('cf-scroll');
       timeStep.style.opacity = '0';

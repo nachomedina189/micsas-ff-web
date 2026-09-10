@@ -272,6 +272,12 @@
       });
     }
 
+    // Marge mínim (minuts) abans de poder oferir una franja com "Com més
+    // aviat millor" — sense això es podia arribar a oferir una franja que
+    // començava d'aquí a 2 minuts, temps insuficient per preparar-la de
+    // veritat. Mateix marge que pedido.html.
+    const ASAP_LEAD_MIN = 20;
+
     function resolveAsap() {
       if (ppDeliveryDate !== todayISO()) return null;
       const now = new Date();
@@ -279,7 +285,7 @@
       for (let i = 1; i < PP_SLOTS.length; i++) {
         const s = PP_SLOTS[i];
         const [h, m] = s.split(':').map(Number);
-        if (h * 60 + m > nowMins && (_slotCounts[s] || 0) < 6) return s;
+        if (h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6) return s;
       }
       return null;
     }
@@ -411,6 +417,9 @@
     function selectTimeFromSelect(val) {
       const resolved = val === 'cuanto-antes' ? resolveAsap() : val;
       ppSelectedTime = resolved || null;
+      if (val === 'cuanto-antes' && resolved) {
+        alert(`Començarem a preparar la teva comanda a les ${resolved}.`);
+      }
       const labelEl = document.getElementById('pp-time-select-label');
       if (labelEl) {
         const chosen = ppTimeOptions.find(o => o.value === val);
