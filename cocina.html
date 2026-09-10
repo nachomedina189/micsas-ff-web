@@ -161,6 +161,15 @@
 
     function fmt(n) { return (Number(n) || 0).toFixed(2).replace('.', ',') + ' €'; }
     function todayISO() { return new Date().toISOString().split('T')[0]; }
+    // Data local (no UTC) en format YYYY-MM-DD — toISOString() pot fer
+    // saltar la data un dia enrere a la nit segons el fus horari.
+    function localDateStr(d) {
+      const dt = new Date(d);
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const day = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
 
     // Login simplificat a petició del propietari: el personal només
     // escriu el seu email, sense cap contrasenya visible. Per darrere cal
@@ -651,8 +660,8 @@
       const fromEl = document.getElementById('history-from');
       const toEl   = document.getElementById('history-to');
       const from = new Date(); from.setDate(from.getDate() - 7);
-      fromEl.value = from.toISOString().split('T')[0];
-      toEl.value = todayISO();
+      fromEl.value = localDateStr(from);
+      toEl.value = localDateStr(new Date());
       document.getElementById('history-modal').classList.remove('hidden');
       renderHistoryList();
     }
@@ -661,12 +670,16 @@
     function renderHistoryList() {
       const from = document.getElementById('history-from').value;
       const to   = document.getElementById('history-to').value;
+      // Filtra i ordena per updated_at (el moment REAL en què la comanda
+      // va quedar entregada/cancel·lada), no per delivery_date — una
+      // comanda per endavant té delivery_date a un dia FUTUR, així que
+      // filtrar per delivery_date podia deixar fora del rang per defecte
+      // (últims 7 dies fins avui) comandes que s'acabaven de completar.
       const hist = ordersCache
-        .filter(o => (o.status === 'delivered' || o.status === 'cancelled')
-          && o.delivery_date
-          && (!from || o.delivery_date >= from)
-          && (!to || o.delivery_date <= to))
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        .filter(o => (o.status === 'delivered' || o.status === 'cancelled') && o.updated_at)
+        .map(o => ({ o, day: localDateStr(o.updated_at) }))
+        .filter(({ day }) => (!from || day >= from) && (!to || day <= to))
+        .sort((a, b) => new Date(b.o.updated_at) - new Date(a.o.updated_at));
 
       const list = document.getElementById('history-list');
       if (!hist.length) {
@@ -674,11 +687,10 @@
         return;
       }
 
-      // Agrupa per dia d'entrega, amb capçalera de data — més fàcil de
-      // repassar que una llista plana barrejant dies diferents.
+      // Agrupa per dia de finalització, amb capçalera de data — més fàcil
+      // de repassar que una llista plana barrejant dies diferents.
       const byDay = new Map();
-      hist.forEach(o => {
-        const day = o.delivery_date || 'sense-data';
+      hist.forEach(({ o, day }) => {
         if (!byDay.has(day)) byDay.set(day, []);
         byDay.get(day).push(o);
       });
@@ -708,8 +720,10 @@
       const addr = o.addresses || {};
       const items = o.order_items || [];
       const itemsText = items.map(it => `${it.quantity}× ${it.product_name}`).join(', ');
-      const time = new Date(o.created_at).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+      const completedTime = new Date(o.updated_at || o.created_at).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+      const deliveryDayLabel = o.delivery_date ? new Date(o.delivery_date + 'T00:00:00').toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' }) : '';
       const statusColor = o.status === 'cancelled' ? 'text-[#DC2626]' : 'text-[#16A34A]';
+      const statusVerb = o.status === 'cancelled' ? 'cancel·lat' : 'entregat';
       const addressText = [addr.street, addr.floor].filter(Boolean).join(', ');
       return `
         <div class="border border-[#E5E7EB] rounded-xl px-4 py-3">
@@ -717,7 +731,7 @@
             <span class="font-bold">${escapeHtml(cust.name || 'Client')}</span>
             <span class="text-xs font-bold uppercase ${statusColor}">${STATUS_LABEL[o.status] || o.status}</span>
           </div>
-          <p class="text-xs text-[#6B7280] mb-1">${escapeHtml(o.slot_time || '')} · entrat a les ${time} · ${fmt(o.total)}</p>
+          <p class="text-xs text-[#6B7280] mb-1">Comanda per al ${deliveryDayLabel} ${escapeHtml(o.slot_time || '')} · ${statusVerb} a les ${completedTime} · ${fmt(o.total)}</p>
           ${addressText ? `<p class="text-sm text-[#4B5563]">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
           ${itemsText ? `<p class="text-sm text-[#374151] mt-1">${escapeHtml(itemsText)}</p>` : ''}
         </div>`;
