@@ -607,7 +607,7 @@
 
         <!-- 5. Caixa d'estimació -->
         <div class="w-full max-w-sm bg-[#F6EFDD] rounded-2xl px-5 py-4 mb-8">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-[#8C7A58] mb-1">Arriba aprox.</p>
+          <p id="cf-success-estimate-label" class="text-[11px] font-bold uppercase tracking-widest text-[#8C7A58] mb-1">Arriba aprox.</p>
           <!-- TODO: n8n tiempo real -->
           <p id="cf-success-estimate" class="text-lg font-semibold text-[#2D241D]"></p>
           <p id="cf-success-reassigned" class="hidden text-xs font-medium text-[#D24A33] mt-2"></p>
@@ -1117,10 +1117,30 @@
       return `${fmtH(start)}–${fmtH(end)}`;
     }
 
+    // Format català "Divendres 13 de setembre" a partir d'una data YYYY-MM-DD.
+    function formatDeliveryDayLabel(dateStr) {
+      const label = new Date(`${dateStr}T00:00:00`).toLocaleDateString('ca-ES', { weekday: 'long', day: '2-digit', month: 'long' });
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    }
+
     function updateSuccessDeliveryEstimate() {
-      estimacioEntrega = computeEstimacioEntrega();
+      // Una finestra "20:15–20:20" només té sentit si la comanda és per
+      // avui mateix — per a un dia futur (l'escenari normal, ja que no
+      // s'accepten comandes per al mateix dia fora d'ASAP) confirmem
+      // directament el dia i l'hora, sense fingir una estimació de minuts
+      // que no aplica quan falten dies per a l'entrega.
+      const isToday = cfDeliveryDate === todayISO();
+      const labelEl = document.getElementById('cf-success-estimate-label');
       const el = document.getElementById('cf-success-estimate');
-      if (el) el.textContent = estimacioEntrega;
+      if (isToday) {
+        estimacioEntrega = computeEstimacioEntrega();
+        if (labelEl) labelEl.textContent = 'Arriba aprox.';
+        if (el) el.textContent = estimacioEntrega;
+      } else {
+        estimacioEntrega = '';
+        if (labelEl) labelEl.textContent = 'Comanda registrada';
+        if (el) el.textContent = `${formatDeliveryDayLabel(cfDeliveryDate)} a les ${cfSelectedTime}`;
+      }
 
       const reassignedEl = document.getElementById('cf-success-reassigned');
       if (reassignedEl) {
