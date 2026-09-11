@@ -1200,6 +1200,37 @@
       return _ppDistanceKm(lat, lng, MATADEPERA_CENTER.lat, MATADEPERA_CENTER.lng) <= MATADEPERA_RADIUS_KM;
     }
 
+    // Punts de recollida fora de Matadepera, afegits explícitament pel
+    // titular del negoci: gent que no viu a Matadepera pot triar recollir
+    // aquí en lloc d'una entrega a domicili. S'identifiquen pel nom del
+    // carrer (no per coordenades: la clau de Google Maps té restricció de
+    // referrer i no es pot geocodificar amb fiabilitat des del servidor —
+    // el mateix Google Places que el client ja resol al navegador és la
+    // font de veritat), amb el codi postal o la ciutat com a segona
+    // confirmació. NOMÉS aquesta adreça exacta queda exempta del requisit
+    // de Matadepera — no s'obre tot un codi postal ni una ciutat sencera.
+    const PP_PICKUP_POINTS = [
+      // Q8 Gasolinera, Av. del Tèxtil 55, 08223 Terrassa.
+      { streetContains: 'textil', postalCode: '08223', cityNormalized: 'terrassa' },
+    ];
+    function _ppMatchesPickupPoint(postalCode, city, streetText) {
+      const street = _ppNormalize(streetText || '');
+      const zip = (postalCode || '').trim();
+      const cityNorm = _ppNormalize(city || '');
+      return PP_PICKUP_POINTS.some(p =>
+        street.includes(p.streetContains) && (zip === p.postalCode || cityNorm === p.cityNormalized)
+      );
+    }
+    function _ppShowZoneOk(zip) {
+      document.getElementById('pp-zone-feedback').classList.remove('hidden');
+      document.getElementById('pp-zip-badge').textContent = zip || '';
+      document.getElementById('pp-zone-ok').classList.remove('hidden');
+      document.getElementById('pp-zone-err').classList.add('hidden');
+      document.getElementById('pp-zone-spin').classList.add('hidden');
+      ppAddressValid = true;
+      if (typeof validateForm === 'function') validateForm();
+    }
+
     async function _ppValidateZone(zip) {
       const feedbackEl = document.getElementById('pp-zone-feedback');
       const badgeEl    = document.getElementById('pp-zip-badge');
@@ -1391,7 +1422,15 @@
 
         ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
         const inMatadepera = _ppAddressIsInMatadepera(comps) || _ppAddressNearMatadepera(window._ppLat, window._ppLng);
-        if (!inMatadepera) {
+        const isPickupPoint = !inMatadepera && _ppMatchesPickupPoint(
+          window._ppExtractedZip, window._ppExtractedCity, route || place.formattedAddress
+        );
+        if (isPickupPoint) {
+          // Adreça d'un punt de recollida conegut (ex. la gasolinera Q8 a
+          // Terrassa) — vàlida encara que no sigui Matadepera, sense tocar
+          // delivery_zones ni obrir cap codi postal sencer.
+          _ppShowZoneOk(window._ppExtractedZip);
+        } else if (!inMatadepera) {
           // Ni el text diu "Matadepera" ni el punt cau a prop del poble —
           // es rebutja directament, no cal ni consultar delivery_zones.
           _ppShowZoneError(window._ppExtractedZip, `Només fem entregues a ${PP_ALLOWED_CITY} i rodalies.`);
