@@ -1,5 +1,6 @@
 import Stripe from "https://esm.sh/stripe@14?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendOrderConfirmationEmail } from "../_shared/email.ts";
 
 // Aquesta funció rep trucades directes de Stripe (no del navegador), per
 // això no porta capçaleres CORS ni comprova l'apikey de Supabase — cal
@@ -46,6 +47,35 @@ Deno.serve(async (req) => {
         if (orderId) {
           const { error } = await sb.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
           if (error) console.error("[stripe-webhook] error marcant pagada", orderId, error);
+
+          // Email de confirmació — aquí (i només aquí) sabem del cert que
+          // el pagament amb targeta s'ha cobrat de veritat. Cal anar a
+          // buscar les dades de la comanda perquè el webhook no les té
+          // (només rep l'esdeveniment de Stripe, no el context del
+          // checkout).
+          if (!error) {
+            const { data: order, error: fetchErr } = await sb
+              .from("orders")
+              .select("total, payment_method, delivery_date, slot_time, customers(name, email), addresses(street, floor, postal_code, city), order_items(product_name, quantity, unit_price, notes)")
+              .eq("id", orderId)
+              .single();
+            if (fetchErr || !order) {
+              console.error("[stripe-webhook] no s'ha pogut recuperar la comanda per l'email", orderId, fetchErr);
+            } else {
+              const cust = (order.customers as { name: string; email: string } | null) ?? { name: "", email: "" };
+              const addr = (order.addresses as { street: string; floor: string | null; postal_code: string; city: string } | null) ?? { street: "", floor: null, postal_code: "", city: "" };
+              await sendOrderConfirmationEmail({
+                toEmail: cust.email,
+                toName: cust.name,
+                items: (order.order_items as { product_name: string; quantity: number; unit_price: number; notes: string | null }[]) ?? [],
+                total: Number(order.total),
+                paymentMethod: order.payment_method as string,
+                deliveryDate: order.delivery_date as string,
+                slotTime: order.slot_time as string | null,
+                address: { street: addr.street, floor: addr.floor, postalCode: addr.postal_code, city: addr.city },
+              });
+            }
+          }
         }
         break;
       }

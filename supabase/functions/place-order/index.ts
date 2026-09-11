@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { sendOrderConfirmationEmail } from "../_shared/email.ts";
 
 // Catàleg de preus real — mateixos ids/preus que l'objecte MENU a
 // pedido.html. El client NOMÉS envia id + quantitat + notes de cada
@@ -196,6 +197,28 @@ Deno.serve(async (req) => {
       }))
     );
     if (itemsErr) throw itemsErr;
+
+    // Email de confirmació NOMÉS per a comandes en efectiu — no hi ha cap
+    // pagament online pel mig, així que la comanda ja està confirmada en
+    // el mateix moment de crear-se. Les comandes amb targeta l'envien des
+    // de stripe-webhook, quan Stripe confirma el cobrament real (mai
+    // abans). S'espera (await) perquè un edge function pot congelar-se
+    // just després de tornar la resposta — sense esperar, l'enviament
+    // "fire and forget" es podria tallar a mig fer. La funció mateixa ja
+    // té try/catch intern i mai llança error, així que això no pot
+    // trencar la creació de la comanda.
+    if (paymentMethod === "cash") {
+      await sendOrderConfirmationEmail({
+        toEmail: email,
+        toName: name,
+        items: resolvedItems,
+        total,
+        paymentMethod,
+        deliveryDate,
+        slotTime: orderRow.slot_time,
+        address: { street, floor, postalCode, city },
+      });
+    }
 
     return new Response(JSON.stringify({ orderId: orderRow.order_id, slotTime: orderRow.slot_time, total }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
