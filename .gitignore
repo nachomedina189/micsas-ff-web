@@ -1,2 +1,5 @@
 node_modules/
 supabase/.temp/
+# Còpies de seguretat de comandes — contenen dades reals de clients (nom,
+# telèfon, adreça), mai s'han de publicar al repositori públic.
+backups/
