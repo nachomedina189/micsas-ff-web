@@ -2,8 +2,77 @@
 <html lang="ca" class="scroll-smooth"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>micsas.ff · La pizza de barri, ara amb motor</title>
-    <meta name="description" content="micsas.ff · Pizzeria a domicili a Matadepera. Pizza napolitana tradicional, lliurament a casa. Truca, mossega, somriu.">
+    <title>micsas.ff · Pizzeria a domicili a Matadepera</title>
+    <meta name="description" content="Pizzeria a domicili a Matadepera. Pizza napolitana artesanal, repartiment a casa cada divendres i diumenge. Fes la teva comanda online a micsas.ff.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://micsasff.com/">
+    <link rel="icon" href="logo micsas.png">
+    <link rel="apple-touch-icon" href="logo micsas.png">
+
+    <!-- Open Graph / WhatsApp / Instagram / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="micsas.ff">
+    <meta property="og:title" content="micsas.ff · Pizzeria a domicili a Matadepera">
+    <meta property="og:description" content="Pizza napolitana artesanal, repartiment a casa cada divendres i diumenge a Matadepera. Fes la teva comanda online.">
+    <meta property="og:image" content="https://micsasff.com/images/margherita-1889.webp">
+    <meta property="og:url" content="https://micsasff.com/">
+    <meta property="og:locale" content="ca_ES">
+
+    <!-- Twitter/X Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="micsas.ff · Pizzeria a domicili a Matadepera">
+    <meta name="twitter:description" content="Pizza napolitana artesanal, repartiment a casa cada divendres i diumenge a Matadepera.">
+    <meta name="twitter:image" content="https://micsasff.com/images/margherita-1889.webp">
+
+    <!-- Dades estructurades (schema.org) perquè Google entengui que és un
+         restaurant de repartiment local a Matadepera — nom, telèfon,
+         horari real (divendres/diumenge 20:00-23:30), enllaç de comanda
+         directa. Sense això Google ha d'endevinar de què va la pàgina. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "name": "micsas.ff",
+      "image": "https://micsasff.com/images/margherita-1889.webp",
+      "logo": "https://micsasff.com/logo%20micsas.png",
+      "url": "https://micsasff.com/",
+      "telephone": "+34614714053",
+      "servesCuisine": ["Pizza", "Pizza napolitana", "Italiana"],
+      "priceRange": "€€",
+      "menu": "https://micsasff.com/menu.html",
+      "acceptsReservations": false,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Carrer Coll d'Estenalles 24",
+        "addressLocality": "Matadepera",
+        "postalCode": "08230",
+        "addressRegion": "Barcelona",
+        "addressCountry": "ES"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Matadepera"
+      },
+      "openingHoursSpecification": [
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "20:00", "closes": "23:30" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "20:00", "closes": "23:30" }
+      ],
+      "sameAs": ["https://instagram.com/micsas.ff"],
+      "potentialAction": {
+        "@type": "OrderAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://micsasff.com/pedido.html",
+          "actionPlatform": [
+            "https://schema.org/DesktopWebPlatform",
+            "https://schema.org/IOSPlatform",
+            "https://schema.org/AndroidPlatform"
+          ]
+        }
+      }
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -482,7 +551,7 @@
             <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
               <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
             </a>
-            <a href="tel:+34600000000" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
+            <a href="tel:+34614714053" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
               Contacte
             </a>
             <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">

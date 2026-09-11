@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /cocina.html
+Disallow: /compte.html
+
+Sitemap: https://micsasff.com/sitemap.xml
