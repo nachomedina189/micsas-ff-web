@@ -402,6 +402,16 @@
       return true;
     }
 
+    // Una comanda en efectiu es considera confirmada des que es crea (no hi
+    // ha cap pas de pagament online pel mig). Una comanda amb targeta
+    // ("card_delivery" — el pagament real amb Stripe, malgrat el nom) NOMÉS
+    // es considera confirmada quan payment_status val 'paid' — abans d'això
+    // encara pot fallar o quedar-se penjada, i no s'ha de confondre el
+    // pizzero amb una comanda que potser no s'arribarà a cobrar mai.
+    function isPaymentConfirmed(o) {
+      return o.payment_method === 'cash' || o.payment_status === 'paid';
+    }
+
     // Ordena els grups d'una columna per franja horària i insereix un
     // subtítol cada vegada que la franja canvia — així durant una nit amb
     // moltes franges a la vegada es veu d'un cop de vista què toca a cada
@@ -427,7 +437,7 @@
     }
 
     function renderOrders() {
-      const board = ordersCache.filter(o => inDateScope(o) && o.status !== 'delivered' && o.status !== 'cancelled');
+      const board = ordersCache.filter(o => inDateScope(o) && isPaymentConfirmed(o) && o.status !== 'delivered' && o.status !== 'cancelled');
       const groups = groupOrders(board);
       const pendingGroups         = groups.filter(g => stageOfGroup(g) === 'pending');
       const preparingGroups       = groups.filter(g => stageOfGroup(g) === 'preparing');
@@ -438,7 +448,7 @@
       // "board" actiu) — són per a la columna "Entregat" de la vista
       // Repartiment, perquè el repartidor tingui constància del que ja ha
       // deixat fet.
-      const deliveredBoard  = ordersCache.filter(o => inDateScope(o) && o.status === 'delivered');
+      const deliveredBoard  = ordersCache.filter(o => inDateScope(o) && isPaymentConfirmed(o) && o.status === 'delivered');
       const deliveredGroups = groupOrders(deliveredBoard);
 
       document.getElementById('order-count').textContent = groups.length;
