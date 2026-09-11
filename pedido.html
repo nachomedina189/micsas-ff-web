@@ -19,6 +19,16 @@
   <link rel="prefetch" href="menu.html">
   <link rel="prefetch" href="micsas-events.html">
   <style>
+    /* L'<input type="date"> natiu (per triar "Un altre dia") té un ample
+       intern mínim al Safari mòbil que pot ignorar el width:100% del CSS i
+       fer que el requadre s'estiri més enllà del contenidor. Forcem-lo a
+       respectar l'amplada real disponible. */
+    input[type="date"] {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+      -webkit-min-logical-width: 0px !important;
+    }
     .hot-fast-badge {
       position: fixed;
       bottom: 14px;

@@ -20,6 +20,16 @@
        activado — el picker nativo respeta color-scheme, no las clases de
        Tailwind del <select>. */
     html { color-scheme: light; }
+    /* El <input type="date"> natiu (per triar "Un altre dia") té un ample
+       intern mínim al Safari mòbil que pot ignorar el width:100% del CSS i
+       fer que el requadre s'estiri més enllà del contenidor. Forcem-lo a
+       respectar l'amplada real disponible. */
+    input[type="date"] {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+      -webkit-min-logical-width: 0px !important;
+    }
     .slot-btn.selected {
       border-color: #E23F2E !important;
       background-color: rgba(226,63,46,0.08);
