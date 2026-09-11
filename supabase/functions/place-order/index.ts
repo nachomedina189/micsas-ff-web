@@ -19,7 +19,7 @@ const CATALOG: Record<string, { name: string; price: number; available?: boolean
   "caramella-affumicata": { name: "Caramella Affumicata", price: 13, available: false },
   "antidiavola":          { name: "Antidiavola",          price: 13 },
   "nutellina":            { name: "Nutellina",            price: 13 },
-  "d3":                   { name: "Cervesa artesana",     price: 3 },
+  "d3":                   { name: "Cervesa artesana Moretti", price: 3 },
 };
 
 Deno.serve(async (req) => {
