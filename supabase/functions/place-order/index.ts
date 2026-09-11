@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
     const {
       name, email, phone,
       street, floor, postalCode, city, delivNotes, finalNotes,
+      lat, lng,
       paymentMethod, paymentStatus,
       tipAmount,
       authUserId,
@@ -150,6 +151,12 @@ Deno.serve(async (req) => {
         postal_code: postalCode,
         city: city || "Matadepera",
         notes: delivNotes ?? null,
+        // Coordenades precises resoltes per Google Places en el moment de
+        // triar l'adreça (no una re-geocodificació del text) — evita que
+        // l'enllaç de navegació de cocina.html acabi apuntant lluny de la
+        // ubicació real quan el carrer és ambigu.
+        lat: typeof lat === "number" ? lat : null,
+        lng: typeof lng === "number" ? lng : null,
       })
       .select("id")
       .single();

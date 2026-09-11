@@ -1864,6 +1864,13 @@
       const floor      = sessionStorage.getItem('micsas_floor')   || null;
       const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '08230';
       const city       = sessionStorage.getItem('micsas_city')    || 'Matadepera';
+      // Coordenades precises que Google Places ja va resoldre a pre-pedido.html
+      // en seleccionar l'adreça — les guardem per a que cocina.html pugui
+      // navegar-hi directament, sense haver de tornar a geocodificar el text.
+      const _latRaw = sessionStorage.getItem('micsas_lat');
+      const _lngRaw = sessionStorage.getItem('micsas_lng');
+      const lat = _latRaw ? parseFloat(_latRaw) : null;
+      const lng = _lngRaw ? parseFloat(_lngRaw) : null;
       const delivNotes = g('cf-notes') || null;
       const timeNote   = cfSelectedTime ? `Hora: ${cfSelectedTime}` : null;
       const finalNotes = [timeNote, delivNotes].filter(Boolean).join(' · ') || null;
@@ -1872,7 +1879,7 @@
       // s'envia ni es desa a Supabase, ja que la taula 'customers' no té cap
       // columna per a això i no tenim accés a la BD per afegir-la des d'aquí.
       const marketingConsent = !!(document.getElementById('cf-marketing') && document.getElementById('cf-marketing').checked);
-      return { name, email, phone, street, floor, postalCode, city, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate, marketingConsent };
+      return { name, email, phone, street, floor, postalCode, city, lat, lng, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate, marketingConsent };
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
@@ -1895,6 +1902,7 @@
         body: JSON.stringify({
           name: d.name, email: d.email, phone: d.phone,
           street: d.street, floor: d.floor, postalCode: d.postalCode, city: d.city,
+          lat: d.lat, lng: d.lng,
           delivNotes: d.delivNotes, finalNotes: d.finalNotes,
           paymentMethod: d.paymentMethod, paymentStatus,
           tipAmount: d.tipAmount,

@@ -372,7 +372,7 @@
     async function loadOrders() {
       const { data, error } = await supabase
         .from('orders')
-        .select('*, customers(name, phone, email), addresses(street, floor, postal_code, city, notes), order_items(*)')
+        .select('*, customers(name, phone, email), addresses(street, floor, postal_code, city, notes, lat, lng), order_items(*)')
         .order('created_at', { ascending: true });
       if (error) { console.error(error); return; }
       const isFirstLoad = _seenOrderIds.size === 0;
@@ -632,8 +632,8 @@
             ` : ''}
             ${stage === 'ready' || stage === 'out_for_delivery' ? `
               <div class="flex gap-2 pt-1">
-                <a href="${buildMapsUrl(formatAddress(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🗺️ Maps</a>
-                <a href="${buildWazeUrl(formatAddress(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🚗 Waze</a>
+                <a href="${buildMapsUrl(addressDestination(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🗺️ Maps</a>
+                <a href="${buildWazeUrl(addressDestination(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🚗 Waze</a>
               </div>
             ` : ''}
             ${allSameStatus && stage !== 'delivered' ? `<div class="border-t border-[#E5E7EB] pt-3">${actionsRow(group.map(o => o.id), stage, 'lg')}</div>` : ''}
@@ -651,6 +651,20 @@
       const line2 = [addr.postal_code, addr.city].filter(Boolean).join(' ');
       return [line1, line2].filter(Boolean).join(', ');
     }
+    // Destí per a navegació: si tenim les coordenades precises que Google
+    // Places ja va resoldre en triar l'adreça (guardades a addresses.lat/lng),
+    // les fem servir directament — "lat,lng" apunta al punt exacte, sense
+    // passar per una re-geocodificació del text que pot fallar amb carrers
+    // ambigus o poc coneguts (havia arribat a apuntar al mig de la zona
+    // forestal del Sant Llorenç del Munt). Si l'adreça és anterior a aquest
+    // canvi i no té lat/lng desades, cau al text com abans.
+    function addressDestination(order) {
+      const addr = order.addresses || {};
+      if (typeof addr.lat === 'number' && typeof addr.lng === 'number') {
+        return `${addr.lat},${addr.lng}`;
+      }
+      return formatAddress(order);
+    }
     function buildMapsUrl(address) {
       return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}&travelmode=driving`;
     }
@@ -662,13 +676,14 @@
         .map(group => ({
           label: (group[0].customers && group[0].customers.name) || 'Client',
           address: formatAddress(group[0]),
+          destination: addressDestination(group[0]),
         }))
-        .filter(w => w.address.trim().length > 0);
+        .filter(w => w.destination.trim().length > 0);
     }
     function buildMultiStopMapsUrl(origin, orderedStops) {
       const originParam = encodeURIComponent(origin);
-      const destination = encodeURIComponent(orderedStops[orderedStops.length - 1].address);
-      const waypointsParam = orderedStops.slice(0, -1).map(s => encodeURIComponent(s.address)).join('|');
+      const destination = encodeURIComponent(orderedStops[orderedStops.length - 1].destination);
+      const waypointsParam = orderedStops.slice(0, -1).map(s => encodeURIComponent(s.destination)).join('|');
       let url = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${destination}&travelmode=driving`;
       if (waypointsParam) url += `&waypoints=${waypointsParam}`;
       return url;
@@ -692,7 +707,7 @@
       const stops = buildRouteWaypoints(readyGroups);
       if (stops.length < 2) { panel.classList.add('hidden'); panel.innerHTML = ''; _lastRouteKey = ''; return; }
 
-      const key = stops.map(s => s.address).join('|');
+      const key = stops.map(s => s.destination).join('|');
       if (key === _lastRouteKey && panel.innerHTML) return;
       _lastRouteKey = key;
 
@@ -702,10 +717,10 @@
       try {
         const { DirectionsService } = await _getRoutesLib();
         const svc = new DirectionsService();
-        const waypoints = stops.slice(0, -1).map(s => ({ location: s.address, stopover: true }));
+        const waypoints = stops.slice(0, -1).map(s => ({ location: s.destination, stopover: true }));
         const result = await svc.route({
           origin: KITCHEN_ORIGIN,
-          destination: stops[stops.length - 1].address,
+          destination: stops[stops.length - 1].destination,
           waypoints,
           optimizeWaypoints: true,
           travelMode: google.maps.TravelMode.DRIVING,
