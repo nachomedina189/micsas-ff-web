@@ -20,15 +20,29 @@
        activado — el picker nativo respeta color-scheme, no las clases de
        Tailwind del <select>. */
     html { color-scheme: light; }
-    /* El <input type="date"> natiu (per triar "Un altre dia") té un ample
-       intern mínim al Safari mòbil que pot ignorar el width:100% del CSS i
-       fer que el requadre s'estiri més enllà del contenidor. Forcem-lo a
-       respectar l'amplada real disponible. */
-    input[type="date"] {
-      box-sizing: border-box;
-      min-width: 0;
-      max-width: 100%;
-      -webkit-min-logical-width: 0px !important;
+    /* Per triar "Un altre dia" NO fem servir <input type="date"> natiu:
+       el seu ample intern mínim al Safari mòbil ignora width:100% i el
+       requadre s'estira fora del contenidor (variable segons navegador,
+       impossible de fixar de manera fiable amb CSS). En lloc d'això,
+       mostrem botons amb els pocs dies vàlids (només divendres/diumenge
+       dins de les 2 properes setmanes) — mateix patró que el desplegable
+       de franja horària, també fet a mà per evitar aquest problema. */
+    .pp-date-pill {
+      padding: 0.5rem 0.9rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(196,176,138,0.4);
+      background: #fff;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #2A1A0F;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pp-date-pill:hover { border-color: rgba(226,63,46,0.4); }
+    .pp-date-pill.selected {
+      border-color: #E23F2E !important;
+      background-color: rgba(226,63,46,0.08);
+      color: #E23F2E;
     }
     .slot-btn.selected {
       border-color: #E23F2E !important;
@@ -151,7 +165,7 @@
             <button type="button" onclick="selectDeliveryDay('today')" id="pp-day-today" class="flex-1 px-4 py-2 rounded-full border text-sm font-medium transition-all">Avui</button>
             <button type="button" onclick="selectDeliveryDay('other')" id="pp-day-other" class="flex-1 px-4 py-2 rounded-full border text-sm font-medium transition-all">Un altre dia</button>
           </div>
-          <input type="date" id="pp-delivery-date" class="hidden w-full bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none mb-2 focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]" onchange="onDeliveryDateChange(this.value)">
+          <div id="pp-date-pills" class="hidden flex flex-wrap gap-2 mb-2"></div>
           <div class="relative">
             <button type="button" id="pp-time-select-btn" onclick="_ppToggleTimeDropdown()"
               class="w-full flex items-center justify-between bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all cursor-pointer text-left">
@@ -253,6 +267,35 @@
       const d = new Date(`${fromDateStr}T00:00:00`);
       do { d.setDate(d.getDate() + 1); } while (!(d.getDay() === 5 || d.getDay() === 0));
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    // Data local (no UTC) en format YYYY-MM-DD — toISOString() pot fer
+    // saltar la data un dia enrere a la nit segons el fus horari.
+    function localISO(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    const PP_DAY_SHORT = { 5: 'Div', 0: 'Diu' };
+    const PP_MONTH_SHORT = ['Gen', 'Feb', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des'];
+    // Mostra els botons de dia vàlid (dins la finestra que ja fèiem servir
+    // per al min/max del <input type="date"> — d'aquí a demà fins a 13
+    // dies vista). Com que només s'accepten divendres i diumenge, la
+    // llista mai té més de 3-4 dates.
+    function renderDatePills() {
+      const box = document.getElementById('pp-date-pills');
+      if (!box) return;
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      const maxDate = new Date(); maxDate.setDate(maxDate.getDate() + 13);
+      const cursor = new Date(tomorrow);
+      const dates = [];
+      while (cursor <= maxDate) {
+        if (cursor.getDay() === 5 || cursor.getDay() === 0) {
+          dates.push({ iso: localISO(cursor), day: cursor.getDate(), month: cursor.getMonth(), dow: cursor.getDay() });
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      box.innerHTML = dates.map(d => `
+        <button type="button" class="pp-date-pill${d.iso === ppDeliveryDate ? ' selected' : ''}" onclick="onDeliveryDateChange('${d.iso}')">
+          ${PP_DAY_SHORT[d.dow]} ${d.day} ${PP_MONTH_SHORT[d.month]}
+        </button>`).join('');
     }
     let ppDeliveryDate = todayISO();
 
@@ -378,7 +421,7 @@
     function selectDeliveryDay(which) {
       const todayBtn  = document.getElementById('pp-day-today');
       const otherBtn  = document.getElementById('pp-day-other');
-      const dateInput = document.getElementById('pp-delivery-date');
+      const pillsBox  = document.getElementById('pp-date-pills');
       todayBtn.classList.toggle('hidden', !isValidOrderDay(todayISO()));
       // "Avui" no és seleccionable si avui no és divendres ni diumenge.
       const isToday = which === 'today' && isValidOrderDay(todayISO());
@@ -393,19 +436,15 @@
       ppSelectedTime = null;
       _ppResetTimeLabel();
       if (isToday) {
-        dateInput.classList.add('hidden');
+        pillsBox.classList.add('hidden');
         ppDeliveryDate = todayISO();
       } else {
         const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-        const maxDate  = new Date(); maxDate.setDate(maxDate.getDate() + 13);
-        let minStr = tomorrow.toISOString().split('T')[0];
+        let minStr = localISO(tomorrow);
         if (!isValidOrderDay(minStr)) minStr = nextValidDate(minStr);
-        dateInput.min = minStr;
-        dateInput.max = maxDate.toISOString().split('T')[0];
-        dateInput.classList.remove('hidden');
-        if (!dateInput.value || !isValidOrderDay(dateInput.value)) dateInput.value = minStr;
-        dateInput.focus();
-        ppDeliveryDate = dateInput.value;
+        if (!ppDeliveryDate || !isValidOrderDay(ppDeliveryDate) || ppDeliveryDate < minStr) ppDeliveryDate = minStr;
+        pillsBox.classList.remove('hidden');
+        renderDatePills();
       }
       loadSlotCounts().then(renderTimeSlots);
       validateForm();
@@ -415,12 +454,12 @@
       if (!val) return;
       if (!isValidOrderDay(val)) {
         val = nextValidDate(val);
-        document.getElementById('pp-delivery-date').value = val;
         alert('Només fem comandes per divendres i diumenge. T\'hem seleccionat el proper dia disponible.');
       }
       ppDeliveryDate = val;
       ppSelectedTime = null;
       _ppResetTimeLabel();
+      renderDatePills();
       loadSlotCounts().then(renderTimeSlots);
       validateForm();
     }
