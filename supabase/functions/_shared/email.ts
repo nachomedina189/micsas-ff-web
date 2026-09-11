@@ -11,7 +11,7 @@
 // — sempre es fa un try/catch i només es registra l'error a la consola.
 
 const RESEND_API_URL = "https://api.resend.com/emails";
-const FROM_ADDRESS = "micsas.ff <pedidos@micsasff.com>";
+const FROM_ADDRESS = "micsas.ff <pedidos@send.micsasff.com>";
 const INSTAGRAM_URL = "https://instagram.com/micsas.ff";
 const LOGO_URL = "https://micsasff.com/logo%20micsas.png";
 
