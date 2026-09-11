@@ -4,7 +4,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 // Email del propietari del negoci que ha de rebre l'avís de cada nova
 // petició de pressupost (formulari "Demana el teu pressupost" a
 // micsas-events.html).
-const CLIENT_NOTIFICATION_EMAIL = "polbonastre@gmail.com";
+const CLIENT_NOTIFICATION_EMAIL = "micsas.ff@gmail.com";
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Micsas FF <onboarding@resend.dev>",
+          from: "micsas.ff <events@send.micsasff.com>",
           to: [CLIENT_NOTIFICATION_EMAIL],
           subject: `Nova petició de pressupost — ${nom}`,
           html: `
