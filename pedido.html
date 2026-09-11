@@ -1006,21 +1006,34 @@
     }
     let cfDeliveryDate = todayISO();
     let _slotCounts = {};
+    // Aforo diari màxim (suma de totes les franges d'un mateix dia). Quan
+    // s'hi arriba, es bloqueja tota nova comanda per aquell dia — no és
+    // que una franja concreta estigui plena, és que ja no es fan més
+    // pizzes. El servidor (create_order_with_slot) ho torna a comprovar
+    // sempre igualment: això només evita que el client arribi a intentar-ho.
+    const DAILY_PIZZA_CAP = 45;
+    let _cfDailySoldOut = false;
 
     async function loadSlotCountsFor(date) {
       _slotCounts = {};
+      _cfDailySoldOut = false;
       if (!window.supabase) return;
       // get_slot_capacity és una funció agregada (no exposa dades del
       // client) accessible per a qualsevol usuari, a diferència d'un
       // select directe a "orders" — bloquejat per RLS per a un client
       // anònim, cosa que deixava _slotCounts sempre buit i cap franja es
       // marcava mai com a completa.
-      const { data } = await window.supabase.rpc('get_slot_capacity', { p_delivery_date: date });
-      if (!data) return;
-      data.forEach(row => {
-        if (!row.slot_time) return;
-        _slotCounts[row.slot_time] = row.pizza_count || 0;
-      });
+      const [{ data }, { data: dailyTotal }] = await Promise.all([
+        window.supabase.rpc('get_slot_capacity', { p_delivery_date: date }),
+        window.supabase.rpc('get_daily_pizza_count', { p_delivery_date: date }),
+      ]);
+      if (data) {
+        data.forEach(row => {
+          if (!row.slot_time) return;
+          _slotCounts[row.slot_time] = row.pizza_count || 0;
+        });
+      }
+      _cfDailySoldOut = typeof dailyTotal === 'number' && dailyTotal >= DAILY_PIZZA_CAP;
     }
 
     function updateDayAvailability() {
@@ -1081,6 +1094,18 @@
     const ASAP_LEAD_MIN = 20;
 
     function renderTimeSlots() {
+      const container = document.getElementById('cf-time-slots');
+      if (!container) return;
+      if (_cfDailySoldOut) {
+        container.innerHTML = `
+          <div class="flex flex-col items-center text-center gap-2 py-6 px-5 rounded-2xl border border-[#E23F2E]/30 bg-[#E23F2E]/5">
+            <iconify-icon icon="solar:pizza-slice-linear" width="28" style="color:#E23F2E;"></iconify-icon>
+            <p class="font-['League_Spartan',sans-serif] font-semibold text-[#2A1A0F]">Pizzes exhaurides per avui</p>
+            <p class="text-sm text-[#5A3E28]">Hem arribat al límit de pizzes que podem preparar avui. Gràcies per la paciència — torna un altre dia!</p>
+          </div>`;
+        window._cfEarliestSlot = null;
+        return;
+      }
       const isToday = cfDeliveryDate === todayISO();
       const realSlots = [];
       for (let h = 20; h <= 23; h++) {
@@ -1099,8 +1124,6 @@
       // botó "Com més aviat millor" — millor amagar-lo que deixar que es
       // trenqui guardant el text literal com si fos una hora real.
       const slots = (isToday && earliestSlot) ? ['Com més aviat millor', ...realSlots] : realSlots;
-      const container = document.getElementById('cf-time-slots');
-      if (!container) return;
       container.innerHTML = slots.map((s) => {
         const isAsap = s === 'Com més aviat millor';
         const isPast = isToday && !isAsap && (() => { const [h, m] = s.split(':').map(Number); return h * 60 + m <= nowMins; })();

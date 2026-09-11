@@ -309,6 +309,11 @@
     }
 
     let _slotCounts = {};
+    // Aforo diari màxim (suma de totes les franges d'un mateix dia). El
+    // servidor (create_order_with_slot) ho torna a comprovar sempre
+    // igualment — això només evita que el client arribi a intentar-ho.
+    const DAILY_PIZZA_CAP = 45;
+    let _ppDailySoldOut = false;
 
     async function loadSlotCounts() {
       if (!window.supabase) return;
@@ -317,13 +322,18 @@
       // select directe a "orders" — bloquejat per RLS per a un client
       // anònim, cosa que deixava _slotCounts sempre buit i cap franja es
       // marcava mai com a completa.
-      const { data } = await window.supabase.rpc('get_slot_capacity', { p_delivery_date: ppDeliveryDate });
+      const [{ data }, { data: dailyTotal }] = await Promise.all([
+        window.supabase.rpc('get_slot_capacity', { p_delivery_date: ppDeliveryDate }),
+        window.supabase.rpc('get_daily_pizza_count', { p_delivery_date: ppDeliveryDate }),
+      ]);
       _slotCounts = {};
-      if (!data) return;
-      data.forEach(row => {
-        if (!row.slot_time) return;
-        _slotCounts[row.slot_time] = row.pizza_count || 0;
-      });
+      if (data) {
+        data.forEach(row => {
+          if (!row.slot_time) return;
+          _slotCounts[row.slot_time] = row.pizza_count || 0;
+        });
+      }
+      _ppDailySoldOut = typeof dailyTotal === 'number' && dailyTotal >= DAILY_PIZZA_CAP;
     }
 
     // Marge mínim (minuts) abans de poder oferir una franja com "Com més
@@ -333,7 +343,7 @@
     const ASAP_LEAD_MIN = 20;
 
     function resolveAsap() {
-      if (ppDeliveryDate !== todayISO()) return null;
+      if (ppDeliveryDate !== todayISO() || _ppDailySoldOut) return null;
       const now = new Date();
       const nowMins = now.getHours() * 60 + now.getMinutes();
       for (let i = 1; i < PP_SLOTS.length; i++) {
@@ -352,6 +362,11 @@
     let ppTimeOptions = [];
 
     function renderTimeSlots() {
+      if (_ppDailySoldOut) {
+        ppTimeOptions = [{ value: '', label: 'Pizzes exhaurides per aquest dia — torna un altre dia', disabled: true }];
+        _ppRenderTimeDropdown();
+        return;
+      }
       const isToday = ppDeliveryDate === todayISO();
       const asap = resolveAsap();
       const options = [];

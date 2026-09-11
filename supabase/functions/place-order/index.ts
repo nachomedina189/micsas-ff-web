@@ -183,6 +183,17 @@ Deno.serve(async (req) => {
       p_delivery_date:  deliveryDate,
       p_slots:          REAL_SLOTS,
     });
+    // Aforo diari exhaurit (45 pizzes/dia): create_order_with_slot llança
+    // una excepció amb el prefix "DAILY_SOLDOUT" en lloc de simplement no
+    // retornar franja, perquè el missatge sigui diferent de "no queden
+    // franges" — aquí no és que aquella hora estigui plena, és que ja no
+    // es fan més pizzes avui.
+    if (rpcErr && rpcErr.message?.includes("DAILY_SOLDOUT")) {
+      return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     if (rpcErr) throw rpcErr;
 
     const orderRow = rpcRows?.[0] as { order_id: string; slot_time: string | null } | undefined;
