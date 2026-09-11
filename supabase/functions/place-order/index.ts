@@ -1,6 +1,26 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
+// Catàleg de preus real — mateixos ids/preus que l'objecte MENU a
+// pedido.html. El client NOMÉS envia id + quantitat + notes de cada
+// article; el preu, el subtotal, el total i el recompte de pizzes es
+// calculen SEMPRE aquí, mai a partir del que digui la petició — sense
+// això, qualsevol (DevTools, o una crida directa a la funció) podia
+// enviar el total/preu per article que volgués i la comanda es desava
+// (i, en pagament amb targeta, es cobrava) a aquell import fabricat.
+const CATALOG: Record<string, { name: string; price: number }> = {
+  "margherita-1889":      { name: "Margherita 1889",      price: 9 },
+  "marinara-olivata":     { name: "Marinara Olivata",     price: 8 },
+  "bianca-suprema":       { name: "Bianca Suprema",       price: 11 },
+  "sottobosco":           { name: "Sottobosco",           price: 11 },
+  "carbonara":            { name: "Carbonara",            price: 14.5 },
+  "inferno-di-nduja":     { name: "Inferno di 'Nduja",    price: 13 },
+  "caramella-affumicata": { name: "Caramella Affumicata", price: 13 },
+  "antidiavola":          { name: "Antidiavola",          price: 13 },
+  "nutellina":            { name: "Nutellina",            price: 13 },
+  "d3":                   { name: "Cervesa artesana",     price: 3 },
+};
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
@@ -18,11 +38,46 @@ Deno.serve(async (req) => {
       name, email, phone,
       street, floor, postalCode, city, delivNotes, finalNotes,
       paymentMethod, paymentStatus,
-      total, subtotal, tipAmount,
+      tipAmount,
       authUserId,
-      slotTime, pizzaCount, deliveryDate,
+      slotTime, deliveryDate,
       items,
     } = await req.json();
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return new Response(JSON.stringify({ error: "La comanda no té cap article." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let subtotal = 0;
+    let pizzaCount = 0;
+    const resolvedItems: { product_name: string; unit_price: number; quantity: number; notes: string | null }[] = [];
+    for (const it of items) {
+      const catalogItem = CATALOG[it?.id];
+      const quantity = Number(it?.quantity);
+      if (!catalogItem || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
+        return new Response(JSON.stringify({ error: "Article no vàlid a la comanda." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      subtotal += catalogItem.price * quantity;
+      if (!String(it.id).startsWith("d")) pizzaCount += quantity;
+      resolvedItems.push({
+        product_name: catalogItem.name,
+        unit_price:   catalogItem.price,
+        quantity,
+        notes:        it.notes ?? null,
+      });
+    }
+    subtotal = Math.round(subtotal * 100) / 100;
+    // La propina és l'única part de l'import que de veritat decideix el
+    // client — es manté, però mai negativa (rebaixaria el total per sota
+    // del subtotal real).
+    const safeTip = Math.max(0, Number(tipAmount) || 0);
+    const total = Math.round((subtotal + safeTip) * 100) / 100;
 
     // Mateixes franges de 15 min que pedido.html / pre-pedido.html (20:00–23:30).
     const REAL_SLOTS: string[] = (() => {
@@ -111,11 +166,11 @@ Deno.serve(async (req) => {
       p_payment_status: paymentStatus ?? "pending",
       p_subtotal:       subtotal,
       p_delivery_fee:   0,
-      p_tip_amount:     tipAmount ?? 0,
+      p_tip_amount:     safeTip,
       p_total:          total,
       p_notes:          finalNotes ?? null,
       p_requested_slot: slotTime ?? null,
-      p_pizza_count:    pizzaCount ?? 0,
+      p_pizza_count:    pizzaCount,
       p_delivery_date:  deliveryDate,
       p_slots:          REAL_SLOTS,
     });
@@ -130,22 +185,18 @@ Deno.serve(async (req) => {
     }
     if (!orderRow) throw new Error("create_order_with_slot no ha retornat cap comanda");
 
-    // Insert order items
-    if (items && items.length > 0) {
-      const { error: itemsErr } = await sb.from("order_items").insert(
-        items.map((it: { product_name: string; unit_price: number; quantity: number; notes: string | null }) => ({
-          order_id:     orderRow.order_id,
-          product_id:   null,
-          product_name: it.product_name,
-          unit_price:   it.unit_price,
-          quantity:     it.quantity,
-          notes:        it.notes ?? null,
-        }))
-      );
-      if (itemsErr) throw itemsErr;
-    }
+    // Insert order items — sempre amb els valors RECALCULATS (resolvedItems),
+    // mai amb el que hagués enviat el client.
+    const { error: itemsErr } = await sb.from("order_items").insert(
+      resolvedItems.map((it) => ({
+        order_id:   orderRow.order_id,
+        product_id: null,
+        ...it,
+      }))
+    );
+    if (itemsErr) throw itemsErr;
 
-    return new Response(JSON.stringify({ orderId: orderRow.order_id, slotTime: orderRow.slot_time }), {
+    return new Response(JSON.stringify({ orderId: orderRow.order_id, slotTime: orderRow.slot_time, total }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: unknown) {

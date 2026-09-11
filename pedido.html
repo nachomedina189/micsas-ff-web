@@ -1826,13 +1826,14 @@
       // validation happen server-side in the place-order Edge Function
       // (service_role, bypasses RLS) so the 6-pizzas-per-slot cap can't be
       // bypassed by calling the client insert path directly.
+      // Només enviem id/quantitat/notes de cada article — el preu i el
+      // recompte de pizzes els recalcula sempre place-order a partir del
+      // catàleg real del servidor, no es fien mai del que digui el client.
       const items = cart.map(it => ({
-        product_name: it.name,
-        unit_price:   it.price,
-        quantity:     it.qty,
-        notes:        it.note || null,
+        id:       it.id,
+        quantity: it.qty,
+        notes:    it.note || null,
       }));
-      const pizzaCount = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
 
       const res = await fetch(PLACE_ORDER_FN_URL, {
         method: 'POST',
@@ -1842,10 +1843,9 @@
           street: d.street, floor: d.floor, postalCode: d.postalCode, city: d.city,
           delivNotes: d.delivNotes, finalNotes: d.finalNotes,
           paymentMethod: d.paymentMethod, paymentStatus,
-          total: d.total, subtotal: d.subtotal, tipAmount: d.tipAmount,
+          tipAmount: d.tipAmount,
           authUserId: currentUser ? currentUser.id : null,
           slotTime: cfSelectedTime || null,
-          pizzaCount,
           deliveryDate: d.deliveryDate || todayISO(),
           items,
         }),
@@ -1869,10 +1869,13 @@
     // la comanda ja existeix, només falta que el webhook la confirmi.
     async function createPendingOrderAndIntent(totalEuros) {
       const orderRes = await _saveOrderToSupabase({ ..._pendingOrderData }, 'processing');
+      // L'import a cobrar el determina sempre create-payment-intent a partir
+      // del total real de la comanda ja desada (orderId) — no fem servir
+      // totalEuros per calcular-lo, només com a referència local d'UI.
       const res = await fetch(EDGE_FN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ amount: Math.round(totalEuros * 100), currency: 'eur', orderId: orderRes.orderId }),
+        body: JSON.stringify({ currency: 'eur', orderId: orderRes.orderId }),
       });
       const json = await res.json();
       if (json.error) throw new Error(json.error);
