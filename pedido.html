@@ -675,7 +675,7 @@
       classics: [
         { id:'carbonara',             name:'Carbonara',             desc:'Fior di latte, Parmigiano, Guanciale, crema de carbonara',               ingredients:['Fior di latte artesana Il Grande Desiderio','Formatge Parmigiano (curat 24 mesos)','Alfàbrega fresca','Crema de carbonara','Guanciale',"Oli AOVE intens d'alfàbrega"], img:'images/carbonara.webp', price:14.5 },
         { id:'inferno-di-nduja',      name:"Inferno di 'Nduja",     desc:"Sobrassada picant (Nduja), Gorgonzola, Fior di latte, Parmigiano",       ingredients:["Sobrassada picant (Nduja)",'Gorgonzola picant','Fior di latte artesana','Parmigiano (curat 24 mesos)','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'images/inferno-di-nduja.webp', price:13 },
-        { id:'caramella-affumicata',  name:'Caramella Affumicata',  desc:'Tomàquet datterino, Provola fumada, Caciocavallo, Fior di latte',         ingredients:['Tomàquet datterino caramella','Formatge fumat (Provola)','Fior di latte artesana','Alfàbrega fresca en cru','Caciocavallo',"Oli d'oliva verge extra"], img:'images/caramella-affumicata.webp', price:13 },
+        { id:'caramella-affumicata',  name:'Caramella Affumicata',  desc:'Tomàquet datterino, Provola fumada, Caciocavallo, Fior di latte',         ingredients:['Tomàquet datterino caramella','Formatge fumat (Provola)','Fior di latte artesana','Alfàbrega fresca en cru','Caciocavallo',"Oli d'oliva verge extra"], img:'images/caramella-affumicata.webp', price:13, available:false },
         { id:'antidiavola',           name:'Antidiavola',           desc:'Tomàquet San Marzano DOP, Xoriço ibèric Joselito, Fior di latte',         ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Xoriço ibèric de gla Joselito','Alfàbrega fresca','Parmigiano (curat 24 mesos)',"Oli d'oliva verge extra"], img:'images/antidiavola.webp', price:13 },
         { id:'nutellina',             name:'Nutellina',             desc:'Nutella, Festuc de Sicília DOP',                                          ingredients:['Nutella (xocolata i avellanes)','Festuc de Sicília DOP'],                                                                 img:'images/nutellina.webp', price:13 },
       ],
@@ -694,19 +694,25 @@
     function getCartItem(id) { return cart.find(i => i.id === id); }
 
     function menuCard(item) {
+      // Article temporalment no disponible (ex. Caramella Affumicata) — es
+      // mostra igual que a la Carta (menu.html): imatge en gris, sense
+      // poder-hi clicar, amb l'avís "Tornarà aviat" en lloc del preu.
+      const unavailable = item.available === false;
       const imgHtml = item.img
-        ? `<img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover" loading="lazy" width="800" height="800">`
+        ? `<img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover${unavailable ? ' grayscale brightness-90' : ''}" loading="lazy" width="800" height="800">`
         : `<div class="w-full h-full flex items-center justify-center bg-[#E6D5B0]"><iconify-icon icon="solar:pizza-slice-bold-duotone" width="48" style="color:#C4B08A;opacity:0.5;"></iconify-icon></div>`;
       const priceStr = item.price.toFixed(2).replace('.', ',') + ' €';
       return `
-        <div class="cursor-pointer flex flex-row items-stretch rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden min-h-[180px] lg:min-h-[200px]" data-pizza-row="${item.id}" data-pizza-card onclick="openItemModal('${item.id}')">
+        <div class="${unavailable ? 'cursor-default opacity-80' : 'cursor-pointer hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5'} flex flex-row items-stretch rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm transition-all duration-200 overflow-hidden min-h-[180px] lg:min-h-[200px]" data-pizza-row="${item.id}" data-pizza-card ${unavailable ? '' : `onclick="openItemModal('${item.id}')"`}>
           <div class="flex-1 min-w-0 p-6 lg:p-7 flex flex-col justify-between">
             <div>
               <span class="font-['League_Spartan',sans-serif] font-black text-lg lg:text-xl tracking-tight text-[#2A1A0F] uppercase block mb-2">${item.name}</span>
               <span class="text-base lg:text-base font-medium text-[#5A3E28] leading-relaxed block">${item.desc}</span>
             </div>
             <div class="flex items-center justify-between mt-4">
-              <span class="font-medium text-base lg:text-base text-[#E23F2E]">${priceStr}</span>
+              ${unavailable
+                ? `<span class="font-bold text-sm uppercase tracking-wide text-[#9B8A72]">Tornarà aviat</span>`
+                : `<span class="font-medium text-base lg:text-base text-[#E23F2E]">${priceStr}</span>`}
             </div>
           </div>
           <div class="w-[32%] sm:w-[48%] shrink-0">${imgHtml}</div>
@@ -2267,7 +2273,7 @@
 
     function openItemModal(id) {
       const item = [...MENU.casa, ...MENU.classics].find(i => i.id === id);
-      if (!item) return;
+      if (!item || item.available === false) return;
       _modalItemId = id;
 
       document.getElementById('item-modal-title').textContent = item.name.toUpperCase();

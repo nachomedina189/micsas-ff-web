@@ -8,14 +8,15 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 // això, qualsevol (DevTools, o una crida directa a la funció) podia
 // enviar el total/preu per article que volgués i la comanda es desava
 // (i, en pagament amb targeta, es cobrava) a aquell import fabricat.
-const CATALOG: Record<string, { name: string; price: number }> = {
+const CATALOG: Record<string, { name: string; price: number; available?: boolean }> = {
   "margherita-1889":      { name: "Margherita 1889",      price: 9 },
   "marinara-olivata":     { name: "Marinara Olivata",     price: 8 },
   "bianca-suprema":       { name: "Bianca Suprema",       price: 11 },
   "sottobosco":           { name: "Sottobosco",           price: 11 },
   "carbonara":            { name: "Carbonara",            price: 14.5 },
   "inferno-di-nduja":     { name: "Inferno di 'Nduja",    price: 13 },
-  "caramella-affumicata": { name: "Caramella Affumicata", price: 13 },
+  // Temporalment fora de carta ("Tornarà aviat" a la Carta i a pedido.html)
+  "caramella-affumicata": { name: "Caramella Affumicata", price: 13, available: false },
   "antidiavola":          { name: "Antidiavola",          price: 13 },
   "nutellina":            { name: "Nutellina",            price: 13 },
   "d3":                   { name: "Cervesa artesana",     price: 3 },
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
     for (const it of items) {
       const catalogItem = CATALOG[it?.id];
       const quantity = Number(it?.quantity);
-      if (!catalogItem || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
+      if (!catalogItem || catalogItem.available === false || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
         return new Response(JSON.stringify({ error: "Article no vàlid a la comanda." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
