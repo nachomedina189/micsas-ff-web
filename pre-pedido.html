@@ -1210,8 +1210,8 @@
     // confirmació. NOMÉS aquesta adreça exacta queda exempta del requisit
     // de Matadepera — no s'obre tot un codi postal ni una ciutat sencera.
     const PP_PICKUP_POINTS = [
-      // Q8 Gasolinera, Av. del Tèxtil 55, 08223 Terrassa.
-      { streetContains: 'textil', postalCode: '08223', cityNormalized: 'terrassa' },
+      // Àrea de Serveis Tiempo Libre Q8, Ctra. de Matadepera, 08225 Terrassa.
+      { streetContains: 'matadepera', postalCode: '08225', cityNormalized: 'terrassa' },
     ];
     function _ppMatchesPickupPoint(postalCode, city, streetText) {
       const street = _ppNormalize(streetText || '');
@@ -1421,14 +1421,21 @@
         window._ppLng = place.location ? place.location.lng() : null;
 
         ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
-        const inMatadepera = _ppAddressIsInMatadepera(comps) || _ppAddressNearMatadepera(window._ppLat, window._ppLng);
-        const isPickupPoint = !inMatadepera && _ppMatchesPickupPoint(
+        // Es comprova ABANS que res i sense dependre del resultat del check
+        // de Matadepera: alguns punts de recollida (ex. la Ctra. de
+        // Matadepera) cauen dins del radi de proximitat a Matadepera però
+        // tenen un codi postal diferent (08225, no 08230) — si es deixés
+        // córrer primer el check de Matadepera, aquest cas acabaria
+        // consultant delivery_zones amb un CP que no hi és i es rebutjaria
+        // per error.
+        const isPickupPoint = _ppMatchesPickupPoint(
           window._ppExtractedZip, window._ppExtractedCity, route || place.formattedAddress
         );
+        const inMatadepera = _ppAddressIsInMatadepera(comps) || _ppAddressNearMatadepera(window._ppLat, window._ppLng);
         if (isPickupPoint) {
-          // Adreça d'un punt de recollida conegut (ex. la gasolinera Q8 a
-          // Terrassa) — vàlida encara que no sigui Matadepera, sense tocar
-          // delivery_zones ni obrir cap codi postal sencer.
+          // Adreça d'un punt de recollida conegut — vàlida encara que no
+          // sigui Matadepera, sense tocar delivery_zones ni obrir cap codi
+          // postal sencer.
           _ppShowZoneOk(window._ppExtractedZip);
         } else if (!inMatadepera) {
           // Ni el text diu "Matadepera" ni el punt cau a prop del poble —
