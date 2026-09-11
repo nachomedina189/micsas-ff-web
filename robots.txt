@@ -3,4 +3,4 @@ Allow: /
 Disallow: /cocina.html
 Disallow: /compte.html
 
-Sitemap: https://micsasff.com/sitemap.xml
+Sitemap: https://www.micsasff.com/sitemap.xml
