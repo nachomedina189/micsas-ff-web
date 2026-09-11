@@ -341,7 +341,7 @@
 
   <!-- ════ CHECKOUT FULLSCREEN ════ -->
   <div id="checkout-fullscreen" role="dialog" aria-modal="true" aria-label="Procés de comanda"
-       class="fixed inset-0 z-[700] bg-[#DDD0B3] flex items-start sm:items-center justify-center p-0 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300 hidden">
+       class="fixed inset-0 z-[700] bg-[#E6D5B0] flex items-start sm:items-center justify-center p-0 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300 hidden">
 
     <!-- Card wrapper -->
     <div class="relative w-full sm:max-w-lg bg-[#F2E6CE] sm:rounded-2xl sm:shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[92dvh] overflow-hidden">
@@ -599,12 +599,12 @@
     </div>
 
     <!-- Success screen -->
-    <div id="cf-success" class="hidden flex-1 flex-col bg-[#EFE5D1]" role="status" aria-live="polite">
+    <div id="cf-success" class="hidden flex-1 flex-col bg-[#F2E6CE]" role="status" aria-live="polite">
 
       <!-- 1. Header -->
       <div class="flex items-center gap-3 px-5 pt-5 pb-1 shrink-0">
         <button onclick="location.href='carta.html';" aria-label="Tornar a l'inici"
-          class="w-10 h-10 flex items-center justify-center rounded-full text-[#2D241D] hover:bg-[#E2D3B4]/50 transition-colors">
+          class="w-10 h-10 flex items-center justify-center rounded-full text-[#2D241D] hover:bg-[#E6D5B0]/50 transition-colors">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M15 18l-6-6 6-6"/>
           </svg>
@@ -619,7 +619,7 @@
           <!-- TODO: vídeo / transición -->
         </div>
         <div class="w-24 h-24 rounded-full bg-[#D24A33] flex items-center justify-center mt-6 mb-6" role="img" aria-label="Comanda confirmada">
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#EFE5D1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#F2E6CE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5 13l4 4L19 7"/>
           </svg>
         </div>
@@ -631,7 +631,7 @@
         <p class="text-sm text-[#8C7A58] mb-7 max-w-xs">S'està preparant la teva comanda amb carinyo.</p>
 
         <!-- 5. Caixa d'estimació -->
-        <div class="w-full max-w-sm bg-[#F6EFDD] rounded-2xl px-5 py-4 mb-8">
+        <div class="w-full max-w-sm bg-[#F2E6CE] rounded-2xl px-5 py-4 mb-8">
           <p id="cf-success-estimate-label" class="text-[11px] font-bold uppercase tracking-widest text-[#8C7A58] mb-1">Arriba aprox.</p>
           <!-- TODO: n8n tiempo real -->
           <p id="cf-success-estimate" class="text-lg font-semibold text-[#2D241D]"></p>
@@ -643,12 +643,12 @@
 
         <!-- 7. CTA Instagram (substitueix el bloc de contacte anterior) -->
         <a id="cf-instagram-cta" href="#" target="_blank" rel="noopener noreferrer"
-          class="w-full max-w-sm bg-[#F6EFDD] rounded-2xl px-5 py-4 mb-2 flex items-center gap-3 text-left hover:bg-[#EFE0C5] transition-colors">
+          class="w-full max-w-sm bg-[#F2E6CE] rounded-2xl px-5 py-4 mb-2 flex items-center gap-3 text-left hover:bg-[#E6D5B0] transition-colors">
           <span class="w-10 h-10 rounded-full bg-[#D24A33] flex items-center justify-center shrink-0" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EFE5D1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2E6CE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="5"/>
               <circle cx="12" cy="12" r="4"/>
-              <circle cx="17.3" cy="6.7" r="0.6" fill="#EFE5D1" stroke="none"/>
+              <circle cx="17.3" cy="6.7" r="0.6" fill="#F2E6CE" stroke="none"/>
             </svg>
           </span>
           <span>
@@ -662,7 +662,7 @@
       <!-- 8. Botó principal -->
       <div class="px-6 pb-6 shrink-0">
         <button onclick="location.href='carta.html';"
-          class="w-full py-3.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#EFE5D1] bg-[#2D241D] transition-all hover:bg-[#1c1712]">
+          class="w-full py-3.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#2D241D] transition-all hover:bg-[#1c1712]">
           Tornar a l'inici
         </button>
       </div>
@@ -728,7 +728,7 @@
         : `<div class="w-full h-full flex items-center justify-center bg-[#E6D5B0]"><iconify-icon icon="solar:pizza-slice-bold-duotone" width="48" style="color:#C4B08A;opacity:0.5;"></iconify-icon></div>`;
       const priceStr = item.price.toFixed(2).replace('.', ',') + ' €';
       return `
-        <div class="${unavailable ? 'cursor-default opacity-80' : 'cursor-pointer hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5'} flex flex-row items-stretch rounded-2xl border border-[#C4B08A]/30 bg-[#F7EDD8] shadow-sm transition-all duration-200 overflow-hidden min-h-[180px] lg:min-h-[200px]" data-pizza-row="${item.id}" data-pizza-card ${unavailable ? '' : `onclick="openItemModal('${item.id}')"`}>
+        <div class="${unavailable ? 'cursor-default opacity-80' : 'cursor-pointer hover:shadow-md hover:border-[#C4B08A]/70 hover:-translate-y-0.5'} flex flex-row items-stretch rounded-2xl border border-[#C4B08A]/30 bg-[#F2E6CE] shadow-sm transition-all duration-200 overflow-hidden min-h-[180px] lg:min-h-[200px]" data-pizza-row="${item.id}" data-pizza-card ${unavailable ? '' : `onclick="openItemModal('${item.id}')"`}>
           <div class="flex-1 min-w-0 p-6 lg:p-7 flex flex-col justify-between">
             <div>
               <span class="font-['League_Spartan',sans-serif] font-black text-lg lg:text-xl tracking-tight text-[#2A1A0F] uppercase block mb-2">${item.name}</span>
@@ -1139,13 +1139,13 @@
       if (!container) return;
       container.innerHTML = `
         <div class="relative flex justify-between">
-          <div class="absolute top-[9px] left-0 right-0 h-0.5 bg-[#E2D3B4]"></div>
+          <div class="absolute top-[9px] left-0 right-0 h-0.5 bg-[#E6D5B0]"></div>
           ${CF_PROGRESS_STEPS.map((label, i) => {
             const stepNum = i + 1;
             const active = stepNum <= estatComanda;
             return `
               <div class="relative z-10 flex flex-col items-center gap-2 flex-1" role="listitem" aria-current="${stepNum === estatComanda ? 'step' : 'false'}">
-                <span class="w-[18px] h-[18px] rounded-full border-2 border-[#EFE5D1] ${active ? 'bg-[#D24A33]' : 'bg-[#E2D3B4]'}"></span>
+                <span class="w-[18px] h-[18px] rounded-full border-2 border-[#F2E6CE] ${active ? 'bg-[#D24A33]' : 'bg-[#E6D5B0]'}"></span>
                 <span class="text-[10px] leading-tight text-center ${active ? 'font-semibold text-[#2D241D]' : 'text-[#8C7A58]'}" style="max-width:64px">${label}</span>
               </div>`;
           }).join('')}
@@ -2559,7 +2559,7 @@
 
         <div>
           <p class="text-xs font-semibold text-[#2A1A0F] uppercase tracking-widest mb-3" data-i18n="modal_rm_ingr">Vols treure algun ingredient?</p>
-          <div id="item-modal-ingredients" class="rounded-xl border border-[#C4B08A]/30 bg-[#F7EDD8] px-4 py-1"></div>
+          <div id="item-modal-ingredients" class="rounded-xl border border-[#C4B08A]/30 bg-[#F2E6CE] px-4 py-1"></div>
         </div>
 
         <div>

@@ -103,7 +103,7 @@
       background-size: 100% auto;
       background-position: center bottom;
       background-repeat: no-repeat;
-      background-color: #cdbc9e;
+      background-color: #F2E6CE;
     }
     @media (min-width: 768px) {
       main.hero-bg {
@@ -115,10 +115,10 @@
     }
   </style>
 </head>
-<body class="bg-[#DDD0B3] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased selection:bg-[#E23F2E]/20">
+<body class="bg-[#F2E6CE] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased selection:bg-[#E23F2E]/20">
 
   <!-- NAV -->
-  <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#DDD0B3]/95 backdrop-blur-md border-b border-[#C4B08A]/40 shadow-sm">
+  <nav class="sticky top-0 z-40 px-6 py-4 md:px-12 flex justify-between items-center bg-[#F2E6CE]/95 backdrop-blur-md border-b border-[#C4B08A]/40 shadow-sm">
     <a href="carta.html">
       <img src="logo micsas.png" alt="micsas" class="h-10 w-auto" style="mix-blend-mode:multiply">
     </a>
@@ -222,7 +222,7 @@
     </div><!-- /pp-card -->
   </main>
 
-  <footer class="bg-[#DDD0B3] border-t border-[#C4B08A]/40 py-6 px-6">
+  <footer class="bg-[#F2E6CE] border-t border-[#C4B08A]/40 py-6 px-6">
     <div class="max-w-3xl mx-auto flex items-center justify-center gap-3 text-xs font-light text-[#5A3E28] flex-wrap">
       <a href="cookies.html" class="hover:text-[#E23F2E] transition-colors">Cookies</a>
       <span>·</span>
@@ -552,10 +552,10 @@
   <script src="cookie-consent.js" defer></script>
 
   <!-- ════ PROFILE PANEL ════ -->
-  <div id="pp-profile-panel" class="hidden fixed inset-0 z-[820] bg-[#DDD0B3] flex flex-col md:flex-row translate-x-full transition-transform duration-300 ease-out">
+  <div id="pp-profile-panel" class="hidden fixed inset-0 z-[820] bg-[#F2E6CE] flex flex-col md:flex-row translate-x-full transition-transform duration-300 ease-out">
 
     <!-- SIDEBAR -->
-    <div class="md:w-72 shrink-0 flex flex-col bg-[#C9B89A] md:h-full border-b md:border-b-0 md:border-r border-[#C4B08A]/40">
+    <div class="md:w-72 shrink-0 flex flex-col bg-[#E6D5B0] md:h-full border-b md:border-b-0 md:border-r border-[#C4B08A]/40">
 
       <!-- Logo + close -->
       <div class="flex items-center justify-between px-6 py-5">
@@ -581,7 +581,7 @@
       <!-- Tab list -->
       <nav class="flex flex-col px-4 pb-6 gap-1">
         <button id="pp-tab-perfil" onclick="showProfileTab('perfil')"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#2A1A0F] bg-[#DDD0B3] shadow-sm transition-all font-['League_Spartan',sans-serif]">
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#2A1A0F] bg-[#F2E6CE] shadow-sm transition-all font-['League_Spartan',sans-serif]">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           El meu perfil
         </button>
@@ -594,7 +594,7 @@
     </div>
 
     <!-- CONTENT -->
-    <div class="flex-1 overflow-y-auto bg-[#DDD0B3]">
+    <div class="flex-1 overflow-y-auto bg-[#F2E6CE]">
 
       <!-- Perfil tab -->
       <div id="pp-section-perfil" class="px-6 md:px-10 py-8 max-w-xl">
@@ -822,10 +822,10 @@
         const btn = document.getElementById('pp-tab-' + t);
         const sec = document.getElementById('pp-section-' + t);
         if (t === tab) {
-          btn.classList.add('bg-[#DDD0B3]', 'text-[#2A1A0F]', 'shadow-sm');
+          btn.classList.add('bg-[#F2E6CE]', 'text-[#2A1A0F]', 'shadow-sm');
           btn.classList.remove('text-[#9B8A72]', 'bg-transparent');
         } else {
-          btn.classList.remove('bg-[#DDD0B3]', 'text-[#2A1A0F]', 'shadow-sm');
+          btn.classList.remove('bg-[#F2E6CE]', 'text-[#2A1A0F]', 'shadow-sm');
           btn.classList.add('text-[#9B8A72]');
         }
         sec.classList.toggle('hidden', t !== tab);
