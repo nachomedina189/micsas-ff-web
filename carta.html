@@ -124,35 +124,41 @@
       .flip-card-inner { transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
     <style>
-      :root { --background: #F2E6CE; --foreground: #2A1E16; --muted: #E6D5B0; --muted-foreground: #8E2A15; --primary: #E23F2E; --primary-foreground: #F2E6CE; --border: #E6D5B0; }
-      .liquid-glass { background: rgba(230, 213, 176, 0.2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(226, 63, 46, 0.15); box-shadow: 0 4px 6px rgba(42, 30, 22, 0.05); position: relative; overflow: hidden; }
-      /* Once the navbar background turns red on scroll, the logo/CTA/icons
-         (dark brown / red-orange, designed for the beige state) need to
-         switch to peach so they stay legible against #c80a07. */
+      :root { --background: #c80a07; --foreground: #F2E6CE; --muted: #E23F2E; --muted-foreground: #E6D5B0; --primary: #F2E6CE; --primary-foreground: #c80a07; --border: #F2E6CE; }
+      .liquid-glass { background: rgba(200, 10, 7, 0.2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(242, 230, 206, 0.15); box-shadow: 0 4px 6px rgba(42, 30, 22, 0.05); position: relative; overflow: hidden; }
+      /* Colors invertits (2026-09): el vermell ara és el color de fons
+         dominant i el crema és l'accent — al contrari que abans. Un cop la
+         navbar es torna BEIGE en fer scroll (abans es tornava vermella), el
+         logo/CTA/icones (ara de color crema per defecte, pensats per al
+         nou fons vermell) han de tornar al seu to fosc/vermell perquè es
+         continuïn veient bé sobre el nou fons clar #F2E6CE. */
       #navbar.nav-scrolled > a:first-child,
       #navbar.nav-scrolled [data-lang] {
-        color: #F2E6CE !important;
+        color: #c80a07 !important;
       }
       #navbar.nav-scrolled a[data-i18n="demana"] {
-        background: #F2E6CE !important;
-        color: #c80a07 !important;
-      }
-      #navbar.nav-scrolled a[data-i18n="demana"]:hover {
-        background: #E6D5B0 !important;
-        color: #c80a07 !important;
-      }
-      #navbar.nav-scrolled .lang-pill {
-        border-color: rgba(242, 230, 206, 0.4) !important;
-      }
-      #navbar.nav-scrolled .lang-pill > span {
-        color: rgba(242, 230, 206, 0.5) !important;
-      }
-      #navbar.nav-scrolled button[aria-label="Menú"] iconify-icon {
+        background: #c80a07 !important;
         color: #F2E6CE !important;
       }
+      #navbar.nav-scrolled a[data-i18n="demana"]:hover {
+        background: #B82A1F !important;
+        color: #F2E6CE !important;
+      }
+      #navbar.nav-scrolled .lang-pill {
+        border-color: rgba(200, 10, 7, 0.4) !important;
+      }
+      #navbar.nav-scrolled .lang-pill > span {
+        color: rgba(200, 10, 7, 0.5) !important;
+      }
+      #navbar.nav-scrolled button[aria-label="Menú"] iconify-icon {
+        color: #c80a07 !important;
+      }
+      #navbar:not(.nav-scrolled) img.nav-logo {
+        filter: invert(1) hue-rotate(303deg) saturate(0.15) brightness(1.25);
+        mix-blend-mode: screen;
+      }
       #navbar.nav-scrolled img.nav-logo {
-        filter: invert(1) hue-rotate(303deg) saturate(0.15) brightness(1.25) !important;
-        mix-blend-mode: screen !important;
+        mix-blend-mode: multiply;
       }
       /* Botó "Demana ja" centrat al header, NOMÉS mòbil: apareix amb la
          mateixa transició (mateixa corba d'easing i moviment vertical) que
@@ -223,16 +229,16 @@
 
     <!-- ──── NAV ──── -->
     <nav class="fixed top-0 w-full z-40 px-6 py-4 md:px-12 flex justify-between items-center transition-all duration-500 border-b border-transparent" id="navbar">
-      <a href="#"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto" style="mix-blend-mode:multiply"></a>
+      <a href="#"><img src="logo micsas.png" alt="micsas" class="nav-logo h-10 w-auto"></a>
 
       <div id="mobile-demana-scroll" class="md:hidden">
         <a href="pre-pedido.html" data-i18n="demana"
-          class="btn-demana inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium font-['League_Spartan',sans-serif] bg-[#F2E6CE] text-[#c80a07] hover:bg-[#E6D5B0] shadow-sm">
+          class="btn-demana inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full text-sm font-medium font-['League_Spartan',sans-serif] bg-[#c80a07] text-[#F2E6CE] hover:bg-[#B82A1F] shadow-sm">
           Demana ja! <span class="arrow">→</span>
         </a>
       </div>
 
-      <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-[var(--foreground)] backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[var(--border)]/30 bg-[#F2E6CE]/70">
+      <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-sm font-medium text-[var(--foreground)] backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-[var(--border)]/30 bg-[#c80a07]/70">
         <a href="#nosaltres" class="relative transition-opacity hover:opacity-60" data-i18n="nav_historia">
           Història
         </a>
@@ -249,52 +255,52 @@
 
       <div class="flex items-center gap-3">
         <div class="lang-pill hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#C4B08A]/60 text-sm">
-          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+          <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#F2E6CE">CA</button>
           <span class="text-[#C4B08A]/60 select-none">|</span>
-          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+          <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#E6D5B0">ES</button>
         </div>
-        <a href="pre-pedido.html" class="hidden md:flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm hover:bg-[#B82A1F] transition-all" data-i18n="demana">
+        <a href="pre-pedido.html" class="hidden md:flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm hover:bg-[#E6D5B0] transition-all" data-i18n="demana">
           Demana ja! →
         </a>
-        <button class="md:hidden p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors" onclick="toggleMobileMenu()" aria-label="Menú">
-          <iconify-icon icon="solar:hamburger-menu-linear" width="24" style="stroke-width:1.5; color:#2A1A0F"></iconify-icon>
+        <button class="md:hidden p-2 rounded-full hover:bg-[#F2E6CE]/10 transition-colors" onclick="toggleMobileMenu()" aria-label="Menú">
+          <iconify-icon icon="solar:hamburger-menu-linear" width="24" style="stroke-width:1.5; color:#F2E6CE"></iconify-icon>
         </button>
       </div>
     </nav>
 
     <!-- ──── MOBILE MENU ──── -->
-    <div id="mobile-menu" class="fixed inset-0 z-[550] backdrop-blur-md pt-24 px-8 pb-8 flex-col gap-8 overflow-y-auto flex bg-[#F2E6CE] opacity-0 -translate-y-3 pointer-events-none transition-all duration-300 ease-out">
-      <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 p-2 rounded-full hover:bg-[#E6D5B0]/50 transition-colors text-[#2A1A0F]">
+    <div id="mobile-menu" class="fixed inset-0 z-[550] backdrop-blur-md pt-24 px-8 pb-8 flex-col gap-8 overflow-y-auto flex bg-[#c80a07] opacity-0 -translate-y-3 pointer-events-none transition-all duration-300 ease-out">
+      <button onclick="toggleMobileMenu()" class="absolute top-6 right-6 p-2 rounded-full hover:bg-[#F2E6CE]/10 transition-colors text-[#F2E6CE]">
         <iconify-icon icon="solar:close-square-linear" width="26" style="stroke-width:1.5;"></iconify-icon>
       </button>
-      <a href="#nosaltres" onclick="toggleMobileMenu()" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#2A1A0F] block" data-i18n="nav_historia">
+      <a href="#nosaltres" onclick="toggleMobileMenu()" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#F2E6CE] block" data-i18n="nav_historia">
         Història
       </a>
-      <a href="menu.html" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#2A1A0F] block">
+      <a href="menu.html" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#F2E6CE] block">
         Carta
       </a>
-      <a href="micsas-events.html" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#2A1A0F] block">
+      <a href="micsas-events.html" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#F2E6CE] block">
         Micsas Events
       </a>
-      <a href="#shop" onclick="toggleMobileMenu()" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#2A1A0F] block">
+      <a href="#shop" onclick="toggleMobileMenu()" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl text-[#F2E6CE] block">
         Shop
       </a>
-      <a href="pre-pedido.html" class="mt-8 py-3 px-6 flex items-center justify-center gap-2 rounded-full text-[#F2E6CE] bg-[#E23F2E] font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] transition-opacity hover:opacity-90" data-i18n="demana">
+      <a href="pre-pedido.html" class="mt-8 py-3 px-6 flex items-center justify-center gap-2 rounded-full text-[#c80a07] bg-[#F2E6CE] font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] transition-opacity hover:opacity-90" data-i18n="demana">
         Demana ja! →
       </a>
     </div>
 
     <!-- ──── HERO ──── -->
-    <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-24 pb-16 bg-[#F2E6CE] overflow-hidden">
+    <header class="relative min-h-[100dvh] flex flex-col items-center text-center px-6 justify-center pt-24 pb-16 bg-[#c80a07] overflow-hidden">
       <div class="flex flex-col items-center reveal visible relative z-10">
-        <p class="hero-item hero-subtitle text-[#2A1E16] uppercase mb-6 flex items-center gap-3 font-['League_Spartan',sans-serif] text-[14px] sm:text-[16px] leading-[1.2] font-medium tracking-[0.2em]">
-          <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#2A1E16]/50"></span>
+        <p class="hero-item hero-subtitle text-[#F2E6CE] uppercase mb-6 flex items-center gap-3 font-['League_Spartan',sans-serif] text-[14px] sm:text-[16px] leading-[1.2] font-medium tracking-[0.2em]">
+          <span class="w-8 h-[1px] bg-gradient-to-r from-transparent to-[#F2E6CE]/50"></span>
           Micsas Friends &amp; Family
-          <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#2A1E16]/50"></span>
+          <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#F2E6CE]/50"></span>
         </p>
 
         <h1 class="hero-item hero-title mb-6 w-full flex items-center justify-center" aria-label="micsas" style="height:clamp(180px,38vw,360px);">
-          <img src="images/micsas-wordmark-red.png" alt="micsas" style="height:clamp(180px,38vw,360px);width:auto;">
+          <img src="images/micsas-wordmark-cream.png" alt="micsas" style="height:clamp(180px,38vw,360px);width:auto;">
         </h1>
       </div>
 
@@ -312,24 +318,24 @@
         </div>
         <!-- Secondary buttons: horizontal row -->
         <div class="hero-item hero-ctas-secondary flex flex-row items-center justify-center gap-3">
-          <a href="#shop" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[#E23F2E] bg-[#F2E6CE] hover:bg-[#E23F2E] hover:text-[#F2E6CE] border-2 border-[#E23F2E]">
+          <a href="#shop" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[#F2E6CE] bg-[#c80a07] hover:bg-[#F2E6CE] hover:text-[#c80a07] border-2 border-[#F2E6CE]">
             Shop
           </a>
-          <a href="micsas-events.html" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[#E23F2E] bg-[#F2E6CE] hover:bg-[#E23F2E] hover:text-[#F2E6CE] border-2 border-[#E23F2E]">
+          <a href="micsas-events.html" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-['League_Spartan',sans-serif] font-medium text-[14px] leading-[1.5] transition-all hover:-translate-y-0.5 text-[#F2E6CE] bg-[#c80a07] hover:bg-[#F2E6CE] hover:text-[#c80a07] border-2 border-[#F2E6CE]">
             Micsas Events
           </a>
         </div>
       </div>
 
       <!-- gradient fade to next section -->
-      <div class="absolute bottom-0 left-0 w-full h-48 md:h-64 bg-gradient-to-b from-transparent to-[#F2E6CE] pointer-events-none z-10"></div>
+      <div class="absolute bottom-0 left-0 w-full h-48 md:h-64 bg-gradient-to-b from-transparent to-[#c80a07] pointer-events-none z-10"></div>
     </header>
 
     <!-- ──── ELS BESTSELLERS ──── -->
-    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#F2E6CE]" id="les-preferides">
+    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#c80a07]" id="les-preferides">
       <div class="max-w-5xl mx-auto">
         <div class="text-center mb-16 reveal visible">
-          <h2 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl mt-3 text-[#2A1A0F]" id="les-preferides" data-i18n="bs_title">
+          <h2 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl mt-3 text-[#F2E6CE]" id="les-preferides" data-i18n="bs_title">
             Els nostres Bestsellers
           </h2>
         </div>
@@ -337,7 +343,7 @@
         <div class="flex flex-col gap-6 md:gap-8 max-w-4xl mx-auto reveal visible">
           <!-- Antidiavola -->
           <div class="flex flex-col gap-3">
-          <p class="text-sm font-light text-[#5A3E28] italic leading-relaxed">Tomàquet San Marzano, xoriço ibèric Joselito i Fior di latte. Una combinació que encén les papil·les.</p>
+          <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">Tomàquet San Marzano, xoriço ibèric Joselito i Fior di latte. Una combinació que encén les papil·les.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
               <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
@@ -351,14 +357,14 @@
                   </span>
                 </div>
               </div>
-              <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 flex flex-col items-center justify-center text-center shadow-sm">
-                <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#2A1A0F] mb-4">
+              <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#c80a07] border border-[#C4B08A]/30 p-8 flex flex-col items-center justify-center text-center shadow-sm">
+                <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#F2E6CE] mb-4">
                   Antidiavola
                 </h3>
-                <p class="text-sm md:text-base font-light text-[#5A3E28] leading-relaxed max-w-md mx-auto" data-i18n="bs_ad_desc">
+                <p class="text-sm md:text-base font-light text-[#F2E6CE] leading-relaxed max-w-md mx-auto" data-i18n="bs_ad_desc">
                   Tomàquet San Marzano DOP, Fior di latte artesana Il grande Desiderio, Xoriço ibèric de gla Joselito, Alfàbrega fresca, Formatge Parmigiano (curat 24 mesos) i Oli d'oliva verge extra Valpolicella Slow Food.
                 </p>
-                <span class="mt-6 font-medium text-lg text-[#2A1A0F]">€13</span>
+                <span class="mt-6 font-medium text-lg text-[#F2E6CE]">€13</span>
               </div>
             </div>
           </div>
@@ -366,11 +372,11 @@
 
           <!-- Inferno Di 'Nduja -->
           <div class="flex flex-col gap-3">
-          <p class="text-sm font-light text-[#5A3E28] italic leading-relaxed">Nduja picant, Gorgonzola cremós i Fior di latte. Per als que no li fan por al foc.</p>
+          <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">Nduja picant, Gorgonzola cremós i Fior di latte. Per als que no li fan por al foc.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#E23F2E]/30">
-                <div class="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#E23F2E] text-[#F2E6CE] text-[10px] md:text-xs uppercase tracking-widest font-medium z-10 whitespace-nowrap shadow-md" data-i18n="bs_recom">
+              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#F2E6CE]/30">
+                <div class="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#F2E6CE] text-[#c80a07] text-[10px] md:text-xs uppercase tracking-widest font-medium z-10 whitespace-nowrap shadow-md" data-i18n="bs_recom">
                   ⭐ La nostra recomanació
                 </div>
                 <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/3c561ade-eeb8-400d-84de-ebf32f00a736_800w.png" alt="INFERNO DI 'NDUJA" class="w-full h-full object-cover">
@@ -383,14 +389,14 @@
                   </span>
                 </div>
               </div>
-              <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#E23F2E] border border-[#E23F2E] p-8 flex flex-col items-center justify-center text-center shadow-sm">
-                <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#F2E6CE] mb-4">
+              <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#F2E6CE] border border-[#F2E6CE] p-8 flex flex-col items-center justify-center text-center shadow-sm">
+                <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#c80a07] mb-4">
                   Inferno di 'Nduja
                 </h3>
-                <p class="text-sm md:text-base font-light text-[#F2E6CE]/90 leading-relaxed max-w-md mx-auto" data-i18n="bs_in_desc">
+                <p class="text-sm md:text-base font-light text-[#5A3E28] leading-relaxed max-w-md mx-auto" data-i18n="bs_in_desc">
                   Sobrassada picant (Nduja), Formatge Gorgonzola picant, Fior di latte artesana Il grande Desiderio, Formatge Parmigiano (curat 24 mesos), Alfàbrega fresca i Oli d'oliva verge extra Valpolicella Slow Food.
                 </p>
-                <span class="mt-6 font-medium text-lg text-[#F2E6CE]">€13</span>
+                <span class="mt-6 font-medium text-lg text-[#c80a07]">€13</span>
               </div>
             </div>
           </div>
@@ -398,7 +404,7 @@
 
           <!-- Nutellina -->
           <div class="flex flex-col gap-3">
-          <p class="text-sm font-light text-[#5A3E28] italic leading-relaxed">La pizza per gaudir al final. Nutella i festuc de Sicília: pura llaminadura.</p>
+          <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">La pizza per gaudir al final. Nutella i festuc de Sicília: pura llaminadura.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
               <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
@@ -412,15 +418,15 @@
                   </span>
                 </div>
               </div>
-              <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#F2E6CE] border border-[#C4B08A]/30 p-8 flex flex-col items-center justify-center text-center shadow-sm">
-                <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#2A1A0F] mb-4">
+              <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-3xl bg-[#c80a07] border border-[#C4B08A]/30 p-8 flex flex-col items-center justify-center text-center shadow-sm">
+                <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#F2E6CE] mb-4">
                   Nutellina
                 </h3>
-                <p class="text-sm md:text-base font-light text-[#5A3E28] leading-relaxed max-w-md mx-auto" data-i18n="bs_nu_desc">
+                <p class="text-sm md:text-base font-light text-[#F2E6CE] leading-relaxed max-w-md mx-auto" data-i18n="bs_nu_desc">
                   Base de crema de xocolata i avellanes Nutella amb topping de
                   festuc de Sicília DOP
                 </p>
-                <span class="mt-6 font-medium text-lg text-[#2A1A0F]">€13</span>
+                <span class="mt-6 font-medium text-lg text-[#F2E6CE]">€13</span>
               </div>
             </div>
           </div>
@@ -428,26 +434,26 @@
         </div>
 
         <div class="text-center mt-16 md:mt-24 reveal flex flex-col items-center gap-6">
-          <a href="pre-pedido.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm hover:bg-[#B82A1F] transition-all" data-i18n="demana">
+          <a href="pre-pedido.html" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[var(--primary-foreground)] bg-[var(--primary)] shadow-sm hover:bg-[#E6D5B0] transition-all" data-i18n="demana">
             Demana ja! →
           </a>
-          <p class="md:text-xl text-lg font-medium text-[#5A3E28] max-w-md mr-auto ml-auto pr-4 pl-4" data-i18n="bs_explora">
+          <p class="md:text-xl text-lg font-medium text-[#F2E6CE] max-w-md mr-auto ml-auto pr-4 pl-4" data-i18n="bs_explora">
             Explora la nostra carta i descobreix tot el que t'oferim
           </p>
-          <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#E23F2E] bg-[#E23F2E]/5 border border-[#E23F2E]/20 transition-all hover:bg-[#E23F2E]/10" data-i18n="bs_veure">
+          <a href="menu.html" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] leading-[1.5] text-[#F2E6CE] bg-[#F2E6CE]/5 border border-[#F2E6CE]/20 transition-all hover:bg-[#F2E6CE]/10" data-i18n="bs_veure">
             Veure tota la carta
           </a>
         </div>
       </div>
     </section>
 
-    <section class="py-20 md:py-28 px-6 text-center relative overflow-hidden bg-gradient-to-br from-[#E23F2E]/85 to-[#B82A1F]/85">
+    <section class="py-20 md:py-28 px-6 text-center relative overflow-hidden bg-gradient-to-br from-[#F2E6CE]/85 to-[#E6D5B0]/85">
       <img src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&q=80&w=1600" alt="Forn de llenya" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay">
       <div class="relative z-10 max-w-4xl mx-auto reveal">
-        <p class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-6xl text-[#F2E6CE] leading-tight">
+        <p class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-6xl text-[#2A1A0F] leading-tight">
           Pizza napolitana tradicional
         </p>
-        <p class="text-sm font-normal text-[#F2E6CE]/80 tracking-wide mt-4" data-i18n="banner_sub">
+        <p class="text-sm font-normal text-[#5A3E28] tracking-wide mt-4" data-i18n="banner_sub">
           Sense pressa, només amor i temps. L'olor de la massa al matí, el so de
           les motos al vespre, la calor del forn de pedra. Així és Micsas. Així
           és el nostre barri.
@@ -456,19 +462,19 @@
     </section>
 
     <!-- ──── NOSALTRES ──── -->
-    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#F2E6CE]" id="nosaltres">
+    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#c80a07]" id="nosaltres">
       <div class="grid md:grid-cols-2 gap-16 max-w-6xl mx-auto items-stretch">
         <div class="space-y-6 flex flex-col justify-center reveal">
-          <span class="text-xs uppercase tracking-widest font-normal text-[#E23F2E] border-l-2 border-[#E23F2E] pl-3 inline-block" data-i18n="nos_label">
+          <span class="text-xs uppercase tracking-widest font-normal text-[#F2E6CE] border-l-2 border-[#F2E6CE] pl-3 inline-block" data-i18n="nos_label">
             la meva història
           </span>
-          <h2 class="leading-tight md:text-4xl text-4xl text-[#2A1A0F] tracking-tight font-['League_Spartan',sans-serif] font-extrabold">
+          <h2 class="leading-tight md:text-4xl text-4xl text-[#F2E6CE] tracking-tight font-['League_Spartan',sans-serif] font-extrabold">
             <span data-i18n="nos_t1">Nascuts a Matadepera,</span>
-            <span class="text-[#E23F2E]" data-i18n="nos_t2">fets</span>
+            <span data-i18n="nos_t2">fets</span>
             <br>
             <span data-i18n="nos_t3">per compartir.</span>
           </h2>
-          <div class="space-y-4 text-sm font-light leading-relaxed max-w-md text-[#5A3E28]">
+          <div class="space-y-4 text-sm font-light leading-relaxed max-w-md text-[#F2E6CE]">
             <p class="" data-i18n="nos_p1">
               Micsas neix a Matadepera, d'un noi obsessionat per la pizza
               napolitana de veritat: massa fermentada 30 hores i ingredients
@@ -506,7 +512,7 @@
           nostre Instagram @micsas.ff!
         </p>
         <div class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[#C4B08A]/30 text-sm font-normal text-[#C4B08A]/60 cursor-not-allowed">
-          <span class="w-2 h-2 rounded-full bg-[#E23F2E] animate-pulse inline-block"></span>
+          <span class="w-2 h-2 rounded-full bg-[#F2E6CE] animate-pulse inline-block"></span>
           <span data-i18n="shop_wip">En construcció</span>
         </div>
       </div>
@@ -516,90 +522,90 @@
     <section class="w-full">
       <div class="w-full aspect-[4/5] md:aspect-video relative overflow-hidden">
         <video src="hero%20section%20real.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" disablepictureinpicture="" aria-hidden="true" class="object-center w-full h-full max-h-full object-cover"></video>
-        <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#F2E6CE]/85 to-transparent pointer-events-none z-10"></div>
+        <div class="absolute bottom-0 left-0 w-full h-[20%] md:h-[25%] bg-gradient-to-t from-[#c80a07]/85 to-transparent pointer-events-none z-10"></div>
       </div>
     </section>
     <footer class="relative overflow-hidden z-10">
-      <!-- Upper: mateix crema opac que el hero (sense /85, veure comentari
-           al header — amb opacitat es veu un to de beix diferent encara
-           que sigui el mateix hex). -->
-      <div class="pt-16 pb-0 px-6 md:px-12 bg-[#F2E6CE]">
+      <!-- Upper: mateix vermell opac que el hero (colors invertits 2026-09:
+           aquesta banda era crema, ara és la vermella). -->
+      <div class="pt-16 pb-0 px-6 md:px-12 bg-[#c80a07]">
         <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
           <!-- Horaris Card -->
-          <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#F2E6CE] border border-[#E23F2E]/20 w-full max-w-[280px] mt-8">
-            <div class="flex items-center gap-2 mb-1.5 text-[#E23F2E]">
+          <div class="flex flex-col items-center p-3.5 px-6 rounded-2xl bg-[#c80a07] border border-[#F2E6CE]/20 w-full max-w-[280px] mt-8">
+            <div class="flex items-center gap-2 mb-1.5 text-[#F2E6CE]">
               <iconify-icon icon="solar:clock-circle-linear" width="18"></iconify-icon>
-              <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-wider text-lg text-[#c80a07] uppercase" data-i18n="horaris">
+              <h3 class="font-['League_Spartan',sans-serif] font-extrabold tracking-wider text-lg text-[#F2E6CE] uppercase" data-i18n="horaris">
                 Horaris
               </h3>
             </div>
-            <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#5A3E28]">
+            <div class="flex flex-col items-center gap-1 text-sm font-medium text-[#F2E6CE]">
               <p>
                 <span data-i18n="hor_dl">Dl – Dj:</span>
-                <span class="text-[#2A1A0F]/40" data-i18n="hor_tancat">Tancat</span>
+                <span class="text-[#F2E6CE]/40" data-i18n="hor_tancat">Tancat</span>
               </p>
               <p>
                 <span data-i18n="hor_dv">Div i Diu:</span>
-                <span class="text-[#E23F2E]">20:00 – 23:30</span>
+                <span class="text-[#F2E6CE]">20:00 – 23:30</span>
               </p>
             </div>
           </div>
 
           <!-- Horizontal row of actions -->
           <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
-            <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#2A1A0F] shrink-0" aria-label="Instagram">
+            <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#C4B08A]/60 flex items-center justify-center transition-all hover:bg-[#F2E6CE] hover:text-[#c80a07] hover:border-[#F2E6CE] text-[#F2E6CE] shrink-0" aria-label="Instagram">
               <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
             </a>
-            <a href="tel:+34614714053" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
+            <a href="tel:+34614714053" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#c80a07] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
               Contacte
             </a>
             <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 text-sm shrink-0">
-              <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#E23F2E">CA</button>
+              <button data-lang="ca" onclick="applyLang('ca')" style="font-weight:700;color:#F2E6CE">CA</button>
               <span class="text-[#C4B08A]/60 select-none">|</span>
-              <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
+              <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#E6D5B0">ES</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Lower: red contrasting bg, border-t is the divider line -->
-      <div class="pt-12 pb-8 px-6 md:px-12 bg-[#c80a07]/85 border-t border-[#F2E6CE]/30">
+      <!-- Lower: colors invertits 2026-09 — aquesta banda era la vermella,
+           ara és la crema. -->
+      <div class="pt-12 pb-8 px-6 md:px-12 bg-[#F2E6CE] border-t border-[#c80a07]/30">
         <div class="flex flex-col items-center w-full max-w-[1400px] mx-auto">
           <!-- Brand Wordmark — logotip real de la marca (no és una font,
                és un dibuix fet a mida per a "micsas"; per això aquí ja no
                hi surt el ".ff", que no existeix en aquest disseny). -->
           <div class="w-full flex justify-center items-center overflow-visible mb-12">
-            <img src="images/micsas-wordmark-cream.png" alt="micsas" class="w-[70vw] sm:w-[55vw] md:w-[38vw] lg:w-[500px] xl:w-[600px] h-auto select-none hover:opacity-80 transition-opacity">
+            <img src="images/micsas-wordmark-red.png" alt="micsas" class="w-[70vw] sm:w-[55vw] md:w-[38vw] lg:w-[500px] xl:w-[600px] h-auto select-none hover:opacity-80 transition-opacity">
           </div>
 
           <!-- Copyright -->
-          <p class="text-xs font-light text-[#F2E6CE]/70 mb-3 text-center" data-i18n="copyright">
+          <p class="text-xs font-light text-[#2A1A0F]/70 mb-3 text-center" data-i18n="copyright">
             © 2025 micsas.ff · Tots els drets reservats
           </p>
 
           <!-- Legal Links -->
-          <div class="flex items-center justify-center gap-3 text-xs font-light text-[#F2E6CE]/70 mb-12 flex-wrap">
-            <a href="cookies.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+          <div class="flex items-center justify-center gap-3 text-xs font-light text-[#2A1A0F]/70 mb-12 flex-wrap">
+            <a href="cookies.html" class="hover:text-[#c80a07] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#c80a07] hover:after:w-full after:transition-all">
               Cookies
             </a>
             <span>·</span>
-            <a href="privacidad.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all" data-i18n="privacitat">
+            <a href="privacidad.html" class="hover:text-[#c80a07] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#c80a07] hover:after:w-full after:transition-all" data-i18n="privacitat">
               Privacitat
             </a>
             <span>·</span>
-            <a href="aviso-legal.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+            <a href="aviso-legal.html" class="hover:text-[#c80a07] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#c80a07] hover:after:w-full after:transition-all">
               Avís legal
             </a>
             <span>·</span>
-            <a href="terminos.html" class="hover:text-[#E23F2E] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#E23F2E] hover:after:w-full after:transition-all">
+            <a href="terminos.html" class="hover:text-[#c80a07] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-[#c80a07] hover:after:w-full after:transition-all">
               Termes i condicions
             </a>
           </div>
 
           <!-- Made By -->
-          <p class="text-[11px] font-light text-[#F2E6CE]/50 text-center">
+          <p class="text-[11px] font-light text-[#2A1A0F]/50 text-center">
             Made for micsas.ff with
-            <iconify-icon icon="solar:heart-bold" class="text-[#E23F2E] inline-block align-text-bottom" width="14"></iconify-icon>
+            <iconify-icon icon="solar:heart-bold" class="text-[#c80a07] inline-block align-text-bottom" width="14"></iconify-icon>
             by UnitedOps
           </p>
         </div>
@@ -610,10 +616,10 @@
       const navbar = document.getElementById('navbar');
       window.addEventListener('scroll', () => {
         if (window.scrollY > 40) {
-          navbar.classList.add('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2E6CE]/30', 'shadow-sm', 'nav-scrolled');
+          navbar.classList.add('bg-[#F2E6CE]/85', 'backdrop-blur-md', 'border-[#c80a07]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.remove('border-transparent');
         } else {
-          navbar.classList.remove('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2E6CE]/30', 'shadow-sm', 'nav-scrolled');
+          navbar.classList.remove('bg-[#F2E6CE]/85', 'backdrop-blur-md', 'border-[#c80a07]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.add('border-transparent');
         }
       }, { passive: true });
@@ -662,7 +668,7 @@
           if (window.innerWidth >= 768) { track.style.transform = 'none'; return; }
           track.style.transform = `translateX(-${currentIndex * 100}%)`;
           dots.forEach((dot, i) => {
-            dot.className = i === currentIndex ? 'w-2 h-2 rounded-full bg-[#E23F2E] transition-all' : 'w-2 h-2 rounded-full bg-[#C4B08A]/50 transition-all';
+            dot.className = i === currentIndex ? 'w-2 h-2 rounded-full bg-[#F2E6CE] transition-all' : 'w-2 h-2 rounded-full bg-[#C4B08A]/50 transition-all';
           });
         }
 
