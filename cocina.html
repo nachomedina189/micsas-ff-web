@@ -444,6 +444,14 @@
       const readyGroups           = groups.filter(g => stageOfGroup(g) === 'ready');
       const outForDeliveryGroups  = groups.filter(g => stageOfGroup(g) === 'out_for_delivery');
 
+      // Comandes amb targeta encara pendents de confirmació de Stripe — es
+      // veuen igualment (en gris, sense accions) perquè el pizzero sàpiga
+      // que hi ha alguna cosa en camí des del primer moment, en lloc de
+      // desaparèixer fins que es confirmi el pagament.
+      const unconfirmedOrders = ordersCache.filter(o =>
+        inDateScope(o) && !isPaymentConfirmed(o) && o.status !== 'cancelled' && o.status !== 'delivered'
+      );
+
       // Les comandes entregades es calculen a part (no formen part del
       // "board" actiu) — són per a la columna "Entregat" de la vista
       // Repartiment, perquè el repartidor tingui constància del que ja ha
@@ -451,17 +459,20 @@
       const deliveredBoard  = ordersCache.filter(o => inDateScope(o) && isPaymentConfirmed(o) && o.status === 'delivered');
       const deliveredGroups = groupOrders(deliveredBoard);
 
-      document.getElementById('order-count').textContent = groups.length;
-      document.getElementById('count-pending').textContent = pendingGroups.length;
+      document.getElementById('order-count').textContent = groups.length + unconfirmedOrders.length;
+      document.getElementById('count-pending').textContent = pendingGroups.length + unconfirmedOrders.length;
       document.getElementById('count-preparing').textContent = preparingGroups.length;
       document.getElementById('count-ready-cuina').textContent = readyGroups.length;
       document.getElementById('count-ready-repartiment').textContent = readyGroups.length;
       document.getElementById('count-out-for-delivery').textContent = outForDeliveryGroups.length;
       document.getElementById('count-delivered').textContent = deliveredGroups.length;
-      document.getElementById('tab-cuina-badge').textContent = pendingGroups.length + preparingGroups.length;
+      document.getElementById('tab-cuina-badge').textContent = pendingGroups.length + preparingGroups.length + unconfirmedOrders.length;
       document.getElementById('tab-repartiment-badge').textContent = readyGroups.length + outForDeliveryGroups.length;
 
-      document.getElementById('col-pending').innerHTML   = renderColumnWithTimeHeaders(pendingGroups);
+      const unconfirmedHtml = unconfirmedOrders.map(renderUnconfirmedCard).join('');
+      const pendingHtml     = pendingGroups.length ? renderColumnWithTimeHeaders(pendingGroups) : '';
+      document.getElementById('col-pending').innerHTML =
+        (unconfirmedHtml + pendingHtml) || renderColumnWithTimeHeaders(pendingGroups);
       document.getElementById('col-preparing').innerHTML = renderColumnWithTimeHeaders(preparingGroups);
       // El mateix contingut de "Llest" es mostra tant a la vista Cuina
       // (confirmació per al pizzero) com a la vista Repartiment (amb el
@@ -640,6 +651,42 @@
           </div>
         </div>
       `;
+    }
+
+    // Targeta grisa per a comandes amb targeta encara no confirmades per
+    // Stripe (payment_status = 'processing'). Abans, aquestes comandes eren
+    // totalment invisibles fins que el webhook les marcava "paid" — el so
+    // de "comanda nova" sonava igualment en crear-se la fila (detectNewPendingOrders
+    // no distingeix pagament confirmat), així que el pizzero sentia l'avís
+    // però no veia res, i quan la targeta apareixia de veritat uns segons o
+    // minuts després ja no hi havia cap segon avís — fàcil de perdre en una
+    // nit amb moltes comandes a la vegada (és el que li va passar a la
+    // comanda de la Xenia l'11/09/2026: mai es va arribar a marcar com a
+    // "Preparant" ni "Entregat" a l'app, tot i que la pizza sí que es va fer
+    // i portar). Ara la comanda es veu des del primer moment, en gris i
+    // sense botons d'acció (no volem que el pizzero es posi a fer una
+    // comanda que Stripe encara podria no confirmar) — i en confirmar-se el
+    // pagament, la mateixa targeta passa a ser una comanda normal.
+    function renderUnconfirmedCard(o) {
+      const cust = o.customers || {};
+      const items = o.order_items || [];
+      const itemsHtml = items.map(it => `<div class="flex justify-between gap-2 text-sm">
+        <span>${it.quantity}× ${escapeHtml(it.product_name)}</span>
+        <span class="shrink-0">${fmt(it.unit_price * it.quantity)}</span>
+      </div>`).join('');
+      const since = new Date(o.created_at).getTime();
+      return `
+        <div class="bg-[#F3F4F6] text-[#6B7280] rounded-2xl border-2 border-dashed border-[#D1D5DB] overflow-hidden">
+          <div class="px-5 py-3 flex items-center justify-between bg-[#9CA3AF] text-white">
+            <span class="font-black text-sm uppercase tracking-wide">🔄 Verificant pagament...</span>
+            <span class="text-xs font-semibold opacity-90">${escapeHtml(o.slot_time || '')}</span>
+          </div>
+          <div class="p-5 space-y-3">
+            ${!isNaN(since) ? `<p class="js-elapsed text-xs font-bold" data-since="${since}">⏱ Esperant...</p>` : ''}
+            <p class="font-bold text-base">${escapeHtml(cust.name || 'Client')}</p>
+            <div class="space-y-1.5">${itemsHtml}</div>
+          </div>
+        </div>`;
     }
 
     // ── Navegació del repartidor: adreces i enllaços de mapes ──
