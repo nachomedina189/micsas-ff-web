@@ -337,24 +337,56 @@
 
     // Avís sonor quan arriba una comanda nova a "Sense afegir" — generat amb
     // Web Audio API (dos tons curts), sense necessitar cap fitxer d'àudio.
-    // En alguns mòbils (sobretot iPhone/Safari) el navegador bloqueja l'àudio
-    // fins que hi ha hagut una interacció prèvia amb la pàgina — si falla,
-    // ho ignorem en silenci, mai talla el funcionament del tauler.
+    // En mòbil (sobretot iPhone/Safari, però també Chrome Android) el
+    // navegador bloqueja l'àudio fins que hi ha hagut una interacció real
+    // (toc/clic) DINS del mateix gest — un AudioContext creat des d'un
+    // esdeveniment de Supabase Realtime (no un toc humà) es queda
+    // "suspended" per sempre i el so mai arriba a sortir, en silenci total,
+    // sense cap error. Abans es creava un AudioContext nou cada vegada, cosa
+    // que ho patia sempre. Ara es crea UN sol cop i es desbloqueja (resume)
+    // en el primer toc/clic que el pizzero faci a la pantalla — cosa que farà
+    // segur en algun moment (només sigui per prémer "Preparar") — i queda
+    // desbloquejat per a la resta de la sessió.
+    let _kitchenAudioCtx = null;
+    function _getKitchenAudioCtx() {
+      if (!_kitchenAudioCtx) {
+        const Ctor = window.AudioContext || window.webkitAudioContext;
+        if (!Ctor) return null;
+        _kitchenAudioCtx = new Ctor();
+      }
+      return _kitchenAudioCtx;
+    }
+    function _unlockKitchenAudio() {
+      const ctx = _getKitchenAudioCtx();
+      if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+    }
+    ['touchstart', 'click', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, _unlockKitchenAudio, { passive: true });
+    });
+
+    // Volum al màxim (abans només al 20%) i un patró de 4 tons en lloc de 2
+    // perquè es noti clarament fins i tot amb soroll de cuina de fons.
     function playNewOrderSound() {
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = _getKitchenAudioCtx();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
         const tone = (freq, delay) => setTimeout(() => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.connect(gain); gain.connect(ctx.destination);
           osc.frequency.value = freq;
-          gain.gain.setValueAtTime(0.2, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.9, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
           osc.start();
-          osc.stop(ctx.currentTime + 0.35);
+          osc.stop(ctx.currentTime + 0.4);
         }, delay);
         tone(880, 0);
-        tone(1175, 180);
+        tone(1175, 200);
+        tone(880, 400);
+        tone(1175, 600);
+        // Vibració addicional a Android (iOS no suporta l'API i l'ignora sol).
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
       } catch (e) { /* àudio bloquejat o no suportat — silenci */ }
     }
 
