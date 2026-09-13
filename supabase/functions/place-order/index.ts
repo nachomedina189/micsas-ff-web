@@ -105,6 +105,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Tancament anticipat NOMÉS per avui 2026-09-13 (excepció d'un sol dia,
+    // demanada expressament el mateix dia — no és un canvi permanent de
+    // l'horari normal 20:00-23:30). Comprovació real i definitiva: el
+    // client ja ho amaga a la UI, però això és el que de veritat ho impedeix.
+    const TODAY_EARLY_CLOSE_DATE = "2026-09-13";
+    const TODAY_EARLY_CLOSE_TIME = "22:30";
+    if (deliveryDate === TODAY_EARLY_CLOSE_DATE && slotTime && slotTime > TODAY_EARLY_CLOSE_TIME) {
+      return new Response(JSON.stringify({ error: `Avui tanquem comandes a les ${TODAY_EARLY_CLOSE_TIME}h. Torna un altre dia!` }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Find or create customer
     let customerId: string;
 
