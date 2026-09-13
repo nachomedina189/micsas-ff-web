@@ -346,13 +346,23 @@
     // veritat. Mateix marge que pedido.html.
     const ASAP_LEAD_MIN = 20;
 
+    // Tancament anticipat NOMÉS per avui 2026-09-13 (excepció d'un sol dia,
+    // demanada expressament — no és un canvi permanent de l'horari normal
+    // 20:00–23:30 de divendres/diumenge).
+    const TODAY_EARLY_CLOSE_DATE = '2026-09-13';
+    const TODAY_EARLY_CLOSE_TIME = '22:30';
+    const _ppEarlyCloseMins = (() => { const [h, m] = TODAY_EARLY_CLOSE_TIME.split(':').map(Number); return h * 60 + m; })();
+
     function resolveAsap() {
       if (ppDeliveryDate !== todayISO() || _ppDailySoldOut) return null;
       const now = new Date();
       const nowMins = now.getHours() * 60 + now.getMinutes();
+      const isEarlyCloseDay = ppDeliveryDate === TODAY_EARLY_CLOSE_DATE;
+      if (isEarlyCloseDay && nowMins >= _ppEarlyCloseMins) return null;
       for (let i = 1; i < PP_SLOTS.length; i++) {
         const s = PP_SLOTS[i];
         const [h, m] = s.split(':').map(Number);
+        if (isEarlyCloseDay && (h * 60 + m) > _ppEarlyCloseMins) continue;
         if (h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6) return s;
       }
       return null;
@@ -372,6 +382,13 @@
         return;
       }
       const isToday = ppDeliveryDate === todayISO();
+      const isEarlyCloseDay = ppDeliveryDate === TODAY_EARLY_CLOSE_DATE;
+      const nowMinsCheck = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
+      if (isEarlyCloseDay && isToday && nowMinsCheck >= _ppEarlyCloseMins) {
+        ppTimeOptions = [{ value: '', label: `Avui ja no acceptem més comandes (tanquem a les ${TODAY_EARLY_CLOSE_TIME}h)`, disabled: true }];
+        _ppRenderTimeDropdown();
+        return;
+      }
       const asap = resolveAsap();
       const options = [];
 
@@ -388,6 +405,11 @@
       PP_SLOTS.slice(1).forEach(s => {
         const [h, m] = s.split(':').map(Number);
         const isPast = isToday && (h * 60 + m) <= nowMins;
+        const isAfterEarlyClose = isEarlyCloseDay && (h * 60 + m) > _ppEarlyCloseMins;
+        if (isAfterEarlyClose && !isPast) {
+          options.push({ value: '', label: `${s} — Tancat avui`, disabled: true });
+          return;
+        }
         const full = (_slotCounts[s] || 0) >= 6;
         if (isPast) options.push({ value: '', label: `${s} — Ja ha passat`, disabled: true });
         else if (full) options.push({ value: '', label: `${s} — Complet`, disabled: true });
@@ -398,6 +420,28 @@
       _ppRenderTimeDropdown();
     }
 
+    // Distingeix un toc real d'un gest de scroll dins el desplegable: abans,
+    // ontouchend seleccionava sempre l'opció que quedava sota el dit en
+    // aixecar-lo, encara que el moviment fos només per fer scroll per la
+    // llista — es triava una hora sense voler-ho. Ara es guarda la posició Y
+    // on comença el toc i, si el dit s'ha desplaçat més d'un cert llindar
+    // abans d'aixecar-se, es considera scroll i no es selecciona res.
+    let _ppTimeTouchStartY = null;
+    function _ppTimeTouchStart(ev) {
+      _ppTimeTouchStartY = ev.touches[0].clientY;
+    }
+    function _ppTimeTouchEnd(ev, value) {
+      const startY = _ppTimeTouchStartY;
+      _ppTimeTouchStartY = null;
+      if (startY == null) return;
+      const endY = ev.changedTouches[0].clientY;
+      if (Math.abs(endY - startY) > 10) return; // era scroll, no un toc real
+      ev.preventDefault();
+      selectTimeFromSelect(value);
+    }
+    window._ppTimeTouchStart = _ppTimeTouchStart;
+    window._ppTimeTouchEnd = _ppTimeTouchEnd;
+
     function _ppRenderTimeDropdown() {
       const box = document.getElementById('pp-time-dropdown');
       if (!box) return;
@@ -406,7 +450,7 @@
         if (opt.disabled) {
           return `<div class="pp-suggestion-item" style="opacity:0.5;cursor:not-allowed;">${_ppEscape(opt.label)}</div>`;
         }
-        return `<button type="button" class="pp-suggestion-item" onclick="selectTimeFromSelect('${opt.value}')" ontouchend="event.preventDefault(); selectTimeFromSelect('${opt.value}');">${_ppEscape(opt.label)}</button>`;
+        return `<button type="button" class="pp-suggestion-item" onclick="selectTimeFromSelect('${opt.value}')" ontouchstart="_ppTimeTouchStart(event)" ontouchend="_ppTimeTouchEnd(event, '${opt.value}')">${_ppEscape(opt.label)}</button>`;
       }).join('');
     }
 
