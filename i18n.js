@@ -1,10 +1,17 @@
 (function () {
+  // GOOGLE_REVIEW_URL: enllaç per deixar una ressenya a Google (Perfil
+  // d'Empresa de Google → "Demana ressenyes" → copiar l'enllaç, del tipus
+  // https://g.page/r/XXXXXXXX/review). Mentre estigui buit, els botons
+  // [data-google-review] queden amagats.
+  var GOOGLE_REVIEW_URL = '';
+
   var t = {
     ca: {
       // SHARED
       demana: 'Demana ja! →', contacte: 'Contacte', horaris: 'Horaris',
       hor_dl: 'Dl – Dj:', hor_tancat: 'Tancat', hor_dv: 'Div i Diu:',
       copyright: '© 2025 micsas.ff · Tots els drets reservats', privacitat: 'Privacitat',
+      resena_cta: "Deixa'ns una ressenya", resena_sub: 'Ens ajuda molt a Google',
       // INDEX
       idx_demana: 'Demana aquí! →', idx_carta: 'Experiència micsas',
       // CARTA NAV
@@ -81,6 +88,7 @@
       demana: '¡Pide ya! →', contacte: 'Contacto', horaris: 'Horarios',
       hor_dl: 'Lun – Jue:', hor_tancat: 'Cerrado', hor_dv: 'Vie y Dom:',
       copyright: '© 2025 micsas.ff · Todos los derechos reservados', privacitat: 'Privacidad',
+      resena_cta: 'Déjanos una reseña', resena_sub: 'Nos ayuda mucho en Google',
       // INDEX
       idx_demana: '¡Pide aquí! →', idx_carta: 'Experiencia micsas',
       // CARTA NAV
@@ -182,8 +190,17 @@
 
   window.applyLang = applyLang;
 
+  function setupGoogleReview() {
+    if (!GOOGLE_REVIEW_URL) return;
+    document.querySelectorAll('[data-google-review]').forEach(function (el) {
+      el.href = GOOGLE_REVIEW_URL;
+      el.classList.remove('hidden');
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var lang = localStorage.getItem('micsas_lang') || 'ca';
     applyLang(lang);
+    setupGoogleReview();
   });
 })();
