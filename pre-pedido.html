@@ -99,7 +99,7 @@
       align-items: center;
     }
     main.hero-bg {
-      background-image: url('images/pre-pedido-mobile.jpg');
+      background-image: url('images/pizzero-fondo-mobile.jpg');
       background-size: 100% auto;
       background-position: center bottom;
       background-repeat: no-repeat;
@@ -107,7 +107,7 @@
     }
     @media (min-width: 768px) {
       main.hero-bg {
-        background-image: url('72cdca59b4cd1170a781c95b9b8ae632_1780566795908.jpeg');
+        background-image: url('images/pizzero-fondo-desktop.jpg');
         background-size: cover;
         background-position: right center;
         background-color: transparent;
@@ -115,8 +115,10 @@
     }
     /* Vídeo del pizzer damunt de la imatge de fons: mateix enquadrament
        que el background (mòbil: amplada 100% ancorat a baix; escriptori:
-       cover ancorat a la dreta). Invisible fins que comença a reproduir-se,
-       així si el vídeo falla o no carrega es continua veient la imatge. */
+       cover ancorat a la dreta). Les imatges pizzero-fondo-* són el primer
+       fotograma dels vídeos de repòs, perquè encaixin al píxel. Invisible
+       fins que comença a reproduir-se, així si el vídeo falla o no carrega
+       es continua veient la imatge. */
     main.hero-bg { position: relative; overflow: hidden; }
     main.hero-bg > :not(.pp-hero-media) { position: relative; z-index: 1; }
     .pp-hero-media { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
