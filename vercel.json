@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/carta.html",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*\\.html)",

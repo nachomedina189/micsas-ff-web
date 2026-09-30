@@ -23,6 +23,20 @@ const CATALOG: Record<string, { name: string; price: number; available?: boolean
   "d3":                   { name: "Cervesa artesana Moretti", price: 3 },
 };
 
+// Data i hora actuals a Europe/Madrid (gestiona CET/CEST automàticament)
+// — cal calcular-ho explícitament perquè el runtime de l'edge function
+// no té garantit aquest fus horari (sol ser UTC).
+function madridNow(): { date: string; mins: number } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Madrid",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  const hour = Number(get("hour")) % 24; // alguns motors ICU donen "24" per mitjanit
+  return { date: `${get("year")}-${get("month")}-${get("day")}`, mins: hour * 60 + Number(get("minute")) };
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
@@ -175,6 +189,35 @@ Deno.serve(async (req) => {
       .single();
     if (addrErr) throw addrErr;
 
+    // Marge mínim de preparació (mateixos 20 min que ASAP_LEAD_MIN a
+    // pedido.html) aplicat com a última barrera real — la de la UI es pot
+    // saltar cridant aquest endpoint directament. Només afecta comandes
+    // per avui; no rebutgem la comanda, sinó que pugem la franja demanada
+    // (mai la baixem) fins que tingui marge suficient, i deixem que
+    // create_order_with_slot faci la seva pròpia comprovació d'aforo a
+    // partir d'aquí — exactament el mateix mecanisme que ja fa servir
+    // quan la franja triada està plena.
+    const SLOT_LEAD_MIN = 20;
+    let effectiveSlotTime = slotTime ?? null;
+    if (effectiveSlotTime) {
+      const { date: madridToday, mins: madridNowMins } = madridNow();
+      if (deliveryDate === madridToday) {
+        const earliestSafeSlot = REAL_SLOTS.find((s) => {
+          const [h, m] = s.split(":").map(Number);
+          return h * 60 + m > madridNowMins + SLOT_LEAD_MIN;
+        }) ?? null;
+        if (!earliestSafeSlot) {
+          return new Response(JSON.stringify({ error: "Ja no queda marge suficient per preparar cap comanda avui. Si us plau, tria un altre dia." }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (effectiveSlotTime < earliestSafeSlot) {
+          effectiveSlotTime = earliestSafeSlot;
+        }
+      }
+    }
+
     // Comprova l'aforo (màx. 6 pizzes per franja) i insereix la comanda en
     // una única transacció de servidor (veure migrations/20260909000000_atomic_order_slot.sql).
     // Fer-ho tot dins la mateixa funció de BD, protegida amb un advisory
@@ -191,7 +234,7 @@ Deno.serve(async (req) => {
       p_tip_amount:     safeTip,
       p_total:          total,
       p_notes:          finalNotes ?? null,
-      p_requested_slot: slotTime ?? null,
+      p_requested_slot: effectiveSlotTime,
       p_pizza_count:    pizzaCount,
       p_delivery_date:  deliveryDate,
       p_slots:          REAL_SLOTS,
