@@ -325,13 +325,14 @@
     }
     let ppDeliveryDate = todayISO();
 
-    // Generate time slots: Com més aviat millor + 20:00 → 23:30 every 15 min
+    // Franges: "Com més aviat millor" + de 20:00 a PP_LAST_SLOT cada 15 min
+    // (política des del 02/10/2026; abans l'última era les 23:30). Ha de
+    // coincidir amb REAL_SLOTS de place-order, que rebutja qualsevol altra hora.
+    const PP_LAST_SLOT = '22:30';
+    const _ppLastSlotMins = (() => { const [h, m] = PP_LAST_SLOT.split(':').map(Number); return h * 60 + m; })();
     const PP_SLOTS = ['Com més aviat millor'];
-    for (let h = 20; h <= 23; h++) {
-      for (let m = 0; m < 60; m += 15) {
-        if (h === 23 && m > 30) break;
-        PP_SLOTS.push(`${h}:${String(m).padStart(2,'0')}`);
-      }
+    for (let t = 20 * 60; t <= _ppLastSlotMins; t += 15) {
+      PP_SLOTS.push(`${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`);
     }
 
     let _slotCounts = {};
@@ -362,29 +363,18 @@
       _ppDailySoldOut = typeof dailyTotal === 'number' && dailyTotal >= DAILY_PIZZA_CAP;
     }
 
-    // Marge mínim (minuts) abans de poder oferir una franja com "Com més
-    // aviat millor" — sense això es podia arribar a oferir una franja que
-    // començava d'aquí a 2 minuts, temps insuficient per preparar-la de
-    // veritat. Mateix marge que pedido.html.
-    const ASAP_LEAD_MIN = 20;
-
-    // Tancament anticipat NOMÉS per avui 2026-09-13 (excepció d'un sol dia,
-    // demanada expressament — no és un canvi permanent de l'horari normal
-    // 20:00–23:30 de divendres/diumenge).
-    const TODAY_EARLY_CLOSE_DATE = '2026-09-13';
-    const TODAY_EARLY_CLOSE_TIME = '22:30';
-    const _ppEarlyCloseMins = (() => { const [h, m] = TODAY_EARLY_CLOSE_TIME.split(':').map(Number); return h * 60 + m; })();
+    // Marge mínim (minuts) entre ara i l'inici d'una franja per poder-la
+    // demanar, tant triant-la directament com amb "Com més aviat millor".
+    // Mateix marge que pedido.html i que SLOT_LEAD_MIN de place-order.
+    const ASAP_LEAD_MIN = 15;
 
     function resolveAsap() {
       if (ppDeliveryDate !== todayISO() || _ppDailySoldOut) return null;
       const now = new Date();
       const nowMins = now.getHours() * 60 + now.getMinutes();
-      const isEarlyCloseDay = ppDeliveryDate === TODAY_EARLY_CLOSE_DATE;
-      if (isEarlyCloseDay && nowMins >= _ppEarlyCloseMins) return null;
       for (let i = 1; i < PP_SLOTS.length; i++) {
         const s = PP_SLOTS[i];
         const [h, m] = s.split(':').map(Number);
-        if (isEarlyCloseDay && (h * 60 + m) > _ppEarlyCloseMins) continue;
         if (h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6) return s;
       }
       return null;
@@ -404,10 +394,9 @@
         return;
       }
       const isToday = ppDeliveryDate === todayISO();
-      const isEarlyCloseDay = ppDeliveryDate === TODAY_EARLY_CLOSE_DATE;
       const nowMinsCheck = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
-      if (isEarlyCloseDay && isToday && nowMinsCheck >= _ppEarlyCloseMins) {
-        ppTimeOptions = [{ value: '', label: `Avui ja no acceptem més comandes (tanquem a les ${TODAY_EARLY_CLOSE_TIME}h)`, disabled: true }];
+      if (isToday && _ppLastSlotMins <= nowMinsCheck + ASAP_LEAD_MIN) {
+        ppTimeOptions = [{ value: '', label: `Avui ja no acceptem més comandes (l'última franja és a les ${PP_LAST_SLOT}h)`, disabled: true }];
         _ppRenderTimeDropdown();
         return;
       }
@@ -427,13 +416,12 @@
       PP_SLOTS.slice(1).forEach(s => {
         const [h, m] = s.split(':').map(Number);
         const isPast = isToday && (h * 60 + m) <= nowMins;
-        const isAfterEarlyClose = isEarlyCloseDay && (h * 60 + m) > _ppEarlyCloseMins;
-        if (isAfterEarlyClose && !isPast) {
-          options.push({ value: '', label: `${s} — Tancat avui`, disabled: true });
-          return;
-        }
+        // Abans aquí només es bloquejaven les franges ja passades: es podia
+        // triar les 20:30 essent les 20:29, sense marge per al pizzer.
+        const isTooSoon = isToday && !isPast && (h * 60 + m) <= nowMins + ASAP_LEAD_MIN;
         const full = (_slotCounts[s] || 0) >= 6;
         if (isPast) options.push({ value: '', label: `${s} — Ja ha passat`, disabled: true });
+        else if (isTooSoon) options.push({ value: '', label: `${s} — Massa aviat`, disabled: true });
         else if (full) options.push({ value: '', label: `${s} — Complet`, disabled: true });
         else options.push({ value: s, label: s });
       });
@@ -586,11 +574,13 @@
     // obsoleta si el client ha trigat una estona omplint la resta del
     // formulari abans de prémer "Demana".
     function isSlotStillValid() {
-      if (!ppSelectedTime || ppDeliveryDate !== todayISO()) return true;
+      if (!ppSelectedTime) return true;
+      if (!PP_SLOTS.slice(1).includes(ppSelectedTime)) return false;
+      if (ppDeliveryDate !== todayISO()) return true;
       const m = /^(\d{1,2}):(\d{2})$/.exec(ppSelectedTime);
       if (!m) return true;
       const now = new Date();
-      return (Number(m[1]) * 60 + Number(m[2])) > (now.getHours() * 60 + now.getMinutes());
+      return (Number(m[1]) * 60 + Number(m[2])) > (now.getHours() * 60 + now.getMinutes()) + ASAP_LEAD_MIN;
     }
 
     function goToMenu() {
@@ -601,7 +591,7 @@
         return;
       }
       if (!isSlotStillValid()) {
-        alert('Aquesta franja horària ja ha passat. Tria una franja horària diferent.');
+        alert('Aquesta franja horària ja no té marge suficient. Tria una franja horària diferent.');
         ppSelectedTime = null;
         _ppResetTimeLabel();
         loadSlotCounts().then(renderTimeSlots);
