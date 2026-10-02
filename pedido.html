@@ -953,10 +953,15 @@
     const STRIPE_PK = 'pk_live_51TdRAALe8eHOVxfS62ZSSTXk9mXkXdKWqzzKMu8geUYsXnPqyzz7OD8EIxRXhk2q6bVNm92UvSDLN9r7mDyFgJO100ZTAkOn0Z';
     const EDGE_FN_URL       = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/create-payment-intent';
     const PLACE_ORDER_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/place-order';
+    const RELEASE_ORDER_FN_URL = 'https://mbcssuvitqgrdqahqomc.supabase.co/functions/v1/release-pending-order';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
     let _stripe = null;
     let _stripeElements = null;
     let _pendingOrderData = null;
+    // Comanda online creada ('processing') però encara no pagada: si el
+    // client abandona el pagament cal alliberar-la, o seguiria ocupant
+    // pizzes de la franja (veure releasePendingOrder).
+    let _pendingOrderRef = null;
     let _paymentRequest = null;
     let _walletInitialized = false;
 
@@ -1389,18 +1394,20 @@
               { payment_method: ev.paymentMethod.id },
               { handleActions: false }
             );
-            if (error) { ev.complete('fail'); showCfToast('Error al processar el pagament.'); return; }
+            if (error) { releasePendingOrder(); ev.complete('fail'); showCfToast('Error al processar el pagament.'); return; }
             ev.complete('success');
             if (paymentIntent.status === 'requires_action') {
               const { error: ae } = await _stripe.confirmCardPayment(clientSecret);
-              if (ae) { showCfToast('Autenticació fallida.'); return; }
+              if (ae) { releasePendingOrder(); showCfToast('Autenticació fallida.'); return; }
             }
+            _pendingOrderRef = null;
             document.getElementById('cf-global-err').classList.add('hidden');
             document.getElementById('cf-scroll').classList.add('hidden');
             updateSuccessDeliveryEstimate();
             const success = document.getElementById('cf-success');
             success.classList.remove('hidden'); success.classList.add('flex');
           } catch (e) {
+            releasePendingOrder();
             ev.complete('fail');
             showCfToast('Error al processar el pagament. Torna-ho a intentar.');
           }
@@ -1988,17 +1995,51 @@
     // la comanda ja existeix, només falta que el webhook la confirmi.
     async function createPendingOrderAndIntent(totalEuros) {
       const orderRes = await _saveOrderToSupabase({ ..._pendingOrderData }, 'processing');
-      // L'import a cobrar el determina sempre create-payment-intent a partir
-      // del total real de la comanda ja desada (orderId) — no fem servir
-      // totalEuros per calcular-lo, només com a referència local d'UI.
-      const res = await fetch(EDGE_FN_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ currency: 'eur', orderId: orderRes.orderId }),
-      });
-      const json = await res.json();
-      if (json.error) throw new Error(json.error);
-      return { clientSecret: json.clientSecret, orderId: orderRes.orderId };
+      _pendingOrderRef = { orderId: orderRes.orderId, clientSecret: null };
+      try {
+        // L'import a cobrar el determina sempre create-payment-intent a partir
+        // del total real de la comanda ja desada (orderId) — no fem servir
+        // totalEuros per calcular-lo, només com a referència local d'UI.
+        const res = await fetch(EDGE_FN_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ currency: 'eur', orderId: orderRes.orderId }),
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        _pendingOrderRef.clientSecret = json.clientSecret;
+        return { clientSecret: json.clientSecret, orderId: orderRes.orderId };
+      } catch (err) {
+        // La comanda ja està desada i ocupa franja, però no s'ha pogut crear
+        // el pagament: ningú la podrà pagar mai, així que s'allibera.
+        releasePendingOrder();
+        throw err;
+      }
+    }
+
+    // Allibera la comanda online encara sense pagar perquè deixi d'ocupar
+    // pizzes de la franja. Es pot cridar sempre sense risc: el servidor no
+    // toca res si la comanda ja està pagada o el pagament és en marxa. Amb
+    // keepalive també arriba si el client tanca o recarrega la pestanya.
+    function releasePendingOrder() {
+      const ref = _pendingOrderRef;
+      _pendingOrderRef = null;
+      if (!ref) return;
+      try {
+        fetch(RELEASE_ORDER_FN_URL, {
+          method: 'POST',
+          keepalive: true,
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ orderId: ref.orderId, clientSecret: ref.clientSecret }),
+        }).catch(() => {});
+      } catch (_) { /* si falla, el límit de 15 min de l'aforo ho cobreix igualment */ }
+    }
+    window.addEventListener('pagehide', releasePendingOrder);
+
+    // El client tanca la finestra de pagament sense pagar.
+    function cancelStripeOverlay() {
+      releasePendingOrder();
+      closeStripeOverlay();
     }
 
     async function openWalletPayment(totalEuros) {
@@ -2093,6 +2134,9 @@
 
     async function openStripeOverlay(totalEuros, walletOnly = false) {
       const overlay = document.getElementById('stripe-overlay');
+      // Un segon toc a "Pagar" amb la finestra ja oberta creava una segona
+      // comanda, i la primera es quedava ocupant franja sense pagar mai.
+      if (!overlay.classList.contains('hidden')) return;
       overlay.classList.remove('hidden');
       const panel = document.getElementById('stripe-modal-panel');
       panel.classList.remove('enter-modal');
@@ -2174,7 +2218,7 @@
 
         if (walletOnly) {
           if (!canPay) {
-            closeStripeOverlay();
+            cancelStripeOverlay();
             showCfToast('El teu dispositiu no suporta Apple Pay ni Google Pay.');
             return;
           }
@@ -2200,6 +2244,7 @@
               const { error: actionErr } = await _stripe.confirmCardPayment(clientSecret);
               if (actionErr) { showCfToast('Autenticació fallida.'); return; }
             }
+            _pendingOrderRef = null;
             closeStripeOverlay();
             updateSuccessDeliveryEstimate();
             const success = document.getElementById('cf-success');
@@ -2262,6 +2307,7 @@
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
+        _pendingOrderRef = null;
         closeStripeOverlay();
         document.getElementById('cf-global-err').classList.add('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
@@ -2672,7 +2718,7 @@
     <div id="stripe-modal-panel" class="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-sm overflow-hidden">
       <div class="flex items-center justify-between px-5 pt-5 pb-3">
         <span id="stripe-amount-label" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">€0,00</span>
-        <button onclick="closeStripeOverlay()" aria-label="Tancar"
+        <button onclick="cancelStripeOverlay()" aria-label="Tancar"
           class="w-7 h-7 flex items-center justify-center text-[#9B8A72] hover:text-[#2A1A0F] transition-colors">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>

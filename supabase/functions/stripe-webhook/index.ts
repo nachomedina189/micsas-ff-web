@@ -45,6 +45,19 @@ Deno.serve(async (req) => {
         const pi = event.data.object as Stripe.PaymentIntent;
         const orderId = pi.metadata?.order_id;
         if (orderId) {
+          // Un primer intent fallit (targeta rebutjada, 3DS no superat...) fa
+          // que payment_intent.payment_failed cancel·li la comanda, però el
+          // client pot tornar-ho a provar amb el MATEIX PaymentIntent i pagar
+          // bé. Sense això quedava "pagada" però cancel·lada: invisible a
+          // cuina i sense comptar a l'aforo, amb el client ja cobrat. Només
+          // es recuperen les que van cancel·lar-se per un pagament fallit.
+          const { error: reviveErr } = await sb.from("orders")
+            .update({ payment_status: "paid", status: "pending" })
+            .eq("id", orderId)
+            .eq("payment_status", "failed")
+            .eq("status", "cancelled");
+          if (reviveErr) console.error("[stripe-webhook] error recuperant comanda", orderId, reviveErr);
+
           const { error } = await sb.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
           if (error) console.error("[stripe-webhook] error marcant pagada", orderId, error);
 
