@@ -96,14 +96,14 @@ Deno.serve(async (req) => {
     const safeTip = Math.max(0, Number(tipAmount) || 0);
     const total = Math.round((subtotal + safeTip) * 100) / 100;
 
-    // Mateixes franges de 15 min que pedido.html / pre-pedido.html (20:00–23:30).
+    // Mateixes franges de 15 min que pedido.html / pre-pedido.html. L'última
+    // franja és LAST_SLOT (política des del 02/10/2026; abans era les 23:30).
+    const LAST_SLOT = "22:30";
     const REAL_SLOTS: string[] = (() => {
+      const [lh, lm] = LAST_SLOT.split(":").map(Number);
       const slots: string[] = [];
-      for (let h = 20; h <= 23; h++) {
-        for (let m = 0; m < 60; m += 15) {
-          if (h === 23 && m > 30) break;
-          slots.push(`${h}:${String(m).padStart(2, "0")}`);
-        }
+      for (let t = 20 * 60; t <= lh * 60 + lm; t += 15) {
+        slots.push(`${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`);
       }
       return slots;
     })();
@@ -119,14 +119,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Tancament anticipat NOMÉS per avui 2026-09-13 (excepció d'un sol dia,
-    // demanada expressament el mateix dia — no és un canvi permanent de
-    // l'horari normal 20:00-23:30). Comprovació real i definitiva: el
-    // client ja ho amaga a la UI, però això és el que de veritat ho impedeix.
-    const TODAY_EARLY_CLOSE_DATE = "2026-09-13";
-    const TODAY_EARLY_CLOSE_TIME = "22:30";
-    if (deliveryDate === TODAY_EARLY_CLOSE_DATE && slotTime && slotTime > TODAY_EARLY_CLOSE_TIME) {
-      return new Response(JSON.stringify({ error: `Avui tanquem comandes a les ${TODAY_EARLY_CLOSE_TIME}h. Torna un altre dia!` }), {
+    // Una franja que no és a REAL_SLOTS (posterior a LAST_SLOT, o enviada per
+    // una pàgina oberta abans d'un canvi d'horari) s'ha de rebutjar aquí:
+    // create_order_with_slot, si no troba la franja demanada a la llista,
+    // comença a buscar per la PRIMERA franja de la nit i la comanda acabaria
+    // assignada a les 20:00.
+    if (slotTime && !REAL_SLOTS.includes(slotTime)) {
+      return new Response(JSON.stringify({ error: `Aquesta franja ja no està disponible: l'última franja és a les ${LAST_SLOT}h. Tria una altra hora.` }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -189,7 +188,7 @@ Deno.serve(async (req) => {
       .single();
     if (addrErr) throw addrErr;
 
-    // Marge mínim de preparació (mateixos 20 min que ASAP_LEAD_MIN a
+    // Marge mínim de preparació (mateixos 15 min que ASAP_LEAD_MIN a
     // pedido.html) aplicat com a última barrera real — la de la UI es pot
     // saltar cridant aquest endpoint directament. Només afecta comandes
     // per avui; no rebutgem la comanda, sinó que pugem la franja demanada
@@ -197,7 +196,7 @@ Deno.serve(async (req) => {
     // create_order_with_slot faci la seva pròpia comprovació d'aforo a
     // partir d'aquí — exactament el mateix mecanisme que ja fa servir
     // quan la franja triada està plena.
-    const SLOT_LEAD_MIN = 20;
+    const SLOT_LEAD_MIN = 15;
     let effectiveSlotTime = slotTime ?? null;
     if (effectiveSlotTime) {
       const { date: madridToday, mins: madridNowMins } = madridNow();

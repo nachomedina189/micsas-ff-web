@@ -232,7 +232,7 @@
             </p>
             <p>
               <span data-i18n="hor_dv">Div i Diu:</span>
-              <span class="text-[#E23F2E]">20:00 – 23:30</span>
+              <span class="text-[#E23F2E]">20:00 – 22:30</span>
             </p>
           </div>
         </div>
@@ -1096,18 +1096,21 @@
       renderTimeSlots();
     }
 
-    // Marge mínim (minuts) abans de poder oferir una franja com "Com més
-    // aviat millor" — sense això es podia arribar a oferir una franja que
-    // començava d'aquí a 2 minuts, temps insuficient per preparar-la de
-    // veritat.
-    const ASAP_LEAD_MIN = 20;
+    // Marge mínim (minuts) entre ara i l'inici d'una franja per poder-la
+    // demanar, tant triant-la directament com amb "Com més aviat millor".
+    // Ha de coincidir amb SLOT_LEAD_MIN de place-order.
+    const ASAP_LEAD_MIN = 15;
 
-    // Tancament anticipat NOMÉS per avui 2026-09-13 (excepció d'un sol dia,
-    // demanada expressament — no és un canvi permanent de l'horari normal
-    // 20:00–23:30 de divendres/diumenge). Passat aquest dia, aquesta
-    // constant deixa de tenir efecte sobre qualsevol altra data.
-    const TODAY_EARLY_CLOSE_DATE = '2026-09-13';
-    const TODAY_EARLY_CLOSE_TIME = '22:30';
+    // Franges de 15 min de 20:00 a CF_LAST_SLOT (política des del
+    // 02/10/2026; abans l'última era les 23:30). Ha de coincidir amb
+    // REAL_SLOTS de place-order, que rebutja qualsevol altra hora.
+    const CF_LAST_SLOT = '22:30';
+    const CF_REAL_SLOTS = (() => {
+      const [lh, lm] = CF_LAST_SLOT.split(':').map(Number);
+      const out = [];
+      for (let t = 20 * 60; t <= lh * 60 + lm; t += 15) out.push(`${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`);
+      return out;
+    })();
 
     function renderTimeSlots() {
       const container = document.getElementById('cf-time-slots');
@@ -1125,29 +1128,21 @@
       const isToday = cfDeliveryDate === todayISO();
       const nowMins = (() => { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); })();
 
-      const isEarlyCloseDay = cfDeliveryDate === TODAY_EARLY_CLOSE_DATE;
-      const earlyCloseMins = (() => { const [h, m] = TODAY_EARLY_CLOSE_TIME.split(':').map(Number); return h * 60 + m; })();
-      if (isEarlyCloseDay && isToday && nowMins >= earlyCloseMins) {
+      const lastSlotMins = (() => { const [h, m] = CF_LAST_SLOT.split(':').map(Number); return h * 60 + m; })();
+      if (isToday && lastSlotMins <= nowMins + ASAP_LEAD_MIN) {
         container.innerHTML = `
           <div class="flex flex-col items-center text-center gap-2 py-6 px-5 rounded-2xl border border-[#C4B08A]/40 bg-[#E6D5B0]/10">
             <iconify-icon icon="solar:clock-circle-linear" width="28" style="color:#9B8A72;"></iconify-icon>
             <p class="font-['League_Spartan',sans-serif] font-semibold text-[#2A1A0F]">Avui ja no acceptem més comandes</p>
-            <p class="text-sm text-[#5A3E28]">Avui tanquem comandes a les ${TODAY_EARLY_CLOSE_TIME}h. Torna un altre dia!</p>
+            <p class="text-sm text-[#5A3E28]">L'última franja és a les ${CF_LAST_SLOT}h i s'ha de demanar com a mínim ${ASAP_LEAD_MIN} minuts abans. Torna un altre dia!</p>
           </div>`;
         window._cfEarliestSlot = null;
         return;
       }
 
-      const realSlots = [];
-      for (let h = 20; h <= 23; h++) {
-        for (let m = 0; m < 60; m += 15) {
-          if (h === 23 && m > 30) break;
-          realSlots.push(`${h}:${String(m).padStart(2,'0')}`);
-        }
-      }
+      const realSlots = CF_REAL_SLOTS;
       const earliestSlot = realSlots.find(s => {
         const [h, m] = s.split(':').map(Number);
-        if (isEarlyCloseDay && (h * 60 + m) > earlyCloseMins) return false;
         return h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6;
       }) || null;
       window._cfEarliestSlot = earliestSlot;
@@ -1164,12 +1159,11 @@
         // pizzer rebia la comanda sense marge de preparació.
         const isPast = isToday && !isAsap && slotMins <= nowMins;
         const isTooSoon = isToday && !isAsap && !isPast && slotMins <= nowMins + ASAP_LEAD_MIN;
-        const isAfterEarlyClose = isEarlyCloseDay && !isAsap && (() => { const [h, m] = s.split(':').map(Number); return (h * 60 + m) > earlyCloseMins; })();
-        const full = !isAsap && !isPast && !isTooSoon && !isAfterEarlyClose && (_slotCounts[s] || 0) >= 6;
-        const blocked = full || isPast || isTooSoon || isAfterEarlyClose;
+        const full = !isAsap && !isPast && !isTooSoon && (_slotCounts[s] || 0) >= 6;
+        const blocked = full || isPast || isTooSoon;
         const label = isAsap
           ? `${s} <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>`
-          : `${s}${isPast ? ' · Ja ha passat' : isTooSoon ? ' · Massa aviat' : isAfterEarlyClose ? ' · Tancat avui' : full ? ' · Complet' : ''}`;
+          : `${s}${isPast ? ' · Ja ha passat' : isTooSoon ? ' · Massa aviat' : full ? ' · Complet' : ''}`;
         return `<button type="button" ${blocked ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
           class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isAsap ? 'lg' : 'base'} ${blocked ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
           <iconify-icon icon="${isAsap ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isAsap ? 20 : 16}" style="color:${isAsap ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
@@ -1460,7 +1454,7 @@
       const _ssZip   = sessionStorage.getItem('micsas_zip');
       const _ssFloor = sessionStorage.getItem('micsas_floor');
       if (_ssDate) cfDeliveryDate = _ssDate;
-      if (_ssTime && !cfSelectedTime) cfSelectedTime = _ssTime;
+      if (_ssTime && !cfSelectedTime && CF_REAL_SLOTS.includes(_ssTime)) cfSelectedTime = _ssTime;
       // Defensa extra si sessionStorage porta una data no vàlida (viernes/domingo).
       if (!isValidOrderDay(cfDeliveryDate)) {
         cfDeliveryDate = isValidOrderDay(todayISO()) ? todayISO() : nextValidDate(todayISO());
@@ -1836,7 +1830,11 @@
     // estona emplenant el formulari abans de prémer "Demana", i cal el
     // mateix marge que a l'hora de triar-la, no només que no hagi passat.
     function isSlotStillValid() {
-      if (!cfSelectedTime || cfDeliveryDate !== todayISO()) return true;
+      if (!cfSelectedTime) return true;
+      // Una hora que ja no és a l'horari (p.ex. guardada abans d'un canvi
+      // d'horari) no és vàlida per a cap dia.
+      if (!CF_REAL_SLOTS.includes(cfSelectedTime)) return false;
+      if (cfDeliveryDate !== todayISO()) return true;
       const m = /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
       if (!m) return true;
       const now = new Date();
