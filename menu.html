@@ -148,12 +148,15 @@
            Per defecte (sense JS o amb "reduir moviment") cada fila es llisca
            amb el dit. Amb JS, .pz-pinned fixa la fila a la pantalla i el
            scroll vertical la mou cap a l'esquerra. */
-        .pz-row { position: relative; margin-bottom: 4rem; }
-        .pz-sticky { position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .pz-menu { position: relative; margin-bottom: 4rem; }
+        .pz-sticky, .pz-stage { position: relative; }
+        .pz-row { position: relative; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 4rem; }
+        .pz-row:last-child { margin-bottom: 0; }
         .pz-head { position: relative; width: 100%; }
-        .pz-pinned .pz-row { margin-bottom: 0; }
         .pz-pinned #menu-pizzes { padding-top: 0; }
-        .pz-pinned .pz-sticky { position: sticky; top: 0; height: 100vh; height: calc(var(--pz-vh) * 100); }
+        .pz-pinned .pz-sticky { position: sticky; top: 0; height: 100vh; height: calc(var(--pz-vh) * 100); overflow: hidden; }
+        .pz-pinned .pz-stage { will-change: transform; }
+        .pz-pinned .pz-row { height: 100vh; height: calc(var(--pz-vh) * 100); margin-bottom: 0; }
         .pz-pinned .pz-head { padding-top: 88px; }
         @media (min-width: 768px) { .pz-pinned .pz-head { padding-top: 100px; } }
 
@@ -357,9 +360,14 @@
         @media (min-width: 768px) { .pizza-back-desc { font-size: 1.05rem; } }
       </style>
 
+      <!-- FILES DE PIZZES: amb JS queden fixades i el scroll les recorre (primer en
+           horitzontal, després baixa a la fila següent, sempre a la mateixa velocitat) -->
+      <section class="pz-menu" aria-label="Pizzes">
+      <div class="pz-sticky">
+      <div class="pz-stage">
+
       <!-- CLÀSSIQUES -->
-      <section class="pz-row" aria-label="Pizzes Clàssiques">
-        <div class="pz-sticky">
+        <div class="pz-row" role="group" aria-label="Pizzes Clàssiques">
           <div class="pz-head px-6 md:px-12 max-w-6xl mx-auto">
             <div class="border-b border-[#F2E6CE]/50 pb-4">
               <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
@@ -487,11 +495,9 @@
 
           </div>
         </div>
-      </section>
 
       <!-- DE LA CASA -->
-      <section class="pz-row" aria-label="Pizzes de la casa">
-        <div class="pz-sticky">
+        <div class="pz-row" role="group" aria-label="Pizzes de la casa">
           <div class="pz-head px-6 md:px-12 max-w-6xl mx-auto">
             <div class="border-b border-[#F2E6CE]/50 pb-4">
               <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
@@ -633,6 +639,9 @@
 
           </div>
         </div>
+
+      </div>
+      </div>
       </section>
 
       <!-- CTA inferior -->
@@ -761,61 +770,81 @@
       doReveal();
 
       // ── Files de pizzes: el scroll vertical les mou cap a l'esquerra ──
-      // Cada fila es queda fixada a la pantalla mentre les seves targetes
-      // passen; quan arriba a l'última, la pàgina continua cap a la següent.
+      // La zona de pizzes es queda fixada a la pantalla. El scroll fa passar
+      // les pizzes de la primera fila, després baixa fins a la segona fila i
+      // en fa passar les pizzes, tot a la mateixa velocitat i amb la mateixa suavitat.
       (function () {
-        // Píxels de scroll vertical per cada píxel que avança la fila (més alt = més lent)
+        // Píxels de scroll per cada píxel que es mou el menú (més alt = més lent)
         const SPEED = 1.8;
-        // Suavitat: la fila llisca cap a la posició del scroll en lloc de saltar-hi
+        // Suavitat: el menú llisca cap a la posició del scroll en lloc de saltar-hi
         const EASE = 0.075;
         const root = document.documentElement;
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const rows = Array.from(document.querySelectorAll('.pz-row')).map(row => ({
-          row,
-          sticky: row.querySelector('.pz-sticky'),
+        const menu = document.querySelector('.pz-menu');
+        if (!menu) return;
+        const sticky = menu.querySelector('.pz-sticky');
+        const stage = menu.querySelector('.pz-stage');
+        const rows = Array.from(menu.querySelectorAll('.pz-row')).map(row => ({
           track: row.querySelector('.pizza-grid'),
-          dist: 0,
-          cur: 0,
         }));
+        // Trams del recorregut: horitzontal (una fila) o vertical (canvi de fila)
+        let steps = [];
+        let total = 0;
         let pinned = false;
+        let cur = 0;
         let raf = 0;
         let lastT = 0;
 
         function measure() {
           pinned = !reduceMotion.matches && window.innerHeight >= 520;
           root.classList.toggle('pz-pinned', pinned);
-          rows.forEach(r => {
-            r.track.style.transform = '';
-            r.dist = pinned ? Math.max(0, r.track.offsetWidth - r.sticky.clientWidth) : 0;
-            // Una mica de recorregut extra perquè l'última pizza es vegi quieta abans de seguir
-            const hold = r.dist ? Math.round(r.sticky.offsetHeight * 0.25) : 0;
-            r.row.style.height = pinned ? Math.round(r.sticky.offsetHeight + r.dist * SPEED + hold) + 'px' : '';
+          stage.style.transform = '';
+          rows.forEach(r => { r.track.style.transform = ''; });
+          steps = [];
+          total = 0;
+          if (!pinned) {
+            menu.style.height = '';
+            return;
+          }
+          const h = sticky.clientHeight;
+          rows.forEach((r, i) => {
+            if (i > 0) steps.push({ len: h });
+            steps.push({ len: Math.max(0, r.track.offsetWidth - sticky.clientWidth), track: r.track });
           });
+          total = steps.reduce((sum, st) => sum + st.len, 0);
+          menu.style.height = Math.round(h + total * SPEED) + 'px';
           render(true);
         }
 
-        function target(r) {
-          if (!pinned || !r.dist) return 0;
-          const top = r.row.getBoundingClientRect().top;
-          return Math.min(1, Math.max(0, -top / (r.dist * SPEED)));
+        function goal() {
+          const top = menu.getBoundingClientRect().top;
+          return Math.min(total, Math.max(0, -top / SPEED));
         }
 
-        // Mou cada fila; retorna true si encara està lliscant cap al seu lloc
+        function apply(v) {
+          let y = 0;
+          steps.forEach(st => {
+            const d = Math.min(st.len, Math.max(0, v));
+            v -= st.len;
+            if (st.track) st.track.style.transform = 'translate3d(' + (-d).toFixed(1) + 'px,0,0)';
+            else y += d;
+          });
+          stage.style.transform = 'translate3d(0,' + (-y).toFixed(1) + 'px,0)';
+        }
+
+        // Mou el menú; retorna true si encara està lliscant cap al seu lloc
         function render(snap, dt) {
           if (!pinned) return false;
-          const k = 1 - Math.pow(1 - EASE, (dt || 16.7) / 16.7);
+          const g = goal();
           let moving = false;
-          rows.forEach(r => {
-            const goal = target(r);
-            if (snap) {
-              r.cur = goal;
-            } else {
-              r.cur += (goal - r.cur) * k;
-              if (Math.abs(goal - r.cur) * r.dist < 0.4) r.cur = goal;
-              else moving = true;
-            }
-            r.track.style.transform = 'translate3d(' + (-r.cur * r.dist).toFixed(1) + 'px,0,0)';
-          });
+          if (snap) {
+            cur = g;
+          } else {
+            cur += (g - cur) * (1 - Math.pow(1 - EASE, (dt || 16.7) / 16.7));
+            if (Math.abs(g - cur) < 0.4) cur = g;
+            else moving = true;
+          }
+          apply(cur);
           return moving;
         }
 
