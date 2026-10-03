@@ -125,156 +125,78 @@
     </nav>
 
     <!-- ════ HEADER ════ -->
-    <header class="pt-32 pb-6 px-6 md:px-12 text-center">
-      <div class="reveal max-w-5xl mr-auto ml-auto visible">
-        <h1 class="font-['League_Spartan',sans-serif] font-black uppercase tracking-[-0.04em] leading-[0.85] text-6xl md:text-8xl lg:text-9xl mt-3 text-[#F2E6CE] mb-8" data-i18n="menu_h1">
-          Les nostres pizzes
+    <header class="pt-32 pb-16 px-6 md:px-12 text-center">
+      <div class="reveal max-w-3xl mr-auto ml-auto visible">
+        <h1 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-5xl md:text-6xl mt-3 text-[#F2E6CE] mb-1" data-i18n="menu_h1">
+          La carta de micsas
         </h1>
-        <a href="pre-pedido.html" class="header-demana-btn inline-block px-9 py-3.5 font-['League_Spartan',sans-serif] font-extrabold uppercase tracking-wide text-[16px] leading-[1.5] text-[#c80a07] bg-[#F2E6CE] shadow-[6px_6px_0_#7d0503] transition-all hover:-translate-y-0.5" data-i18n="demana">
+<a href="pre-pedido.html" class="header-demana-btn inline-block mt-4 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[#E23F2E] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5" data-i18n="demana">
           Demana ja! →
         </a>
-        <div>
-          <div class="pz-scroll-cue" aria-hidden="true">
-            <span data-i18n="menu_scroll">Fes scroll</span>
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v16m0 0l-6.5-6.5M12 19l6.5-6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/></svg>
-          </div>
-        </div>
       </div>
     </header>
 
     <!-- ════ LA CARTA ════ -->
-    <main id="menu-pizzes" class="pb-32" style="background-color:#c80a07;">
+    <main id="menu-pizzes" class="py-16 pb-32" style="background-color:#c80a07;">
       <style>
-        :root {
-          --card-bg: #FFFFFF;
-          --pz-red: #c80a07;
-          --pz-cream: #F2E6CE;
-          --pz-ink: #2A1A0F;
-          --pz-vh: 1vh;
-        }
+        :root { --card-bg: #FFFFFF; --pz-vh: 1vh; }
         @supports (height: 1svh) { :root { --pz-vh: 1svh; } }
-
-        /* ── Cintes de text en moviment ── */
-        .pz-tapes { position: relative; height: 140px; overflow: hidden; }
         /* overflow-x: clip no trenca position: sticky (on n'hi ha suport) */
         html body { overflow-x: clip; }
-        .pz-tape {
-          position: absolute; left: -10vw; width: 120vw;
-          overflow: hidden; white-space: nowrap;
-          font-family: 'League Spartan', sans-serif; font-weight: 900;
-          text-transform: uppercase; letter-spacing: 0.02em;
-          font-size: 1.15rem; line-height: 1; padding: 13px 0 10px;
-        }
-        @media (min-width: 768px) {
-          .pz-tape { font-size: 1.5rem; padding: 16px 0 13px; }
-          .pz-tape-b { top: 64px; }
-        }
-        .pz-tape-a { top: 28px; background: var(--pz-cream); color: var(--pz-red); transform: rotate(-3deg); z-index: 2; }
-        .pz-tape-b { top: 76px; background: #8f0705; color: var(--pz-cream); transform: rotate(2.5deg); z-index: 1; }
-        .pz-tapes-single { height: 110px; }
-        .pz-tapes-single .pz-tape-a { top: 32px; transform: rotate(2deg); background: var(--pz-red); color: var(--pz-cream); }
-        .pz-tape-track { display: inline-flex; animation: pzMarquee 38s linear infinite; }
-        .pz-tape-b .pz-tape-track { animation-direction: reverse; animation-duration: 46s; }
-        .pz-tape-track span { padding-right: 0.6em; }
-        @keyframes pzMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-        /* ── Avís de scroll ── */
-        .pz-scroll-cue {
-          display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
-          margin-top: 34px; color: var(--pz-cream);
-          font-weight: 700; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
-        }
-        .pz-scroll-cue svg { width: 22px; height: 22px; animation: pzCue 1.6s ease-in-out infinite; }
-        @keyframes pzCue { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
-
-        /* ── Fila de categoria ── */
-        .pz-row { position: relative; background: var(--pz-red); --pz-shadow: #7d0503; --pz-word: #b30805; }
-        .pz-row-cream { background: var(--pz-cream); --pz-shadow: #c80a07; --pz-word: #e8d7b6; }
+        /* ── Files de pizzes ──
+           Per defecte (sense JS o amb "reduir moviment") cada fila es llisca
+           amb el dit. Amb JS, .pz-pinned fixa la fila a la pantalla i el
+           scroll vertical la mou cap a l'esquerra. */
+        .pz-row { position: relative; margin-bottom: 4rem; }
         .pz-sticky { position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        .pz-head {
-          position: relative; z-index: 2;
-          display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
-          padding: 40px 24px 18px;
-        }
-        @media (min-width: 768px) { .pz-head { padding: 48px 48px 22px; } }
-        .pz-kicker {
-          font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
-          color: rgba(242,230,206,0.75); margin: 0 0 6px;
-        }
-        .pz-title {
-          font-family: 'League Spartan', sans-serif; font-weight: 900;
-          font-size: clamp(2.2rem, 10vw, 5rem); line-height: 0.88; letter-spacing: -0.035em;
-          text-transform: uppercase; color: var(--pz-cream); margin: 0;
-        }
-        @media (min-width: 768px) { .pz-br { display: none; } }
-        .pz-count {
-          font-weight: 800; color: var(--pz-cream); font-variant-numeric: tabular-nums;
-          font-size: 0.95rem; letter-spacing: 0.06em; white-space: nowrap; padding-bottom: 4px;
-        }
-        .pz-count-now { font-size: 2.1rem; letter-spacing: -0.02em; }
-        @media (min-width: 768px) { .pz-count-now { font-size: 3rem; } }
-        .pz-row-cream .pz-kicker { color: rgba(200,10,7,0.75); }
-        .pz-row-cream .pz-title, .pz-row-cream .pz-count { color: var(--pz-red); }
+        .pz-head { position: relative; width: 100%; }
+        .pz-pinned .pz-row { margin-bottom: 0; }
+        .pz-pinned #menu-pizzes { padding-top: 0; }
+        .pz-pinned .pz-sticky { position: sticky; top: 0; height: 100vh; height: calc(var(--pz-vh) * 100); }
+        .pz-pinned .pz-head { padding-top: 88px; }
+        @media (min-width: 768px) { .pz-pinned .pz-head { padding-top: 100px; } }
 
-        .pz-bgword {
-          position: absolute; left: 0; top: 54%; z-index: 0;
-          transform: translate3d(var(--bx, 0px), -50%, 0);
-          font-family: 'League Spartan', sans-serif; font-weight: 900;
-          font-size: calc(var(--pz-vh) * 42); line-height: 0.8; letter-spacing: -0.04em;
-          text-transform: uppercase; white-space: nowrap;
-          color: var(--pz-word);
-          pointer-events: none; user-select: none;
-        }
-
-        .pz-progress {
-          position: relative; z-index: 2;
-          height: 4px; margin: 6px 24px 18px;
-          background: rgba(242,230,206,0.25);
-        }
-        @media (min-width: 768px) { .pz-progress { margin: 8px 48px 30px; } }
-        .pz-progress span {
-          display: block; height: 100%; background: var(--pz-cream);
-          transform: scaleX(0); transform-origin: 0 50%;
-        }
-        .pz-row-cream .pz-progress { background: rgba(200,10,7,0.2); }
-        .pz-row-cream .pz-progress span { background: var(--pz-red); }
-
-        /* ── Pista de targetes ──
-           Per defecte (sense JS o amb "reduir moviment") és una fila que es
-           llisca amb el dit. Amb JS, .pz-pinned fixa cada fila a la pantalla
-           i el scroll vertical la mou cap a l'esquerra. */
         .pizza-grid {
-          --cw: max(240px, min(80vw, calc(var(--pz-vh) * 100 - 350px)));
+          --cw: max(240px, min(84vw, calc(var(--pz-vh) * 100 - 300px)));
           --info-h: 100px;
-          position: relative; z-index: 1;
-          display: flex; align-items: center; gap: 22px;
-          padding: 18px 24px 30px;
-          overflow-x: auto; overflow-y: hidden;
-          scroll-snap-type: x mandatory; scroll-padding-left: 24px;
-          scrollbar-width: thin; scrollbar-color: rgba(242,230,206,0.6) transparent;
-          counter-reset: pz;
+          --pad: 24px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 24px var(--pad) 32px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-snap-type: x mandatory;
+          scroll-padding-left: var(--pad);
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
         }
+        .pizza-grid::-webkit-scrollbar { display: none; }
         @media (min-width: 768px) {
           .pizza-grid {
-            --cw: max(260px, min(31vw, calc(var(--pz-vh) * 100 - 420px), 520px));
-            --info-h: 132px;
-            gap: 34px; padding: 22px 48px 34px; scroll-padding-left: 48px;
+            --cw: max(260px, min(31vw, calc(var(--pz-vh) * 100 - 360px), 520px));
+            --info-h: 124px;
+            /* alineat amb el títol (max-w-6xl + px-12) */
+            --pad: max(48px, calc((100% - 72rem) / 2 + 48px));
+            gap: 16px;
           }
         }
-        .pz-pinned .pz-sticky { position: sticky; top: 0; height: 100vh; height: calc(var(--pz-vh) * 100); }
-        .pz-pinned .pz-head { padding-top: 84px; }
-        @media (min-width: 768px) { .pz-pinned .pz-head { padding-top: 104px; } }
         .pz-pinned .pizza-grid {
-          flex: 1; width: max-content; overflow: visible;
-          scroll-snap-type: none; padding-top: 0; padding-bottom: 0;
+          flex: 1;
+          width: max-content;
+          overflow: visible;
+          scroll-snap-type: none;
+          padding-top: 0;
+          padding-bottom: 8px;
           will-change: transform;
         }
 
         /* Flip hint finger */
         .flip-hint {
           position: absolute;
-          bottom: calc(var(--info-h) + 14px);
-          right: 14px;
+          bottom: 12px;
+          right: 12px;
           z-index: 10;
           pointer-events: none;
           display: flex;
@@ -285,16 +207,15 @@
           transition: opacity 0.4s;
         }
         .flip-hint.hide { opacity: 0; }
-        .flip-hint svg { width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        .flip-hint svg { width: 24px; height: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
         @keyframes hintBounce {
           0%, 100% { transform: translateY(0) rotate(-15deg); }
           40%       { transform: translateY(-6px) rotate(-15deg); }
           60%       { transform: translateY(-3px) rotate(-15deg); }
         }
 
-        /* Card (Scene) — --p (0→1) és quant ha "entrat" la targeta a la pantalla */
+        /* Card (Scene) */
         .pizza-grid-card {
-          --p: 1;
           position: relative;
           flex: 0 0 auto;
           width: var(--cw);
@@ -303,21 +224,14 @@
           perspective: 1400px;
           cursor: pointer;
           border-radius: 0;
-          box-shadow: 10px 10px 0 var(--pz-shadow);
-          transform-origin: 50% 100%;
-          transform:
-            translate3d(0, calc((1 - var(--p)) * 80px), 0)
-            rotate(calc(var(--tilt, 0deg) + (1 - var(--p)) * 12deg))
-            scale(calc(0.84 + var(--p) * 0.16));
-          transition: box-shadow 0.25s ease;
+          box-shadow: 0 6px 28px rgba(30,8,4,0.32);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .pizza-grid-card:nth-child(4n+1) { --tilt: -1.4deg; }
-        .pizza-grid-card:nth-child(4n+2) { --tilt: 1deg; }
-        .pizza-grid-card:nth-child(4n+3) { --tilt: -0.6deg; }
-        .pizza-grid-card:nth-child(4n+4) { --tilt: 1.5deg; }
-        .pizza-grid-card { counter-increment: pz; }
         @media (hover: hover) {
-          .pizza-grid-card:hover { box-shadow: 15px 15px 0 var(--pz-shadow); }
+          .pizza-grid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 44px rgba(30,8,4,0.46);
+          }
         }
         .pizza-grid-card-inner {
           position: relative;
@@ -369,20 +283,22 @@
           transform: translate(-50%, -50%) rotate(-10deg);
           z-index: 5;
           border: 3px solid #c80a07;
-          padding: 8px 20px;
-          background: rgba(242,230,206,0.92);
+          border-radius: 6px;
+          padding: 6px 16px;
+          background: rgba(242,230,206,0.9);
           color: #c80a07;
           font-family: 'League Spartan', sans-serif;
           font-weight: 900;
-          font-size: 1.1rem;
-          line-height: 1.15;
+          font-size: 13px;
+          line-height: 1.2;
           letter-spacing: 0.05em;
           text-transform: uppercase;
           text-align: center;
           pointer-events: none;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.18);
         }
         .pizza-card-photo-back {
-          width: 100%; height: 38%;
+          width: 100%; height: 45%;
           object-fit: cover;
           display: block;
           flex-shrink: 0;
@@ -390,60 +306,39 @@
         }
         .pizza-card-body {
           height: var(--info-h);
-          padding: 12px 54px 14px 18px;
+          padding: 12px 18px 16px;
           display: flex;
           flex-direction: column;
           justify-content: center;
           background: var(--card-bg);
         }
-        @media (min-width: 768px) { .pizza-card-body { padding: 14px 60px 16px 22px; } }
-        /* Número de la targeta i icona de girar */
-        .pizza-card-body::before {
-          content: '↻';
-          position: absolute; right: 16px; top: calc(var(--cw) + 12px);
-          font-size: 1.25rem; font-weight: 700; line-height: 1; color: var(--pz-red);
-        }
-        .pizza-card-body::after {
-          content: counter(pz, decimal-leading-zero);
-          position: absolute; right: 16px; bottom: 12px;
-          font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em;
-          color: rgba(42,26,15,0.35);
-        }
         .pizza-grid-price {
-          position: absolute; top: 14px; left: 14px; z-index: 3;
           font-family: 'League Spartan', sans-serif;
-          font-size: 1.35rem; font-weight: 900; line-height: 1;
-          padding: 8px 12px 5px;
-          background: var(--pz-red); color: #FFFFFF;
-          transform: rotate(-4deg);
-          box-shadow: 3px 3px 0 #7d0503;
+          font-size: 1.4rem; font-weight: 700;
+          color: #c80a07;
+          display: block; margin-bottom: 3px;
         }
-        @media (min-width: 768px) { .pizza-grid-price { font-size: 1.6rem; top: 18px; left: 18px; } }
         .pizza-grid-name {
-          font-family: 'League Spartan', sans-serif; font-weight: 900;
-          font-size: clamp(1.35rem, 6.2vw, 2rem); letter-spacing: -0.01em;
+          font-family: 'League Spartan', sans-serif; font-weight: 600;
+          font-size: 1rem; letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--pz-ink); line-height: 0.95;
+          color: #3a2e25; line-height: 1.25;
           display: block;
         }
         .pizza-grid-subtitle {
           font-family: 'League Spartan', sans-serif;
-          font-size: 0.78rem; font-weight: 700;
-          color: var(--pz-red); text-transform: uppercase;
-          letter-spacing: 0.12em;
-          display: block; margin-top: 7px;
+          font-size: 0.75rem; font-weight: 400;
+          color: #7a6355; text-transform: uppercase;
+          letter-spacing: 0.07em;
+          display: block; margin-top: 3px;
         }
-        .pz-sticker {
-          position: absolute; top: 16px; right: 16px; z-index: 3;
-          padding: 7px 11px 5px;
-          background: var(--pz-cream); color: var(--pz-red);
-          font-family: 'League Spartan', sans-serif; font-weight: 900;
-          font-size: 0.85rem; letter-spacing: 0.08em; line-height: 1; text-transform: uppercase;
-          transform: rotate(7deg);
-          box-shadow: 2px 2px 0 rgba(42,26,15,0.25);
+        @media (min-width: 768px) {
+          .pizza-grid-price { font-size: 1.6rem; }
+          .pizza-grid-name { font-size: 1.1rem; }
+          .pizza-card-body { padding: 14px 22px 18px; }
         }
         .pizza-card-body-back {
-          padding: 18px 22px 20px;
+          padding: 16px 18px 18px;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -452,50 +347,28 @@
         }
         .pizza-back-desc {
           font-family: 'League Spartan', sans-serif;
-          font-size: clamp(0.98rem, 4.2vw, 1.15rem);
+          font-size: 0.95rem;
           font-weight: 400;
-          color: var(--pz-ink);
+          color: #2A1A0F;
           line-height: 1.45;
           text-align: center;
           margin: 0;
         }
-        .pizza-back-desc strong { color: var(--pz-red); font-weight: 800; }
-
-        @media (prefers-reduced-motion: reduce) {
-          .pz-tape-track, .pz-scroll-cue svg, .flip-hint { animation: none; }
-        }
+        @media (min-width: 768px) { .pizza-back-desc { font-size: 1.05rem; } }
       </style>
 
-      <!-- Cintes -->
-      <div class="pz-tapes" aria-hidden="true">
-        <div class="pz-tape pz-tape-b"><div class="pz-tape-track">
-          <span data-i18n="menu_tape_b">Massa fermentada 30 hores ✦ Ingredients de proximitat ✦</span>
-          <span data-i18n="menu_tape_b">Massa fermentada 30 hores ✦ Ingredients de proximitat ✦</span>
-          <span data-i18n="menu_tape_b">Massa fermentada 30 hores ✦ Ingredients de proximitat ✦</span>
-          <span data-i18n="menu_tape_b">Massa fermentada 30 hores ✦ Ingredients de proximitat ✦</span>
-          <span data-i18n="menu_tape_b">Massa fermentada 30 hores ✦ Ingredients de proximitat ✦</span>
-          <span data-i18n="menu_tape_b">Massa fermentada 30 hores ✦ Ingredients de proximitat ✦</span>
-        </div></div>
-        <div class="pz-tape pz-tape-a"><div class="pz-tape-track">
-          <span data-i18n="menu_tape_a">Pizza napolitana ✦ Feta a Matadepera ✦ Hot &amp; Fast ✦ Divendres i diumenge ✦</span>
-          <span data-i18n="menu_tape_a">Pizza napolitana ✦ Feta a Matadepera ✦ Hot &amp; Fast ✦ Divendres i diumenge ✦</span>
-          <span data-i18n="menu_tape_a">Pizza napolitana ✦ Feta a Matadepera ✦ Hot &amp; Fast ✦ Divendres i diumenge ✦</span>
-          <span data-i18n="menu_tape_a">Pizza napolitana ✦ Feta a Matadepera ✦ Hot &amp; Fast ✦ Divendres i diumenge ✦</span>
-          <span data-i18n="menu_tape_a">Pizza napolitana ✦ Feta a Matadepera ✦ Hot &amp; Fast ✦ Divendres i diumenge ✦</span>
-          <span data-i18n="menu_tape_a">Pizza napolitana ✦ Feta a Matadepera ✦ Hot &amp; Fast ✦ Divendres i diumenge ✦</span>
-        </div></div>
-      </div>
-
       <!-- CLÀSSIQUES -->
-      <section class="pz-row" aria-labelledby="pz-title-1">
+      <section class="pz-row" aria-label="Pizzes Clàssiques">
         <div class="pz-sticky">
-          <span class="pz-bgword" aria-hidden="true">Clàssiques</span>
-          <div class="pz-head">
-            <div>
-              <p class="pz-kicker">tradició napolitana</p>
-              <h2 class="pz-title" id="pz-title-1">Pizzes <br class="pz-br">Clàssiques</h2>
+          <div class="pz-head px-6 md:px-12 max-w-6xl mx-auto">
+            <div class="border-b border-[#F2E6CE]/50 pb-4">
+              <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
+                Pizzes Clàssiques
+              </h2>
+              <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#F2E6CE]/70">
+                tradició napolitana
+              </p>
             </div>
-            <div class="pz-count" aria-hidden="true"><span class="pz-count-now">01</span> / <span class="pz-count-total">04</span></div>
           </div>
           <div class="pizza-grid pizza-grid-classics">
 
@@ -611,33 +484,23 @@
                 </div>
               </div>
             </div>
+
           </div>
-          <div class="pz-progress" aria-hidden="true"><span></span></div>
         </div>
       </section>
 
-      <!-- Cinta -->
-      <div class="pz-tapes pz-tapes-single" aria-hidden="true" style="background:var(--pz-cream)">
-        <div class="pz-tape pz-tape-a"><div class="pz-tape-track">
-          <span data-i18n="menu_tape_c">Toca una pizza per veure'n els ingredients ✦</span>
-          <span data-i18n="menu_tape_c">Toca una pizza per veure'n els ingredients ✦</span>
-          <span data-i18n="menu_tape_c">Toca una pizza per veure'n els ingredients ✦</span>
-          <span data-i18n="menu_tape_c">Toca una pizza per veure'n els ingredients ✦</span>
-          <span data-i18n="menu_tape_c">Toca una pizza per veure'n els ingredients ✦</span>
-          <span data-i18n="menu_tape_c">Toca una pizza per veure'n els ingredients ✦</span>
-        </div></div>
-      </div>
-
       <!-- DE LA CASA -->
-      <section class="pz-row pz-row-cream" aria-labelledby="pz-title-2">
+      <section class="pz-row" aria-label="Pizzes de la casa">
         <div class="pz-sticky">
-          <span class="pz-bgword" aria-hidden="true">De la casa</span>
-          <div class="pz-head">
-            <div>
-              <p class="pz-kicker">les nostres creacions</p>
-              <h2 class="pz-title" id="pz-title-2">Pizzes <br class="pz-br">de la casa</h2>
+          <div class="pz-head px-6 md:px-12 max-w-6xl mx-auto">
+            <div class="border-b border-[#F2E6CE]/50 pb-4">
+              <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
+                Pizzes de la casa
+              </h2>
+              <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#F2E6CE]/70">
+                les nostres creacions
+              </p>
             </div>
-            <div class="pz-count" aria-hidden="true"><span class="pz-count-now">01</span> / <span class="pz-count-total">05</span></div>
           </div>
           <div class="pizza-grid">
 
@@ -672,7 +535,6 @@
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
                   <img src="images/inferno-di-nduja.webp" alt="INFERNO DI 'NDUJA" loading="lazy" width="800" height="800" class="pizza-card-photo">
-                  <span class="pz-sticker" data-i18n="menu_st_picant">Picant</span>
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">INFERNO DI 'NDUJA</span>
@@ -751,7 +613,6 @@
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
                   <img src="images/nutellina.webp" alt="NUTELLINA" loading="lazy" width="800" height="800" class="pizza-card-photo">
-                  <span class="pz-sticker" data-i18n="menu_st_dolca">Dolça</span>
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">NUTELLINA</span>
@@ -769,19 +630,18 @@
                 </div>
               </div>
             </div>
+
           </div>
-          <div class="pz-progress" aria-hidden="true"><span></span></div>
         </div>
       </section>
 
       <!-- CTA inferior -->
-      <div class="px-6 md:px-12 pt-24 text-center reveal">
-        <p class="font-['League_Spartan',sans-serif] font-black uppercase tracking-tight leading-[0.9] text-4xl md:text-6xl text-[#F2E6CE] mb-8" data-i18n="menu_cta_big">
-          Tens gana?
-        </p>
-        <a href="pre-pedido.html" class="inline-block px-10 py-4 font-['League_Spartan',sans-serif] font-extrabold uppercase tracking-wide text-[18px] leading-[1.5] text-[#c80a07] bg-[#F2E6CE] shadow-[8px_8px_0_#7d0503] transition-all hover:-translate-y-0.5 hover:shadow-[11px_11px_0_#7d0503]" data-i18n="demana">
-          Demana ja! →
-        </a>
+      <div class="px-6 md:px-12 max-w-6xl mx-auto">
+        <div class="text-center reveal">
+          <a href="pre-pedido.html" class="inline-block px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[#E23F2E] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5" data-i18n="demana">
+            Demana ja! →
+          </a>
+        </div>
       </div>
     </main>
 
@@ -914,16 +774,9 @@
           row,
           sticky: row.querySelector('.pz-sticky'),
           track: row.querySelector('.pizza-grid'),
-          word: row.querySelector('.pz-bgword'),
-          bar: row.querySelector('.pz-progress span'),
-          now: row.querySelector('.pz-count-now'),
-          total: row.querySelector('.pz-count-total'),
-          cards: Array.from(row.querySelectorAll('.pizza-grid-card')).map(el => ({ el, x: 0, w: 0, p: -1 })),
           dist: 0,
-          count: 0,
           cur: 0,
         }));
-        rows.forEach(r => { if (r.total) r.total.textContent = String(r.cards.length).padStart(2, '0'); });
         let pinned = false;
         let raf = 0;
         let lastT = 0;
@@ -933,68 +786,35 @@
           root.classList.toggle('pz-pinned', pinned);
           rows.forEach(r => {
             r.track.style.transform = '';
-            if (r.word) r.word.style.removeProperty('--bx');
             r.dist = pinned ? Math.max(0, r.track.offsetWidth - r.sticky.clientWidth) : 0;
-            // Una mica de recorregut extra perquè l'última targeta es vegi quieta abans de seguir
+            // Una mica de recorregut extra perquè l'última pizza es vegi quieta abans de seguir
             const hold = r.dist ? Math.round(r.sticky.offsetHeight * 0.25) : 0;
             r.row.style.height = pinned ? Math.round(r.sticky.offsetHeight + r.dist * SPEED + hold) + 'px' : '';
-            r.cards.forEach(c => { c.x = c.el.offsetLeft; c.w = c.el.offsetWidth; });
           });
           render(true);
         }
 
         function target(r) {
-          if (!pinned) {
-            const max = r.track.scrollWidth - r.track.clientWidth;
-            return max > 0 ? r.track.scrollLeft / max : 0;
-          }
-          if (!r.dist) return 0;
+          if (!pinned || !r.dist) return 0;
           const top = r.row.getBoundingClientRect().top;
           return Math.min(1, Math.max(0, -top / (r.dist * SPEED)));
         }
 
-        // Pinta cada fila; retorna true si encara s'està movent cap al seu lloc
+        // Mou cada fila; retorna true si encara està lliscant cap al seu lloc
         function render(snap, dt) {
-          const vw = window.innerWidth;
+          if (!pinned) return false;
           const k = 1 - Math.pow(1 - EASE, (dt || 16.7) / 16.7);
           let moving = false;
           rows.forEach(r => {
             const goal = target(r);
-            if (snap || !pinned) {
+            if (snap) {
               r.cur = goal;
             } else {
               r.cur += (goal - r.cur) * k;
               if (Math.abs(goal - r.cur) * r.dist < 0.4) r.cur = goal;
               else moving = true;
             }
-            const progress = r.cur;
-            const shift = pinned ? progress * r.dist : r.track.scrollLeft;
-            if (pinned) {
-              r.track.style.transform = 'translate3d(' + (-shift).toFixed(1) + 'px,0,0)';
-              if (r.word) {
-                const travel = Math.max(0, r.word.offsetWidth - vw * 0.6);
-                r.word.style.setProperty('--bx', (-progress * travel).toFixed(1) + 'px');
-              }
-            }
-            if (r.bar) r.bar.style.transform = 'scaleX(' + progress.toFixed(3) + ')';
-
-            // Cada targeta "entra" girada i petita i es posa al seu lloc
-            let entered = 0;
-            r.cards.forEach(c => {
-              const left = c.x - shift;
-              const settle = Math.min(vw * 0.5, c.w * 1.05);
-              const p = Math.min(1, Math.max(0, (vw - left) / settle));
-              if (p > 0.5) entered++;
-              if (Math.abs(p - c.p) > 0.002) {
-                c.p = p;
-                c.el.style.setProperty('--p', p.toFixed(3));
-              }
-            });
-            entered = Math.max(1, entered);
-            if (r.now && entered !== r.count) {
-              r.count = entered;
-              r.now.textContent = String(entered).padStart(2, '0');
-            }
+            r.track.style.transform = 'translate3d(' + (-r.cur * r.dist).toFixed(1) + 'px,0,0)';
           });
           return moving;
         }
@@ -1025,10 +845,8 @@
           }
         });
         window.addEventListener('scroll', queue, { passive: true });
-        rows.forEach(r => r.track.addEventListener('scroll', queue, { passive: true }));
         if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', measure);
         window.addEventListener('load', measure);
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
         measure();
       })();
 

@@ -44,11 +44,6 @@
       menu_sec3: 'Begudes & Postres', menu_cerv_d: 'Producció local · 33 cl',
       menu_tira_d: 'Fet a la cuina cada dia',
       menu_cta: "T'hem convençut? Ara pots triar i demanar.",
-      menu_scroll: 'Fes scroll', menu_cta_big: 'Tens gana?',
-      menu_tape_a: 'Pizza napolitana ✦ Feta a Matadepera ✦ Hot & Fast ✦ Divendres i diumenge ✦',
-      menu_tape_b: 'Massa fermentada 30 hores ✦ Ingredients de proximitat ✦',
-      menu_tape_c: "Toca una pizza per veure'n els ingredients ✦",
-      menu_st_picant: 'Picant', menu_st_dolca: 'Dolça',
       // EVENTS
       ev_tornar: 'Tornar', ev_title: 'Portem el forn de pizza al teu esdeveniment',
       ev_sub: "Pizzes napolitanes fetes al moment, allà on tu vulguis. Casaments, festes d'empresa, aniversaris o qualsevol celebració que es mereixi una pizza de veritat.",
@@ -125,11 +120,6 @@
       menu_sec3: 'Bebidas & Postres', menu_cerv_d: 'Producción local · 33 cl',
       menu_tira_d: 'Hecho en la cocina cada día',
       menu_cta: "¿Te hemos convencido? Ya puedes elegir y pedir.",
-      menu_scroll: 'Haz scroll', menu_cta_big: '¿Tienes hambre?',
-      menu_tape_a: 'Pizza napolitana ✦ Hecha en Matadepera ✦ Hot & Fast ✦ Viernes y domingo ✦',
-      menu_tape_b: 'Masa fermentada 30 horas ✦ Ingredientes de proximidad ✦',
-      menu_tape_c: 'Toca una pizza para ver sus ingredientes ✦',
-      menu_st_picant: 'Picante', menu_st_dolca: 'Dulce',
       // EVENTS
       ev_tornar: 'Volver', ev_title: 'Llevamos el horno de pizza a tu evento',
       ev_sub: "Pizzas napolitanas hechas al momento, donde tú quieras. Bodas, fiestas de empresa, aniversarios o cualquier celebración que se merezca una pizza de verdad.",
