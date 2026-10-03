@@ -904,6 +904,10 @@
       // Cada fila es queda fixada a la pantalla mentre les seves targetes
       // passen; quan arriba a l'última, la pàgina continua cap a la següent.
       (function () {
+        // Píxels de scroll vertical per cada píxel que avança la fila (més alt = més lent)
+        const SPEED = 1.8;
+        // Suavitat: la fila llisca cap a la posició del scroll en lloc de saltar-hi
+        const EASE = 0.075;
         const root = document.documentElement;
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const rows = Array.from(document.querySelectorAll('.pz-row')).map(row => ({
@@ -917,10 +921,12 @@
           cards: Array.from(row.querySelectorAll('.pizza-grid-card')).map(el => ({ el, x: 0, w: 0, p: -1 })),
           dist: 0,
           count: 0,
+          cur: 0,
         }));
         rows.forEach(r => { if (r.total) r.total.textContent = String(r.cards.length).padStart(2, '0'); });
         let pinned = false;
-        let queued = false;
+        let raf = 0;
+        let lastT = 0;
 
         function measure() {
           pinned = !reduceMotion.matches && window.innerHeight >= 520;
@@ -930,31 +936,45 @@
             if (r.word) r.word.style.removeProperty('--bx');
             r.dist = pinned ? Math.max(0, r.track.offsetWidth - r.sticky.clientWidth) : 0;
             // Una mica de recorregut extra perquè l'última targeta es vegi quieta abans de seguir
-            const hold = r.dist ? Math.round(r.sticky.offsetHeight * 0.2) : 0;
-            r.row.style.height = pinned ? (r.sticky.offsetHeight + r.dist + hold) + 'px' : '';
+            const hold = r.dist ? Math.round(r.sticky.offsetHeight * 0.25) : 0;
+            r.row.style.height = pinned ? Math.round(r.sticky.offsetHeight + r.dist * SPEED + hold) + 'px' : '';
             r.cards.forEach(c => { c.x = c.el.offsetLeft; c.w = c.el.offsetWidth; });
           });
-          update();
+          render(true);
         }
 
-        function update() {
-          queued = false;
+        function target(r) {
+          if (!pinned) {
+            const max = r.track.scrollWidth - r.track.clientWidth;
+            return max > 0 ? r.track.scrollLeft / max : 0;
+          }
+          if (!r.dist) return 0;
+          const top = r.row.getBoundingClientRect().top;
+          return Math.min(1, Math.max(0, -top / (r.dist * SPEED)));
+        }
+
+        // Pinta cada fila; retorna true si encara s'està movent cap al seu lloc
+        function render(snap, dt) {
           const vw = window.innerWidth;
+          const k = 1 - Math.pow(1 - EASE, (dt || 16.7) / 16.7);
+          let moving = false;
           rows.forEach(r => {
-            let progress, shift;
+            const goal = target(r);
+            if (snap || !pinned) {
+              r.cur = goal;
+            } else {
+              r.cur += (goal - r.cur) * k;
+              if (Math.abs(goal - r.cur) * r.dist < 0.4) r.cur = goal;
+              else moving = true;
+            }
+            const progress = r.cur;
+            const shift = pinned ? progress * r.dist : r.track.scrollLeft;
             if (pinned) {
-              const top = r.row.getBoundingClientRect().top;
-              progress = r.dist ? Math.min(1, Math.max(0, -top / r.dist)) : 0;
-              shift = progress * r.dist;
               r.track.style.transform = 'translate3d(' + (-shift).toFixed(1) + 'px,0,0)';
               if (r.word) {
                 const travel = Math.max(0, r.word.offsetWidth - vw * 0.6);
                 r.word.style.setProperty('--bx', (-progress * travel).toFixed(1) + 'px');
               }
-            } else {
-              const max = r.track.scrollWidth - r.track.clientWidth;
-              shift = r.track.scrollLeft;
-              progress = max > 0 ? shift / max : 0;
             }
             if (r.bar) r.bar.style.transform = 'scaleX(' + progress.toFixed(3) + ')';
 
@@ -976,10 +996,19 @@
               r.now.textContent = String(entered).padStart(2, '0');
             }
           });
+          return moving;
+        }
+
+        function frame(t) {
+          raf = 0;
+          const dt = lastT ? Math.min(64, t - lastT) : 16.7;
+          lastT = t;
+          if (render(false, dt)) raf = requestAnimationFrame(frame);
+          else lastT = 0;
         }
 
         function queue() {
-          if (!queued) { queued = true; requestAnimationFrame(update); }
+          if (!raf) raf = requestAnimationFrame(frame);
         }
 
         let lastWidth = window.innerWidth;
