@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       name, email, phone,
       street, floor, postalCode, city, delivNotes, finalNotes,
       lat, lng,
-      paymentMethod, paymentStatus,
+      paymentMethod,
       tipAmount,
       authUserId,
       slotTime, deliveryDate,
@@ -130,6 +130,14 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // L'estat de pagament el decideix SEMPRE el servidor, mai el client:
+    // abans es feia servir el paymentStatus de la petició, i qualsevol podia
+    // crear una comanda amb targeta ja "paid" (visible a cuina com a pagada)
+    // sense haver pagat res. Efectiu → 'pending' (es cobra a l'entrega);
+    // qualsevol altre mètode → 'processing' fins que stripe-webhook rebi
+    // payment_intent.succeeded.
+    const paymentStatus = paymentMethod === "cash" ? "pending" : "processing";
 
     // Find or create customer
     let customerId: string;
@@ -227,7 +235,7 @@ Deno.serve(async (req) => {
       p_customer_id:    customerId,
       p_address_id:     address.id,
       p_payment_method: paymentMethod,
-      p_payment_status: paymentStatus ?? "pending",
+      p_payment_status: paymentStatus,
       p_subtotal:       subtotal,
       p_delivery_fee:   0,
       p_tip_amount:     safeTip,
