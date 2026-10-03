@@ -775,9 +775,10 @@
       // en fa passar les pizzes, tot a la mateixa velocitat i amb la mateixa suavitat.
       (function () {
         // Píxels de scroll per cada píxel que es mou el menú (més alt = més lent)
-        const SPEED = 1.8;
-        // Suavitat: el menú llisca cap a la posició del scroll en lloc de saltar-hi
-        const EASE = 0.075;
+        const SPEED = 1.5;
+        // Lliscament (segons): el menú arrenca suau, agafa velocitat i, quan
+        // deixes de fer scroll, continua planejant fins que s'atura, com sobre gel
+        const GLIDE = 0.24;
         const root = document.documentElement;
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const menu = document.querySelector('.pz-menu');
@@ -792,6 +793,7 @@
         let total = 0;
         let pinned = false;
         let cur = 0;
+        let vel = 0;
         let raf = 0;
         let lastT = 0;
 
@@ -839,9 +841,19 @@
           let moving = false;
           if (snap) {
             cur = g;
+            vel = 0;
           } else {
-            cur += (g - cur) * (1 - Math.pow(1 - EASE, (dt || 16.7) / 16.7));
-            if (Math.abs(g - cur) < 0.4) cur = g;
+            // Molla amb esmorteïment crític: sense salts de velocitat ni rebots
+            const w = 2 / GLIDE;
+            const x = w * (dt || 16.7) / 1000;
+            const k = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+            const off = cur - g;
+            const tmp = (vel + w * off) * (dt || 16.7) / 1000;
+            vel = (vel - w * tmp) * k;
+            cur = g + (off + tmp) * k;
+            // Si es passa de llarg, s'atura al seu lloc en lloc de tornar enrere
+            if ((off > 0) !== (cur - g > 0)) { cur = g; vel = 0; }
+            if (Math.abs(g - cur) < 0.3 && Math.abs(vel) < 4) { cur = g; vel = 0; }
             else moving = true;
           }
           apply(cur);
@@ -850,7 +862,7 @@
 
         function frame(t) {
           raf = 0;
-          const dt = lastT ? Math.min(64, t - lastT) : 16.7;
+          const dt = lastT ? Math.min(64, Math.max(1, t - lastT)) : 16.7;
           lastT = t;
           if (render(false, dt)) raf = requestAnimationFrame(frame);
           else lastT = 0;
