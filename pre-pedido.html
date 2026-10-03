@@ -328,7 +328,7 @@
     // Franges: "Com més aviat millor" + de 20:00 a PP_LAST_SLOT cada 15 min
     // (política des del 02/10/2026; abans l'última era les 23:30). Ha de
     // coincidir amb REAL_SLOTS de place-order, que rebutja qualsevol altra hora.
-    const PP_LAST_SLOT = '22:30';
+    const PP_LAST_SLOT = '22:45';
     const _ppLastSlotMins = (() => { const [h, m] = PP_LAST_SLOT.split(':').map(Number); return h * 60 + m; })();
     const PP_SLOTS = ['Com més aviat millor'];
     for (let t = 20 * 60; t <= _ppLastSlotMins; t += 15) {
