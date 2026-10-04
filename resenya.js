@@ -4,7 +4,7 @@
 // Profile (format https://g.page/r/XXXX/review). Mentre estigui buit, els
 // botons de ressenya queden amagats perquè no portin a un enllaç trencat.
 (function () {
-  var GOOGLE_REVIEW_URL = '';
+  var GOOGLE_REVIEW_URL = 'https://g.page/r/CWL_rSnGnmppEBM/review';
 
   function init() {
     document.querySelectorAll('[data-review-link]').forEach(function (el) {
