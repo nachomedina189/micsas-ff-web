@@ -1238,7 +1238,8 @@
       }
       if (data?.inProgress) { showToast("L'informe ja s'està enviant."); return; }
       paseButtonState(new Date().toISOString());
-      showToast(data?.weekly ? 'Informe del pase i resum setmanal enviats' : 'Informe del pase enviat');
+      const sent = data?.weekly ? 'Informe del pase i resum setmanal enviats' : 'Informe del pase enviat';
+      showToast(data?.invoice ? `${sent} · factura ${data.invoice}` : sent);
     }
     window.closePase = closePase;
 

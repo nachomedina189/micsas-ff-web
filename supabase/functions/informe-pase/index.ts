@@ -5,6 +5,7 @@ import {
   type IncidentRow, type ItemRow, type OrderRow, type RejectionRow, type ReportInput, type StatusEventRow,
 } from "../_shared/pase-metrics.ts";
 import { paseEmailSubject, renderPaseEmail, renderWeeklyEmail, weeklyEmailSubject } from "../_shared/pase-email.ts";
+import { invoiceFilename, renderInvoicePdf, toBase64 } from "../_shared/factura-pdf.ts";
 
 // Informe del pase. cocina.html la crida quan el pizzero prem "Tancar pase":
 // calcula els indicadors del dia i envia l'informe complet (plantilla B)
@@ -17,6 +18,11 @@ import { paseEmailSubject, renderPaseEmail, renderWeeklyEmail, weeklyEmailSubjec
 //   el dia anterior, igual que el tauler de cuina).
 // - Si ja s'ha enviat, no el torna a enviar tret que force = true.
 // - preview = true retorna l'HTML sense enviar res (per provar).
+//
+// Si les factures estan activades (taula invoice_settings), el correu de
+// l'informe porta adjunta en PDF la factura simplificada del pase, només
+// amb les comandes pagades amb targeta. Cada dia té una sola factura: si
+// es torna a enviar, s'adjunta la mateixa.
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FROM_ADDRESS = "micsas.ff informes <informes@send.micsasff.com>";
@@ -120,13 +126,32 @@ async function loadInput(sb: SupabaseClient, date: string, closedAt: string | nu
   return { date, orders, items, events, rejections: (rej ?? []) as RejectionRow[], incidents, doughs, closedAt };
 }
 
-async function sendEmail(to: string[], subject: string, html: string): Promise<string> {
+// Factura del pase en PDF, o null si les factures estan desactivades.
+async function paseInvoice(sb: SupabaseClient, date: string): Promise<{ number: number; filename: string; content: string } | null> {
+  const { data, error } = await sb.rpc("issue_pase_invoice", { p_date: date });
+  if (error) throw new Error(error.message);
+  const inv = Array.isArray(data) ? data[0] : data;
+  if (!inv?.number) return null;   // desactivades, sense comandes amb targeta o fora d'ordre
+  const { data: s, error: sErr } = await sb.from("invoice_settings").select("*").maybeSingle();
+  if (sErr || !s) throw new Error(sErr?.message ?? "Falta invoice_settings");
+  const pdf = await renderInvoicePdf({
+    number: inv.number, date: inv.delivery_date, concept: inv.concept,
+    base: Number(inv.base), vat: Number(inv.vat), total: Number(inv.total), vatRate: Number(s.vat_rate),
+    issuerName: s.issuer_name, issuerNif: s.issuer_nif, issuerAddress: s.issuer_address, issuerCity: s.issuer_city,
+    paymentDays: s.payment_days, iban: s.iban,
+  });
+  return { number: inv.number, filename: invoiceFilename(inv), content: toBase64(pdf) };
+}
+
+type Attachment = { filename: string; content: string };
+
+async function sendEmail(to: string[], subject: string, html: string, attachments: Attachment[] = []): Promise<string> {
   const apiKey = Deno.env.get("RESEND_API_KEY");
   if (!apiKey) throw new Error("RESEND_API_KEY no configurada");
   const res = await fetch(RESEND_API_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: FROM_ADDRESS, to, subject, html }),
+    body: JSON.stringify({ from: FROM_ADDRESS, to, subject, html, ...(attachments.length ? { attachments } : {}) }),
   });
   const text = await res.text();
   if (!res.ok) throw new Error(`Resend ${res.status}: ${text}`);
@@ -196,8 +221,19 @@ Deno.serve(async (req) => {
 
     const to = (Deno.env.get("PASE_REPORT_TO") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
     const recipients = to.length ? to : DEFAULT_TO;
-    await sendEmail(recipients, paseEmailSubject(report), html);
-    await sb.from("pase_reports").update({ sent_at: new Date().toISOString(), last_error: null }).eq("delivery_date", date);
+
+    // La factura no ha d'impedir mai que surti l'informe.
+    let invoice: Awaited<ReturnType<typeof paseInvoice>> = null;
+    let invoiceError: string | null = null;
+    try {
+      invoice = await paseInvoice(sb, date);
+    } catch (err) {
+      console.error("[informe-pase] factura", err);
+      invoiceError = `factura: ${err instanceof Error ? err.message : String(err)}`;
+    }
+
+    await sendEmail(recipients, paseEmailSubject(report), html, invoice ? [{ filename: invoice.filename, content: invoice.content }] : []);
+    await sb.from("pase_reports").update({ sent_at: new Date().toISOString(), last_error: invoiceError }).eq("delivery_date", date);
 
     let weeklySent = false;
     if (weeklyHtml) {
@@ -211,7 +247,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ ok: true, deliveryDate: date, sentTo: recipients, weekly: weeklySent, pizzas: report.day.pizzas });
+    return json({ ok: true, deliveryDate: date, sentTo: recipients, weekly: weeklySent, pizzas: report.day.pizzas, invoice: invoice?.number ?? null });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Error desconegut";
     console.error("[informe-pase]", err);
