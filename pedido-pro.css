@@ -169,7 +169,6 @@ body.pp {
 .pp #cart-drawer { border-left: 1px solid var(--pp-line) !important; }
 .pp #cart-drawer > div:first-child span.font-black { font-family: 'Inter', sans-serif !important; font-weight: 700 !important; font-size: 1.125rem !important; }
 .pp #cart-items > div { background: var(--pp-surface) !important; }
-.pp #cart-empty img { width: 7rem; height: 7rem; filter: grayscale(.2); }
 .pp #cart-empty p.font-black { font-size: 1.25rem !important; }
 .pp #cart-footer button {
   border-radius: 12px !important; background: var(--pp-accent) !important; color: #fff !important;
