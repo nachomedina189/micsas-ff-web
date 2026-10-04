@@ -158,6 +158,10 @@
         .pz-pinned .pz-stage { will-change: transform; }
         .pz-pinned .pz-row { height: 100vh; height: calc(var(--pz-vh) * 100); margin-bottom: 0; }
         .pz-pinned .pz-head { padding-top: 88px; }
+        /* La finestra amaga les targetes fora de la columna del títol
+           (el JS hi posa la màscara), perquè la fila es vegi centrada */
+        .pz-window { position: relative; }
+        .pz-pinned .pz-window { flex: 1; display: flex; flex-direction: column; min-height: 0; }
         @media (min-width: 768px) { .pz-pinned .pz-head { padding-top: 100px; } }
 
         .pizza-grid {
@@ -378,6 +382,7 @@
               </p>
             </div>
           </div>
+          <div class="pz-window">
           <div class="pizza-grid pizza-grid-classics">
 
             <!-- MARGHERITA 1889 -->
@@ -494,6 +499,7 @@
             </div>
 
           </div>
+          </div>
         </div>
 
       <!-- DE LA CASA -->
@@ -508,6 +514,7 @@
               </p>
             </div>
           </div>
+          <div class="pz-window">
           <div class="pizza-grid">
 
             <!-- CARBONARA -->
@@ -637,6 +644,7 @@
               </div>
             </div>
 
+          </div>
           </div>
         </div>
 
@@ -775,16 +783,21 @@
       // en fa passar les pizzes, tot a la mateixa velocitat i amb la mateixa suavitat.
       (function () {
         // Píxels de scroll per cada píxel que es mou el menú (més alt = més lent)
-        const SPEED = 1.8;
-        // Suavitat: el menú llisca cap a la posició del scroll en lloc de saltar-hi
-        const EASE = 0.075;
+        const SPEED = 1.5;
+        // Lliscament (segons): el menú arrenca suau, agafa velocitat i, quan
+        // deixes de fer scroll, continua planejant fins que s'atura, com sobre gel
+        const GLIDE = 0.24;
         const root = document.documentElement;
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const menu = document.querySelector('.pz-menu');
         if (!menu) return;
         const sticky = menu.querySelector('.pz-sticky');
         const stage = menu.querySelector('.pz-stage');
+        const desktop = window.matchMedia('(min-width: 768px)');
         const rows = Array.from(menu.querySelectorAll('.pz-row')).map(row => ({
+          row,
+          line: row.querySelector('.pz-head > div'),
+          win: row.querySelector('.pz-window'),
           track: row.querySelector('.pizza-grid'),
         }));
         // Trams del recorregut: horitzontal (una fila) o vertical (canvi de fila)
@@ -792,6 +805,7 @@
         let total = 0;
         let pinned = false;
         let cur = 0;
+        let vel = 0;
         let raf = 0;
         let lastT = 0;
 
@@ -799,7 +813,12 @@
           pinned = !reduceMotion.matches && window.innerHeight >= 520;
           root.classList.toggle('pz-pinned', pinned);
           stage.style.transform = '';
-          rows.forEach(r => { r.track.style.transform = ''; });
+          rows.forEach(r => {
+            r.track.style.transform = '';
+            r.track.style.removeProperty('--cw');
+            r.track.style.paddingLeft = r.track.style.paddingRight = '';
+            r.win.style.webkitMaskImage = r.win.style.maskImage = '';
+          });
           steps = [];
           total = 0;
           if (!pinned) {
@@ -807,13 +826,45 @@
             return;
           }
           const h = sticky.clientHeight;
+          const w = sticky.clientWidth;
           rows.forEach((r, i) => {
+            fit(r, h, w);
             if (i > 0) steps.push({ len: h });
-            steps.push({ len: Math.max(0, r.track.offsetWidth - sticky.clientWidth), track: r.track });
+            steps.push({ len: Math.max(0, r.track.offsetWidth - w), track: r.track });
           });
           total = steps.reduce((sum, st) => sum + st.len, 0);
           menu.style.height = Math.round(h + total * SPEED) + 'px';
           render(true);
+        }
+
+        // Mida de les targetes i finestra centrada: en entrar a la fila es veuen
+        // targetes senceres que omplen la columna del títol (o, si no hi caben,
+        // centrades dins d'ella), sense trossos de la següent a un sol costat.
+        function fit(r, h, w) {
+          const big = desktop.matches;
+          const gap = parseFloat(getComputedStyle(r.track).columnGap) || 0;
+          const base = r.row.getBoundingClientRect().left;
+          const col = r.line.getBoundingClientRect();
+          const colW = col.width;
+          // Targeta més gran que cap a l'alçada de la pantalla
+          const max = Math.min(colW, Math.max(big ? 260 : 240, Math.min(h - (big ? 360 : 300), big ? 520 : colW)));
+          let n = Math.ceil((colW + gap) / (max * 1.06 + gap));
+          let cw = (colW - (n - 1) * gap) / n;
+          let win = colW;
+          if (cw < max * 0.8) {
+            n = Math.max(1, Math.floor((colW + gap) / (max + gap)));
+            cw = max;
+            win = n * cw + (n - 1) * gap;
+          }
+          const left = col.left - base + (colW - win) / 2;
+          const right = w - left - win;
+          r.track.style.setProperty('--cw', cw.toFixed(2) + 'px');
+          r.track.style.paddingLeft = left.toFixed(2) + 'px';
+          r.track.style.paddingRight = right.toFixed(2) + 'px';
+          // Fora de la columna les targetes i l'ombra s'esvaeixen en l'espai d'un forat entre targetes
+          const a = left.toFixed(2), b = (left + win).toFixed(2);
+          const mask = 'linear-gradient(to right, transparent ' + (left - gap).toFixed(2) + 'px, #000 ' + a + 'px, #000 ' + b + 'px, transparent ' + (left + win + gap).toFixed(2) + 'px)';
+          r.win.style.webkitMaskImage = r.win.style.maskImage = mask;
         }
 
         function goal() {
@@ -839,9 +890,19 @@
           let moving = false;
           if (snap) {
             cur = g;
+            vel = 0;
           } else {
-            cur += (g - cur) * (1 - Math.pow(1 - EASE, (dt || 16.7) / 16.7));
-            if (Math.abs(g - cur) < 0.4) cur = g;
+            // Molla amb esmorteïment crític: sense salts de velocitat ni rebots
+            const w = 2 / GLIDE;
+            const x = w * (dt || 16.7) / 1000;
+            const k = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+            const off = cur - g;
+            const tmp = (vel + w * off) * (dt || 16.7) / 1000;
+            vel = (vel - w * tmp) * k;
+            cur = g + (off + tmp) * k;
+            // Si es passa de llarg, s'atura al seu lloc en lloc de tornar enrere
+            if ((off > 0) !== (cur - g > 0)) { cur = g; vel = 0; }
+            if (Math.abs(g - cur) < 0.3 && Math.abs(vel) < 4) { cur = g; vel = 0; }
             else moving = true;
           }
           apply(cur);
@@ -850,7 +911,7 @@
 
         function frame(t) {
           raf = 0;
-          const dt = lastT ? Math.min(64, t - lastT) : 16.7;
+          const dt = lastT ? Math.min(64, Math.max(1, t - lastT)) : 16.7;
           lastT = t;
           if (render(false, dt)) raf = requestAnimationFrame(frame);
           else lastT = 0;
