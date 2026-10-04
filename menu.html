@@ -94,7 +94,9 @@
         mix-blend-mode: multiply !important;
       }
     </style>
-  </head>
+    <link rel="stylesheet" href="pizza-badge.css">
+  <script src="pizza-badge.js"></script>
+</head>
   <body class="bg-[#c80a07] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
     <!-- Paper texture -->
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
@@ -130,7 +132,7 @@
         <h1 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-5xl md:text-6xl mt-3 text-[#F2E6CE] mb-1" data-i18n="menu_h1">
           La carta de micsas
         </h1>
-        <p id="pizza-counter" class="mt-4 px-5 py-2 rounded-full font-['League_Spartan',sans-serif] font-bold text-[15px] text-[#F2E6CE] bg-[#c80a07]" style="display:none" aria-live="polite"></p>
+        <div id="pizza-counter" class="pzb-wrap mt-5" style="display:none" aria-live="polite"></div>
 <a href="pre-pedido.html" class="header-demana-btn inline-block mt-4 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[#E23F2E] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5" data-i18n="demana">
           Demana ja! →
         </a>
@@ -1011,13 +1013,8 @@
           body: JSON.stringify({ p_delivery_date: iso(d) })
         }).then(function (r) { return r.ok ? r.json() : null; }).then(function (rows) {
           var st = Array.isArray(rows) ? rows[0] : rows;
-          var day = DAYS[d.getDay()];
-          var msg = '';
-          if (st && st.status === 'few') msg = 'Només en queden ' + st.remaining + ' per ' + (iso(d) === iso(new Date()) ? 'avui' : 'al ' + day) + '!';
-          else if (st && st.status === 'low') msg = "S'estan esgotant les pizzes de " + (iso(d) === iso(new Date()) ? 'avui' : 'aquest ' + day) + '!';
-          else if (st && st.status === 'soldout') msg = 'Pizzes exhaurides ' + (iso(d) === iso(new Date()) ? 'avui' : 'aquest ' + day) + '. Torna el proper dia!';
-          bar.textContent = msg ? '🔥 ' + msg : '';
-          bar.style.display = msg ? 'inline-block' : 'none';
+          var today = iso(d) === iso(new Date());
+          window.renderPizzaBadge(bar, st, today ? 'avui' : 'al ' + DAYS[d.getDay()]);
         }).catch(function () {});
       }
       load();
