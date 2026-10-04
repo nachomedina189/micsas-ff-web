@@ -162,6 +162,11 @@
            (el JS hi posa la màscara), perquè la fila es vegi centrada */
         .pz-window { position: relative; }
         .pz-pinned .pz-window { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        /* Barreta de progrés sota cada fila: indica quant falta per veure-la sencera */
+        .pz-bar { position: relative; height: 3px; margin: 0 24px 24px; background: rgba(242,230,206,0.25); overflow: hidden; }
+        .pz-bar[hidden] { display: none; }
+        .pz-bar span { position: absolute; inset: 0; background: #F2E6CE; transform: scaleX(0); transform-origin: left center; will-change: transform; }
+        @media (min-width: 768px) { .pz-bar { margin: 0 48px 32px; } }
         @media (min-width: 768px) { .pz-pinned .pz-head { padding-top: 100px; } }
 
         .pizza-grid {
@@ -500,6 +505,7 @@
 
           </div>
           </div>
+          <div class="pz-bar" hidden aria-hidden="true"><span></span></div>
         </div>
 
       <!-- DE LA CASA -->
@@ -646,6 +652,7 @@
 
           </div>
           </div>
+          <div class="pz-bar" hidden aria-hidden="true"><span></span></div>
         </div>
 
       </div>
@@ -796,9 +803,11 @@
         const desktop = window.matchMedia('(min-width: 768px)');
         const rows = Array.from(menu.querySelectorAll('.pz-row')).map(row => ({
           row,
-          line: row.querySelector('.pz-head > div'),
+          head: row.querySelector('.pz-head'),
           win: row.querySelector('.pz-window'),
           track: row.querySelector('.pizza-grid'),
+          bar: row.querySelector('.pz-bar'),
+          fill: row.querySelector('.pz-bar span'),
         }));
         // Trams del recorregut: horitzontal (una fila) o vertical (canvi de fila)
         let steps = [];
@@ -818,11 +827,15 @@
             r.track.style.removeProperty('--cw');
             r.track.style.paddingLeft = r.track.style.paddingRight = '';
             r.win.style.webkitMaskImage = r.win.style.maskImage = '';
+            r.head.style.maxWidth = r.head.style.paddingLeft = r.head.style.paddingRight = '';
+            r.bar.style.marginLeft = r.bar.style.marginRight = '';
+            r.bar.hidden = false;
           });
           steps = [];
           total = 0;
           if (!pinned) {
             menu.style.height = '';
+            rows.forEach(swiped);
             return;
           }
           const h = sticky.clientHeight;
@@ -830,41 +843,50 @@
           rows.forEach((r, i) => {
             fit(r, h, w);
             if (i > 0) steps.push({ len: h });
-            steps.push({ len: Math.max(0, r.track.offsetWidth - w), track: r.track });
+            const len = Math.max(0, r.track.offsetWidth - w);
+            steps.push({ len, track: r.track, fill: r.fill });
+            // Si totes les pizzes de la fila ja hi caben, la barreta no cal
+            r.bar.hidden = len < 1;
           });
           total = steps.reduce((sum, st) => sum + st.len, 0);
           menu.style.height = Math.round(h + total * SPEED) + 'px';
           render(true);
         }
 
-        // Mida de les targetes i finestra centrada: en entrar a la fila es veuen
-        // targetes senceres que omplen la columna del títol (o, si no hi caben,
-        // centrades dins d'ella), sense trossos de la següent a un sol costat.
+        // Mida de les targetes: la fila ocupa gairebé tota l'amplada de la
+        // pantalla (4 pizzes a l'ordinador, menys com més estreta) amb el mateix
+        // marge a cada costat; si no hi caben d'alçada, es fan més petites i
+        // queden centrades. El títol i la barreta s'alineen amb les targetes.
         function fit(r, h, w) {
           const big = desktop.matches;
           const gap = parseFloat(getComputedStyle(r.track).columnGap) || 0;
-          const base = r.row.getBoundingClientRect().left;
-          const col = r.line.getBoundingClientRect();
-          const colW = col.width;
+          const pad = big ? 48 : 24;
+          const n = w >= 1200 ? 4 : w >= 900 ? 3 : w >= 600 ? 2 : 1;
           // Targeta més gran que cap a l'alçada de la pantalla
-          const max = Math.min(colW, Math.max(big ? 260 : 240, Math.min(h - (big ? 360 : 300), big ? 520 : colW)));
-          let n = Math.ceil((colW + gap) / (max * 1.06 + gap));
-          let cw = (colW - (n - 1) * gap) / n;
-          let win = colW;
-          if (cw < max * 0.8) {
-            n = Math.max(1, Math.floor((colW + gap) / (max + gap)));
-            cw = max;
-            win = n * cw + (n - 1) * gap;
-          }
-          const left = col.left - base + (colW - win) / 2;
+          const max = Math.max(big ? 260 : 240, h - (big ? 380 : 320));
+          const cw = Math.min(max, (w - 2 * pad - (n - 1) * gap) / n);
+          const win = n * cw + (n - 1) * gap;
+          const left = (w - win) / 2;
           const right = w - left - win;
           r.track.style.setProperty('--cw', cw.toFixed(2) + 'px');
           r.track.style.paddingLeft = left.toFixed(2) + 'px';
           r.track.style.paddingRight = right.toFixed(2) + 'px';
-          // Fora de la columna les targetes i l'ombra s'esvaeixen en l'espai d'un forat entre targetes
+          r.head.style.maxWidth = 'none';
+          r.head.style.paddingLeft = left.toFixed(2) + 'px';
+          r.head.style.paddingRight = right.toFixed(2) + 'px';
+          r.bar.style.marginLeft = left.toFixed(2) + 'px';
+          r.bar.style.marginRight = right.toFixed(2) + 'px';
+          // Fora de la fila les targetes i l'ombra s'esvaeixen en l'espai d'un forat entre targetes
           const a = left.toFixed(2), b = (left + win).toFixed(2);
           const mask = 'linear-gradient(to right, transparent ' + (left - gap).toFixed(2) + 'px, #000 ' + a + 'px, #000 ' + b + 'px, transparent ' + (left + win + gap).toFixed(2) + 'px)';
           r.win.style.webkitMaskImage = r.win.style.maskImage = mask;
+        }
+
+        // Sense fixar (lliscant amb el dit) la barreta segueix el scroll de la fila
+        function swiped(r) {
+          const max = r.track.scrollWidth - r.track.clientWidth;
+          r.bar.hidden = max < 1;
+          r.fill.style.transform = 'scaleX(' + (max > 0 ? r.track.scrollLeft / max : 0).toFixed(4) + ')';
         }
 
         function goal() {
@@ -877,8 +899,12 @@
           steps.forEach(st => {
             const d = Math.min(st.len, Math.max(0, v));
             v -= st.len;
-            if (st.track) st.track.style.transform = 'translate3d(' + (-d).toFixed(1) + 'px,0,0)';
-            else y += d;
+            if (st.track) {
+              st.track.style.transform = 'translate3d(' + (-d).toFixed(1) + 'px,0,0)';
+              st.fill.style.transform = 'scaleX(' + (st.len ? d / st.len : 0).toFixed(4) + ')';
+            } else {
+              y += d;
+            }
           });
           stage.style.transform = 'translate3d(0,' + (-y).toFixed(1) + 'px,0)';
         }
@@ -935,6 +961,7 @@
           }
         });
         window.addEventListener('scroll', queue, { passive: true });
+        rows.forEach(r => r.track.addEventListener('scroll', () => { if (!pinned) swiped(r); }, { passive: true }));
         if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', measure);
         window.addEventListener('load', measure);
         measure();
