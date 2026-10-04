@@ -128,7 +128,7 @@
                 class="w-24 bg-transparent border-x border-white/15 text-center text-2xl font-black outline-none focus:bg-white/5">
               <button type="button" id="doughs-plus" onmousedown="event.preventDefault()" onclick="adjustDoughs(1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Afegir una massa">+</button>
             </div>
-            <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" class="hidden h-14 px-5 rounded-xl bg-[#16A34A] text-white text-sm font-black uppercase tracking-wide hover:brightness-110">Desar</button>
+            <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" disabled class="h-14 min-w-[8.5rem] px-5 rounded-xl bg-[#3A404B] text-[#8B93A1] text-sm font-black uppercase tracking-wide transition-colors">Desar</button>
           </div>
           <p id="doughs-status" class="text-xs font-bold h-4 text-[#8B93A1]" aria-live="polite"></p>
         </div>
@@ -482,7 +482,7 @@
       left.style.color = st.remaining === 0 ? '#EF4444' : st.remaining <= 5 ? '#F59E0B' : '#E8EAED';
       document.getElementById('doughs-total').textContent = st.doughs;
       document.getElementById('doughs-used').textContent = st.used;
-      if (!doughsDirty) document.getElementById('doughs-input').value = st.doughs;
+      if (!doughsDirty) { document.getElementById('doughs-input').value = st.doughs; setDoughsBtn('saved'); }
       if (st.used > st.doughs) {
         note.textContent = `⚠ Ja hi ha ${st.used} pizzes venudes i has posat ${st.doughs} masses. No es cancel·la cap comanda; només es bloqueja vendre'n més.`;
         note.style.color = '#F59E0B';
@@ -517,7 +517,19 @@
     }
     window.selectDoughsDate = selectDoughsDate;
 
-    function showDoughsSave(on) { document.getElementById('doughs-save').classList.toggle('hidden', !on); }
+    // Botó sempre visible: groc "Desar" si hi ha canvis sense desar, verd
+    // "Desat ✓" quan el número coincideix amb el de Supabase.
+    function setDoughsBtn(state) {
+      const b = document.getElementById('doughs-save');
+      const look = {
+        unsaved: ['Desar',     '#F59E0B', '#15181D', false],
+        saving:  ['Desant…',   '#F59E0B', '#15181D', true],
+        saved:   ['Desat ✓',   '#16A34A', '#FFFFFF', true],
+      }[state];
+      b.textContent = look[0]; b.style.background = look[1]; b.style.color = look[2]; b.disabled = look[3];
+      b.style.cursor = look[3] ? 'default' : 'pointer';
+    }
+    function showDoughsSave(on) { setDoughsBtn(on ? 'unsaved' : 'saved'); }
     function setDoughsStatus(text, color, clearAfterMs) {
       const el = document.getElementById('doughs-status');
       el.textContent = text; el.style.color = color || '#8B93A1';
@@ -561,7 +573,7 @@
       const v = parseInt(document.getElementById('doughs-input').value, 10);
       if (!Number.isFinite(v) || v < 0 || v > 500) { revertDoughsInput(); return; }
       clearTimeout(doughsIdleTimer);
-      doughsDirty = false; showDoughsSave(false);
+      doughsDirty = false; setDoughsBtn('saving');
       saveDoughs(v);
     }
 
@@ -581,18 +593,21 @@
     async function saveDoughs(n) {
       if (doughsSaving) { doughsSaveTimer = setTimeout(() => saveDoughs(n), 200); return; }
       doughsSaving = true;
-      setDoughsStatus('Desant…');
+      setDoughsBtn('saving'); setDoughsStatus('');
       const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: clampDoughs(n) });
       doughsSaving = false;
       if (error) {
         console.error(error);
-        setDoughsStatus('No s\'ha pogut desar. Torna-ho a provar.', '#EF4444');
-        await loadDoughs();
+        // Es queda com a esborrany (botó groc) perquè es pugui tornar a provar.
+        doughsDirty = true;
+        document.getElementById('doughs-input').value = clampDoughs(n);
+        setDoughsBtn('unsaved');
+        setDoughsStatus('No s\'ha pogut desar a Supabase. Torna a prémer Desar.', '#EF4444');
         return;
       }
       doughsState = Array.isArray(data) ? data[0] : data;
       renderDoughs();
-      setDoughsStatus('Desat ✓', '#16A34A', 2500);
+      setDoughsStatus('');
     }
     window.onDoughsInput = onDoughsInput;
     window.onDoughsBlur = onDoughsBlur;
