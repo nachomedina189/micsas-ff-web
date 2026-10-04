@@ -149,3 +149,61 @@
   });
   sync();
 })();
+
+/* ── Avís "afegit a la cistella" (dalt a la dreta, es desvaneix sol) ──
+   pedido.html crida window.ppNotifyAdded(id, nom, quantitat) quan s'afegeix
+   un producte. Si es torna a afegir el mateix producte mentre l'avís és
+   visible, s'actualitza el comptador; si són productes diferents, s'apilen
+   (màxim 3). No intercepta clics (pointer-events: none). */
+(function () {
+  const SHOW_MS = 2000, FADE_MS = 350, MAX = 3;
+  let box = null;
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function container() {
+    if (box && document.body.contains(box)) return box;
+    box = document.createElement('div');
+    box.className = 'pp-addtoasts';
+    box.setAttribute('aria-live', 'polite');
+    box.setAttribute('role', 'status');
+    document.body.appendChild(box);
+    return box;
+  }
+
+  function dismiss(t) {
+    clearTimeout(t._timer);
+    if (t.classList.contains('out')) return;
+    t.classList.remove('in');
+    t.classList.add('out');
+    setTimeout(() => t.remove(), FADE_MS);
+  }
+
+  function arm(t) {
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => dismiss(t), SHOW_MS);
+  }
+
+  window.ppNotifyAdded = function (id, name, qty) {
+    qty = Math.max(1, parseInt(qty, 10) || 1);
+    const c = container();
+    const last = c.lastElementChild;
+    if (last && last.dataset.id === String(id) && !last.classList.contains('out')) {
+      last._qty += qty;
+      last.querySelector('.n').textContent = '× ' + last._qty;
+      last.classList.remove('bump'); void last.offsetWidth; last.classList.add('bump');
+      arm(last);
+      return;
+    }
+    const t = document.createElement('div');
+    t.className = 'pp-addtoast';
+    t.dataset.id = id;
+    t._qty = qty;
+    t.innerHTML = `<span class="ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>`
+      + `<span class="tx"><b>${esc(name)}</b> <span class="n">${qty > 1 ? '× ' + qty : ''}</span><small>Afegit a la cistella</small></span>`;
+    c.appendChild(t);
+    const live = [...c.children].filter((x) => !x.classList.contains('out'));
+    live.slice(0, Math.max(0, live.length - MAX)).forEach(dismiss);
+    requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('in')));
+    arm(t);
+  };
+})();
