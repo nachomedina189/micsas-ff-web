@@ -29,32 +29,32 @@ body.pp {
 }
 
 /* Botons i textos petits en Inter; títols es queden amb League Spartan (marca) */
-.pp button[class*="League_Spartan"],
-.pp a[class*="League_Spartan"] { font-family: 'Inter', system-ui, sans-serif !important; font-weight: 600 !important; }
+.pp button[class*="League_Spartan"]:not(footer *),
+.pp a[class*="League_Spartan"]:not(footer *) { font-family: 'Inter', system-ui, sans-serif !important; font-weight: 600 !important; }
 
 /* ── Paleta: crema → neutre ─────────────────────────────────────── */
-.pp [class~="bg-[#F2E6CE]"],
-.pp [class~="bg-[#F2E6CE]/95"],
-.pp [class~="bg-[#F2E6CE]/85"] { background-color: var(--pp-surface) !important; }
-.pp [class~="bg-[#E6D5B0]"] { background-color: var(--pp-soft) !important; }
-.pp [class~="bg-[#E6D5B0]/10"],
-.pp [class~="bg-[#E6D5B0]/20"],
-.pp [class~="bg-[#E6D5B0]/30"] { background-color: var(--pp-soft) !important; }
-.pp [class~="border-[#C4B08A]/20"],
-.pp [class~="border-[#C4B08A]/30"],
-.pp [class~="border-[#C4B08A]/40"],
-.pp [class~="border-[#C4B08A]/60"],
-.pp [class~="border-[#C4B08A]"],
-.pp [class~="border-[#F2E6CE]/40"],
-.pp [class~="border-[#E6D5B0]"] { border-color: var(--pp-line) !important; }
-.pp [class~="text-[#2A1A0F]"],
-.pp [class~="text-[#2D241D]"] { color: var(--pp-ink) !important; }
-.pp [class~="text-[#5A3E28]"],
-.pp [class~="text-[#8C7A58]"] { color: var(--pp-ink-2) !important; }
-.pp [class~="text-[#9B8A72]"],
-.pp [class~="text-[#C4B08A]"] { color: var(--pp-muted) !important; }
-.pp [class~="bg-[#E6D5B0]"].h-px,
-.pp .h-px[class~="bg-[#E6D5B0]"] { background-color: var(--pp-line) !important; }
+.pp [class~="bg-[#F2E6CE]"]:not(footer *),
+.pp [class~="bg-[#F2E6CE]/95"]:not(footer *),
+.pp [class~="bg-[#F2E6CE]/85"]:not(footer *) { background-color: var(--pp-surface) !important; }
+.pp [class~="bg-[#E6D5B0]"]:not(footer *) { background-color: var(--pp-soft) !important; }
+.pp [class~="bg-[#E6D5B0]/10"]:not(footer *),
+.pp [class~="bg-[#E6D5B0]/20"]:not(footer *),
+.pp [class~="bg-[#E6D5B0]/30"]:not(footer *) { background-color: var(--pp-soft) !important; }
+.pp [class~="border-[#C4B08A]/20"]:not(footer *),
+.pp [class~="border-[#C4B08A]/30"]:not(footer *),
+.pp [class~="border-[#C4B08A]/40"]:not(footer *),
+.pp [class~="border-[#C4B08A]/60"]:not(footer *),
+.pp [class~="border-[#C4B08A]"]:not(footer *),
+.pp [class~="border-[#F2E6CE]/40"]:not(footer *),
+.pp [class~="border-[#E6D5B0]"]:not(footer *) { border-color: var(--pp-line) !important; }
+.pp [class~="text-[#2A1A0F]"]:not(footer *),
+.pp [class~="text-[#2D241D]"]:not(footer *) { color: var(--pp-ink) !important; }
+.pp [class~="text-[#5A3E28]"]:not(footer *),
+.pp [class~="text-[#8C7A58]"]:not(footer *) { color: var(--pp-ink-2) !important; }
+.pp [class~="text-[#9B8A72]"]:not(footer *),
+.pp [class~="text-[#C4B08A]"]:not(footer *) { color: var(--pp-muted) !important; }
+.pp [class~="bg-[#E6D5B0]"].h-px:not(footer *),
+.pp .h-px[class~="bg-[#E6D5B0]"]:not(footer *) { background-color: var(--pp-line) !important; }
 
 /* Zones que abans eren sobre fons vermell: text crema → text fosc */
 .pp > section [class~="text-[#F2E6CE]"] { color: var(--pp-ink) !important; }
@@ -162,14 +162,8 @@ body.pp {
 .pp #mcb-btn { background: var(--pp-ink) !important; border-color: var(--pp-ink) !important; color: #fff !important; border-radius: 14px !important; }
 .pp #mcb-btn span { font-weight: 600 !important; opacity: 1 !important; }
 
-/* ── Peu de pàgina compacte ─────────────────────────────────────── */
-.pp footer > div:first-child { background: var(--pp-bg) !important; padding-top: 1rem !important; }
-.pp footer [class~="text-[#F2E6CE]"]:not(.bg-\[\#2A1A0F\]) { color: var(--pp-ink) !important; }
-.pp footer [class~="border-[#F2E6CE]/40"] { border-color: var(--pp-line) !important; }
-.pp footer img[src*="wordmark"] { width: 160px !important; margin: 0 auto; opacity: .9; }
-.pp footer .mb-12 { margin-bottom: 1.5rem !important; }
-.pp footer .mt-12 { margin-top: 1.5rem !important; }
-.pp footer > div:last-child { background: var(--pp-surface) !important; border-color: var(--pp-line) !important; padding-top: 2rem !important; }
+/* ── Peu de pàgina: es queda amb l'estètica original de la web ── */
+.pp footer { font-family: 'League Spartan', sans-serif; }
 
 /* ── Cistella ───────────────────────────────────────────────────── */
 .pp #cart-drawer { border-left: 1px solid var(--pp-line) !important; }
@@ -328,7 +322,7 @@ body.pp {
 .pp #cf-success button[class*="rounded-full"] { border-radius: 12px !important; }
 
 /* detalls */
-.pp [class~="bg-[#2A1A0F]"] { background-color: var(--pp-ink) !important; }
+.pp [class~="bg-[#2A1A0F]"]:not(footer *) { background-color: var(--pp-ink) !important; }
 .pp [style*="8E6A4A"] { color: var(--pp-muted) !important; font-family: 'Inter', sans-serif !important; }
 .pp input::placeholder, .pp textarea::placeholder { color: #A19C96 !important; }
 .pp #cf-order-summary [class~="text-[#E23F2E]"] { color: #1F8A4C !important; }
