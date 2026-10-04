@@ -190,6 +190,7 @@
           </div>
           <div id="pp-date-pills" class="hidden flex flex-wrap gap-2 mb-2"></div>
           <div class="relative">
+            <p id="pp-pizza-status" class="hidden text-sm font-semibold text-[#E23F2E] mb-2"></p>
             <button type="button" id="pp-time-select-btn" onclick="_ppToggleTimeDropdown()"
               class="w-full flex items-center justify-between bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] transition-all cursor-pointer text-left">
               <span id="pp-time-select-label" class="text-[#9B8A72]">Tria una franja horària...</span>
@@ -340,8 +341,8 @@
     // Aforo diari màxim (suma de totes les franges d'un mateix dia). El
     // servidor (create_order_with_slot) ho torna a comprovar sempre
     // igualment — això només evita que el client arribi a intentar-ho.
-    const DAILY_PIZZA_CAP = 45;
     let _ppDailySoldOut = false;
+    let _ppPizzaStatus = null;
 
     async function loadSlotCounts() {
       if (!window.supabase) return;
@@ -350,9 +351,9 @@
       // select directe a "orders" — bloquejat per RLS per a un client
       // anònim, cosa que deixava _slotCounts sempre buit i cap franja es
       // marcava mai com a completa.
-      const [{ data }, { data: dailyTotal }] = await Promise.all([
+      const [{ data }, { data: pizzaStatus }] = await Promise.all([
         window.supabase.rpc('get_slot_capacity', { p_delivery_date: ppDeliveryDate }),
-        window.supabase.rpc('get_daily_pizza_count', { p_delivery_date: ppDeliveryDate }),
+        window.supabase.rpc('get_pizza_status', { p_delivery_date: ppDeliveryDate }),
       ]);
       _slotCounts = {};
       if (data) {
@@ -361,7 +362,17 @@
           _slotCounts[row.slot_time] = row.pizza_count || 0;
         });
       }
-      _ppDailySoldOut = typeof dailyTotal === 'number' && dailyTotal >= DAILY_PIZZA_CAP;
+      _ppPizzaStatus = Array.isArray(pizzaStatus) ? pizzaStatus[0] : pizzaStatus;
+      _ppDailySoldOut = _ppPizzaStatus?.status === 'soldout';
+    }
+
+    // Només revela el número quan en queden 15 o menys; entre 16 i 20 diu
+    // només que s'estan esgotant; amb més, no diu res.
+    function pizzaStatusMessage(st) {
+      if (!st) return '';
+      if (st.status === 'few') return `🔥 Només en queden ${st.remaining}!`;
+      if (st.status === 'low') return '🔥 S\'estan esgotant les pizzes!';
+      return '';
     }
 
     // Marge mínim (minuts) entre ara i l'inici d'una franja per poder-la
@@ -389,6 +400,12 @@
     let ppTimeOptions = [];
 
     function renderTimeSlots() {
+      const statusEl = document.getElementById('pp-pizza-status');
+      if (statusEl) {
+        const msg = pizzaStatusMessage(_ppPizzaStatus);
+        statusEl.textContent = msg;
+        statusEl.classList.toggle('hidden', !msg);
+      }
       if (_ppDailySoldOut) {
         ppTimeOptions = [{ value: '', label: 'Pizzes exhaurides per aquest dia — torna un altre dia', disabled: true }];
         _ppRenderTimeDropdown();

@@ -246,13 +246,17 @@ Deno.serve(async (req) => {
       p_delivery_date:  deliveryDate,
       p_slots:          REAL_SLOTS,
     });
-    // Aforo diari exhaurit (45 pizzes/dia): create_order_with_slot llança
-    // una excepció amb el prefix "DAILY_SOLDOUT" en lloc de simplement no
-    // retornar franja, perquè el missatge sigui diferent de "no queden
-    // franges" — aquí no és que aquella hora estigui plena, és que ja no
-    // es fan més pizzes avui.
+    // Masses del dia exhaurides (les posa el pizzero a cocina.html):
+    // create_order_with_slot llança "DAILY_SOLDOUT remaining=N" en lloc de
+    // simplement no retornar franja, perquè el missatge sigui diferent de
+    // "no queden franges" — aquí no és que aquella hora estigui plena, és
+    // que ja no hi ha prou masses. Si en queden algunes, diem quantes.
     if (rpcErr && rpcErr.message?.includes("DAILY_SOLDOUT")) {
-      return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true }), {
+      const left = Number(/remaining=(\d+)/.exec(rpcErr.message)?.[1] ?? 0);
+      const msg = left > 0
+        ? `Només en queden ${left} per a aquest dia. Treu-ne alguna del cistell i torna-ho a provar.`
+        : "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!";
+      return new Response(JSON.stringify({ error: msg, soldOut: left === 0, remaining: left }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
