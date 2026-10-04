@@ -37,6 +37,20 @@ function madridNow(): { date: string; mins: number } {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, mins: hour * 60 + Number(get("minute")) };
 }
 
+// Apunta una comanda rebutjada (demanda perduda) per a l'informe del pase.
+// Mai ha de trencar la resposta al client: qualsevol error es registra i prou.
+async function logRejection(
+  sb: ReturnType<typeof createClient>,
+  row: { delivery_date: string | null; requested_slot: string | null; pizza_count: number; reason: string },
+): Promise<void> {
+  try {
+    const { error } = await sb.from("order_rejections").insert(row);
+    if (error) console.error("[place-order] order_rejections", error.message);
+  } catch (err) {
+    console.error("[place-order] order_rejections", err);
+  }
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
@@ -125,6 +139,7 @@ Deno.serve(async (req) => {
     // comença a buscar per la PRIMERA franja de la nit i la comanda acabaria
     // assignada a les 20:00.
     if (slotTime && !REAL_SLOTS.includes(slotTime)) {
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "slot_closed" });
       return new Response(JSON.stringify({ error: `Aquesta franja ja no està disponible: l'última franja és a les ${LAST_SLOT}h. Tria una altra hora.` }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -144,6 +159,7 @@ Deno.serve(async (req) => {
     const { data: dayStatus } = await sb.rpc("get_pizza_status", { p_delivery_date: deliveryDate });
     const dayRow = Array.isArray(dayStatus) ? dayStatus[0] : dayStatus;
     if (dayRow?.status === "soldout") {
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
       return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true, remaining: 0 }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -224,6 +240,7 @@ Deno.serve(async (req) => {
           return h * 60 + m > madridNowMins + SLOT_LEAD_MIN;
         }) ?? null;
         if (!earliestSafeSlot) {
+          await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "too_late" });
           return new Response(JSON.stringify({ error: "Ja no queda marge suficient per preparar cap comanda avui. Si us plau, tria un altre dia." }), {
             status: 409,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -263,6 +280,7 @@ Deno.serve(async (req) => {
     // que ja no hi ha prou masses. Si en queden algunes, diem quantes.
     if (rpcErr && rpcErr.message?.includes("DAILY_SOLDOUT")) {
       const left = Number(/remaining=(\d+)/.exec(rpcErr.message)?.[1] ?? 0);
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
       const msg = left > 0
         ? `Només en queden ${left} per a aquest dia. Treu-ne alguna del cistell i torna-ho a provar.`
         : "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!";
@@ -275,12 +293,20 @@ Deno.serve(async (req) => {
 
     const orderRow = rpcRows?.[0] as { order_id: string; slot_time: string | null } | undefined;
     if (slotTime && !orderRow) {
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "no_slots" });
       return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (!orderRow) throw new Error("create_order_with_slot no ha retornat cap comanda");
+
+    // Franja que va triar el client: si estava plena, la comanda ha quedat
+    // en una de posterior, i l'informe del pase compta aquests desplaçaments.
+    if (slotTime) {
+      const { error: reqErr } = await sb.from("orders").update({ requested_slot: slotTime }).eq("id", orderRow.order_id);
+      if (reqErr) console.error("[place-order] requested_slot", reqErr.message);
+    }
 
     // Insert order items — sempre amb els valors RECALCULATS (resolvedItems),
     // mai amb el que hagués enviat el client.
