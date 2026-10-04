@@ -139,6 +139,16 @@ Deno.serve(async (req) => {
     // payment_intent.succeeded.
     const paymentStatus = paymentMethod === "cash" ? "pending" : "processing";
 
+    // Dia exhaurit: no s'accepta cap comanda, ni tan sols només de begudes
+    // (create_order_with_slot només bloqueja si hi ha pizzes a la comanda).
+    const { data: dayStatus } = await sb.rpc("get_pizza_status", { p_delivery_date: deliveryDate });
+    const dayRow = Array.isArray(dayStatus) ? dayStatus[0] : dayStatus;
+    if (dayRow?.status === "soldout") {
+      return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true, remaining: 0 }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     // Find or create customer
     let customerId: string;
 

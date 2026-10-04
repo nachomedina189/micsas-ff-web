@@ -592,7 +592,7 @@
     }
 
     function goToMenu() {
-      if (!ppSelectedTime || !ppAddressValid) return;
+      if (!ppSelectedTime || !ppAddressValid || _ppDailySoldOut) return;
       if (!isValidOrderDay(ppDeliveryDate)) {
         alert('Només fem comandes per divendres i diumenge. Tria un altre dia.');
         selectDeliveryDay('other');
