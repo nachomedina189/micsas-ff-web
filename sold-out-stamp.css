@@ -1,0 +1,26 @@
+/* Pantalla de "sold out" de pre-pedido: sello rojo a página completa. */
+.sos {
+  position: fixed; left: 0; right: 0; bottom: 0; top: 65px; z-index: 35;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+  padding: 24px 16px; background: #F2E6CE; text-align: center;
+  font-family: 'League Spartan', sans-serif; color: #2A1A0F;
+  animation: sos-fade .25s ease-out both;
+}
+.sos[hidden] { display: none; }
+.sos-stamp { width: min(92vw, 760px); transform: rotate(-6deg); animation: sos-slam .55s cubic-bezier(.2,1.4,.35,1) .1s both; }
+.sos-stamp svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sos-msg { font-weight: 800; font-size: clamp(18px, 3.2vw, 26px); letter-spacing: .02em; max-width: 30ch; line-height: 1.15; animation: sos-fade .4s ease-out .5s both; }
+.sos-sub { font-weight: 400; font-size: 15px; color: #5A3E28; margin-top: 6px; letter-spacing: 0; }
+.sos-btn {
+  padding: 14px 32px; border-radius: 999px; background: #E23F2E; color: #F2E6CE; border: 0; cursor: pointer;
+  font-family: inherit; font-weight: 800; font-size: 15px; letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: 0 8px 22px rgba(226,63,46,.35); animation: sos-fade .4s ease-out .7s both;
+}
+.sos-btn:active { transform: scale(.97); }
+@keyframes sos-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sos-slam {
+  0%   { opacity: 0; transform: rotate(-14deg) scale(2.4); }
+  60%  { opacity: 1; transform: rotate(-5deg) scale(.96); }
+  100% { opacity: 1; transform: rotate(-6deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .sos, .sos-stamp, .sos-msg, .sos-btn { animation: none; } }
