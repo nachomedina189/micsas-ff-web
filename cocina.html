@@ -122,11 +122,11 @@
         <div class="flex flex-col items-end gap-1.5 ml-auto">
           <div class="flex items-center gap-3">
             <div class="flex items-stretch h-14 rounded-xl border border-white/15 bg-[#0E1013] overflow-hidden">
-              <button type="button" id="doughs-minus" onclick="adjustDoughs(-1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Treure una massa">−</button>
+              <button type="button" id="doughs-minus" onmousedown="event.preventDefault()" onclick="adjustDoughs(-1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Treure una massa">−</button>
               <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" aria-label="Nombre de masses"
-                oninput="onDoughsInput()" onblur="onDoughsBlur()" onkeydown="onDoughsKey(event)"
+                oninput="onDoughsInput()" onblur="onDoughsBlur(event)" onkeydown="onDoughsKey(event)"
                 class="w-24 bg-transparent border-x border-white/15 text-center text-2xl font-black outline-none focus:bg-white/5">
-              <button type="button" id="doughs-plus" onclick="adjustDoughs(1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Afegir una massa">+</button>
+              <button type="button" id="doughs-plus" onmousedown="event.preventDefault()" onclick="adjustDoughs(1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Afegir una massa">+</button>
             </div>
             <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" class="hidden h-14 px-5 rounded-xl bg-[#16A34A] text-white text-sm font-black uppercase tracking-wide hover:brightness-110">Desar</button>
           </div>
@@ -444,13 +444,12 @@
     // Si no es posa res, la web fa servir 40 per defecte.
     let doughsDate = null;
     let doughsState = null;
-    // El número que es veu sempre és el de Supabase, excepte en dos casos
-    // transitoris: mentre s'escriu un número a mà (doughsDirty, només es
-    // desa amb "Desar"/Enter; si es surt del camp sense desar, torna al
-    // valor de Supabase) i uns instants després d'un +/− (doughsPending,
-    // que es desa sol agrupant clics ràpids).
+    // El número que es veu és sempre el de Supabase, excepte mentre hi ha
+    // un esborrany (doughsDirty): un número escrit a mà o canviat amb +/−.
+    // L'esborrany només es desa amb "Desar"/Enter; si es surt del camp, es
+    // prem Esc o passen 20 s sense tocar res, torna al valor de Supabase.
     let doughsDirty = false;
-    let doughsPending = null;
+    let doughsIdleTimer = null;
     let doughsSaveTimer = null;
     let doughsStatusTimer = null;
     let doughsSaving = false;
@@ -483,7 +482,7 @@
       left.style.color = st.remaining === 0 ? '#EF4444' : st.remaining <= 5 ? '#F59E0B' : '#E8EAED';
       document.getElementById('doughs-total').textContent = st.doughs;
       document.getElementById('doughs-used').textContent = st.used;
-      if (!doughsDirty && doughsPending === null) document.getElementById('doughs-input').value = st.doughs;
+      if (!doughsDirty) document.getElementById('doughs-input').value = st.doughs;
       if (st.used > st.doughs) {
         note.textContent = `⚠ Ja hi ha ${st.used} pizzes venudes i has posat ${st.doughs} masses. No es cancel·la cap comanda; només es bloqueja vendre'n més.`;
         note.style.color = '#F59E0B';
@@ -511,8 +510,8 @@
     }
 
     function selectDoughsDate(iso) {
-      clearTimeout(doughsSaveTimer);
-      doughsDate = iso; doughsDirty = false; doughsPending = null;
+      clearTimeout(doughsSaveTimer); clearTimeout(doughsIdleTimer);
+      doughsDate = iso; doughsDirty = false;
       showDoughsSave(false); setDoughsStatus('');
       loadDoughs();
     }
@@ -527,20 +526,28 @@
     }
     const clampDoughs = n => Math.min(500, Math.max(0, Math.round(n)));
 
-    // Escriure a mà: queda com a esborrany fins que es prem "Desar" o Enter.
-    function onDoughsInput() {
+    // Qualsevol canvi (teclejar, fletxes del camp, + o −) és un esborrany:
+    // surt el botó "Desar" i no es guarda res fins que es confirma.
+    function markDoughsDraft() {
       const v = parseInt(document.getElementById('doughs-input').value, 10);
-      doughsDirty = true;
-      clearTimeout(doughsSaveTimer); doughsPending = null;
-      showDoughsSave(Number.isFinite(v) && doughsState && v !== doughsState.doughs);
-      setDoughsStatus('Sense desar: prem Desar per confirmar', '#F59E0B');
+      const changed = Number.isFinite(v) && doughsState && v !== doughsState.doughs;
+      doughsDirty = !!changed;
+      showDoughsSave(!!changed);
+      setDoughsStatus(changed ? 'Sense desar: prem Desar per confirmar' : '', '#F59E0B');
+      clearTimeout(doughsIdleTimer);
+      if (changed) doughsIdleTimer = setTimeout(revertDoughsInput, 20000);
     }
+    function onDoughsInput() { markDoughsDraft(); }
     // Sortir del camp sense desar: es queda com abans (el valor de Supabase).
-    function onDoughsBlur() {
+    // Passar a +/−/Desar amb el teclat no compta com a sortir.
+    function onDoughsBlur(e) {
       if (!doughsDirty) return;
+      const to = e && e.relatedTarget;
+      if (to && (to.id === 'doughs-minus' || to.id === 'doughs-plus' || to.id === 'doughs-save')) return;
       revertDoughsInput();
     }
     function revertDoughsInput() {
+      clearTimeout(doughsIdleTimer);
       doughsDirty = false;
       showDoughsSave(false);
       setDoughsStatus('');
@@ -553,19 +560,19 @@
     function saveDoughsFromInput() {
       const v = parseInt(document.getElementById('doughs-input').value, 10);
       if (!Number.isFinite(v) || v < 0 || v > 500) { revertDoughsInput(); return; }
+      clearTimeout(doughsIdleTimer);
       doughsDirty = false; showDoughsSave(false);
       saveDoughs(v);
     }
 
-    // +/−: es desa sol (agrupant clics ràpids en una sola escriptura).
+    // +/−: canvien l'esborrany (a partir del que hi ha al camp) i mostren "Desar".
     function adjustDoughs(delta) {
       if (!doughsState) return;
-      doughsDirty = false; showDoughsSave(false);
-      doughsPending = clampDoughs((doughsPending ?? doughsState.doughs) + delta);
-      document.getElementById('doughs-input').value = doughsPending;
-      setDoughsStatus('Desant…');
-      clearTimeout(doughsSaveTimer);
-      doughsSaveTimer = setTimeout(() => saveDoughs(doughsPending), 500);
+      const input = document.getElementById('doughs-input');
+      const cur = parseInt(input.value, 10);
+      const base = Number.isFinite(cur) ? cur : doughsState.doughs;
+      input.value = clampDoughs(base + delta);
+      markDoughsDraft();
     }
 
     // Escriu a Supabase i mostra el que Supabase ha respost (mai el que
@@ -577,7 +584,6 @@
       setDoughsStatus('Desant…');
       const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: clampDoughs(n) });
       doughsSaving = false;
-      doughsPending = null;
       if (error) {
         console.error(error);
         setDoughsStatus('No s\'ha pogut desar. Torna-ho a provar.', '#EF4444');
