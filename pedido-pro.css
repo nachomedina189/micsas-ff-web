@@ -146,17 +146,19 @@ body.pp {
   pointer-events: none;
 }
 .pp [data-pizza-card][onclick]:hover::after { background: var(--pp-accent); color: #fff; }
-/* begudes (files) */
+/* begudes (files)
+   El botó "Afegir" porta bg-[#F2E6CE]; la regla general de dalt el passaria
+   a blanc (text blanc sobre blanc), per això aquí el selector és més específic. */
 .pp #menu-drinks [data-pizza-row] {
   background: var(--pp-surface); border: 1px solid var(--pp-line); border-radius: 14px;
   padding: 1rem 1.25rem !important;
 }
 .pp #menu-drinks [data-pizza-row] span.font-normal { color: var(--pp-ink) !important; font-weight: 600; }
-.pp [data-btn-add] {
+.pp [data-ctrl-wrap] [data-btn-add] {
   background: var(--pp-ink) !important; color: #fff !important; border-color: var(--pp-ink) !important;
   padding: 0.5rem 1rem !important; font-size: 0.8125rem !important; font-weight: 600 !important;
 }
-.pp [data-btn-add]:hover { background: var(--pp-accent) !important; border-color: var(--pp-accent) !important; }
+.pp [data-ctrl-wrap] [data-btn-add]:hover { background: var(--pp-accent) !important; border-color: var(--pp-accent) !important; }
 
 /* barra de cistella al mòbil: fosca, amb el total ben visible */
 .pp #mcb-btn { background: var(--pp-ink) !important; border-color: var(--pp-ink) !important; color: #fff !important; border-radius: 14px !important; }
