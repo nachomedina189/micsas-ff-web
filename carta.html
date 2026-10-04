@@ -572,9 +572,19 @@
 
           <!-- Ressenya a Google (l'enllaç es configura a resenya.js) -->
           <a href="#" data-review-link target="_blank" rel="noopener noreferrer"
-            class="hidden inline-flex items-center justify-center gap-2 px-6 py-3 mb-12 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#2A1A0F] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5">
-            <iconify-icon icon="solar:star-bold" class="text-[#E23F2E]" width="18" height="18"></iconify-icon>
-            <span data-i18n="resenya">Deixa'ns una ressenya a Google</span>
+            class="hidden resenya-cta flex-col items-center gap-3 w-full max-w-[340px] px-6 py-6 mb-12 rounded-3xl bg-[#F2E6CE] text-center border-2 border-[#F5B301] transition-transform hover:-translate-y-1">
+            <span class="flex items-center justify-center gap-1" aria-hidden="true">
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            </span>
+            <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-2xl leading-tight text-[#c80a07]" data-i18n="resenya">Deixa'ns una ressenya a Google</span>
+            <span class="text-sm font-normal text-[#5A3E28]" data-i18n="resenya_help">Ens ajuda moltíssim i només triga 10 segons</span>
+            <span class="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] font-semibold text-[#F2E6CE] bg-[#c80a07]">
+              <span data-i18n="resenya_btn">Valorar ara</span> →
+            </span>
           </a>
         </div>
       </div>
