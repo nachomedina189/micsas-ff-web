@@ -82,6 +82,8 @@ $$;
 
 revoke all on function public.get_daily_availability(date) from public;
 grant execute on function public.get_daily_availability(date) to authenticated;
+-- Supabase dóna per defecte execute a anon; aquestes dues són només per a cuina.
+revoke execute on function public.get_daily_availability(date) from anon;
 
 -- Cuina posa (o corregeix amb +1/−1) les masses d'una data. Si el número
 -- queda per sota del que ja s'ha venut, no es cancel·la res: simplement
@@ -118,6 +120,7 @@ $$;
 
 revoke all on function public.set_daily_doughs(date, int) from public;
 grant execute on function public.set_daily_doughs(date, int) to authenticated;
+revoke execute on function public.set_daily_doughs(date, int) from anon;
 
 -- Per al client (anònim). Només diu el número exacte quan en queden 15 o
 -- menys, a petició del propietari:
