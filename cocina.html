@@ -102,6 +102,33 @@
       </div>
     </header>
 
+    <!-- ════ MASSES DEL DIA: el pizzero posa quantes masses (=pizzes) fa per a cada dia ════ -->
+    <section id="doughs-panel" class="mx-6 mt-6 bg-[#15181D] rounded-2xl p-4 md:p-5 border border-white/8">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div>
+          <h2 class="font-black text-lg uppercase tracking-wide">Masses del dia</h2>
+          <div id="doughs-dates" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-center">
+            <p id="doughs-left" class="font-black text-5xl leading-none">–</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-[#8B93A1] mt-1">Queden</p>
+          </div>
+          <div class="text-sm text-[#8B93A1] leading-snug">
+            <p>Masses: <b id="doughs-total" class="text-[#E8EAED]">–</b></p>
+            <p>Venudes: <b id="doughs-used" class="text-[#E8EAED]">–</b></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 ml-auto">
+          <button onclick="adjustDoughs(-1)" class="w-11 h-11 rounded-lg border border-white/15 text-xl font-black hover:bg-white/5" aria-label="Treure una massa">−1</button>
+          <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" class="w-24 h-11 rounded-lg bg-[#0E1013] border border-white/15 text-center text-lg font-bold" placeholder="Masses">
+          <button onclick="saveDoughsFromInput()" class="px-4 h-11 rounded-lg bg-[#16A34A] text-white text-sm font-bold">Desar</button>
+          <button onclick="adjustDoughs(1)" class="w-11 h-11 rounded-lg border border-white/15 text-xl font-black hover:bg-white/5" aria-label="Afegir una massa">+1</button>
+        </div>
+      </div>
+      <p id="doughs-note" class="text-sm mt-3 text-[#8B93A1]"></p>
+    </section>
+
     <!-- ════ VISTA CUINA: Sense afegir → Preparant → Llest (confirmació) ════ -->
     <main id="view-cuina" class="p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
       <section id="section-pending" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8">
@@ -271,6 +298,7 @@
       document.getElementById('tab-repartiment').classList.toggle('bg-white', v === 'repartiment');
       document.getElementById('tab-repartiment').classList.toggle('text-[#14171C]', v === 'repartiment');
       document.getElementById('view-cuina').classList.toggle('hidden', v !== 'cuina');
+      document.getElementById('doughs-panel').classList.toggle('hidden', v !== 'cuina');
       document.getElementById('view-repartiment').classList.toggle('hidden', v !== 'repartiment');
     }
     window.setView = setView;
@@ -330,8 +358,10 @@
         _dataFeedStarted = true;
         setDateScope('today');
         loadOrders();
+        loadDoughs();
         subscribeRealtime();
         setInterval(updateElapsedCounters, 30000);
+        setInterval(loadDoughs, 60000);
       }
     }
 
@@ -399,6 +429,85 @@
       return newIds;
     }
 
+
+    // ── Masses del dia ──
+    // El nombre de masses és el nombre de pizzes que es poden vendre aquell
+    // dia (la web ho bloqueja quan s'acaben). Es posa per data d'entrega,
+    // perquè la web accepta comandes anticipades de divendres i diumenge.
+    // Si no es posa res, la web fa servir 40 per defecte.
+    let doughsDate = null;
+    let doughsState = null;
+
+    function doughsServiceDates() {
+      const out = [];
+      const d = new Date(businessDateISO() + 'T00:00:00');
+      for (let i = 0; i < 14 && out.length < 4; i++) {
+        if (d.getDay() === 5 || d.getDay() === 0) out.push(localDateStr(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    }
+
+    function renderDoughsDates() {
+      const names = ['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'];
+      document.getElementById('doughs-dates').innerHTML = doughsServiceDates().map(iso => {
+        const d = new Date(iso + 'T00:00:00');
+        const on = iso === doughsDate;
+        return `<button onclick="selectDoughsDate('${iso}')" class="px-3 py-1.5 rounded-lg text-sm font-semibold border ${on ? 'bg-white text-[#15181D] border-white' : 'border-white/15 hover:bg-white/5'}">${names[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}</button>`;
+      }).join('');
+    }
+
+    function renderDoughs() {
+      const st = doughsState;
+      const left = document.getElementById('doughs-left');
+      const note = document.getElementById('doughs-note');
+      if (!st) { left.textContent = '–'; return; }
+      left.textContent = st.remaining;
+      left.style.color = st.remaining === 0 ? '#EF4444' : st.remaining <= 5 ? '#F59E0B' : '#E8EAED';
+      document.getElementById('doughs-total').textContent = st.doughs;
+      document.getElementById('doughs-used').textContent = st.used;
+      document.getElementById('doughs-input').value = st.doughs;
+      if (st.used > st.doughs) {
+        note.textContent = `⚠ Ja hi ha ${st.used} pizzes venudes i has posat ${st.doughs} masses. No es cancel·la cap comanda; només es bloqueja vendre'n més.`;
+        note.style.color = '#F59E0B';
+      } else if (st.remaining === 0) {
+        note.textContent = 'Masses esgotades: la web ja no deixa comprar pizzes aquest dia.';
+        note.style.color = '#EF4444';
+      } else if (st.remaining <= 5) {
+        note.textContent = `⚠ Només queden ${st.remaining} masses.`;
+        note.style.color = '#F59E0B';
+      } else if (!st.is_set) {
+        note.textContent = `Encara no has posat les masses d'aquest dia: la web fa servir ${st.doughs} per defecte.`;
+        note.style.color = '#8B93A1';
+      } else {
+        note.textContent = '';
+      }
+    }
+
+    async function loadDoughs() {
+      if (!doughsDate) doughsDate = doughsServiceDates()[0];
+      renderDoughsDates();
+      const { data, error } = await supabase.rpc('get_daily_availability', { p_delivery_date: doughsDate });
+      if (error) { console.error(error); return; }
+      doughsState = Array.isArray(data) ? data[0] : data;
+      renderDoughs();
+    }
+
+    function selectDoughsDate(iso) { doughsDate = iso; loadDoughs(); }
+    window.selectDoughsDate = selectDoughsDate;
+
+    async function saveDoughs(n) {
+      if (!Number.isFinite(n) || n < 0 || n > 500) return;
+      const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: Math.round(n) });
+      if (error) { console.error(error); alert('No s\'han pogut desar les masses.'); return; }
+      doughsState = Array.isArray(data) ? data[0] : data;
+      renderDoughs();
+    }
+    function saveDoughsFromInput() { saveDoughs(parseInt(document.getElementById('doughs-input').value, 10)); }
+    function adjustDoughs(delta) { if (doughsState) saveDoughs(doughsState.doughs + delta); }
+    window.saveDoughsFromInput = saveDoughsFromInput;
+    window.adjustDoughs = adjustDoughs;
+
     const _seenOrderIds = new Set();
 
     async function loadOrders() {
@@ -412,6 +521,7 @@
       const newInScope = (data || []).some(o => newIds.includes(o.id) && inDateScope(o));
       ordersCache = data || [];
       renderOrders();
+      loadDoughs();
       if (!isFirstLoad && newInScope) playNewOrderSound();
     }
 

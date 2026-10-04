@@ -376,6 +376,7 @@
           <button type="button" onclick="selectDeliveryDay('other')" id="cf-day-other" class="px-5 py-2.5 rounded-full border text-sm font-medium transition-all">Un altre dia</button>
         </div>
         <div id="cf-date-pills" class="hidden flex flex-wrap gap-2 justify-center"></div>
+        <p id="cf-pizza-status" class="hidden text-center text-sm font-semibold text-[#E23F2E]"></p>
         <div id="cf-time-slots" class="space-y-3"></div>
         <p class="flex items-center justify-center gap-1.5 text-xs text-[#9B8A72] text-center">
           <iconify-icon icon="solar:fire-bold" width="14" style="color:#E23F2E;"></iconify-icon>
@@ -1028,21 +1029,22 @@
     // que una franja concreta estigui plena, és que ja no es fan més
     // pizzes. El servidor (create_order_with_slot) ho torna a comprovar
     // sempre igualment: això només evita que el client arribi a intentar-ho.
-    const DAILY_PIZZA_CAP = 45;
     let _cfDailySoldOut = false;
+    let _cfPizzaStatus = null;
 
     async function loadSlotCountsFor(date) {
       _slotCounts = {};
       _cfDailySoldOut = false;
+      _cfPizzaStatus = null;
       if (!window.supabase) return;
       // get_slot_capacity és una funció agregada (no exposa dades del
       // client) accessible per a qualsevol usuari, a diferència d'un
       // select directe a "orders" — bloquejat per RLS per a un client
       // anònim, cosa que deixava _slotCounts sempre buit i cap franja es
       // marcava mai com a completa.
-      const [{ data }, { data: dailyTotal }] = await Promise.all([
+      const [{ data }, { data: pizzaStatus }] = await Promise.all([
         window.supabase.rpc('get_slot_capacity', { p_delivery_date: date }),
-        window.supabase.rpc('get_daily_pizza_count', { p_delivery_date: date }),
+        window.supabase.rpc('get_pizza_status', { p_delivery_date: date }),
       ]);
       if (data) {
         data.forEach(row => {
@@ -1050,8 +1052,20 @@
           _slotCounts[row.slot_time] = row.pizza_count || 0;
         });
       }
-      _cfDailySoldOut = typeof dailyTotal === 'number' && dailyTotal >= DAILY_PIZZA_CAP;
+      _cfPizzaStatus = Array.isArray(pizzaStatus) ? pizzaStatus[0] : pizzaStatus;
+      _cfDailySoldOut = _cfPizzaStatus?.status === 'soldout';
     }
+
+    // Estat de les pizzes del dia (masses que ha posat el pizzero menys les
+    // ja reservades). Només revela el número quan en queden 15 o menys; entre
+    // 16 i 20 diu només que s'estan esgotant; amb més, no diu res.
+    function pizzaStatusMessage(st) {
+      if (!st) return '';
+      if (st.status === 'few') return `🔥 Només en queden ${st.remaining}!`;
+      if (st.status === 'low') return '🔥 S\'estan esgotant les pizzes!';
+      return '';
+    }
+
 
     function updateDayAvailability() {
       const todayBtn = document.getElementById('cf-day-today');
@@ -1123,6 +1137,12 @@
     function renderTimeSlots() {
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
+      const statusEl = document.getElementById('cf-pizza-status');
+      if (statusEl) {
+        const msg = pizzaStatusMessage(_cfPizzaStatus);
+        statusEl.textContent = msg;
+        statusEl.classList.toggle('hidden', !msg);
+      }
       if (_cfDailySoldOut) {
         container.innerHTML = `
           <div class="flex flex-col items-center text-center gap-2 py-6 px-5 rounded-2xl border border-[#E23F2E]/30 bg-[#E23F2E]/5">
