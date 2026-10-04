@@ -121,8 +121,8 @@
         </div>
         <div class="flex items-center gap-2 ml-auto">
           <button onclick="adjustDoughs(-1)" class="w-11 h-11 rounded-lg border border-white/15 text-xl font-black hover:bg-white/5" aria-label="Treure una massa">−1</button>
-          <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" class="w-24 h-11 rounded-lg bg-[#0E1013] border border-white/15 text-center text-lg font-bold" placeholder="Masses">
-          <button onclick="saveDoughsFromInput()" class="px-4 h-11 rounded-lg bg-[#16A34A] text-white text-sm font-bold">Desar</button>
+          <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" oninput="markDoughsDirty()" onkeydown="if(event.key==='Enter')saveDoughsFromInput()" class="w-24 h-11 rounded-lg bg-[#0E1013] border border-white/15 text-center text-lg font-bold" placeholder="Masses">
+          <button id="doughs-save" onclick="saveDoughsFromInput()" class="px-4 h-11 rounded-lg bg-[#16A34A] text-white text-sm font-bold">Desar</button>
           <button onclick="adjustDoughs(1)" class="w-11 h-11 rounded-lg border border-white/15 text-xl font-black hover:bg-white/5" aria-label="Afegir una massa">+1</button>
         </div>
       </div>
@@ -437,6 +437,8 @@
     // Si no es posa res, la web fa servir 40 per defecte.
     let doughsDate = null;
     let doughsState = null;
+    let doughsDirty = false; // número escrit però encara no desat: els refrescos no el trepitgen
+    let doughsSavedTimer = null;
 
     function doughsServiceDates() {
       const out = [];
@@ -466,7 +468,7 @@
       left.style.color = st.remaining === 0 ? '#EF4444' : st.remaining <= 5 ? '#F59E0B' : '#E8EAED';
       document.getElementById('doughs-total').textContent = st.doughs;
       document.getElementById('doughs-used').textContent = st.used;
-      document.getElementById('doughs-input').value = st.doughs;
+      if (!doughsDirty) document.getElementById('doughs-input').value = st.doughs;
       if (st.used > st.doughs) {
         note.textContent = `⚠ Ja hi ha ${st.used} pizzes venudes i has posat ${st.doughs} masses. No es cancel·la cap comanda; només es bloqueja vendre'n més.`;
         note.style.color = '#F59E0B';
@@ -493,15 +495,30 @@
       renderDoughs();
     }
 
-    function selectDoughsDate(iso) { doughsDate = iso; loadDoughs(); }
+    function selectDoughsDate(iso) { doughsDate = iso; doughsDirty = false; setDoughsSaveBtn('Desar', '#16A34A'); loadDoughs(); }
     window.selectDoughsDate = selectDoughsDate;
+
+    function setDoughsSaveBtn(text, bg) {
+      const b = document.getElementById('doughs-save');
+      b.textContent = text; b.style.background = bg;
+    }
+    function markDoughsDirty() {
+      doughsDirty = true;
+      clearTimeout(doughsSavedTimer);
+      setDoughsSaveBtn('Sense desar', '#D97706');
+    }
+    window.markDoughsDirty = markDoughsDirty;
 
     async function saveDoughs(n) {
       if (!Number.isFinite(n) || n < 0 || n > 500) return;
       const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: Math.round(n) });
       if (error) { console.error(error); alert('No s\'han pogut desar les masses.'); return; }
+      doughsDirty = false;
       doughsState = Array.isArray(data) ? data[0] : data;
       renderDoughs();
+      setDoughsSaveBtn('Desat ✓', '#16A34A');
+      clearTimeout(doughsSavedTimer);
+      doughsSavedTimer = setTimeout(() => setDoughsSaveBtn('Desar', '#16A34A'), 2000);
     }
     function saveDoughsFromInput() { saveDoughs(parseInt(document.getElementById('doughs-input').value, 10)); }
     function adjustDoughs(delta) { if (doughsState) saveDoughs(doughsState.doughs + delta); }
