@@ -144,6 +144,8 @@
       color: #2A1A0F !important;
     }
   </style>
+  <link rel="stylesheet" href="pizza-badge.css">
+  <script src="pizza-badge.js"></script>
 </head>
 
 <body class="pp bg-[#c80a07] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
@@ -377,7 +379,7 @@
           <button type="button" onclick="selectDeliveryDay('other')" id="cf-day-other" class="px-5 py-2.5 rounded-full border text-sm font-medium transition-all">Un altre dia</button>
         </div>
         <div id="cf-date-pills" class="hidden flex flex-wrap gap-2 justify-center"></div>
-        <p id="cf-pizza-status" class="hidden text-center text-sm font-semibold text-[#E23F2E]"></p>
+        <div id="cf-pizza-status" class="pzb-wrap" style="display:none" aria-live="polite"></div>
         <div id="cf-time-slots" class="space-y-3"></div>
         <p class="flex items-center justify-center gap-1.5 text-xs text-[#9B8A72] text-center">
           <iconify-icon icon="solar:fire-bold" width="14" style="color:#E23F2E;"></iconify-icon>
@@ -1057,15 +1059,6 @@
       _cfDailySoldOut = _cfPizzaStatus?.status === 'soldout';
     }
 
-    // Estat de les pizzes del dia (masses que ha posat el pizzero menys les
-    // ja reservades). Només revela el número quan en queden 15 o menys; entre
-    // 16 i 20 diu només que s'estan esgotant; amb més, no diu res.
-    function pizzaStatusMessage(st) {
-      if (!st) return '';
-      if (st.status === 'few') return `🔥 Només en queden ${st.remaining}!`;
-      if (st.status === 'low') return '🔥 S\'estan esgotant les pizzes!';
-      return '';
-    }
 
 
     function updateDayAvailability() {
@@ -1139,11 +1132,7 @@
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
       const statusEl = document.getElementById('cf-pizza-status');
-      if (statusEl) {
-        const msg = pizzaStatusMessage(_cfPizzaStatus);
-        statusEl.textContent = msg;
-        statusEl.classList.toggle('hidden', !msg);
-      }
+      window.renderPizzaBadge(statusEl, _cfPizzaStatus);
       if (_cfDailySoldOut) {
         container.innerHTML = `
           <div class="flex flex-col items-center text-center gap-2 py-6 px-5 rounded-2xl border border-[#E23F2E]/30 bg-[#E23F2E]/5">
