@@ -1,0 +1,334 @@
+/* ══════════════════════════════════════════════════════════════════
+   pedido-pro.css — aspecte "botiga de delivery" només per a pedido.html.
+
+   La resta de la web manté l'estètica de marca (vermell + crema). Aquí,
+   on la gent tria, omple dades i paga, fem servir una paleta neutra
+   (fons blanc/gris clar, text gairebé negre, vermell NOMÉS per a accions)
+   perquè la pàgina es llegeixi com una passarel·la de pagament seriosa.
+
+   Tot està dins de body.pp i funciona canviant els colors de les classes
+   de Tailwind que ja fa servir la pàgina (també les que genera el JS),
+   així no cal tocar la lògica de comanda ni de pagament amb Stripe.
+   ══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body.pp {
+  --pp-bg: #F6F5F3;
+  --pp-surface: #FFFFFF;
+  --pp-soft: #F4F3F1;
+  --pp-line: #E7E5E2;
+  --pp-ink: #161412;
+  --pp-ink-2: #5E5A55;
+  --pp-muted: #8A857F;
+  --pp-accent: #E23F2E;
+  --pp-accent-dark: #B82A1F;
+  background: var(--pp-bg) !important;
+  color: var(--pp-ink);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+/* Botons i textos petits en Inter; títols es queden amb League Spartan (marca) */
+.pp button[class*="League_Spartan"],
+.pp a[class*="League_Spartan"] { font-family: 'Inter', system-ui, sans-serif !important; font-weight: 600 !important; }
+
+/* ── Paleta: crema → neutre ─────────────────────────────────────── */
+.pp [class~="bg-[#F2E6CE]"],
+.pp [class~="bg-[#F2E6CE]/95"],
+.pp [class~="bg-[#F2E6CE]/85"] { background-color: var(--pp-surface) !important; }
+.pp [class~="bg-[#E6D5B0]"] { background-color: var(--pp-soft) !important; }
+.pp [class~="bg-[#E6D5B0]/10"],
+.pp [class~="bg-[#E6D5B0]/20"],
+.pp [class~="bg-[#E6D5B0]/30"] { background-color: var(--pp-soft) !important; }
+.pp [class~="border-[#C4B08A]/20"],
+.pp [class~="border-[#C4B08A]/30"],
+.pp [class~="border-[#C4B08A]/40"],
+.pp [class~="border-[#C4B08A]/60"],
+.pp [class~="border-[#C4B08A]"],
+.pp [class~="border-[#F2E6CE]/40"],
+.pp [class~="border-[#E6D5B0]"] { border-color: var(--pp-line) !important; }
+.pp [class~="text-[#2A1A0F]"],
+.pp [class~="text-[#2D241D]"] { color: var(--pp-ink) !important; }
+.pp [class~="text-[#5A3E28]"],
+.pp [class~="text-[#8C7A58]"] { color: var(--pp-ink-2) !important; }
+.pp [class~="text-[#9B8A72]"],
+.pp [class~="text-[#C4B08A]"] { color: var(--pp-muted) !important; }
+.pp [class~="bg-[#E6D5B0]"].h-px,
+.pp .h-px[class~="bg-[#E6D5B0]"] { background-color: var(--pp-line) !important; }
+
+/* Zones que abans eren sobre fons vermell: text crema → text fosc */
+.pp > section [class~="text-[#F2E6CE]"] { color: var(--pp-ink) !important; }
+.pp > section [class~="text-[#F2E6CE]/70"] { color: var(--pp-muted) !important; }
+
+/* ── Capçalera ──────────────────────────────────────────────────── */
+.pp #navbar {
+  background: rgba(255,255,255,0.96) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--pp-line) !important;
+  box-shadow: none !important;
+  padding-top: 0.75rem; padding-bottom: 0.75rem;
+}
+.pp #navbar img.nav-logo { filter: none !important; mix-blend-mode: multiply !important; height: 2.25rem; }
+.pp #navbar button[aria-label="Cistella"] iconify-icon { color: var(--pp-ink) !important; }
+.pp #navbar [class~="rounded-full"][class~="border"] { box-shadow: none !important; }
+.pp .hot-fast-badge { display: none !important; }
+.pp .fixed.inset-0.pointer-events-none[class*="opacity-[0.03]"] { display: none; } /* textura de paper */
+
+/* ── Títol + xips d'informació ─────────────────────────────────── */
+.pp > section:first-of-type {
+  text-align: left;
+  padding-top: 6.5rem !important;
+  padding-bottom: 1.25rem !important;
+  max-width: 72rem; margin: 0 auto;
+}
+.pp > section:first-of-type h1 {
+  font-size: clamp(1.75rem, 3.2vw, 2.5rem) !important;
+  line-height: 1.1;
+  margin-bottom: 0.9rem !important;
+}
+.pp-chips { display: flex; flex-wrap: wrap; gap: 0.35rem 1.1rem; }
+.pp-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.875rem; font-weight: 500; color: var(--pp-ink-2); white-space: nowrap;
+}
+.pp-chip svg { width: 16px; height: 16px; color: var(--pp-accent); flex-shrink: 0; }
+@media (max-width: 639px) {
+  .pp > section:first-of-type h1 { font-size: 1.6rem !important; }
+  .pp-chip { font-size: 0.8125rem; }
+}
+
+/* ── Barra de categories (sticky) ───────────────────────────────── */
+.pp-cats {
+  position: sticky; top: 60px; z-index: 30;
+  background: rgba(246,245,243,0.96); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--pp-line);
+  margin: 0 -1.5rem 2rem; padding: 0.65rem 1.5rem;
+  display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none;
+}
+.pp-cats::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) { .pp-cats { margin: 0 -3rem 2.5rem; padding: 0.75rem 3rem; } }
+.pp-cats a {
+  flex-shrink: 0; padding: 0.45rem 0.95rem; border-radius: 9999px;
+  font-size: 0.875rem; font-weight: 600; color: var(--pp-ink-2);
+  background: var(--pp-surface); border: 1px solid var(--pp-line);
+  text-decoration: none; transition: all .15s ease;
+}
+.pp-cats a.on { background: var(--pp-ink); border-color: var(--pp-ink); color: #fff; }
+
+/* ── Llistat de productes ───────────────────────────────────────── */
+.pp > section:nth-of-type(2) { padding-top: 0 !important; }
+.pp > section h2 { font-size: 1.5rem !important; }
+.pp > section .border-b.pb-4 { padding-bottom: 0.75rem !important; margin-bottom: 1.25rem !important; }
+.pp > section .mb-16 { margin-bottom: 3rem !important; scroll-margin-top: 130px; }
+.pp [data-pizza-card] {
+  position: relative;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 2px rgba(22,20,18,0.04) !important;
+  min-height: 150px !important;
+}
+.pp [data-pizza-card]:hover { box-shadow: 0 6px 20px rgba(22,20,18,0.08) !important; transform: translateY(-1px); }
+.pp [data-pizza-card] > div:first-child { padding: 1.1rem 1.25rem !important; }
+.pp [data-pizza-card] span.uppercase { text-transform: none !important; font-size: 1.125rem !important; margin-bottom: 0.35rem !important; }
+.pp [data-pizza-card] span.leading-relaxed { font-size: 0.875rem !important; font-weight: 400 !important; line-height: 1.45 !important; color: var(--pp-ink-2) !important;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pp [data-pizza-card] [class~="text-[#E23F2E]"] { color: var(--pp-ink) !important; font-weight: 600 !important; font-size: 1rem !important; }
+.pp [data-pizza-card] > div:last-child { width: 38% !important; }
+@media (min-width: 640px) { .pp [data-pizza-card] > div:last-child { width: 42% !important; } }
+/* botó "+" visible: el clic passa a la targeta, que ja obre el detall */
+.pp [data-pizza-card][onclick]::after {
+  content: '+';
+  position: absolute; right: 10px; bottom: 10px;
+  width: 36px; height: 36px; border-radius: 9999px;
+  background: var(--pp-surface); color: var(--pp-ink);
+  box-shadow: 0 2px 8px rgba(22,20,18,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font: 500 24px/1 'Inter', sans-serif;
+  pointer-events: none;
+}
+.pp [data-pizza-card][onclick]:hover::after { background: var(--pp-accent); color: #fff; }
+/* begudes (files) */
+.pp #menu-drinks [data-pizza-row] {
+  background: var(--pp-surface); border: 1px solid var(--pp-line); border-radius: 14px;
+  padding: 1rem 1.25rem !important;
+}
+.pp #menu-drinks [data-pizza-row] span.font-normal { color: var(--pp-ink) !important; font-weight: 600; }
+.pp [data-btn-add] {
+  background: var(--pp-ink) !important; color: #fff !important; border-color: var(--pp-ink) !important;
+  padding: 0.5rem 1rem !important; font-size: 0.8125rem !important; font-weight: 600 !important;
+}
+.pp [data-btn-add]:hover { background: var(--pp-accent) !important; border-color: var(--pp-accent) !important; }
+
+/* barra de cistella al mòbil: fosca, amb el total ben visible */
+.pp #mcb-btn { background: var(--pp-ink) !important; border-color: var(--pp-ink) !important; color: #fff !important; border-radius: 14px !important; }
+.pp #mcb-btn span { font-weight: 600 !important; opacity: 1 !important; }
+
+/* ── Peu de pàgina compacte ─────────────────────────────────────── */
+.pp footer > div:first-child { background: var(--pp-bg) !important; padding-top: 1rem !important; }
+.pp footer [class~="text-[#F2E6CE]"]:not(.bg-\[\#2A1A0F\]) { color: var(--pp-ink) !important; }
+.pp footer [class~="border-[#F2E6CE]/40"] { border-color: var(--pp-line) !important; }
+.pp footer img[src*="wordmark"] { width: 160px !important; margin: 0 auto; opacity: .9; }
+.pp footer .mb-12 { margin-bottom: 1.5rem !important; }
+.pp footer .mt-12 { margin-top: 1.5rem !important; }
+.pp footer > div:last-child { background: var(--pp-surface) !important; border-color: var(--pp-line) !important; padding-top: 2rem !important; }
+
+/* ── Cistella ───────────────────────────────────────────────────── */
+.pp #cart-drawer { border-left: 1px solid var(--pp-line) !important; }
+.pp #cart-drawer > div:first-child span.font-black { font-family: 'Inter', sans-serif !important; font-weight: 700 !important; font-size: 1.125rem !important; }
+.pp #cart-items > div { background: var(--pp-surface) !important; }
+.pp #cart-empty img { width: 7rem; height: 7rem; filter: grayscale(.2); }
+.pp #cart-empty p.font-black { font-size: 1.25rem !important; }
+.pp #cart-footer button {
+  border-radius: 12px !important; background: var(--pp-accent) !important; color: #fff !important;
+  display: flex; justify-content: space-between; padding-left: 1.25rem; padding-right: 1.25rem;
+}
+
+/* Escriptori: la cistella sempre visible a la dreta, com a qualsevol app de delivery */
+@media (min-width: 1024px) {
+  body.pp { padding-right: 380px; }
+  .pp #navbar { padding-right: calc(380px + 3rem) !important; }
+  .pp #cart-drawer {
+    transform: none !important;
+    top: 0; height: 100dvh; max-width: 380px !important;
+    z-index: 45; box-shadow: none !important;
+    background: var(--pp-surface) !important;
+  }
+  .pp #cart-drawer > div:first-child { min-height: 61px; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+  .pp #cart-drawer > div:first-child > button { display: none; }
+  .pp #cart-overlay { display: none !important; }
+  .pp #navbar button[aria-label="Cistella"] { display: none; }
+}
+
+/* ── Checkout ───────────────────────────────────────────────────── */
+.pp #checkout-fullscreen { background: var(--pp-bg) !important; }
+.pp #checkout-fullscreen > div:first-child {
+  background: var(--pp-surface) !important;
+  border: 1px solid var(--pp-line);
+}
+@media (min-width: 640px) {
+  .pp #checkout-fullscreen > div:first-child { border-radius: 16px !important; box-shadow: 0 20px 60px rgba(22,20,18,0.10) !important; max-width: 34rem !important; }
+}
+.pp #checkout-fullscreen > div:first-child > div:first-child { background: var(--pp-surface) !important; padding-top: 0.85rem; padding-bottom: 0.85rem; }
+.pp #checkout-fullscreen h1 { font-family: 'Inter', sans-serif !important; font-weight: 700 !important; font-size: 1rem !important; letter-spacing: 0 !important; }
+.pp #checkout-fullscreen section h2,
+.pp #cf-time-step h2 { font-family: 'Inter', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }
+.pp #checkout-fullscreen section h2 { font-size: 1.0625rem !important; margin-bottom: 0.75rem !important; }
+.pp #cf-time-step h2 { font-size: 1.5rem !important; }
+.pp #cf-time-step > div { padding-top: 1.5rem !important; }
+
+/* indicador de passos */
+.pp-steps { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--pp-line); background: var(--pp-surface); flex-shrink: 0; }
+.pp-step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 600; color: var(--pp-muted); white-space: nowrap; }
+.pp-step i { width: 20px; height: 20px; border-radius: 9999px; border: 1.5px solid var(--pp-line); display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 0.6875rem; }
+.pp-step.on { color: var(--pp-ink); }
+.pp-step.on i { background: var(--pp-ink); border-color: var(--pp-ink); color: #fff; }
+.pp-step.done { color: var(--pp-ink-2); }
+.pp-step.done i { background: #EAF6EF; border-color: #BFE3CD; color: #1F8A4C; }
+.pp-steps .bar { flex: 1; height: 1.5px; background: var(--pp-line); min-width: 12px; }
+
+/* franges horàries: graella en lloc d'una llista llarga */
+.pp #cf-time-slots { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.5rem; }
+.pp #cf-time-slots > * { margin-top: 0 !important; }
+.pp #cf-time-slots > div { grid-column: 1 / -1; }
+.pp #cf-time-slots button { border-radius: 12px !important; padding: 0.85rem 0.75rem !important; font-size: 0.9375rem !important; gap: 0.5rem !important; background: var(--pp-surface); }
+.pp #cf-time-slots button[class*="text-lg"] { grid-column: 1 / -1; font-weight: 600 !important; }
+.pp #cf-time-slots button:not([disabled]):hover { border-color: var(--pp-ink) !important; background: var(--pp-soft) !important; }
+.pp #cf-day-today, .pp #cf-day-other { border-radius: 10px !important; }
+
+/* resum del lliurament */
+.pp-recap { display: flex; gap: 0.75rem; align-items: flex-start; border: 1px solid var(--pp-line); border-radius: 14px; padding: 0.9rem 1rem; background: var(--pp-surface); }
+.pp-recap svg { width: 20px; height: 20px; color: var(--pp-accent); flex-shrink: 0; margin-top: 1px; }
+.pp-recap b { display: block; font-size: 0.875rem; font-weight: 600; color: var(--pp-ink); }
+.pp-recap span { display: block; font-size: 0.8125rem; color: var(--pp-ink-2); margin-top: 1px; }
+
+/* bloc del total */
+.pp #cf-summary-btn span.font-black { font-family: 'Inter', sans-serif !important; font-weight: 700 !important; font-size: 1.125rem !important; letter-spacing: 0 !important; }
+.pp #cf-total-display { color: var(--pp-ink) !important; }
+.pp #cf-scroll > div > div:first-child { border-radius: 14px !important; background: var(--pp-surface) !important; }
+
+/* camps de formulari */
+.pp #checkout-fullscreen input[type="text"],
+.pp #checkout-fullscreen input[type="email"],
+.pp #checkout-fullscreen input[type="tel"],
+.pp #checkout-fullscreen input[type="number"],
+.pp #checkout-fullscreen select,
+.pp #checkout-fullscreen textarea,
+.pp #item-modal textarea, .pp #item-modal select {
+  background: var(--pp-surface) !important;
+  border: 1px solid #D9D6D2 !important;
+  border-radius: 10px !important;
+  font-size: 0.9375rem !important;
+  color: var(--pp-ink) !important;
+}
+.pp #checkout-fullscreen input:focus,
+.pp #checkout-fullscreen select:focus,
+.pp #checkout-fullscreen textarea:focus { border-color: var(--pp-ink) !important; box-shadow: 0 0 0 3px rgba(22,20,18,0.08) !important; --tw-ring-color: transparent !important; }
+.pp #checkout-fullscreen label.block { font-size: 0.8125rem !important; font-weight: 600 !important; }
+
+/* propina */
+.pp .cf-tip-chip { border-radius: 10px !important; min-width: 3.5rem; }
+
+/* consentiments més discrets */
+.pp #checkout-fullscreen label.group span { font-size: 0.8125rem !important; }
+.pp #checkout-fullscreen label.group a { color: var(--pp-ink) !important; }
+
+/* pagament */
+.pp #checkout-card-btn,
+.pp #stripe-pay-btn {
+  border-radius: 12px !important;
+  background: var(--pp-accent) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.pp #checkout-card-btn:hover, .pp #stripe-pay-btn:hover { background: var(--pp-accent-dark) !important; }
+.pp #checkout-card-btn::before,
+.pp #stripe-pay-btn::before {
+  content: ''; width: 16px; height: 16px; flex-shrink: 0;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.pp #cf-pay-delivery-wrapper { border-radius: 12px !important; }
+.pp #cf-submit { border-radius: 12px !important; font-weight: 600 !important; }
+
+.pp-trust { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding-top: 0.25rem; }
+.pp-trust .brands { display: flex; gap: 0.375rem; flex-wrap: wrap; justify-content: center; }
+.pp-trust .brands span {
+  height: 24px; padding: 0 0.5rem; border: 1px solid var(--pp-line); border-radius: 5px; background: #fff;
+  display: inline-flex; align-items: center; font: 700 0.6875rem/1 'Inter', sans-serif; color: var(--pp-ink-2); letter-spacing: 0.01em;
+}
+.pp-trust .brands .visa { color: #1A1F71; font-style: italic; font-weight: 800; letter-spacing: 0.04em; }
+.pp-trust .brands .mc { gap: 0; padding: 0 0.45rem; }
+.pp-trust .brands .mc i { width: 12px; height: 12px; border-radius: 9999px; display: inline-block; }
+.pp-trust .brands .mc i:first-child { background: #EB001B; }
+.pp-trust .brands .mc i:last-child { background: #F79E1B; margin-left: -4px; mix-blend-mode: multiply; }
+.pp-trust p { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: var(--pp-muted); text-align: center; }
+.pp-trust p svg { width: 13px; height: 13px; flex-shrink: 0; color: #1F8A4C; }
+
+/* finestra de Stripe */
+.pp #stripe-modal-panel { border-radius: 16px 16px 0 0 !important; }
+@media (min-width: 768px) { .pp #stripe-modal-panel { border-radius: 16px !important; max-width: 26rem !important; } }
+.pp #stripe-amount-label { font-family: 'Inter', sans-serif !important; font-weight: 700 !important; font-size: 1.5rem !important; }
+.pp-paylabel { display: block; font-size: 0.75rem; font-weight: 600; color: var(--pp-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+.pp #stripe-modal-panel > div:last-child > p:last-child { font-size: 0.75rem !important; color: var(--pp-muted) !important; gap: 0.35rem !important; }
+
+/* modal de producte */
+.pp #item-modal-panel { border-radius: 20px 20px 0 0 !important; }
+@media (min-width: 640px) { .pp #item-modal-panel { border-radius: 20px !important; } }
+.pp #item-modal-title { text-transform: none !important; }
+.pp #item-modal-price { color: var(--pp-ink) !important; font-weight: 600 !important; }
+.pp #item-modal button[class~="bg-[#E23F2E]"] { border-radius: 12px !important; font-weight: 600 !important; }
+
+/* pantalla de confirmació */
+.pp #cf-success { background: var(--pp-surface) !important; }
+.pp #cf-success [class~="bg-[#D24A33]"] { background: #1F8A4C !important; }
+.pp #cf-success h2 { color: var(--pp-ink) !important; }
+.pp #cf-success .rounded-2xl[class~="bg-[#F2E6CE]"],
+.pp #cf-success a[class~="bg-[#F2E6CE]"] { background: var(--pp-soft) !important; border-radius: 14px !important; }
+.pp #cf-success button[class*="rounded-full"] { border-radius: 12px !important; }
+
+/* detalls */
+.pp [class~="bg-[#2A1A0F]"] { background-color: var(--pp-ink) !important; }
+.pp [style*="8E6A4A"] { color: var(--pp-muted) !important; font-family: 'Inter', sans-serif !important; }
+.pp input::placeholder, .pp textarea::placeholder { color: #A19C96 !important; }
+.pp #cf-order-summary [class~="text-[#E23F2E]"] { color: #1F8A4C !important; }
