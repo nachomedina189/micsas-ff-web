@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
 
     // Mateixes franges de 15 min que pedido.html / pre-pedido.html. L'última
     // franja és LAST_SLOT (política des del 02/10/2026; abans era les 23:30).
-    const LAST_SLOT = "22:30";
+    const LAST_SLOT = "22:45";
     const REAL_SLOTS: string[] = (() => {
       const [lh, lm] = LAST_SLOT.split(":").map(Number);
       const slots: string[] = [];
