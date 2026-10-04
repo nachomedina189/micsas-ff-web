@@ -3,6 +3,7 @@
     ca: {
       // SHARED
       demana: 'Demana ja! →', contacte: 'Contacte', horaris: 'Horaris',
+      resenya: "Deixa'ns una ressenya a Google", resenya_t: "Deixa'ns una ressenya", resenya_sub: "T'ha agradat? Explica-ho a Google",
       hor_dl: 'Dl – Dj:', hor_tancat: 'Tancat', hor_dv: 'Div i Diu:',
       copyright: '© 2025 micsas.ff · Tots els drets reservats', privacitat: 'Privacitat',
       // INDEX
@@ -79,6 +80,7 @@
     es: {
       // SHARED
       demana: '¡Pide ya! →', contacte: 'Contacto', horaris: 'Horarios',
+      resenya: 'Déjanos una reseña en Google', resenya_t: 'Déjanos una reseña', resenya_sub: '¿Te ha gustado? Cuéntalo en Google',
       hor_dl: 'Lun – Jue:', hor_tancat: 'Cerrado', hor_dv: 'Vie y Dom:',
       copyright: '© 2025 micsas.ff · Todos los derechos reservados', privacitat: 'Privacidad',
       // INDEX
