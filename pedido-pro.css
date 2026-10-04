@@ -325,3 +325,60 @@ body.pp {
 .pp [style*="8E6A4A"] { color: var(--pp-muted) !important; font-family: 'Inter', sans-serif !important; }
 .pp input::placeholder, .pp textarea::placeholder { color: #A19C96 !important; }
 .pp #cf-order-summary [class~="text-[#E23F2E]"] { color: #1F8A4C !important; }
+
+/* ── Avís "afegit a la cistella" (vegeu pedido-pro.js) ── */
+.pp-addtoasts {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 80px);
+  right: 16px;
+  z-index: 8500; /* per sobre de la cistella i del checkout, sota la finestra de Stripe */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+.pp-addtoast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 320px;
+  padding: 10px 14px 10px 10px;
+  background: #161412;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.12);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateY(-8px) scale(.98);
+  transition: opacity .35s ease, transform .35s cubic-bezier(0.16,1,0.3,1);
+}
+.pp-addtoast.in { opacity: 1; transform: none; }
+.pp-addtoast.out { opacity: 0; transform: translateY(-4px); }
+.pp-addtoast .ok {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1F9D55;
+  color: #fff;
+}
+.pp-addtoast .ok svg { width: 15px; height: 15px; }
+.pp-addtoast .tx { min-width: 0; }
+.pp-addtoast b { font-weight: 600; }
+.pp-addtoast .n { font-weight: 600; color: #F5B7AF; }
+.pp-addtoast small { display: block; font-size: 12px; color: rgba(255,255,255,.7); margin-top: 1px; }
+.pp-addtoast.bump .ok { animation: pp-bump .3s ease; }
+@keyframes pp-bump { 50% { transform: scale(1.2); } }
+/* Escriptori: a la dreta de la carta, sense tapar la columna de la cistella */
+@media (min-width: 1024px) {
+  .pp-addtoasts { top: 77px; right: calc(380px + 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-addtoast { transition: opacity .2s linear; transform: none !important; }
+}

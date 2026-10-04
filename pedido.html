@@ -843,9 +843,10 @@
       }
     }
 
-    function addToCartSilent(id, name, price) {
+    function addToCartSilent(id, name, price, quiet) {
       const ex = cart.find(i => i.id === id);
       if (ex) ex.qty++; else cart.push({ id, name, price, qty: 1, note: '' });
+      if (!quiet) window.ppNotifyAdded?.(id, name);
       const wrap = document.querySelector(`[data-ctrl-wrap="${id}"]`);
       if (wrap) wrap.animate([{ transform:'translateY(0px)' },{ transform:'translateY(-2px)' },{ transform:'translateY(0px)' }], { duration:220, easing:'cubic-bezier(0.16,1,0.3,1)' });
       renderCart(false); syncMenuRow(id);
@@ -856,6 +857,7 @@
       if (!it) return;
       it.qty = Math.max(0, it.qty + delta);
       if (it.qty === 0) cart = cart.filter(i => i.id !== id);
+      if (delta > 0) window.ppNotifyAdded?.(id, it.name);
       renderCart(false); syncMenuRow(id);
     }
 
@@ -2397,7 +2399,8 @@
       if (removed.length) note += 'Sense: ' + removed.join(', ');
       if (allergy) note += (note ? ' · ' : '') + 'Al·lèrgia: ' + allergy;
 
-      for (let i = 0; i < _modalQty; i++) addToCartSilent(item.id, item.name, item.price);
+      for (let i = 0; i < _modalQty; i++) addToCartSilent(item.id, item.name, item.price, true);
+      window.ppNotifyAdded?.(item.id, item.name, _modalQty);
       if (note) setPizzaNote(item.id, note);
 
       const drinkId = document.getElementById('item-modal-drink').value;
