@@ -480,19 +480,10 @@
               <label for="cf-phone" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
                 Telèfon <span class="text-[#E23F2E]" aria-hidden="true">*</span>
               </label>
-              <div class="flex gap-2">
-                <div class="relative shrink-0">
-                  <select id="cf-phone-prefix" aria-label="Prefix telefònic"
-                    class="appearance-none bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl pl-3 pr-7 py-3 text-[#2A1A0F] text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] cursor-pointer transition-all">
-                    <option value="+34">🇪🇸 +34</option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#9B8A72]">
-                    <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
-                  </div>
-                </div>
-                <input id="cf-phone" type="tel" autocomplete="tel-national" placeholder="6XX XXX XXX"
+              <div>
+                <input id="cf-phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" placeholder="6XX XXX XXX"
                   aria-required="true"
-                  class="flex-1 bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+                  class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
               </div>
               <p class="cf-field-err hidden text-xs mt-1 text-[#E23F2E]" data-for="cf-phone">Mínim 9 dígits.</p>
             </div>
@@ -1347,7 +1338,7 @@
         const setVal = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
         setVal('cf-name', name);
         setVal('cf-email', email);
-        setVal('cf-phone', phone);
+        setVal('cf-phone', stripPhonePrefix(phone));
         validateCheckout();
       } catch(e) {}
     }
@@ -1590,7 +1581,7 @@
         const phone = (document.getElementById('cf-phone') || {}).value || '';
         const nameOk  = name.trim().length >= 2;
         const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-        const phoneOk = phone.replace(/\D/g, '').length >= 9;
+        const phoneOk = stripPhonePrefix(phone).length >= 9;
         clientOk = nameOk && emailOk && phoneOk;
       }
       const baseOk = clientOk && tnc && privacy;
@@ -1690,7 +1681,7 @@
       if (name || phone) {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
         setVal('cf-name',  name);
-        setVal('cf-phone', phone.replace(/^\+\d+\s?/, ''));
+        setVal('cf-phone', stripPhonePrefix(phone));
         setVal('cf-email', email);
 
         if (name && phone) {
@@ -1957,6 +1948,23 @@
       }
     }
 
+    // El client només escriu el seu número de 9 dígits; si l'autocompletat o
+    // un "enganxar" hi posa +34 / 0034 / 34, el traiem. Es desa com "+34 XXXXXXXXX".
+    function stripPhonePrefix(v) {
+      let d = String(v || '').replace(/[^\d+]/g, '');
+      d = d.replace(/^(\+|00)34/, '');
+      d = d.replace(/\D/g, '');
+      if (d.length > 9 && d.startsWith('34')) d = d.slice(2);
+      return d;
+    }
+    (function () {
+      const ph = document.getElementById('cf-phone');
+      if (!ph) return;
+      const clean = () => { const c = stripPhonePrefix(ph.value); if (c !== ph.value.replace(/\s/g, '')) ph.value = c; };
+      ph.addEventListener('input', clean);
+      ph.addEventListener('change', clean);
+    })();
+
     function _collectOrderData() {
       const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       let name, email, phone;
@@ -1967,9 +1975,7 @@
       } else {
         name  = g('cf-name');
         email = g('cf-email') || null;
-        const prefix   = document.getElementById('cf-phone-prefix');
-        const phoneRaw = g('cf-phone');
-        phone = (prefix ? prefix.value : '+34') + ' ' + phoneRaw;
+        phone = '+34 ' + stripPhonePrefix(g('cf-phone'));
       }
       const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
       const floor      = sessionStorage.getItem('micsas_floor')   || null;
@@ -2304,7 +2310,7 @@
         showFieldErr('cf-email', v.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
       }
       if (id === 'cf-phone') {
-        const digits = e.target.value.replace(/\D/g,'');
+        const digits = stripPhonePrefix(e.target.value);
         showFieldErr('cf-phone', digits.length > 0 && digits.length < 9);
       }
     });
