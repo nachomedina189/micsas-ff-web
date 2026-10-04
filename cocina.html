@@ -119,11 +119,18 @@
             <p>Venudes: <b id="doughs-used" class="text-[#E8EAED]">–</b></p>
           </div>
         </div>
-        <div class="flex items-center gap-2 ml-auto">
-          <button onclick="adjustDoughs(-1)" class="w-11 h-11 rounded-lg border border-white/15 text-xl font-black hover:bg-white/5" aria-label="Treure una massa">−1</button>
-          <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" oninput="markDoughsDirty()" onkeydown="if(event.key==='Enter')saveDoughsFromInput()" class="w-24 h-11 rounded-lg bg-[#0E1013] border border-white/15 text-center text-lg font-bold" placeholder="Masses">
-          <button id="doughs-save" onclick="saveDoughsFromInput()" class="px-4 h-11 rounded-lg bg-[#16A34A] text-white text-sm font-bold">Desar</button>
-          <button onclick="adjustDoughs(1)" class="w-11 h-11 rounded-lg border border-white/15 text-xl font-black hover:bg-white/5" aria-label="Afegir una massa">+1</button>
+        <div class="flex flex-col items-end gap-1.5 ml-auto">
+          <div class="flex items-center gap-3">
+            <div class="flex items-stretch h-14 rounded-xl border border-white/15 bg-[#0E1013] overflow-hidden">
+              <button type="button" id="doughs-minus" onclick="adjustDoughs(-1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Treure una massa">−</button>
+              <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" aria-label="Nombre de masses"
+                oninput="onDoughsInput()" onblur="onDoughsBlur()" onkeydown="onDoughsKey(event)"
+                class="w-24 bg-transparent border-x border-white/15 text-center text-2xl font-black outline-none focus:bg-white/5">
+              <button type="button" id="doughs-plus" onclick="adjustDoughs(1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Afegir una massa">+</button>
+            </div>
+            <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" class="hidden h-14 px-5 rounded-xl bg-[#16A34A] text-white text-sm font-black uppercase tracking-wide hover:brightness-110">Desar</button>
+          </div>
+          <p id="doughs-status" class="text-xs font-bold h-4 text-[#8B93A1]" aria-live="polite"></p>
         </div>
       </div>
       <p id="doughs-note" class="text-sm mt-3 text-[#8B93A1]"></p>
@@ -437,8 +444,16 @@
     // Si no es posa res, la web fa servir 40 per defecte.
     let doughsDate = null;
     let doughsState = null;
-    let doughsDirty = false; // número escrit però encara no desat: els refrescos no el trepitgen
-    let doughsSavedTimer = null;
+    // El número que es veu sempre és el de Supabase, excepte en dos casos
+    // transitoris: mentre s'escriu un número a mà (doughsDirty, només es
+    // desa amb "Desar"/Enter; si es surt del camp sense desar, torna al
+    // valor de Supabase) i uns instants després d'un +/− (doughsPending,
+    // que es desa sol agrupant clics ràpids).
+    let doughsDirty = false;
+    let doughsPending = null;
+    let doughsSaveTimer = null;
+    let doughsStatusTimer = null;
+    let doughsSaving = false;
 
     function doughsServiceDates() {
       const out = [];
@@ -468,7 +483,7 @@
       left.style.color = st.remaining === 0 ? '#EF4444' : st.remaining <= 5 ? '#F59E0B' : '#E8EAED';
       document.getElementById('doughs-total').textContent = st.doughs;
       document.getElementById('doughs-used').textContent = st.used;
-      if (!doughsDirty) document.getElementById('doughs-input').value = st.doughs;
+      if (!doughsDirty && doughsPending === null) document.getElementById('doughs-input').value = st.doughs;
       if (st.used > st.doughs) {
         note.textContent = `⚠ Ja hi ha ${st.used} pizzes venudes i has posat ${st.doughs} masses. No es cancel·la cap comanda; només es bloqueja vendre'n més.`;
         note.style.color = '#F59E0B';
@@ -495,33 +510,87 @@
       renderDoughs();
     }
 
-    function selectDoughsDate(iso) { doughsDate = iso; doughsDirty = false; setDoughsSaveBtn('Desar', '#16A34A'); loadDoughs(); }
+    function selectDoughsDate(iso) {
+      clearTimeout(doughsSaveTimer);
+      doughsDate = iso; doughsDirty = false; doughsPending = null;
+      showDoughsSave(false); setDoughsStatus('');
+      loadDoughs();
+    }
     window.selectDoughsDate = selectDoughsDate;
 
-    function setDoughsSaveBtn(text, bg) {
-      const b = document.getElementById('doughs-save');
-      b.textContent = text; b.style.background = bg;
+    function showDoughsSave(on) { document.getElementById('doughs-save').classList.toggle('hidden', !on); }
+    function setDoughsStatus(text, color, clearAfterMs) {
+      const el = document.getElementById('doughs-status');
+      el.textContent = text; el.style.color = color || '#8B93A1';
+      clearTimeout(doughsStatusTimer);
+      if (clearAfterMs) doughsStatusTimer = setTimeout(() => { el.textContent = ''; }, clearAfterMs);
     }
-    function markDoughsDirty() {
-      doughsDirty = true;
-      clearTimeout(doughsSavedTimer);
-      setDoughsSaveBtn('Sense desar', '#D97706');
-    }
-    window.markDoughsDirty = markDoughsDirty;
+    const clampDoughs = n => Math.min(500, Math.max(0, Math.round(n)));
 
-    async function saveDoughs(n) {
-      if (!Number.isFinite(n) || n < 0 || n > 500) return;
-      const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: Math.round(n) });
-      if (error) { console.error(error); alert('No s\'han pogut desar les masses.'); return; }
+    // Escriure a mà: queda com a esborrany fins que es prem "Desar" o Enter.
+    function onDoughsInput() {
+      const v = parseInt(document.getElementById('doughs-input').value, 10);
+      doughsDirty = true;
+      clearTimeout(doughsSaveTimer); doughsPending = null;
+      showDoughsSave(Number.isFinite(v) && doughsState && v !== doughsState.doughs);
+      setDoughsStatus('Sense desar: prem Desar per confirmar', '#F59E0B');
+    }
+    // Sortir del camp sense desar: es queda com abans (el valor de Supabase).
+    function onDoughsBlur() {
+      if (!doughsDirty) return;
+      revertDoughsInput();
+    }
+    function revertDoughsInput() {
       doughsDirty = false;
+      showDoughsSave(false);
+      setDoughsStatus('');
+      if (doughsState) document.getElementById('doughs-input').value = doughsState.doughs;
+    }
+    function onDoughsKey(e) {
+      if (e.key === 'Enter') { e.preventDefault(); saveDoughsFromInput(); }
+      else if (e.key === 'Escape') { revertDoughsInput(); e.target.blur(); }
+    }
+    function saveDoughsFromInput() {
+      const v = parseInt(document.getElementById('doughs-input').value, 10);
+      if (!Number.isFinite(v) || v < 0 || v > 500) { revertDoughsInput(); return; }
+      doughsDirty = false; showDoughsSave(false);
+      saveDoughs(v);
+    }
+
+    // +/−: es desa sol (agrupant clics ràpids en una sola escriptura).
+    function adjustDoughs(delta) {
+      if (!doughsState) return;
+      doughsDirty = false; showDoughsSave(false);
+      doughsPending = clampDoughs((doughsPending ?? doughsState.doughs) + delta);
+      document.getElementById('doughs-input').value = doughsPending;
+      setDoughsStatus('Desant…');
+      clearTimeout(doughsSaveTimer);
+      doughsSaveTimer = setTimeout(() => saveDoughs(doughsPending), 500);
+    }
+
+    // Escriu a Supabase i mostra el que Supabase ha respost (mai el que
+    // s'esperava): així el número de pantalla i el de la base de dades
+    // no es poden descuadrar.
+    async function saveDoughs(n) {
+      if (doughsSaving) { doughsSaveTimer = setTimeout(() => saveDoughs(n), 200); return; }
+      doughsSaving = true;
+      setDoughsStatus('Desant…');
+      const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: clampDoughs(n) });
+      doughsSaving = false;
+      doughsPending = null;
+      if (error) {
+        console.error(error);
+        setDoughsStatus('No s\'ha pogut desar. Torna-ho a provar.', '#EF4444');
+        await loadDoughs();
+        return;
+      }
       doughsState = Array.isArray(data) ? data[0] : data;
       renderDoughs();
-      setDoughsSaveBtn('Desat ✓', '#16A34A');
-      clearTimeout(doughsSavedTimer);
-      doughsSavedTimer = setTimeout(() => setDoughsSaveBtn('Desar', '#16A34A'), 2000);
+      setDoughsStatus('Desat ✓', '#16A34A', 2500);
     }
-    function saveDoughsFromInput() { saveDoughs(parseInt(document.getElementById('doughs-input').value, 10)); }
-    function adjustDoughs(delta) { if (doughsState) saveDoughs(doughsState.doughs + delta); }
+    window.onDoughsInput = onDoughsInput;
+    window.onDoughsBlur = onDoughsBlur;
+    window.onDoughsKey = onDoughsKey;
     window.saveDoughsFromInput = saveDoughsFromInput;
     window.adjustDoughs = adjustDoughs;
 
