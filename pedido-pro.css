@@ -382,3 +382,7 @@ body.pp {
 @media (prefers-reduced-motion: reduce) {
   .pp-addtoast { transition: opacity .2s linear; transform: none !important; }
 }
+
+/* Títols principals (capçalera i categories) en vermell de marca */
+.pp > section:first-of-type h1,
+.pp > section .border-b h2 { color: #c80a07 !important; }
