@@ -185,8 +185,9 @@
 
       <div class="px-6 py-5 space-y-5">
 
-        <!-- Time -->
-        <div>
+        <!-- Pas 1: hora. L'adreça no apareix fins que el client confirma
+             la franja amb "Continuar". -->
+        <div id="pp-step-time">
           <label for="pp-time-select-btn" class="block text-xs font-semibold uppercase tracking-widest text-[#2A1A0F] mb-2">Quan vols rebre-la?</label>
           <div class="flex gap-2 mb-2">
             <button type="button" onclick="selectDeliveryDay('today')" id="pp-day-today" class="flex-1 px-4 py-2 rounded-full border text-sm font-medium transition-all">Avui</button>
@@ -206,9 +207,23 @@
             <iconify-icon icon="solar:fire-bold" width="14" style="color:#E23F2E;"></iconify-icon>
             Demana abans del sold-out.
           </p>
+          <button id="pp-time-continue" type="button" disabled onclick="_ppConfirmTime()"
+            class="mt-4 w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
+            Continuar
+          </button>
         </div>
 
-        <div class="border-t border-[#C4B08A]/20"></div>
+        <!-- Pas 2: adreça (amagat fins confirmar l'hora) -->
+        <div id="pp-step-address" class="hidden space-y-5 !mt-0">
+
+        <!-- Resum de l'hora triada, amb opció de tornar enrere -->
+        <div class="flex items-center justify-between gap-3 bg-white border border-[#C4B08A]/40 rounded-xl px-4 py-3">
+          <div class="min-w-0">
+            <p class="text-xs font-semibold uppercase tracking-widest text-[#2A1A0F]">Quan</p>
+            <p id="pp-time-summary" class="text-sm text-[#2A1A0F] truncate"></p>
+          </div>
+          <button type="button" onclick="_ppShowStep('time')" class="shrink-0 text-sm font-medium text-[#E23F2E] hover:underline">Canviar</button>
+        </div>
 
         <!-- Address -->
         <div class="space-y-3">
@@ -249,6 +264,8 @@
           </button>
           <p class="text-xs text-center font-light text-[#9B8A72] mt-3">Podràs triar les teves pizzes al següent pas</p>
         </div>
+
+        </div><!-- /pp-step-address -->
 
       </div>
     </div><!-- /pp-card -->
@@ -572,14 +589,60 @@
     // ppAddressValid will be set to true by the Places integration once an address is selected
     let ppAddressValid = false;
 
+    const PP_BTN_ON  = "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] transition-all cursor-pointer";
+    const PP_BTN_OFF = "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
+
     function validateForm() {
       const ok  = !!(ppSelectedTime && ppAddressValid);
       const btn = document.getElementById('pp-cta');
       btn.disabled = !ok;
-      btn.className = ok
-        ? "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] transition-all cursor-pointer"
-        : "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
+      btn.className = ok ? PP_BTN_ON : PP_BTN_OFF;
+      const cont = document.getElementById('pp-time-continue');
+      if (cont) {
+        const timeOk = !!ppSelectedTime && !_ppDailySoldOut;
+        cont.disabled = !timeOk;
+        cont.className = 'mt-4 ' + (timeOk ? PP_BTN_ON : PP_BTN_OFF);
+      }
+      // Si l'hora deixa de ser vàlida (canvi de dia, sold out...), es torna
+      // al pas de l'hora: l'adreça només es mostra amb una hora triada.
+      if (!ppSelectedTime) _ppShowStep('time');
     }
+
+    // Dos passos: primer l'hora i, un cop confirmada, l'adreça.
+    function _ppShowStep(step) {
+      const timeStep = document.getElementById('pp-step-time');
+      const addrStep = document.getElementById('pp-step-address');
+      if (!timeStep || !addrStep) return;
+      const toAddress = step === 'address';
+      timeStep.classList.toggle('hidden', toAddress);
+      addrStep.classList.toggle('hidden', !toAddress);
+      const box = document.getElementById('pp-time-dropdown');
+      if (box) box.classList.add('hidden');
+      if (toAddress) {
+        const label = document.getElementById('pp-time-select-label')?.textContent?.trim() || ppSelectedTime;
+        let day = 'Avui';
+        if (ppDeliveryDate !== todayISO()) {
+          const d = new Date(`${ppDeliveryDate}T00:00:00`);
+          day = `${PP_DAY_SHORT[d.getDay()] || ''} ${d.getDate()} ${PP_MONTH_SHORT[d.getMonth()]}`.trim();
+        }
+        document.getElementById('pp-time-summary').textContent = `${day} · ${label}`;
+      }
+    }
+    window._ppShowStep = _ppShowStep;
+
+    function _ppConfirmTime() {
+      if (!ppSelectedTime || _ppDailySoldOut) return;
+      if (!isSlotStillValid()) {
+        alert('Aquesta franja horària ja no té marge suficient. Tria una franja horària diferent.');
+        ppSelectedTime = null;
+        _ppResetTimeLabel();
+        loadSlotCounts().then(renderTimeSlots);
+        validateForm();
+        return;
+      }
+      _ppShowStep('address');
+    }
+    window._ppConfirmTime = _ppConfirmTime;
 
     // Comprova que la franja triada encara no hagi passat — pot quedar
     // obsoleta si el client ha trigat una estona omplint la resta del
@@ -1532,8 +1595,9 @@
   </script>
 
   <script>
-    // Pizzer animat: bucle en repòs + reacció quan el client s'acosta al
-    // botó "Ho vull ARA!". Tots dos clips comencen i acaben al mateix
+    // Pizzer animat: bucle en repòs + reacció NOMÉS quan el client prem el
+    // botó "Ho vull ARA!" (igual a mòbil i escriptori; abans reaccionava en
+    // passar-hi el cursor, cosa que al mòbil no existeix). Tots dos clips comencen i acaben al mateix
     // fotograma que la imatge de fons, així ni el bucle ni el pas d'un clip
     // a l'altre fan salts. Si els vídeos no carreguen, queda la imatge.
     (function () {
@@ -1558,8 +1622,19 @@
       idle.play().catch(() => {});
 
       let reacting = false;
+      let pending = false;
       function playReaction() {
-        if (reacting || react.readyState < 2) return;
+        if (reacting) return;
+        // Si el clip encara no està carregat (habitual al mòbil, que ignora
+        // preload), es reprodueix tan aviat com estigui a punt.
+        if (react.readyState < 2) {
+          if (!pending) {
+            pending = true;
+            react.addEventListener('loadeddata', () => { pending = false; playReaction(); }, { once: true });
+            if (react.networkState !== 2) react.load(); // 2 = ja està carregant
+          }
+          return;
+        }
         reacting = true;
         react.currentTime = 0;
         react.play().then(() => {
@@ -1574,9 +1649,7 @@
         reacting = false;
       });
 
-      btn.addEventListener('mouseenter', playReaction);
-      btn.addEventListener('focus', playReaction);
-      btn.addEventListener('touchstart', playReaction, { passive: true });
+      btn.addEventListener('click', playReaction);
     })();
   </script>
 
