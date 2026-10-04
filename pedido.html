@@ -1863,6 +1863,19 @@
       if (!validateCheckout()) return;
       if (cart.length === 0) return;
 
+      // Sold out: mai es deixa comprar. Es torna a consultar just ara perquè
+      // la pàgina pot portar oberta una estona i les pizzes s'han pogut acabar.
+      await loadSlotCountsFor(cfDeliveryDate);
+      if (_cfDailySoldOut) {
+        cfSelectedTime = null;
+        document.getElementById('cf-global-err').textContent = 'Sold ooout, moltes gràcies família! Ja no queden pizzes per a aquest dia.';
+        document.getElementById('cf-global-err').classList.remove('hidden');
+        document.getElementById('cf-scroll').classList.add('hidden');
+        document.getElementById('cf-time-step').classList.remove('hidden');
+        renderTimeSlots();
+        return;
+      }
+
       if (!isValidOrderDay(cfDeliveryDate)) {
         cfSelectedTime = null;
         document.getElementById('cf-global-err').textContent = 'Només fem comandes per divendres i diumenge. Tria un altre dia.';

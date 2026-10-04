@@ -231,6 +231,16 @@ Deno.serve(async (req) => {
     // lock per delivery_date, evita que dues comandes simultànies per la
     // mateixa franja passin totes dues la comprovació d'aforo abans que
     // cap de les dues s'hagi inserit.
+    // Dia exhaurit: no s'accepta cap comanda, ni tan sols només de begudes
+    // (create_order_with_slot només bloqueja si hi ha pizzes a la comanda).
+    const { data: dayStatus } = await sb.rpc("get_pizza_status", { p_delivery_date: deliveryDate });
+    const dayRow = Array.isArray(dayStatus) ? dayStatus[0] : dayStatus;
+    if (dayRow?.status === "soldout") {
+      return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true, remaining: 0 }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { data: rpcRows, error: rpcErr } = await sb.rpc("create_order_with_slot", {
       p_customer_id:    customerId,
       p_address_id:     address.id,
