@@ -1956,7 +1956,7 @@
       // prefix davant (+34, 0034, 34 repetits) es descarta, però mai les xifres del número.
       let d = String(v || '').replace(/\D/g, '');
       while (d.length > 9 && /^(0034|34)/.test(d)) d = d.replace(/^(0034|34)/, '');
-      return d.slice(0, 9);
+      return d;
     }
     (function () {
       const ph = document.getElementById('cf-phone');
