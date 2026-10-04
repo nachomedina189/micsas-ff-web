@@ -24,6 +24,52 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- ════ MÒBIL: només ajustos responsive i tàctils (≤767px); l'escriptori no canvia ════ -->
+  <style>
+    html { -webkit-text-size-adjust: 100%; }
+    button, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 767px) {
+      body { overflow-x: hidden; }
+      /* Capçalera: files que s'embolcallen en lloc de sortir de pantalla */
+      #kitchen-screen > header > div:first-child { flex-wrap: wrap; gap: .5rem; padding: .625rem .75rem; }
+      #kitchen-screen > header > div:first-child > div { flex-wrap: wrap; gap: .5rem; min-width: 0; }
+      #kitchen-screen > header > div:first-child > div:last-child { width: 100%; }
+      #kitchen-screen > header > div:first-child > div:last-child > div { padding-right: .5rem; }
+      #kitchen-screen > header h1 { font-size: 1.25rem; }
+      #kitchen-screen > header button { min-height: 44px; padding-left: .75rem; padding-right: .75rem; }
+      #role-tabs { padding: 0 .75rem .625rem; }
+      #role-tabs button { flex: 1; justify-content: center; min-height: 48px; }
+      /* Marges laterals més ajustades i columnes apilades */
+      #doughs-panel { margin: .75rem .75rem 0; }
+      #view-cuina, #view-repartiment { padding: .75rem; gap: .75rem; }
+      #view-cuina section, #view-repartiment section { min-width: 0; }
+      /* Masses del dia: tot a ample complet, controls grans per al polze */
+      #doughs-panel > div { gap: .75rem; }
+      #doughs-panel > div > div { min-width: 0; }
+      #doughs-panel > div > div:last-child { width: 100%; margin-left: 0; align-items: stretch; }
+      #doughs-panel > div > div:last-child > div { width: 100%; }
+      #doughs-panel > div > div:last-child > div > div { flex: 1; }
+      #doughs-input { flex: 1; width: auto; min-width: 0; font-size: 1.5rem; }
+      #doughs-minus, #doughs-plus { width: 4rem; }
+      #doughs-save { min-width: 6.5rem; }
+      #doughs-dates button { min-height: 44px; }
+      /* Targetes de comanda: botons i enllaços amb zona tàctil >=48px */
+      #view-cuina button, #view-repartiment button,
+      #view-cuina a[href^="http"], #view-repartiment a[href^="http"] { min-height: 48px; }
+      #view-cuina a[href^="tel:"], #view-repartiment a[href^="tel:"] { display: inline-block; padding: .5rem 0; font-size: 1rem; }
+      #view-cuina .overflow-hidden, #view-repartiment .overflow-hidden { overflow-wrap: anywhere; }
+      #route-panel a { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+      /* Historial: ocupa gairebé tota la pantalla, camps de data còmodes */
+      #history-modal > div { max-height: 92vh; }
+      #history-modal > div > div:first-child, #history-modal > div > div:nth-child(2) { padding-left: 1rem; padding-right: 1rem; }
+      #history-modal > div > div:first-child button { width: 44px; height: 44px; }
+      #history-modal input[type="date"] { min-height: 44px; font-size: 16px; }
+      #history-modal > div > div:nth-child(2) > button { min-height: 44px; }
+      #history-list { padding: 1rem; overflow-wrap: anywhere; }
+      #history-list button[aria-label] { width: 44px; height: 44px; }
+      #login-email { font-size: 16px; } /* evita el zoom automàtic d'iOS */
+    }
+  </style>
 </head>
 <body class="bg-[#0F1115] text-[#E8EAED] font-['Inter',sans-serif] antialiased min-h-screen">
 
