@@ -286,12 +286,13 @@
           flex-shrink: 0;
           background: var(--card-bg);
         }
-        .pizza-grid-card.pizza-out-of-carta { cursor: default; }
-        .pizza-grid-card.pizza-out-of-carta .pizza-card-photo,
-        .pizza-grid-card.pizza-out-of-carta .pizza-card-photo-back {
+        /* Pizza apagada a cocina.html (carta-del-dia.js hi posa la classe i el segell) */
+        .pizza-grid-card.menu-off { cursor: default; }
+        .pizza-grid-card.menu-off .pizza-card-photo,
+        .pizza-grid-card.menu-off .pizza-card-photo-back {
           filter: grayscale(0.85) brightness(0.92);
         }
-        .pizza-out-of-carta-stamp {
+        .menu-off-stamp {
           position: absolute;
           top: calc(var(--cw) / 2);
           left: 50%;
@@ -579,11 +580,10 @@
             </div>
 
             <!-- CARAMELLA AFFUMICATA -->
-            <div class="pizza-grid-card pizza-out-of-carta" data-id="caramella-affumicata">
+            <div class="pizza-grid-card" data-id="caramella-affumicata">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
                   <img src="images/caramella-affumicata.webp" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
-                  <div class="pizza-out-of-carta-stamp">Tornem<br>aviat!</div>
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">CARAMELLA AFFUMICATA</span>
@@ -973,7 +973,7 @@
       const flipHint = document.getElementById('flip-hint');
       document.querySelectorAll('.pizza-grid-card').forEach(card => {
         card.addEventListener('click', () => {
-          if (card.classList.contains('pizza-out-of-carta')) return;
+          if (card.classList.contains('menu-off')) return;
           card.classList.toggle('is-flipped');
           if (flipHint) { flipHint.classList.add('hide'); }
         });
@@ -981,6 +981,7 @@
     </script>
     <script src="i18n.js"></script>
     <script src="transicion.js"></script>
+    <script src="carta-del-dia.js" defer></script>
     <script src="cookie-consent.js" defer></script>
 
 
