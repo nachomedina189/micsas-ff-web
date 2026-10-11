@@ -757,7 +757,7 @@
 
     async function loadMenuBlocks() {
       const reqs = [
-        supabase.from('menu_blocks').select('item_type, item_id, block_date'),
+        supabase.from('menu_blocks').select('item_type, item_id, block_date').eq('off', true),
         supabase.rpc('get_menu_availability', { p_delivery_date: menuPaseDate() }),
       ];
       if (!menuCatalog) {

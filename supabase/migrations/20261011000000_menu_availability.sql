@@ -7,7 +7,9 @@
 --
 -- Cada apagada és "només aquell dia" (block_date = data del pase; l'endemà
 -- ja no compta i torna a estar disponible sol) o "fins a nou avís"
--- (block_date null, fins que cuina el torni a encendre).
+-- (block_date null, fins que cuina el torni a encendre). Hi ha com a molt
+-- una fila per producte/ingredient; tornar-lo a posar disponible la deixa
+-- amb off = false (no s'esborra res).
 --
 -- La lògica de què es pot demanar viu NOMÉS aquí (get_menu_availability):
 -- la fan servir les pàgines (menu, carta, pedido) per pintar-ho i
@@ -42,6 +44,7 @@ create policy "public_select_menu_ingredients" on public.menu_ingredients for se
 create table if not exists public.menu_blocks (
   item_type  text not null check (item_type in ('product', 'ingredient')),
   item_id    text not null,
+  off        boolean not null default true,  -- false = torna a estar disponible
   block_date date,   -- null = fins a nou avís; data = només aquell dia d'entrega
   updated_at timestamptz not null default now(),
   updated_by uuid,
@@ -68,7 +71,7 @@ as $$
   with active as (
     select b.item_type, b.item_id, b.block_date is null as indef
     from public.menu_blocks b
-    where b.block_date is null or b.block_date = p_delivery_date
+    where b.off and (b.block_date is null or b.block_date = p_delivery_date)
   )
   select p.id,
          bool_or(a.indef),
@@ -107,21 +110,14 @@ begin
   else
     raise exception 'INVALID_TYPE';
   end if;
+  if p_mode not in ('on', 'day', 'indef') then raise exception 'INVALID_MODE'; end if;
+  if p_mode = 'day' and p_date is null then raise exception 'MISSING_DATE'; end if;
 
-  if p_mode = 'on' then
-    delete from public.menu_blocks where item_type = p_item_type and item_id = p_item_id;
-  elsif p_mode in ('day', 'indef') then
-    if p_mode = 'day' and p_date is null then raise exception 'MISSING_DATE'; end if;
-    insert into public.menu_blocks (item_type, item_id, block_date, updated_at, updated_by)
-    values (p_item_type, p_item_id, case when p_mode = 'day' then p_date end, now(), auth.uid())
-    on conflict (item_type, item_id) do update
-      set block_date = excluded.block_date, updated_at = excluded.updated_at, updated_by = excluded.updated_by;
-  else
-    raise exception 'INVALID_MODE';
-  end if;
-
-  -- Les apagades d'un sol dia ja passades no fan res; es netegen aquí.
-  delete from public.menu_blocks where block_date < current_date - 1;
+  insert into public.menu_blocks (item_type, item_id, off, block_date, updated_at, updated_by)
+  values (p_item_type, p_item_id, p_mode <> 'on', case when p_mode = 'day' then p_date end, now(), auth.uid())
+  on conflict (item_type, item_id) do update
+    set off = excluded.off, block_date = excluded.block_date,
+        updated_at = excluded.updated_at, updated_by = excluded.updated_by;
 end;
 $$;
 
