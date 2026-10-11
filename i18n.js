@@ -14,8 +14,8 @@
       // BESTSELLERS
       bs_title: 'Els nostres Bestsellers', bs_ingr: 'Ingredients',
       bs_recom: '⭐ La nostra recomanació',
-      bs_m_desc: "Tomàquet San Marzano DOP, Fior di latte artesana Il grande Desiderio, Alfàbrega fresca, Formatge Parmigiano (curat 24 mesos) i Oli d'oliva verge extra Valpolicella Slow Food.",
-      bs_ca_desc: "Tomàquet datterino caramella, Formatge fumat (Provola), Fior di latte artesana Il grande Desiderio, Alfàbrega fresca en cru, Formatge Caciocavallo i Oli d'oliva verge extra Valpolicella Slow Food.",
+      bs_m_desc: "Tomàquet San Marzano DOP, Fior di latte d’Agerola, Alfàbrega fresca, Formatge Parmigiano (curat 24 mesos) i Oli d'oliva verge extra Valpolicella Slow Food.",
+      bs_ca_desc: "Tomàquet datterino caramella, Formatge fumat (Provola), Fior di latte d’Agerola, Alfàbrega fresca en cru, Formatge Caciocavallo i Oli d'oliva verge extra Valpolicella Slow Food.",
       bs_nu_desc: 'Base de crema de xocolata i avellanes Nutella amb topping de festuc de Sicília DOP',
       bs_explora: "Explora la nostra carta i descobreix tot el que t'oferim",
       bs_veure: 'Veure tota la carta',
@@ -91,8 +91,8 @@
       // BESTSELLERS
       bs_title: 'Nuestros Bestsellers', bs_ingr: 'Ingredientes',
       bs_recom: '⭐ Nuestra recomendación',
-      bs_m_desc: 'Tomate San Marzano DOP, Fior di latte artesana Il grande Desiderio, Albahaca fresca, Queso Parmigiano (curado 24 meses) y Aceite de oliva virgen extra Valpolicella Slow Food.',
-      bs_ca_desc: 'Tomate datterino caramella, Queso ahumado (Provola), Fior di latte artesana Il grande Desiderio, Albahaca fresca en crudo, Queso Caciocavallo y Aceite de oliva virgen extra Valpolicella Slow Food.',
+      bs_m_desc: 'Tomate San Marzano DOP, Fior di latte d’Agerola, Albahaca fresca, Queso Parmigiano (curado 24 meses) y Aceite de oliva virgen extra Valpolicella Slow Food.',
+      bs_ca_desc: 'Tomate datterino caramella, Queso ahumado (Provola), Fior di latte d’Agerola, Albahaca fresca en crudo, Queso Caciocavallo y Aceite de oliva virgen extra Valpolicella Slow Food.',
       bs_nu_desc: 'Base de crema de chocolate y avellanas Nutella con topping de pistacho de Sicilia DOP',
       bs_explora: "Explora nuestra carta y descubre todo lo que te ofrecemos",
       bs_veure: 'Ver toda la carta',
