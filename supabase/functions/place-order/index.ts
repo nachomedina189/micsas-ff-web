@@ -9,15 +9,17 @@ import { sendOrderConfirmationEmail } from "../_shared/email.ts";
 // això, qualsevol (DevTools, o una crida directa a la funció) podia
 // enviar el total/preu per article que volgués i la comanda es desava
 // (i, en pagament amb targeta, es cobrava) a aquell import fabricat.
-const CATALOG: Record<string, { name: string; price: number; available?: boolean }> = {
+//
+// Què es pot demanar cada dia (pizzes o ingredients apagats des de
+// cocina.html) NO es decideix aquí: ho diu get_menu_availability.
+const CATALOG: Record<string, { name: string; price: number }> = {
   "margherita-1889":      { name: "Margherita 1889",      price: 9 },
   "marinara-olivata":     { name: "Marinara Olivata",     price: 8 },
   "bianca-suprema":       { name: "Bianca Suprema",       price: 11 },
   "sottobosco":           { name: "Sottobosco",           price: 11 },
   "carbonara":            { name: "Carbonara",            price: 14.5 },
   "inferno-di-nduja":     { name: "Inferno di 'Nduja",    price: 13 },
-  // Temporalment fora de carta ("Tornarà aviat" a la Carta i a pedido.html)
-  "caramella-affumicata": { name: "Caramella Affumicata", price: 13, available: false },
+  "caramella-affumicata": { name: "Caramella Affumicata", price: 13 },
   "antidiavola":          { name: "Antidiavola",          price: 13 },
   "nutellina":            { name: "Nutellina",            price: 13 },
   "d3":                   { name: "Cervesa artesana Moretti", price: 3 },
@@ -88,7 +90,7 @@ Deno.serve(async (req) => {
     for (const it of items) {
       const catalogItem = CATALOG[it?.id];
       const quantity = Number(it?.quantity);
-      if (!catalogItem || catalogItem.available === false || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
+      if (!catalogItem || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
         return new Response(JSON.stringify({ error: "Article no vàlid a la comanda." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -165,6 +167,28 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Pizzes, begudes o ingredients apagats a cocina.html per a aquest dia:
+    // la web ja no els deixa afegir, però una pàgina oberta d'abans (o una
+    // crida directa) encara els podria enviar. Es comprova abans de crear
+    // res. Si la consulta falla, no es bloqueja la comanda (igual que el
+    // control de dia exhaurit de dalt).
+    const { data: offRows, error: offErr } = await sb.rpc("get_menu_availability", { p_delivery_date: deliveryDate });
+    if (offErr) console.error("[place-order] get_menu_availability", offErr.message);
+    const offIds = new Set(((offRows ?? []) as { product_id: string }[]).map((r) => r.product_id));
+    const unavailable = [...new Set(items.map((it: { id: string }) => String(it.id)))].filter((id) => offIds.has(id));
+    if (unavailable.length) {
+      const names = unavailable.map((id) => CATALOG[id].name);
+      const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} i ${names[names.length - 1]}`;
+      const msg = names.length === 1
+        ? `Ho sentim, ${list} ja no està disponible per a aquest dia. Treu-la del cistell i torna-ho a provar.`
+        : `Ho sentim, ${list} ja no estan disponibles per a aquest dia. Treu-les del cistell i torna-ho a provar.`;
+      return new Response(JSON.stringify({ error: msg, unavailable }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Find or create customer
     let customerId: string;
 

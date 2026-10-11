@@ -227,6 +227,17 @@
         animation: none;
         transform: translateX(4px);
       }
+      /* Pizza apagada a cocina.html (carta-del-dia.js hi posa la classe i el segell) */
+      .menu-off img { filter: grayscale(0.85) brightness(0.92); }
+      .menu-off-stamp {
+        position: absolute; top: 76%; left: 50%; z-index: 5;
+        transform: translate(-50%, -50%) rotate(-10deg);
+        border: 3px solid #c80a07; border-radius: 6px; padding: 8px 20px;
+        background: rgba(242,230,206,0.92); color: #c80a07;
+        font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 18px;
+        line-height: 1.2; letter-spacing: 0.05em; text-transform: uppercase; text-align: center;
+        pointer-events: none; box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      }
     </style>
   </head>
   <body class="text-[var(--foreground)] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
@@ -352,7 +363,7 @@
           <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">Tomàquet San Marzano, xoriço ibèric Joselito i Fior di latte. Una combinació que encén les papil·les.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              <div data-menu-id="antidiavola" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                 <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png" alt="ANTIDIAVOLA" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
                   <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">
@@ -381,7 +392,7 @@
           <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">Nduja picant, Gorgonzola cremós i Fior di latte. Per als que no li fan por al foc.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#F2E6CE]/30">
+              <div data-menu-id="inferno-di-nduja" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#F2E6CE]/30">
                 <div class="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#F2E6CE] text-[#c80a07] text-[10px] md:text-xs uppercase tracking-widest font-medium z-10 whitespace-nowrap shadow-md" data-i18n="bs_recom">
                   ⭐ La nostra recomanació
                 </div>
@@ -413,7 +424,7 @@
           <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">La pizza per gaudir al final. Nutella i festuc de Sicília: pura llaminadura.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              <div data-menu-id="nutellina" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                 <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="Gourmet Chocolate and Pistachio Dessert Pizza" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
                   <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">
@@ -720,6 +731,7 @@
     <script src="i18n.js"></script>
     <script src="resenya.js"></script>
     <script src="transicion.js"></script>
+    <script src="carta-del-dia.js" defer></script>
     <script src="cookie-consent.js" defer></script>
 
 </body></html>

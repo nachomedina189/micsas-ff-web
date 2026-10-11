@@ -53,6 +53,11 @@
       #doughs-minus, #doughs-plus { width: 4rem; }
       #doughs-save { min-width: 6.5rem; }
       #doughs-dates button { min-height: 44px; }
+      /* Carta del dia: segments grans per al polze */
+      #menu-panel { margin: .75rem .75rem 0; }
+      #menu-panel-btn { min-height: 44px; display: inline-flex; align-items: center; }
+      #menu-panel-body > div:first-child button { flex: 1; justify-content: center; min-height: 44px; }
+      #menu-list .menu-seg button { min-height: 44px; font-size: .8125rem; }
       /* Targetes de comanda: botons i enllaços amb zona tàctil >=48px */
       #view-cuina button, #view-repartiment button,
       #view-cuina a[href^="http"], #view-repartiment a[href^="http"] { min-height: 48px; }
@@ -181,6 +186,34 @@
         </div>
       </div>
       <p id="doughs-note" class="text-sm mt-3 text-[#8B93A1]"></p>
+    </section>
+
+    <!-- ════ CARTA DEL DIA: apagar pizzes, begudes o ingredients perquè la web no els deixi demanar ════ -->
+    <section id="menu-panel" class="mx-6 mt-4 bg-[#15181D] rounded-2xl border border-white/8">
+      <button type="button" id="menu-panel-toggle" onclick="toggleMenuPanel()" aria-expanded="false" aria-controls="menu-panel-body"
+        class="w-full flex items-center gap-3 px-4 py-3.5 md:px-5 text-left">
+        <span class="min-w-0 flex-1">
+          <span class="block font-black text-lg uppercase tracking-wide">Carta del dia <span id="menu-pase-label" class="ml-1 text-xs font-bold text-[#8B93A1] normal-case tracking-normal whitespace-nowrap"></span></span>
+          <span id="menu-summary" class="block text-sm font-semibold text-[#8B93A1] mt-0.5">Carregant…</span>
+        </span>
+        <span id="menu-panel-btn" class="shrink-0 px-4 py-2 rounded-lg border border-white/15 text-sm font-semibold">Editar</span>
+      </button>
+      <div id="menu-panel-body" class="hidden px-4 pb-4 md:px-5 md:pb-5">
+        <div class="flex gap-2 mb-3">
+          <button type="button" id="menu-tab-products" onclick="setMenuTab('products')" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
+            Pizzes <span id="menu-tab-products-n" class="hidden px-2 py-0.5 rounded-full bg-[#EF4444] text-white text-xs font-bold"></span>
+          </button>
+          <button type="button" id="menu-tab-ingredients" onclick="setMenuTab('ingredients')" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
+            Ingredients <span id="menu-tab-ingredients-n" class="hidden px-2 py-0.5 rounded-full bg-[#EF4444] text-white text-xs font-bold"></span>
+          </button>
+        </div>
+        <p class="text-xs text-[#8B93A1] mb-3 leading-relaxed">
+          <b class="text-[#E8EAED]">Només avui</b>: l'endemà torna a estar disponible sol.
+          <b class="text-[#E8EAED]">Fins a nou avís</b>: apagat fins que el tornis a posar.
+          Si apagues un ingredient, no es pot demanar cap pizza que el porti.
+        </p>
+        <div id="menu-list" class="space-y-2"></div>
+      </div>
     </section>
 
     <!-- ════ VISTA CUINA: Sense afegir → Preparant → Llest (confirmació) ════ -->
@@ -375,6 +408,7 @@
       document.getElementById('tab-repartiment').classList.toggle('text-[#14171C]', v === 'repartiment');
       document.getElementById('view-cuina').classList.toggle('hidden', v !== 'cuina');
       document.getElementById('doughs-panel').classList.toggle('hidden', v !== 'cuina');
+      document.getElementById('menu-panel').classList.toggle('hidden', v !== 'cuina');
       document.getElementById('view-repartiment').classList.toggle('hidden', v !== 'repartiment');
     }
     window.setView = setView;
@@ -435,10 +469,12 @@
         setDateScope('today');
         loadOrders();
         loadDoughs();
+        loadMenuBlocks();
         refreshPaseButton();
         subscribeRealtime();
         setInterval(updateElapsedCounters, 30000);
         setInterval(loadDoughs, 60000);
+        setInterval(loadMenuBlocks, 60000);
       }
     }
 
@@ -684,6 +720,186 @@
     window.onDoughsKey = onDoughsKey;
     window.saveDoughsFromInput = saveDoughsFromInput;
     window.adjustDoughs = adjustDoughs;
+
+    // ── Carta del dia ──
+    // El pizzero apaga una pizza, la beguda o un ingredient (s'ha acabat el
+    // guanciale...) i la web deixa de deixar-ho demanar. Un ingredient
+    // apagat treu totes les pizzes que el porten. "Només avui" s'aplica a
+    // la data del pase (la mateixa que surt primer a Masses del dia) i
+    // l'endemà ja no compta; "Fins a nou avís" dura fins que es torni a
+    // posar Disponible. Què queda apagat ho calcula Supabase
+    // (get_menu_availability), el mateix que fan servir la web i place-order.
+    let menuCatalog = null;           // { products: [...], ingredients: [...] }
+    let menuBlocks = new Map();       // 'product:carbonara' → block_date (null = fins a nou avís)
+    let menuOff = new Map();          // product_id → { until_notice, missing }
+    let menuTab = 'products';
+    const menuSaving = new Set();
+    const MENU_PANEL_KEY = 'micsas_menu_panel_open';
+
+    function menuPaseDate() { return doughsServiceDates()[0]; }
+    function menuDayWord() {
+      const iso = menuPaseDate();
+      if (iso === businessDateISO()) return 'avui';
+      const d = new Date(iso + 'T00:00:00');
+      return `el ${['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'][d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+    }
+    function menuStateOf(type, id) {
+      const key = type + ':' + id;
+      if (!menuBlocks.has(key)) return 'on';
+      const d = menuBlocks.get(key);
+      if (d === null) return 'indef';
+      return d === menuPaseDate() ? 'day' : 'on';
+    }
+    function menuItemName(type, id) {
+      const list = menuCatalog ? (type === 'product' ? menuCatalog.products : menuCatalog.ingredients) : [];
+      return (list.find(x => x.id === id) || {}).name || id;
+    }
+
+    async function loadMenuBlocks() {
+      const reqs = [
+        supabase.from('menu_blocks').select('item_type, item_id, block_date'),
+        supabase.rpc('get_menu_availability', { p_delivery_date: menuPaseDate() }),
+      ];
+      if (!menuCatalog) {
+        reqs.push(
+          supabase.from('menu_products').select('id, kind, name, sort, ingredients').order('sort'),
+          supabase.from('menu_ingredients').select('id, name, grp, sort').order('sort'),
+        );
+      }
+      const [blocks, off, products, ingredients] = await Promise.all(reqs);
+      const err = blocks.error || off.error || products?.error || ingredients?.error;
+      if (err) {
+        console.error('[carta del dia]', err);
+        if (!menuCatalog) setMenuSummary("No s'ha pogut carregar la carta. Torna-ho a provar en un moment.", '#EF4444');
+        return;
+      }
+      if (products) menuCatalog = { products: products.data || [], ingredients: ingredients.data || [] };
+      // Mentre es desa un canvi, no es trepitja el que ja es veu a la pantalla.
+      if (menuSaving.size) return;
+      menuBlocks = new Map((blocks.data || []).map(b => [b.item_type + ':' + b.item_id, b.block_date]));
+      menuOff = new Map((off.data || []).map(r => [r.product_id, r]));
+      renderMenuPanel();
+    }
+
+    function setMenuSummary(text, color) {
+      const el = document.getElementById('menu-summary');
+      el.textContent = text;
+      el.style.color = color || '#8B93A1';
+    }
+
+    function renderMenuPanel() {
+      if (!menuCatalog) return;
+      const pase = new Date(menuPaseDate() + 'T00:00:00');
+      document.getElementById('menu-pase-label').textContent = `· ${['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'][pase.getDay()]} ${pase.getDate()}/${pase.getMonth() + 1}`;
+
+      const offNames = menuCatalog.products.filter(p => menuOff.has(p.id)).map(p => p.name);
+      if (offNames.length) setMenuSummary('No es pot demanar: ' + offNames.join(', '), '#F59E0B');
+      else setMenuSummary('✓ Tot disponible a la web', '#16A34A');
+
+      const ingOff = menuCatalog.ingredients.filter(i => menuStateOf('ingredient', i.id) !== 'on').length;
+      const badge = (id, n) => {
+        const el = document.getElementById(id);
+        el.textContent = n;
+        el.classList.toggle('hidden', !n);
+      };
+      badge('menu-tab-products-n', offNames.length);
+      badge('menu-tab-ingredients-n', ingOff);
+      ['products', 'ingredients'].forEach(t => {
+        const b = document.getElementById('menu-tab-' + t);
+        b.classList.toggle('bg-white', menuTab === t);
+        b.classList.toggle('text-[#14171C]', menuTab === t);
+      });
+
+      const dayLabel = menuDayWord() === 'avui' ? 'Només avui' : 'Només ' + menuDayWord().replace(/^el /, '');
+      // off: no es pot demanar. Una pizza pot estar "Disponible" però sense
+      // poder-se demanar perquè li falta un ingredient: llavors el botó
+      // Disponible surt en gris, no en verd.
+      const row = (type, item, note, off) => {
+        const state = menuStateOf(type, item.id);
+        const saving = menuSaving.has(type + ':' + item.id);
+        const seg = (mode, label, on) => `<button type="button" onclick="setMenuBlock('${type}','${item.id}','${mode}')" aria-pressed="${state === mode}"
+          class="flex-1 px-2 py-2 rounded-lg text-sm font-bold leading-tight transition-colors ${state === mode ? on : 'text-[#8B93A1] hover:bg-white/5 hover:text-[#E8EAED]'}">${label}</button>`;
+        return `
+          <div class="flex flex-wrap md:flex-nowrap items-center gap-x-4 gap-y-2 rounded-xl px-3 py-2.5 ${off ? 'bg-[#EF4444]/10' : 'bg-white/[0.03]'}">
+            <div class="min-w-0 flex-1">
+              <p class="font-bold ${off ? 'text-[#FCA5A5]' : ''}">${escapeHtml(item.name)}</p>
+              ${note ? `<p class="text-xs mt-0.5 ${off ? 'text-[#FCA5A5]' : 'text-[#8B93A1]'}">${note}</p>` : ''}
+            </div>
+            <div class="menu-seg flex gap-1 p-1 rounded-xl bg-[#0E1013] border border-white/10 w-full md:w-[24rem] shrink-0 ${saving ? 'opacity-60 pointer-events-none' : ''}">
+              ${seg('on', 'Disponible', off ? 'bg-[#3A404B] text-[#E8EAED]' : 'bg-[#16A34A] text-white')}
+              ${seg('day', escapeHtml(dayLabel), 'bg-[#F59E0B] text-[#15181D]')}
+              ${seg('indef', 'Fins a nou avís', 'bg-[#EF4444] text-white')}
+            </div>
+          </div>`;
+      };
+      const head = t => `<h3 class="text-xs font-bold uppercase tracking-widest text-[#5B6270] pt-3 first:pt-0">${escapeHtml(t)}</h3>`;
+
+      let html = '';
+      if (menuTab === 'products') {
+        let lastKind = null;
+        menuCatalog.products.forEach(p => {
+          if (p.kind !== lastKind) { html += head(p.kind === 'drink' ? 'Begudes' : 'Pizzes'); lastKind = p.kind; }
+          const o = menuOff.get(p.id);
+          const note = o && o.missing && o.missing.length ? 'No es pot demanar: falta ' + escapeHtml(o.missing.join(', ')) : '';
+          html += row('product', p, note, !!o);
+        });
+      } else {
+        let lastGrp = null;
+        menuCatalog.ingredients.forEach(i => {
+          if (i.grp !== lastGrp) { html += head(i.grp); lastGrp = i.grp; }
+          const uses = menuCatalog.products.filter(p => (p.ingredients || []).includes(i.id)).map(p => p.name);
+          const note = uses.length ? 'Ho porta: ' + escapeHtml(uses.join(', ')) : '';
+          html += row('ingredient', i, note, menuStateOf('ingredient', i.id) !== 'on');
+        });
+      }
+      document.getElementById('menu-list').innerHTML = html;
+    }
+
+    async function setMenuBlock(type, id, mode) {
+      const key = type + ':' + id;
+      if (menuSaving.has(key) || menuStateOf(type, id) === mode) return;
+      const had = menuBlocks.has(key);
+      const prev = menuBlocks.get(key);
+      // Es veu el canvi a l'instant; si Supabase falla, es desfà.
+      if (mode === 'on') menuBlocks.delete(key);
+      else menuBlocks.set(key, mode === 'day' ? menuPaseDate() : null);
+      menuSaving.add(key);
+      renderMenuPanel();
+      const { error } = await supabase.rpc('set_menu_block', { p_item_type: type, p_item_id: id, p_mode: mode, p_date: menuPaseDate() });
+      menuSaving.delete(key);
+      const name = menuItemName(type, id);
+      if (error) {
+        console.error('[carta del dia]', error);
+        if (had) menuBlocks.set(key, prev); else menuBlocks.delete(key);
+        renderMenuPanel();
+        showToast(`No s'ha pogut desar ${name}. Torna-ho a provar.`, true);
+        return;
+      }
+      showToast(mode === 'on' ? `${name}: disponible a la web`
+        : mode === 'day' ? `${name}: no disponible ${menuDayWord()}`
+        : `${name}: no disponible fins a nou avís`);
+      await loadMenuBlocks();
+    }
+    window.setMenuBlock = setMenuBlock;
+
+    function setMenuTab(t) {
+      menuTab = t;
+      renderMenuPanel();
+    }
+    window.setMenuTab = setMenuTab;
+
+    function applyMenuPanelOpen(open) {
+      document.getElementById('menu-panel-body').classList.toggle('hidden', !open);
+      document.getElementById('menu-panel-toggle').setAttribute('aria-expanded', String(open));
+      document.getElementById('menu-panel-btn').textContent = open ? 'Amagar' : 'Editar';
+    }
+    function toggleMenuPanel() {
+      const open = document.getElementById('menu-panel-body').classList.contains('hidden');
+      applyMenuPanelOpen(open);
+      try { localStorage.setItem(MENU_PANEL_KEY, open ? '1' : '0'); } catch (_) {}
+    }
+    window.toggleMenuPanel = toggleMenuPanel;
+    try { applyMenuPanelOpen(localStorage.getItem(MENU_PANEL_KEY) === '1'); } catch (_) {}
 
     const _seenOrderIds = new Set();
 
