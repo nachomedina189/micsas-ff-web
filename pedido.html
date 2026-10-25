@@ -2130,7 +2130,11 @@
         }).catch(() => {});
       } catch (_) { /* si falla, el límit de 15 min de l'aforo ho cobreix igualment */ }
     }
-    window.addEventListener('pagehide', releasePendingOrder);
+    // Bizum (i qualsevol mètode amb redirecció) surt de la pàgina per
+    // aprovar el pagament: aquí NO s'ha d'alliberar la comanda, perquè es
+    // cancel·laria el PaymentIntent mentre el client paga al banc.
+    let _payRedirecting = false;
+    window.addEventListener('pagehide', () => { if (!_payRedirecting) releasePendingOrder(); });
 
     // El client tanca la finestra de pagament sense pagar.
     function cancelStripeOverlay() {
@@ -2161,7 +2165,7 @@
         _stripeElements = _stripe.elements({
           clientSecret,
           locale: 'ca',
-          paymentMethodOrder: ['card'],
+          paymentMethodOrder: ['card', 'bizum'],
           appearance: {
             theme: 'flat',
             variables: {
@@ -2252,10 +2256,21 @@
       btn.textContent = 'Processant...';
       errEl.classList.add('hidden');
 
+      // Si el client tria Bizum, Stripe el porta a aprovar el pagament i el
+      // retorna a return_url: el cistell (només en memòria) es perd, així que
+      // guardem el que cal per ensenyar la pantalla de "Gràcies!" en tornar.
+      try {
+        sessionStorage.setItem('micsas_pay_return', JSON.stringify({
+          date: cfDeliveryDate, time: cfSelectedTime, reassigned: !!window._cfSlotReassigned,
+        }));
+      } catch (_) {}
+      _payRedirecting = true;
       const { error, paymentIntent } = await _stripe.confirmPayment({
         elements: _stripeElements,
         redirect: 'if_required',
+        confirmParams: { return_url: location.origin + location.pathname + '?pagament=retorn' },
       });
+      _payRedirecting = false;
 
       if (error) {
         btn.disabled = false;
@@ -2276,6 +2291,55 @@
         success.classList.add('flex');
       }
     }
+
+    // Tornada d'un pagament amb redirecció (Bizum). Stripe afegeix
+    // payment_intent_client_secret i redirect_status a l'URL. La comanda ja
+    // existeix i és el webhook qui la marca com a pagada: aquí només
+    // ensenyem el resultat al client.
+    async function handlePaymentReturn() {
+      const params = new URLSearchParams(location.search);
+      const clientSecret = params.get('payment_intent_client_secret');
+      if (!clientSecret) return;
+      history.replaceState(null, '', location.pathname);
+      let saved = {};
+      try { saved = JSON.parse(sessionStorage.getItem('micsas_pay_return') || '{}'); } catch (_) {}
+      sessionStorage.removeItem('micsas_pay_return');
+      let status = params.get('redirect_status');
+      try {
+        if (!_stripe) _stripe = Stripe(STRIPE_PK);
+        const { paymentIntent } = await _stripe.retrievePaymentIntent(clientSecret);
+        if (paymentIntent) status = paymentIntent.status;
+      } catch (e) { console.warn('[payment-return]', e); }
+
+      if (status !== 'succeeded' && status !== 'processing') {
+        showPaymentReturnFailed();
+        return;
+      }
+      if (saved.date) cfDeliveryDate = saved.date;
+      if (saved.time) cfSelectedTime = saved.time;
+      window._cfSlotReassigned = !!saved.reassigned;
+      const fs = document.getElementById('checkout-fullscreen');
+      fs.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('cf-time-step').classList.add('hidden');
+      document.getElementById('cf-scroll').classList.add('hidden');
+      updateSuccessDeliveryEstimate();
+      const success = document.getElementById('cf-success');
+      success.classList.remove('hidden');
+      success.classList.add('flex');
+    }
+
+    // El client ha cancel·lat o el banc ha rebutjat el Bizum. La comanda no
+    // s'ha cobrat (Stripe la cancel·larà), així que ha de tornar a fer-la.
+    function showPaymentReturnFailed() {
+      const box = document.createElement('div');
+      box.setAttribute('role', 'alert');
+      box.className = 'fixed left-4 right-4 top-4 z-[9500] mx-auto max-w-sm rounded-xl bg-white border border-[#E23F2E] px-4 py-3 text-sm text-[#2A1A0F] shadow-lg';
+      box.textContent = "El pagament no s'ha completat i no s'ha cobrat res. Torna a fer la comanda i prova-ho de nou o tria un altre mètode.";
+      document.body.appendChild(box);
+      setTimeout(() => box.remove(), 9000);
+    }
+    window.addEventListener('load', handlePaymentReturn);
 
     function resetCart() {
       cart = []; renderCart(false); cfPayMethod = null; cfPlacesAddress = ''; cfSelectedTime = null;

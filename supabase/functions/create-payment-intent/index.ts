@@ -56,10 +56,16 @@ Deno.serve(async (req) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency,
-      automatic_payment_methods: { enabled: true, allow_redirects: "never" },
+      // Sense allow_redirects: "never". Aquell valor amagava tots els mètodes
+      // que surten de la pàgina per aprovar el pagament, i Bizum n'és un:
+      // per això no apareixia mai. pedido.html ja passa return_url.
+      automatic_payment_methods: { enabled: true },
       // Stripe exigeix que els valors de metadata siguin strings.
       metadata: { order_id: String(orderId) },
     });
+    // Quins mètodes ofereix Stripe per a aquest pagament: si no hi surt
+    // "bizum", no està activat al Dashboard de Stripe.
+    console.log("[create-payment-intent] mètodes", paymentIntent.id, paymentIntent.payment_method_types.join(","));
 
     return new Response(
       JSON.stringify({ clientSecret: paymentIntent.client_secret }),
