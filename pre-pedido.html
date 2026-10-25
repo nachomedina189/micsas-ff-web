@@ -247,6 +247,16 @@
             </div>
           </div>
 
+          <div id="pp-number-wrap" class="hidden">
+            <label for="pp-street-number" class="block text-xs font-medium mb-1.5 text-[#5A3E28]">
+              Número del carrer <span class="text-[#E23F2E]">*</span>
+            </label>
+            <input id="pp-street-number" type="text" autocomplete="off" maxlength="10" placeholder="Ex: 12"
+              class="w-full bg-white border border-[#E23F2E]/60 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]"
+              oninput="validateForm()">
+            <p class="mt-1.5 text-xs text-[#9B8A72]">L'adreça no porta número. Afegeix-lo perquè el repartidor trobi casa teva.</p>
+          </div>
+
           <div>
             <label for="pp-floor" class="block text-xs font-medium mb-1.5 text-[#5A3E28]">
               Pis / Porta <span class="text-[#9B8A72] font-normal">(opcional)</span>
@@ -588,12 +598,25 @@
 
     // ppAddressValid will be set to true by the Places integration once an address is selected
     let ppAddressValid = false;
+    // true quan l'adreça triada a Google no porta número de portal: llavors
+    // es demana a part (camp pp-street-number) abans de deixar continuar.
+    let ppNeedsNumber = false;
+    function _ppStreetNumber() {
+      const el = document.getElementById('pp-street-number');
+      return el ? el.value.trim() : '';
+    }
+    function _ppSetNeedsNumber(needs) {
+      ppNeedsNumber = needs;
+      const wrap = document.getElementById('pp-number-wrap');
+      if (wrap) wrap.classList.toggle('hidden', !needs);
+      if (!needs) { const el = document.getElementById('pp-street-number'); if (el) el.value = ''; }
+    }
 
     const PP_BTN_ON  = "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#F2E6CE] bg-[#E23F2E] shadow-sm hover:bg-[#B82A1F] transition-all cursor-pointer";
     const PP_BTN_OFF = "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
 
     function validateForm() {
-      const ok  = !!(ppSelectedTime && ppAddressValid);
+      const ok  = !!(ppSelectedTime && ppAddressValid && (!ppNeedsNumber || _ppStreetNumber()));
       const btn = document.getElementById('pp-cta');
       btn.disabled = !ok;
       btn.className = ok ? PP_BTN_ON : PP_BTN_OFF;
@@ -659,6 +682,7 @@
 
     function goToMenu() {
       if (!ppSelectedTime || !ppAddressValid || _ppDailySoldOut) return;
+      if (ppNeedsNumber && !_ppStreetNumber()) return;
       if (!isValidOrderDay(ppDeliveryDate)) {
         alert('Només fem comandes per divendres i diumenge. Tria un altre dia.');
         selectDeliveryDay('other');
@@ -674,7 +698,8 @@
       }
       sessionStorage.setItem('micsas_time',          ppSelectedTime);
       sessionStorage.setItem('micsas_delivery_date', ppDeliveryDate);
-      sessionStorage.setItem('micsas_address', window._ppFormattedAddress || '');
+      const _addr = window._ppFormattedAddress || '';
+      sessionStorage.setItem('micsas_address', ppNeedsNumber ? [_addr, _ppStreetNumber()].filter(Boolean).join(', ') : _addr);
       sessionStorage.setItem('micsas_zip',     window._ppExtractedZip    || '');
       sessionStorage.setItem('micsas_city',    window._ppExtractedCity   || '');
       sessionStorage.setItem('micsas_floor',   document.getElementById('pp-floor').value.trim());
@@ -1416,6 +1441,7 @@
       window._ppLat = null;
       window._ppLng = null;
       ppAddressValid = false;
+      _ppSetNeedsNumber(false);
       _ppResetZoneFeedback();
       if (typeof validateForm === "function") validateForm();
     }
@@ -1562,6 +1588,7 @@
         window._ppLng = place.location ? place.location.lng() : null;
 
         ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
+        _ppSetNeedsNumber(!streetNumber);
         // Es comprova ABANS que res i sense dependre del resultat del check
         // de Matadepera: alguns punts de recollida (ex. la Ctra. de
         // Matadepera) cauen dins del radi de proximitat a Matadepera però
