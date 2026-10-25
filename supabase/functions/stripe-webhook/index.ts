@@ -102,6 +102,8 @@ Deno.serve(async (req) => {
       case "payment_intent.canceled": {
         const pi = event.data.object as Stripe.PaymentIntent;
         const orderId = pi.metadata?.order_id;
+        // Per saber després per què ha fallat (targeta, Bizum, abandonat...).
+        console.log("[stripe-webhook]", event.type, pi.id, pi.last_payment_error?.payment_method?.type ?? "-", pi.last_payment_error?.code ?? pi.cancellation_reason ?? "-");
         if (orderId) {
           const { error } = await sb.from("orders")
             .update({ payment_status: "failed", status: "cancelled" })
