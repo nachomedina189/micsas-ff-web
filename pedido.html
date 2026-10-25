@@ -565,7 +565,7 @@
             <!-- Card button -->
             <button id="checkout-card-btn" onclick="payWithCard()"
               class="w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] text-white bg-[#E23F2E] hover:bg-[#B82A1F] active:bg-[#9A1F12] transition-all">
-              Pagar amb targeta
+              Pagar amb targeta o Bizum
             </button>
 
             <!-- Separator -->
@@ -1477,7 +1477,10 @@
         return;
       }
       if (errEl) errEl.classList.add('hidden');
-      _pendingOrderData = _collectOrderData();
+      // Aquest botó és sempre pagament online, encara que abans s'hagi tocat
+      // "Pagament al repartidor": sense forçar-ho, la comanda es desava com a
+      // efectiu i cuina la veia com "Efectiu al repartidor" ja pagada.
+      _pendingOrderData = { ..._collectOrderData(), paymentMethod: 'card_delivery' };
       openStripeOverlay(_pendingOrderData.total);
     }
 
