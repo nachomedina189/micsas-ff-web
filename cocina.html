@@ -1118,6 +1118,7 @@
           <div class="space-y-2">
             ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + (STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
             <div class="space-y-1.5">${itemsHtml}</div>
+            ${Number(o.discount_amount) > 0 ? `<div class="flex justify-between gap-2 text-sm text-[#059669]"><span>Descompte ${escapeHtml(o.discount_code || '')}</span><span class="shrink-0">−${fmt(o.discount_amount)}</span></div>` : ''}
             <div class="flex items-center justify-between text-sm">
               <span class="${o.payment_method !== 'cash' && o.payment_status !== 'paid' ? 'text-[#DC2626] font-semibold' : 'text-[#6B7280]'}">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : (o.payment_status === 'paid' ? 'Pagat online' : '⚠ Verificant pagament…')}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
               <span class="font-bold">${fmt(o.total)}</span>

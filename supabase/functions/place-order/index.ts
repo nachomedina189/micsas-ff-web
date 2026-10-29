@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { sendOrderConfirmationEmail } from "../_shared/email.ts";
+import { resolveDiscount } from "../_shared/discount.ts";
 
 // Catàleg de preus real — mateixos ids/preus que l'objecte MENU a
 // pedido.html. El client NOMÉS envia id + quantitat + notes de cada
@@ -67,7 +68,8 @@ Deno.serve(async (req) => {
     );
 
     const {
-      name, email, phone,
+      name: legacyName, email, phone,
+      firstName, lastName,
       street, floor, postalCode, city, delivNotes, finalNotes,
       lat, lng,
       paymentMethod,
@@ -75,7 +77,17 @@ Deno.serve(async (req) => {
       authUserId,
       slotTime, deliveryDate,
       items,
+      discountCode,
     } = await req.json();
+
+    // Nom i cognoms arriben per separat; a customers.name es continua desant
+    // el nom complet, que és el que llegeixen cocina.html, correus i informes.
+    // Una pàgina antiga que només envia `name` també funciona.
+    const cleanName = (v: unknown) => String(v ?? "").trim().replace(/\s+/g, " ").slice(0, 80);
+    const first = cleanName(firstName);
+    const last = cleanName(lastName);
+    const name = [first, last].filter(Boolean).join(" ") || cleanName(legacyName);
+    const nameParts = first || last ? { first_name: first || null, last_name: last || null } : {};
 
     if (!Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: "La comanda no té cap article." }), {
@@ -110,7 +122,31 @@ Deno.serve(async (req) => {
     // client — es manté, però mai negativa (rebaixaria el total per sota
     // del subtotal real).
     const safeTip = Math.max(0, Number(tipAmount) || 0);
-    const total = Math.round((subtotal + safeTip) * 100) / 100;
+
+    // Codi de descompte: es valida aquí amb el subtotal real, i rebaixa només
+    // el subtotal (mai la propina). Si el client n'ha escrit un que ja no val,
+    // es rebutja la comanda en lloc de cobrar-li més del que veia a pantalla.
+    let discount: { code: string; amount: number } | null = null;
+    if (discountCode) {
+      const d = await resolveDiscount(sb, discountCode, subtotal);
+      if (!d.ok) {
+        return new Response(JSON.stringify({ error: d.error, discountInvalid: true }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      discount = { code: d.code, amount: d.amount };
+    }
+    const discountAmount = discount?.amount ?? 0;
+    const total = Math.round((subtotal - discountAmount + safeTip) * 100) / 100;
+    // Stripe no cobra menys de 0,50 €: un descompte que deixa la comanda
+    // gairebé a zero només es pot pagar en efectiu.
+    if (paymentMethod !== "cash" && total < 0.5) {
+      return new Response(JSON.stringify({ error: "Amb aquest descompte l'import és massa baix per pagar online. Tria pagament al repartidor." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Mateixes franges de 15 min que pedido.html / pre-pedido.html. L'última
     // franja és LAST_SLOT (política des del 02/10/2026; abans era les 23:30).
@@ -202,13 +238,13 @@ Deno.serve(async (req) => {
 
       if (existing) {
         await sb.from("customers")
-          .update({ name, phone, email })
+          .update({ name, ...nameParts, phone, email })
           .eq("id", existing.id);
         customerId = existing.id;
       } else {
         const { data: nc, error: ne } = await sb
           .from("customers")
-          .insert({ name, phone, email, auth_user_id: authUserId })
+          .insert({ name, ...nameParts, phone, email, auth_user_id: authUserId })
           .select("id")
           .single();
         if (ne) throw ne;
@@ -217,7 +253,7 @@ Deno.serve(async (req) => {
     } else {
       const { data: nc, error: ne } = await sb
         .from("customers")
-        .insert({ name, phone, email })
+        .insert({ name, ...nameParts, phone, email })
         .select("id")
         .single();
       if (ne) throw ne;
@@ -327,9 +363,13 @@ Deno.serve(async (req) => {
 
     // Franja que va triar el client: si estava plena, la comanda ha quedat
     // en una de posterior, i l'informe del pase compta aquests desplaçaments.
-    if (slotTime) {
-      const { error: reqErr } = await sb.from("orders").update({ requested_slot: slotTime }).eq("id", orderRow.order_id);
-      if (reqErr) console.error("[place-order] requested_slot", reqErr.message);
+    // També el codi de descompte aplicat (orders.total ja el porta restat).
+    if (slotTime || discount) {
+      const extra: Record<string, unknown> = {};
+      if (slotTime) extra.requested_slot = slotTime;
+      if (discount) { extra.discount_code = discount.code; extra.discount_amount = discount.amount; }
+      const { error: reqErr } = await sb.from("orders").update(extra).eq("id", orderRow.order_id);
+      if (reqErr) console.error("[place-order] requested_slot/discount", reqErr.message);
     }
 
     // Insert order items — sempre amb els valors RECALCULATS (resolvedItems),
@@ -356,7 +396,10 @@ Deno.serve(async (req) => {
       await sendOrderConfirmationEmail({
         toEmail: email,
         toName: name,
-        items: resolvedItems,
+        // El descompte surt al correu com una línia més, en negatiu.
+        items: discount
+          ? [...resolvedItems, { product_name: `Descompte ${discount.code}`, quantity: 1, unit_price: -discount.amount, notes: null }]
+          : resolvedItems,
         total,
         paymentMethod,
         deliveryDate,
@@ -365,7 +408,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ orderId: orderRow.order_id, slotTime: orderRow.slot_time, total }), {
+    return new Response(JSON.stringify({ orderId: orderRow.order_id, slotTime: orderRow.slot_time, total, discountAmount }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: unknown) {
