@@ -593,15 +593,10 @@
           <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-xl text-[#2A1A0F] mb-4">Mètode de pagament</h2>
           <div class="space-y-3">
 
-            <!-- Wallet button (Apple Pay / Google Pay) — hidden until Stripe confirms support -->
-            <div id="checkout-wallet-container" class="hidden">
-              <div id="checkout-payment-request-button"></div>
-            </div>
-
             <!-- Card button -->
             <button id="checkout-card-btn" onclick="payWithCard()"
               class="w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] text-white bg-[#E23F2E] hover:bg-[#B82A1F] active:bg-[#9A1F12] transition-all">
-              Pagar amb targeta o Bizum
+              Pagar amb targeta, Apple Pay o Bizum
             </button>
 
             <!-- Separator -->
@@ -1044,8 +1039,6 @@
     // client abandona el pagament cal alliberar-la, o seguiria ocupant
     // pizzes de la franja (veure releasePendingOrder).
     let _pendingOrderRef = null;
-    let _paymentRequest = null;
-    let _walletInitialized = false;
 
     // ── Checkout Fullscreen State ──
     let cfPayMethod = null;
@@ -1489,71 +1482,6 @@
       }
       const totalEl = document.getElementById('cf-total-display');
       if (totalEl) totalEl.textContent = fmtComma(total());
-      if (_paymentRequest) {
-        try { _paymentRequest.update({ total: { label: 'Micsas', amount: Math.max(50, Math.round(total() * 100)) } }); } catch(_) {}
-      }
-    }
-
-    async function initStripeWallet() {
-      if (_walletInitialized) return;
-      _walletInitialized = true;
-      try {
-        if (!_stripe) _stripe = Stripe(STRIPE_PK);
-        _paymentRequest = _stripe.paymentRequest({
-          country: 'ES', currency: 'eur',
-          total: { label: 'Micsas', amount: Math.max(50, Math.round(total() * 100)) },
-          requestPayerName: true,
-        });
-        const canPay = await _paymentRequest.canMakePayment();
-        console.log('[Stripe wallet] canMakePayment:', JSON.stringify(canPay));
-        if (!canPay) return;
-        const walletEls = _stripe.elements();
-        const prBtn = walletEls.create('paymentRequestButton', {
-          paymentRequest: _paymentRequest,
-          style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '52px' } },
-        });
-        document.getElementById('checkout-payment-request-button').innerHTML = '';
-        prBtn.mount('#checkout-payment-request-button');
-        document.getElementById('checkout-wallet-container').classList.remove('hidden');
-        _paymentRequest.on('paymentmethod', async (ev) => {
-          const tnc     = document.getElementById('cf-tnc')?.checked;
-          const privacy = document.getElementById('cf-privacy')?.checked;
-          if (!cfClientComplete || !tnc || !privacy) {
-            ev.complete('fail');
-            showCfToast((!tnc || !privacy)
-              ? 'Has d\'acceptar els Termes i Condicions i la Política de Privacitat abans de pagar.'
-              : 'Omple les teves dades abans de pagar.');
-            return;
-          }
-          _pendingOrderData = _collectOrderData();
-          try {
-            const { clientSecret } = await createPendingOrderAndIntent(_pendingOrderData.total);
-            const { error, paymentIntent } = await _stripe.confirmCardPayment(
-              clientSecret,
-              { payment_method: ev.paymentMethod.id },
-              { handleActions: false }
-            );
-            if (error) { releasePendingOrder(); ev.complete('fail'); showCfToast('Error al processar el pagament.'); return; }
-            ev.complete('success');
-            if (paymentIntent.status === 'requires_action') {
-              const { error: ae } = await _stripe.confirmCardPayment(clientSecret);
-              if (ae) { releasePendingOrder(); showCfToast('Autenticació fallida.'); return; }
-            }
-            _pendingOrderRef = null;
-            document.getElementById('cf-global-err').classList.add('hidden');
-            document.getElementById('cf-scroll').classList.add('hidden');
-            updateSuccessDeliveryEstimate();
-            const success = document.getElementById('cf-success');
-            success.classList.remove('hidden'); success.classList.add('flex');
-          } catch (e) {
-            releasePendingOrder();
-            ev.complete('fail');
-            showCfToast('Error al processar el pagament. Torna-ho a intentar.');
-          }
-        });
-      } catch (e) {
-        console.warn('[wallet-init]', e);
-      }
     }
 
     async function payWithCard() {
@@ -1595,7 +1523,6 @@
       const count = totalCount();
       document.getElementById('cf-items-count').textContent = count + (count === 1 ? ' article' : ' articles');
       refreshTotals();
-      initStripeWallet();
       // Read pre-pedido data from sessionStorage (if coming from pre-pedido.html)
       const _ssTime  = sessionStorage.getItem('micsas_time');
       const _ssDate  = sessionStorage.getItem('micsas_delivery_date');
@@ -2294,7 +2221,7 @@
         _stripeElements = _stripe.elements({
           clientSecret,
           locale: 'ca',
-          paymentMethodOrder: ['card', 'bizum'],
+          paymentMethodOrder: ['apple_pay', 'google_pay', 'card', 'bizum'],
           appearance: {
             theme: 'flat',
             variables: {
@@ -2348,7 +2275,15 @@
         });
         const pe = _stripeElements.create('payment', {
           layout: { type: 'accordion', defaultCollapsed: false, radios: false },
-          wallets: { googlePay: 'never', applePay: 'never' },
+          // Apple Pay i Google Pay surten aquí dins, com una opció més, i
+          // paguen pel mateix camí que la targeta: la comanda ja és online i
+          // l'import és el del servidor. Abans anaven amb un botó a part
+          // (paymentRequestButton) que desava la comanda com a efectiu si
+          // s'havia tocat "Pagament al repartidor" i fallava si les dades no
+          // estaven omplertes. Només surten si el domini està registrat a
+          // Stripe (Payment method domains) i el client té una targeta a la
+          // cartera del mòbil.
+          wallets: { googlePay: 'auto', applePay: 'auto' },
         });
         document.getElementById('stripe-payment-element').innerHTML = '';
         pe.mount('#stripe-payment-element');
@@ -2517,9 +2452,6 @@
       // Reset submit button and wallet state
       const btn = document.getElementById('cf-submit');
       if (btn) { btn.textContent = 'Confirmar comanda'; btn.disabled = true; btn.classList.add('hidden'); }
-      _paymentRequest = null; _walletInitialized = false;
-      const wc = document.getElementById('checkout-wallet-container');
-      if (wc) { wc.classList.add('hidden'); document.getElementById('checkout-payment-request-button').innerHTML = ''; }
       [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
     }
 
