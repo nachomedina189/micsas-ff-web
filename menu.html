@@ -2,9 +2,16 @@
 <html lang="ca" class="scroll-smooth"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Carta — micsas.ff</title>
+    <title>Carta de pizzes napolitanes · micsas.ff Matadepera</title>
     <meta name="description" content="Tota la carta de micsas.ff, pizzeria a domicili a Matadepera. Pizzes napolitanes artesanals per a repartiment a casa.">
     <link rel="canonical" href="https://www.micsasff.com/menu.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="micsas.ff">
+    <meta property="og:title" content="Carta de pizzes napolitanes · micsas.ff">
+    <meta property="og:description" content="Totes les pizzes de micsas.ff, pizzeria a domicili a Matadepera. Repartiment divendres i diumenge.">
+    <meta property="og:image" content="https://www.micsasff.com/images/margherita-1889.webp">
+    <meta property="og:url" content="https://www.micsasff.com/menu.html">
+    <meta property="og:locale" content="ca_ES">
     <link rel="icon" href="logo micsas.png">
     <link rel="apple-touch-icon" href="logo micsas.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,7 +23,7 @@
     <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="prefetch" href="index.html">
+    <link rel="prefetch" href="/">
     <link rel="prefetch" href="carta.html">
     <link rel="prefetch" href="pedido.html">
     <link rel="prefetch" href="micsas-events.html">
@@ -87,7 +94,9 @@
         mix-blend-mode: multiply !important;
       }
     </style>
-  </head>
+    <link rel="stylesheet" href="pizza-badge.css">
+  <script src="pizza-badge.js"></script>
+</head>
   <body class="bg-[#c80a07] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
     <!-- Paper texture -->
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
@@ -123,6 +132,7 @@
         <h1 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-5xl md:text-6xl mt-3 text-[#F2E6CE] mb-1" data-i18n="menu_h1">
           La carta de micsas
         </h1>
+        <div id="pizza-counter" class="pzb-wrap mt-5" style="display:none" aria-live="polite"></div>
 <a href="pre-pedido.html" class="header-demana-btn inline-block mt-4 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[#E23F2E] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5" data-i18n="demana">
           Demana ja! →
         </a>
@@ -132,18 +142,69 @@
     <!-- ════ LA CARTA ════ -->
     <main id="menu-pizzes" class="py-16 pb-32" style="background-color:#c80a07;">
       <style>
-        :root { --card-bg: #F2E6CE; }
-        /* ── Pizza Grid ── */
+        :root { --card-bg: #FFFFFF; --pz-vh: 1vh; }
+        @supports (height: 1svh) { :root { --pz-vh: 1svh; } }
+        /* overflow-x: clip no trenca position: sticky (on n'hi ha suport) */
+        html body { overflow-x: clip; }
+
+        /* ── Files de pizzes ──
+           Per defecte (sense JS o amb "reduir moviment") cada fila es llisca
+           amb el dit. Amb JS, .pz-pinned fixa la fila a la pantalla i el
+           scroll vertical la mou cap a l'esquerra. */
+        .pz-menu { position: relative; margin-bottom: 4rem; }
+        .pz-sticky, .pz-stage { position: relative; }
+        .pz-row { position: relative; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 4rem; }
+        .pz-row:last-child { margin-bottom: 0; }
+        .pz-head { position: relative; width: 100%; }
+        .pz-pinned #menu-pizzes { padding-top: 0; }
+        .pz-pinned .pz-sticky { position: sticky; top: 0; height: 100vh; height: calc(var(--pz-vh) * 100); overflow: hidden; }
+        .pz-pinned .pz-stage { will-change: transform; }
+        .pz-pinned .pz-row { height: 100vh; height: calc(var(--pz-vh) * 100); margin-bottom: 0; }
+        .pz-pinned .pz-head { padding-top: 88px; }
+        /* La finestra amaga les targetes fora de la columna del títol
+           (el JS hi posa la màscara), perquè la fila es vegi centrada */
+        .pz-window { position: relative; }
+        .pz-pinned .pz-window { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        /* Barreta de progrés sota cada fila: indica quant falta per veure-la sencera */
+        .pz-bar { position: relative; height: 3px; margin: 0 24px 24px; background: rgba(242,230,206,0.25); overflow: hidden; }
+        .pz-bar[hidden] { display: none; }
+        .pz-bar span { position: absolute; inset: 0; background: #F2E6CE; transform: scaleX(0); transform-origin: left center; will-change: transform; }
+        @media (min-width: 768px) { .pz-bar { margin: 0 48px 32px; } }
+        @media (min-width: 768px) { .pz-pinned .pz-head { padding-top: 100px; } }
+
         .pizza-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
+          --cw: max(240px, min(84vw, calc(var(--pz-vh) * 100 - 300px)));
+          --info-h: 100px;
+          --pad: 24px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 24px var(--pad) 32px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-snap-type: x mandatory;
+          scroll-padding-left: var(--pad);
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
         }
-        @media (max-width: 1023px) and (min-width: 768px) {
-          .pizza-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .pizza-grid::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+          .pizza-grid {
+            --cw: max(260px, min(31vw, calc(var(--pz-vh) * 100 - 360px), 520px));
+            --info-h: 124px;
+            /* alineat amb el títol (max-w-6xl + px-12) */
+            --pad: max(48px, calc((100% - 72rem) / 2 + 48px));
+            gap: 16px;
+          }
         }
-        @media (max-width: 767px) {
-          .pizza-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; gap: 16px; }
+        .pz-pinned .pizza-grid {
+          flex: 1;
+          width: max-content;
+          overflow: visible;
+          scroll-snap-type: none;
+          padding-top: 0;
+          padding-bottom: 8px;
+          will-change: transform;
         }
 
         /* Flip hint finger */
@@ -162,17 +223,6 @@
         }
         .flip-hint.hide { opacity: 0; }
         .flip-hint svg { width: 24px; height: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-        .flip-hint span {
-          font-size: 9px;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          color: #3a2e25;
-          background: rgba(242,230,206,0.92);
-          padding: 2px 7px;
-          border-radius: 20px;
-          white-space: nowrap;
-          backdrop-filter: blur(4px);
-        }
         @keyframes hintBounce {
           0%, 100% { transform: translateY(0) rotate(-15deg); }
           40%       { transform: translateY(-6px) rotate(-15deg); }
@@ -182,16 +232,21 @@
         /* Card (Scene) */
         .pizza-grid-card {
           position: relative;
-          perspective: 1000px;
-          height: 380px;
+          flex: 0 0 auto;
+          width: var(--cw);
+          height: calc(var(--cw) + var(--info-h));
+          scroll-snap-align: start;
+          perspective: 1400px;
           cursor: pointer;
-          border-radius: 16px;
+          border-radius: 0;
           box-shadow: 0 6px 28px rgba(30,8,4,0.32);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .pizza-grid-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 16px 44px rgba(30,8,4,0.46);
+        @media (hover: hover) {
+          .pizza-grid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 44px rgba(30,8,4,0.46);
+          }
         }
         .pizza-grid-card-inner {
           position: relative;
@@ -209,7 +264,7 @@
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
           background: var(--card-bg);
-          border-radius: 16px;
+          border-radius: 0;
           overflow: hidden;
         }
         .pizza-card-front {
@@ -218,8 +273,6 @@
         }
         .pizza-card-back {
           transform: rotateY(180deg);
-          padding: 0;
-          background: var(--card-bg);
           overflow-y: auto;
           display: flex;
           flex-direction: column;
@@ -227,23 +280,21 @@
           scrollbar-color: #C4B08A transparent;
         }
         .pizza-card-photo {
-          width: 100%; height: 70%;
+          width: 100%; height: var(--cw);
           object-fit: cover;
           display: block;
           flex-shrink: 0;
           background: var(--card-bg);
-          border: 6px solid #3a2e25;
-          border-radius: 14px;
-          box-sizing: border-box;
         }
-        .pizza-grid-card.pizza-out-of-carta { cursor: default; }
-        .pizza-grid-card.pizza-out-of-carta .pizza-card-photo,
-        .pizza-grid-card.pizza-out-of-carta .pizza-card-photo-back {
+        /* Pizza apagada a cocina.html (carta-del-dia.js hi posa la classe i el segell) */
+        .pizza-grid-card.menu-off { cursor: default; }
+        .pizza-grid-card.menu-off .pizza-card-photo,
+        .pizza-grid-card.menu-off .pizza-card-photo-back {
           filter: grayscale(0.85) brightness(0.92);
         }
-        .pizza-out-of-carta-stamp {
+        .menu-off-stamp {
           position: absolute;
-          top: 38%;
+          top: calc(var(--cw) / 2);
           left: 50%;
           transform: translate(-50%, -50%) rotate(-10deg);
           z-index: 5;
@@ -263,18 +314,15 @@
           box-shadow: 0 2px 6px rgba(0,0,0,0.18);
         }
         .pizza-card-photo-back {
-          width: 100%; height: 48%;
+          width: 100%; height: 45%;
           object-fit: cover;
           display: block;
           flex-shrink: 0;
           background: var(--card-bg);
-          border: 6px solid #3a2e25;
-          border-radius: 14px;
-          box-sizing: border-box;
         }
         .pizza-card-body {
-          padding: 10px 14px 14px;
-          flex: 1;
+          height: var(--info-h);
+          padding: 12px 18px 16px;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -282,37 +330,31 @@
         }
         .pizza-grid-price {
           font-family: 'League Spartan', sans-serif;
-          font-size: 1.15rem; font-weight: 700;
+          font-size: 1.4rem; font-weight: 700;
           color: #c80a07;
           display: block; margin-bottom: 3px;
         }
         .pizza-grid-name {
           font-family: 'League Spartan', sans-serif; font-weight: 600;
-          font-size: 0.78rem; letter-spacing: 0.08em;
+          font-size: 1rem; letter-spacing: 0.08em;
           text-transform: uppercase;
           color: #3a2e25; line-height: 1.25;
           display: block;
         }
         .pizza-grid-subtitle {
           font-family: 'League Spartan', sans-serif;
-          font-size: 0.65rem; font-weight: 400;
+          font-size: 0.75rem; font-weight: 400;
           color: #7a6355; text-transform: uppercase;
           letter-spacing: 0.07em;
           display: block; margin-top: 3px;
         }
-        .pizza-allergens-row {
-          display: flex; flex-wrap: wrap; gap: 4px;
-          margin-top: auto;
-          padding-top: 14px;
-        }
-        .pizza-allergen-chip {
-          background: rgba(196,176,138,0.18); border: 1px solid #C4B08A;
-          border-radius: 999px; padding: 2px 8px;
-          font-size: 0.65rem; color: #5A3E28;
-          font-family: 'League Spartan', sans-serif;
+        @media (min-width: 768px) {
+          .pizza-grid-price { font-size: 1.6rem; }
+          .pizza-grid-name { font-size: 1.1rem; }
+          .pizza-card-body { padding: 14px 22px 18px; }
         }
         .pizza-card-body-back {
-          padding: 14px 16px 16px;
+          padding: 16px 18px 18px;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -321,27 +363,35 @@
         }
         .pizza-back-desc {
           font-family: 'League Spartan', sans-serif;
-          font-size: 0.82rem;
+          font-size: 0.95rem;
           font-weight: 400;
           color: #2A1A0F;
           line-height: 1.45;
           text-align: center;
           margin: 0;
         }
+        @media (min-width: 768px) { .pizza-back-desc { font-size: 1.05rem; } }
       </style>
 
-      <div class="px-6 md:px-12 max-w-6xl mx-auto">
+      <!-- FILES DE PIZZES: amb JS queden fixades i el scroll les recorre (primer en
+           horitzontal, després baixa a la fila següent, sempre a la mateixa velocitat) -->
+      <section class="pz-menu" aria-label="Pizzes">
+      <div class="pz-sticky">
+      <div class="pz-stage">
 
-        <!-- CLÀSSIQUES -->
-        <div class="mb-16 reveal visible">
-          <div class="border-b border-[#F2E6CE]/50 pb-4 mb-8">
-            <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
-              Pizzes Clàssiques
-            </h2>
-            <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#F2E6CE]/70">
-              tradició napolitana
-            </p>
+      <!-- CLÀSSIQUES -->
+        <div class="pz-row" role="group" aria-label="Pizzes Clàssiques">
+          <div class="pz-head px-6 md:px-12 max-w-6xl mx-auto">
+            <div class="border-b border-[#F2E6CE]/50 pb-4">
+              <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
+                Pizzes Clàssiques
+              </h2>
+              <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#F2E6CE]/70">
+                tradició napolitana
+              </p>
+            </div>
           </div>
+          <div class="pz-window">
           <div class="pizza-grid pizza-grid-classics">
 
             <!-- MARGHERITA 1889 -->
@@ -366,7 +416,7 @@
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
-                      <strong>Fior di latte</strong> artesana Il grande Desiderio,
+                      <strong>Fior di latte</strong> d’Agerola,
                       <strong>Alfàbrega</strong> fresca, Formatge
                       <strong>Parmigiano</strong> (curat 24 mesos),
                       <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
@@ -417,7 +467,7 @@
                   <img src="images/bianca-suprema.webp" alt="BIANCA SUPREMA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
-                      <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
+                      <strong>Fior di latte</strong> d’Agerola, Formatge
                       <strong>Pecorino</strong>, Formatge
                       <strong>Gorgonzola</strong> dolç,
                       <strong>Ricotta</strong> artesana Il grande Desiderio,
@@ -445,7 +495,7 @@
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
-                      <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
+                      <strong>Fior di latte</strong> d’Agerola, Formatge
                       <strong>Parmigiano</strong> (curat 24 mesos),
                       <strong>Xampinyons</strong>,
                       <strong>Pernil dolç</strong>,
@@ -458,18 +508,23 @@
             </div>
 
           </div>
+          </div>
+          <div class="pz-bar" hidden aria-hidden="true"><span></span></div>
         </div>
 
-        <!-- DE LA CASA -->
-        <div class="mb-16 reveal">
-          <div class="border-b border-[#F2E6CE]/50 pb-4 mb-8">
-            <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
-              Pizzes de la casa
-            </h2>
-            <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#F2E6CE]/70">
-              les nostres creacions
-            </p>
+      <!-- DE LA CASA -->
+        <div class="pz-row" role="group" aria-label="Pizzes de la casa">
+          <div class="pz-head px-6 md:px-12 max-w-6xl mx-auto">
+            <div class="border-b border-[#F2E6CE]/50 pb-4">
+              <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">
+                Pizzes de la casa
+              </h2>
+              <p class="text-xs uppercase tracking-widest mt-1 font-normal text-[#F2E6CE]/70">
+                les nostres creacions
+              </p>
+            </div>
           </div>
+          <div class="pz-window">
           <div class="pizza-grid">
 
             <!-- CARBONARA -->
@@ -486,7 +541,7 @@
                   <img src="images/carbonara.webp" alt="CARBONARA" loading="lazy" width="800" height="800" class="pizza-card-photo-back">
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
-                      <strong>Fior di latte</strong> artesana Il Grande Desiderio, Formatge
+                      <strong>Fior di latte</strong> d’Agerola, Formatge
                       <strong>Parmigiano</strong> (curat 24 mesos),
                       <strong>Alfàbrega</strong> fresca,
                       <strong>Crema de carbonara</strong>,
@@ -514,7 +569,7 @@
                     <p class="pizza-back-desc">
                       <strong>Sobrassada</strong> picant (Nduja), Formatge
                       <strong>Gorgonzola</strong> picant,
-                      <strong>Fior di latte</strong> artesana Il grande Desiderio, Formatge
+                      <strong>Fior di latte</strong> d’Agerola, Formatge
                       <strong>Parmigiano</strong> (curat 24 mesos),
                       <strong>Alfàbrega</strong> fresca,
                       <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
@@ -525,11 +580,10 @@
             </div>
 
             <!-- CARAMELLA AFFUMICATA -->
-            <div class="pizza-grid-card pizza-out-of-carta" data-id="caramella-affumicata">
+            <div class="pizza-grid-card" data-id="caramella-affumicata">
               <div class="pizza-grid-card-inner">
                 <div class="pizza-card-front">
                   <img src="images/caramella-affumicata.webp" alt="CARAMELLA AFFUMICATA" loading="lazy" width="800" height="800" class="pizza-card-photo">
-                  <div class="pizza-out-of-carta-stamp">Tornem<br>aviat!</div>
                   <div class="pizza-card-body">
                     <span class="pizza-grid-price">13€</span>
                     <span class="pizza-grid-name">CARAMELLA AFFUMICATA</span>
@@ -540,7 +594,7 @@
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> datterino caramella, Formatge fumat (Provola),
-                      <strong>Fior di latte</strong> artesana Il grande Desiderio,
+                      <strong>Fior di latte</strong> d’Agerola,
                       <strong>Alfàbrega</strong> fresca en cru, Formatge
                       <strong>Caciocavallo</strong>,
                       <strong>Oli d'oliva</strong> verge extra Valpolicella Slow Food.
@@ -565,7 +619,7 @@
                   <div class="pizza-card-body-back">
                     <p class="pizza-back-desc">
                       <strong>Tomàquet</strong> San Marzano DOP,
-                      <strong>Fior di latte</strong> artesana Il grande Desiderio,
+                      <strong>Fior di latte</strong> d’Agerola,
                       <strong>Xoriço ibèric</strong> de gla Joselito,
                       <strong>Alfàbrega</strong> fresca, Formatge
                       <strong>Parmigiano</strong> (curat 24 mesos),
@@ -600,15 +654,21 @@
             </div>
 
           </div>
+          </div>
+          <div class="pz-bar" hidden aria-hidden="true"><span></span></div>
         </div>
 
-        <!-- CTA inferior -->
+      </div>
+      </div>
+      </section>
+
+      <!-- CTA inferior -->
+      <div class="px-6 md:px-12 max-w-6xl mx-auto">
         <div class="text-center reveal">
           <a href="pre-pedido.html" class="inline-block px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] text-[#E23F2E] bg-[#F2E6CE] shadow-sm transition-all hover:bg-[#E6D5B0] hover:-translate-y-0.5" data-i18n="demana">
             Demana ja! →
           </a>
         </div>
-
       </div>
     </main>
 
@@ -727,10 +787,193 @@
       window.addEventListener('scroll', doReveal, { passive: true });
       doReveal();
 
+      // ── Files de pizzes: el scroll vertical les mou cap a l'esquerra ──
+      // La zona de pizzes es queda fixada a la pantalla. El scroll fa passar
+      // les pizzes de la primera fila, després baixa fins a la segona fila i
+      // en fa passar les pizzes, tot a la mateixa velocitat i amb la mateixa suavitat.
+      (function () {
+        // Píxels de scroll per cada píxel que es mou el menú (més alt = més lent)
+        const SPEED = 1.5;
+        // Lliscament (segons): el menú arrenca suau, agafa velocitat i, quan
+        // deixes de fer scroll, continua planejant fins que s'atura, com sobre gel
+        const GLIDE = 0.24;
+        const root = document.documentElement;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const menu = document.querySelector('.pz-menu');
+        if (!menu) return;
+        const sticky = menu.querySelector('.pz-sticky');
+        const stage = menu.querySelector('.pz-stage');
+        const desktop = window.matchMedia('(min-width: 768px)');
+        const rows = Array.from(menu.querySelectorAll('.pz-row')).map(row => ({
+          row,
+          head: row.querySelector('.pz-head'),
+          win: row.querySelector('.pz-window'),
+          track: row.querySelector('.pizza-grid'),
+          bar: row.querySelector('.pz-bar'),
+          fill: row.querySelector('.pz-bar span'),
+        }));
+        // Trams del recorregut: horitzontal (una fila) o vertical (canvi de fila)
+        let steps = [];
+        let total = 0;
+        let pinned = false;
+        let cur = 0;
+        let vel = 0;
+        let raf = 0;
+        let lastT = 0;
+
+        function measure() {
+          pinned = !reduceMotion.matches && window.innerHeight >= 520;
+          root.classList.toggle('pz-pinned', pinned);
+          stage.style.transform = '';
+          rows.forEach(r => {
+            r.track.style.transform = '';
+            r.track.style.removeProperty('--cw');
+            r.track.style.paddingLeft = r.track.style.paddingRight = '';
+            r.win.style.webkitMaskImage = r.win.style.maskImage = '';
+            r.head.style.maxWidth = r.head.style.paddingLeft = r.head.style.paddingRight = '';
+            r.bar.style.marginLeft = r.bar.style.marginRight = '';
+            r.bar.hidden = false;
+          });
+          steps = [];
+          total = 0;
+          if (!pinned) {
+            menu.style.height = '';
+            rows.forEach(swiped);
+            return;
+          }
+          const h = sticky.clientHeight;
+          const w = sticky.clientWidth;
+          rows.forEach((r, i) => {
+            fit(r, h, w);
+            if (i > 0) steps.push({ len: h });
+            const len = Math.max(0, r.track.offsetWidth - w);
+            steps.push({ len, track: r.track, fill: r.fill });
+            // Si totes les pizzes de la fila ja hi caben, la barreta no cal
+            r.bar.hidden = len < 1;
+          });
+          total = steps.reduce((sum, st) => sum + st.len, 0);
+          menu.style.height = Math.round(h + total * SPEED) + 'px';
+          render(true);
+        }
+
+        // Mida de les targetes: la fila ocupa gairebé tota l'amplada de la
+        // pantalla (4 pizzes a l'ordinador, menys com més estreta) amb el mateix
+        // marge a cada costat; si no hi caben d'alçada, es fan més petites i
+        // queden centrades. El títol i la barreta s'alineen amb les targetes.
+        function fit(r, h, w) {
+          const big = desktop.matches;
+          const gap = parseFloat(getComputedStyle(r.track).columnGap) || 0;
+          const pad = big ? 48 : 24;
+          const n = w >= 1200 ? 4 : w >= 900 ? 3 : w >= 600 ? 2 : 1;
+          // Targeta més gran que cap a l'alçada de la pantalla
+          const max = Math.max(big ? 260 : 240, h - (big ? 380 : 320));
+          const cw = Math.min(max, (w - 2 * pad - (n - 1) * gap) / n);
+          const win = n * cw + (n - 1) * gap;
+          const left = (w - win) / 2;
+          const right = w - left - win;
+          r.track.style.setProperty('--cw', cw.toFixed(2) + 'px');
+          r.track.style.paddingLeft = left.toFixed(2) + 'px';
+          r.track.style.paddingRight = right.toFixed(2) + 'px';
+          r.head.style.maxWidth = 'none';
+          r.head.style.paddingLeft = left.toFixed(2) + 'px';
+          r.head.style.paddingRight = right.toFixed(2) + 'px';
+          r.bar.style.marginLeft = left.toFixed(2) + 'px';
+          r.bar.style.marginRight = right.toFixed(2) + 'px';
+          // Fora de la fila les targetes i l'ombra s'esvaeixen en l'espai d'un forat entre targetes
+          const a = left.toFixed(2), b = (left + win).toFixed(2);
+          const mask = 'linear-gradient(to right, transparent ' + (left - gap).toFixed(2) + 'px, #000 ' + a + 'px, #000 ' + b + 'px, transparent ' + (left + win + gap).toFixed(2) + 'px)';
+          r.win.style.webkitMaskImage = r.win.style.maskImage = mask;
+        }
+
+        // Sense fixar (lliscant amb el dit) la barreta segueix el scroll de la fila
+        function swiped(r) {
+          const max = r.track.scrollWidth - r.track.clientWidth;
+          r.bar.hidden = max < 1;
+          r.fill.style.transform = 'scaleX(' + (max > 0 ? r.track.scrollLeft / max : 0).toFixed(4) + ')';
+        }
+
+        function goal() {
+          const top = menu.getBoundingClientRect().top;
+          return Math.min(total, Math.max(0, -top / SPEED));
+        }
+
+        function apply(v) {
+          let y = 0;
+          steps.forEach(st => {
+            const d = Math.min(st.len, Math.max(0, v));
+            v -= st.len;
+            if (st.track) {
+              st.track.style.transform = 'translate3d(' + (-d).toFixed(1) + 'px,0,0)';
+              st.fill.style.transform = 'scaleX(' + (st.len ? d / st.len : 0).toFixed(4) + ')';
+            } else {
+              y += d;
+            }
+          });
+          stage.style.transform = 'translate3d(0,' + (-y).toFixed(1) + 'px,0)';
+        }
+
+        // Mou el menú; retorna true si encara està lliscant cap al seu lloc
+        function render(snap, dt) {
+          if (!pinned) return false;
+          const g = goal();
+          let moving = false;
+          if (snap) {
+            cur = g;
+            vel = 0;
+          } else {
+            // Molla amb esmorteïment crític: sense salts de velocitat ni rebots
+            const w = 2 / GLIDE;
+            const x = w * (dt || 16.7) / 1000;
+            const k = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+            const off = cur - g;
+            const tmp = (vel + w * off) * (dt || 16.7) / 1000;
+            vel = (vel - w * tmp) * k;
+            cur = g + (off + tmp) * k;
+            // Si es passa de llarg, s'atura al seu lloc en lloc de tornar enrere
+            if ((off > 0) !== (cur - g > 0)) { cur = g; vel = 0; }
+            if (Math.abs(g - cur) < 0.3 && Math.abs(vel) < 4) { cur = g; vel = 0; }
+            else moving = true;
+          }
+          apply(cur);
+          return moving;
+        }
+
+        function frame(t) {
+          raf = 0;
+          const dt = lastT ? Math.min(64, Math.max(1, t - lastT)) : 16.7;
+          lastT = t;
+          if (render(false, dt)) raf = requestAnimationFrame(frame);
+          else lastT = 0;
+        }
+
+        function queue() {
+          if (!raf) raf = requestAnimationFrame(frame);
+        }
+
+        let lastWidth = window.innerWidth;
+        let lastHeight = window.innerHeight;
+        window.addEventListener('resize', () => {
+          // A mòbil la barra d'adreces canvia l'alçada quan fas scroll:
+          // només tornem a mesurar si el canvi és real.
+          if (window.innerWidth !== lastWidth || Math.abs(window.innerHeight - lastHeight) > 140) {
+            lastWidth = window.innerWidth;
+            lastHeight = window.innerHeight;
+            measure();
+          } else {
+            queue();
+          }
+        });
+        window.addEventListener('scroll', queue, { passive: true });
+        rows.forEach(r => r.track.addEventListener('scroll', () => { if (!pinned) swiped(r); }, { passive: true }));
+        if (reduceMotion.addEventListener) reduceMotion.addEventListener('change', measure);
+        window.addEventListener('load', measure);
+        measure();
+      })();
+
       const flipHint = document.getElementById('flip-hint');
       document.querySelectorAll('.pizza-grid-card').forEach(card => {
         card.addEventListener('click', () => {
-          if (card.classList.contains('pizza-out-of-carta')) return;
+          if (card.classList.contains('menu-off')) return;
           card.classList.toggle('is-flipped');
           if (flipHint) { flipHint.classList.add('hide'); }
         });
@@ -738,6 +981,45 @@
     </script>
     <script src="i18n.js"></script>
     <script src="transicion.js"></script>
+    <script src="carta-del-dia.js" defer></script>
     <script src="cookie-consent.js" defer></script>
 
+
+    <!-- Contador de pizzes del proper dia de servei. Només es mostra quan
+         queden 20 o menys (sense número fins a 15) — ho decideix la funció
+         get_pizza_status de Supabase, no aquesta pàgina. -->
+    <script>
+    (function () {
+      var bar = document.getElementById('pizza-counter');
+      if (!bar) return;
+      var URL = 'https://mbcssuvitqgrdqahqomc.supabase.co';
+      var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
+      function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+      // Proper divendres o diumenge; avui compta només abans de l'última franja (22:45).
+      function nextServiceDate() {
+        var d = new Date();
+        if (d.getHours() * 60 + d.getMinutes() >= 22 * 60 + 30) d.setDate(d.getDate() + 1);
+        for (var i = 0; i < 7; i++) {
+          if (d.getDay() === 5 || d.getDay() === 0) return d;
+          d.setDate(d.getDate() + 1);
+        }
+        return d;
+      }
+      var DAYS = ['diumenge', 'dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte'];
+      function load() {
+        var d = nextServiceDate();
+        fetch(URL + '/rest/v1/rpc/get_pizza_status', {
+          method: 'POST',
+          headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_delivery_date: iso(d) })
+        }).then(function (r) { return r.ok ? r.json() : null; }).then(function (rows) {
+          var st = Array.isArray(rows) ? rows[0] : rows;
+          var today = iso(d) === iso(new Date());
+          window.renderPizzaBadge(bar, st, today ? 'avui' : 'al ' + DAYS[d.getDay()]);
+        }).catch(function () {});
+      }
+      load();
+      setInterval(load, 60000);
+    })();
+    </script>
 </body></html>

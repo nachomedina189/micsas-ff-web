@@ -24,6 +24,57 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- ════ MÒBIL: només ajustos responsive i tàctils (≤767px); l'escriptori no canvia ════ -->
+  <style>
+    html { -webkit-text-size-adjust: 100%; }
+    button, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 767px) {
+      body { overflow-x: hidden; }
+      /* Capçalera: files que s'embolcallen en lloc de sortir de pantalla */
+      #kitchen-screen > header > div:first-child { flex-wrap: wrap; gap: .5rem; padding: .625rem .75rem; }
+      #kitchen-screen > header > div:first-child > div { flex-wrap: wrap; gap: .5rem; min-width: 0; }
+      #kitchen-screen > header > div:first-child > div:last-child { width: 100%; }
+      #kitchen-screen > header > div:first-child > div:last-child > div { padding-right: .5rem; }
+      #kitchen-screen > header h1 { font-size: 1.25rem; }
+      #kitchen-screen > header button { min-height: 44px; padding-left: .75rem; padding-right: .75rem; }
+      #role-tabs { padding: 0 .75rem .625rem; }
+      #role-tabs button { flex: 1; justify-content: center; min-height: 48px; }
+      /* Marges laterals més ajustades i columnes apilades */
+      #doughs-panel { margin: .75rem .75rem 0; }
+      #view-cuina, #view-repartiment { padding: .75rem; gap: .75rem; }
+      #view-cuina section, #view-repartiment section { min-width: 0; }
+      /* Masses del dia: tot a ample complet, controls grans per al polze */
+      #doughs-panel > div { gap: .75rem; }
+      #doughs-panel > div > div { min-width: 0; }
+      #doughs-panel > div > div:last-child { width: 100%; margin-left: 0; align-items: stretch; }
+      #doughs-panel > div > div:last-child > div { width: 100%; }
+      #doughs-panel > div > div:last-child > div > div { flex: 1; }
+      #doughs-input { flex: 1; width: auto; min-width: 0; font-size: 1.5rem; }
+      #doughs-minus, #doughs-plus { width: 4rem; }
+      #doughs-save { min-width: 6.5rem; }
+      #doughs-dates button { min-height: 44px; }
+      /* Carta del dia: segments grans per al polze */
+      #menu-panel { margin: .75rem .75rem 0; }
+      #menu-panel-btn { min-height: 44px; display: inline-flex; align-items: center; }
+      #menu-panel-body > div:first-child button { flex: 1; justify-content: center; min-height: 44px; }
+      #menu-list .menu-seg button { min-height: 44px; font-size: .8125rem; }
+      /* Targetes de comanda: botons i enllaços amb zona tàctil >=48px */
+      #view-cuina button, #view-repartiment button,
+      #view-cuina a[href^="http"], #view-repartiment a[href^="http"] { min-height: 48px; }
+      #view-cuina a[href^="tel:"], #view-repartiment a[href^="tel:"] { display: inline-block; padding: .5rem 0; font-size: 1rem; }
+      #view-cuina .overflow-hidden, #view-repartiment .overflow-hidden { overflow-wrap: anywhere; }
+      #route-panel a { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+      /* Historial: ocupa gairebé tota la pantalla, camps de data còmodes */
+      #history-modal > div { max-height: 92vh; }
+      #history-modal > div > div:first-child, #history-modal > div > div:nth-child(2) { padding-left: 1rem; padding-right: 1rem; }
+      #history-modal > div > div:first-child button { width: 44px; height: 44px; }
+      #history-modal input[type="date"] { min-height: 44px; font-size: 16px; }
+      #history-modal > div > div:nth-child(2) > button { min-height: 44px; }
+      #history-list { padding: 1rem; overflow-wrap: anywhere; }
+      #history-list button[aria-label] { width: 44px; height: 44px; }
+      #login-email { font-size: 16px; } /* evita el zoom automàtic d'iOS */
+    }
+  </style>
 </head>
 <body class="bg-[#0F1115] text-[#E8EAED] font-['Inter',sans-serif] antialiased min-h-screen">
 
@@ -83,6 +134,7 @@
             <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Avui (pase)</button>
             <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Setmana</button>
           </div>
+          <button onclick="closePase()" id="close-pase-btn" class="px-4 py-2 rounded-lg text-sm font-semibold bg-[#E23F2E] hover:bg-[#C9321F] text-white transition-all">Tancar pase</button>
           <button onclick="openHistory()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 hover:bg-white/5 transition-all">Historial</button>
           <button onclick="changeRole()" class="px-4 py-2 rounded-lg text-sm font-semibold text-[#8B93A1] hover:text-[#E8EAED] transition-colors">
             Canviar rol
@@ -101,6 +153,68 @@
         </button>
       </div>
     </header>
+
+    <!-- ════ MASSES DEL DIA: el pizzero posa quantes masses (=pizzes) fa per a cada dia ════ -->
+    <section id="doughs-panel" class="mx-6 mt-6 bg-[#15181D] rounded-2xl p-4 md:p-5 border border-white/8">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div>
+          <h2 class="font-black text-lg uppercase tracking-wide">Masses del dia</h2>
+          <div id="doughs-dates" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-center">
+            <p id="doughs-left" class="font-black text-5xl leading-none">–</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-[#8B93A1] mt-1">Queden</p>
+          </div>
+          <div class="text-sm text-[#8B93A1] leading-snug">
+            <p>Masses: <b id="doughs-total" class="text-[#E8EAED]">–</b></p>
+            <p>Venudes: <b id="doughs-used" class="text-[#E8EAED]">–</b></p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1.5 ml-auto">
+          <div class="flex items-center gap-3">
+            <div class="flex items-stretch h-14 rounded-xl border border-white/15 bg-[#0E1013] overflow-hidden">
+              <button type="button" id="doughs-minus" onmousedown="event.preventDefault()" onclick="adjustDoughs(-1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Treure una massa">−</button>
+              <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" aria-label="Nombre de masses"
+                oninput="onDoughsInput()" onblur="onDoughsBlur(event)" onkeydown="onDoughsKey(event)"
+                class="w-24 bg-transparent border-x border-white/15 text-center text-2xl font-black outline-none focus:bg-white/5">
+              <button type="button" id="doughs-plus" onmousedown="event.preventDefault()" onclick="adjustDoughs(1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Afegir una massa">+</button>
+            </div>
+            <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" disabled class="h-14 min-w-[8.5rem] px-5 rounded-xl bg-[#3A404B] text-[#8B93A1] text-sm font-black uppercase tracking-wide transition-colors">Desar</button>
+          </div>
+          <p id="doughs-status" class="text-xs font-bold h-4 text-[#8B93A1]" aria-live="polite"></p>
+        </div>
+      </div>
+      <p id="doughs-note" class="text-sm mt-3 text-[#8B93A1]"></p>
+    </section>
+
+    <!-- ════ CARTA DEL DIA: apagar pizzes, begudes o ingredients perquè la web no els deixi demanar ════ -->
+    <section id="menu-panel" class="mx-6 mt-4 bg-[#15181D] rounded-2xl border border-white/8">
+      <button type="button" id="menu-panel-toggle" onclick="toggleMenuPanel()" aria-expanded="false" aria-controls="menu-panel-body"
+        class="w-full flex items-center gap-3 px-4 py-3.5 md:px-5 text-left">
+        <span class="min-w-0 flex-1">
+          <span class="block font-black text-lg uppercase tracking-wide">Carta del dia <span id="menu-pase-label" class="ml-1 text-xs font-bold text-[#8B93A1] normal-case tracking-normal whitespace-nowrap"></span></span>
+          <span id="menu-summary" class="block text-sm font-semibold text-[#8B93A1] mt-0.5">Carregant…</span>
+        </span>
+        <span id="menu-panel-btn" class="shrink-0 px-4 py-2 rounded-lg border border-white/15 text-sm font-semibold">Editar</span>
+      </button>
+      <div id="menu-panel-body" class="hidden px-4 pb-4 md:px-5 md:pb-5">
+        <div class="flex gap-2 mb-3">
+          <button type="button" id="menu-tab-products" onclick="setMenuTab('products')" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
+            Pizzes <span id="menu-tab-products-n" class="hidden px-2 py-0.5 rounded-full bg-[#EF4444] text-white text-xs font-bold"></span>
+          </button>
+          <button type="button" id="menu-tab-ingredients" onclick="setMenuTab('ingredients')" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
+            Ingredients <span id="menu-tab-ingredients-n" class="hidden px-2 py-0.5 rounded-full bg-[#EF4444] text-white text-xs font-bold"></span>
+          </button>
+        </div>
+        <p class="text-xs text-[#8B93A1] mb-3 leading-relaxed">
+          <b class="text-[#E8EAED]">Només avui</b>: l'endemà torna a estar disponible sol.
+          <b class="text-[#E8EAED]">Fins a nou avís</b>: apagat fins que el tornis a posar.
+          Si apagues un ingredient, no es pot demanar cap pizza que el porti.
+        </p>
+        <div id="menu-list" class="space-y-2"></div>
+      </div>
+    </section>
 
     <!-- ════ VISTA CUINA: Sense afegir → Preparant → Llest (confirmació) ════ -->
     <main id="view-cuina" class="p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
@@ -153,6 +267,28 @@
       </section>
     </main>
   </div>
+
+  <!-- ════ INCIDÈNCIA (modal) ════ -->
+  <div id="incident-modal" class="hidden fixed inset-0 z-[950] bg-black/60 flex items-end md:items-center justify-center" onclick="if (event.target === this) closeIncident()">
+    <div class="bg-[#F7F8FA] text-[#14171C] w-full md:max-w-md md:rounded-2xl rounded-t-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="font-black tracking-tight text-xl">Apuntar incidència</h2>
+        <button onclick="closeIncident()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#E5E7EB] text-[#6B7280] hover:text-[#14171C] transition-colors" aria-label="Tancar">✕</button>
+      </div>
+      <p id="incident-who" class="text-sm text-[#6B7280]"></p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="saveIncident('cremada')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">🔥 Cremada</button>
+        <button onclick="saveIncident('equivocada')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">🔄 Equivocada</button>
+        <button onclick="saveIncident('falta')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">➖ Falta producte</button>
+        <button onclick="saveIncident('retard')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">⏱ Retard</button>
+        <button onclick="saveIncident('queixa')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">💬 Queixa client</button>
+        <button onclick="saveIncident('altres')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">Altres</button>
+      </div>
+      <p class="text-xs text-[#6B7280]">Surt a l'informe del pase.</p>
+    </div>
+  </div>
+
+  <div id="pase-toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-[1000] max-w-[90vw] px-5 py-3 rounded-xl bg-[#16A34A] text-white text-sm font-bold shadow-lg" role="status" aria-live="polite"></div>
 
   <!-- ════ HISTORIAL (modal) ════ -->
   <div id="history-modal" class="hidden fixed inset-0 z-[900] bg-black/60 flex items-end md:items-center justify-center">
@@ -271,6 +407,8 @@
       document.getElementById('tab-repartiment').classList.toggle('bg-white', v === 'repartiment');
       document.getElementById('tab-repartiment').classList.toggle('text-[#14171C]', v === 'repartiment');
       document.getElementById('view-cuina').classList.toggle('hidden', v !== 'cuina');
+      document.getElementById('doughs-panel').classList.toggle('hidden', v !== 'cuina');
+      document.getElementById('menu-panel').classList.toggle('hidden', v !== 'cuina');
       document.getElementById('view-repartiment').classList.toggle('hidden', v !== 'repartiment');
     }
     window.setView = setView;
@@ -330,8 +468,13 @@
         _dataFeedStarted = true;
         setDateScope('today');
         loadOrders();
+        loadDoughs();
+        loadMenuBlocks();
+        refreshPaseButton();
         subscribeRealtime();
         setInterval(updateElapsedCounters, 30000);
+        setInterval(loadDoughs, 60000);
+        setInterval(loadMenuBlocks, 60000);
       }
     }
 
@@ -399,6 +542,365 @@
       return newIds;
     }
 
+
+    // ── Masses del dia ──
+    // El nombre de masses és el nombre de pizzes que es poden vendre aquell
+    // dia (la web ho bloqueja quan s'acaben). Es posa per data d'entrega,
+    // perquè la web accepta comandes anticipades de divendres i diumenge.
+    // Si no es posa res, la web fa servir 40 per defecte.
+    let doughsDate = null;
+    let doughsState = null;
+    // El número que es veu és sempre el de Supabase, excepte mentre hi ha
+    // un esborrany (doughsDirty): un número escrit a mà o canviat amb +/−.
+    // L'esborrany només es desa amb "Desar"/Enter; si es surt del camp, es
+    // prem Esc o passen 20 s sense tocar res, torna al valor de Supabase.
+    let doughsDirty = false;
+    let doughsIdleTimer = null;
+    let doughsSaveTimer = null;
+    let doughsStatusTimer = null;
+    let doughsSaving = false;
+
+    function doughsServiceDates() {
+      const out = [];
+      const d = new Date(businessDateISO() + 'T00:00:00');
+      for (let i = 0; i < 14 && out.length < 4; i++) {
+        if (d.getDay() === 5 || d.getDay() === 0) out.push(localDateStr(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    }
+
+    function renderDoughsDates() {
+      const names = ['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'];
+      document.getElementById('doughs-dates').innerHTML = doughsServiceDates().map(iso => {
+        const d = new Date(iso + 'T00:00:00');
+        const on = iso === doughsDate;
+        return `<button onclick="selectDoughsDate('${iso}')" class="px-3 py-1.5 rounded-lg text-sm font-semibold border ${on ? 'bg-white text-[#15181D] border-white' : 'border-white/15 hover:bg-white/5'}">${names[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}</button>`;
+      }).join('');
+    }
+
+    function renderDoughs() {
+      const st = doughsState;
+      const left = document.getElementById('doughs-left');
+      const note = document.getElementById('doughs-note');
+      if (!st) { left.textContent = '–'; return; }
+      left.textContent = st.remaining;
+      left.style.color = st.remaining === 0 ? '#EF4444' : st.remaining <= 5 ? '#F59E0B' : '#E8EAED';
+      document.getElementById('doughs-total').textContent = st.doughs;
+      document.getElementById('doughs-used').textContent = st.used;
+      if (!doughsDirty) { document.getElementById('doughs-input').value = st.doughs; setDoughsBtn('saved'); }
+      if (st.used > st.doughs) {
+        note.textContent = `⚠ Ja hi ha ${st.used} pizzes venudes i has posat ${st.doughs} masses. No es cancel·la cap comanda; només es bloqueja vendre'n més.`;
+        note.style.color = '#F59E0B';
+      } else if (st.remaining === 0) {
+        note.textContent = 'Masses esgotades: la web ja no deixa comprar pizzes aquest dia.';
+        note.style.color = '#EF4444';
+      } else if (st.remaining <= 5) {
+        note.textContent = `⚠ Només queden ${st.remaining} masses.`;
+        note.style.color = '#F59E0B';
+      } else if (!st.is_set) {
+        note.textContent = `Encara no has posat les masses d'aquest dia: la web fa servir ${st.doughs} per defecte.`;
+        note.style.color = '#8B93A1';
+      } else {
+        note.textContent = '';
+      }
+    }
+
+    async function loadDoughs() {
+      if (!doughsDate) doughsDate = doughsServiceDates()[0];
+      renderDoughsDates();
+      const { data, error } = await supabase.rpc('get_daily_availability', { p_delivery_date: doughsDate });
+      if (error) { console.error(error); return; }
+      doughsState = Array.isArray(data) ? data[0] : data;
+      renderDoughs();
+    }
+
+    function selectDoughsDate(iso) {
+      clearTimeout(doughsSaveTimer); clearTimeout(doughsIdleTimer);
+      doughsDate = iso; doughsDirty = false;
+      showDoughsSave(false); setDoughsStatus('');
+      loadDoughs();
+    }
+    window.selectDoughsDate = selectDoughsDate;
+
+    // Botó sempre visible: groc "Desar" si hi ha canvis sense desar, verd
+    // "Desat ✓" quan el número coincideix amb el de Supabase.
+    function setDoughsBtn(state) {
+      const b = document.getElementById('doughs-save');
+      const look = {
+        unsaved: ['Desar',     '#F59E0B', '#15181D', false],
+        saving:  ['Desant…',   '#F59E0B', '#15181D', true],
+        saved:   ['Desat ✓',   '#16A34A', '#FFFFFF', true],
+      }[state];
+      b.textContent = look[0]; b.style.background = look[1]; b.style.color = look[2]; b.disabled = look[3];
+      b.style.cursor = look[3] ? 'default' : 'pointer';
+    }
+    function showDoughsSave(on) { setDoughsBtn(on ? 'unsaved' : 'saved'); }
+    function setDoughsStatus(text, color, clearAfterMs) {
+      const el = document.getElementById('doughs-status');
+      el.textContent = text; el.style.color = color || '#8B93A1';
+      clearTimeout(doughsStatusTimer);
+      if (clearAfterMs) doughsStatusTimer = setTimeout(() => { el.textContent = ''; }, clearAfterMs);
+    }
+    const clampDoughs = n => Math.min(500, Math.max(0, Math.round(n)));
+
+    // Qualsevol canvi (teclejar, fletxes del camp, + o −) és un esborrany:
+    // surt el botó "Desar" i no es guarda res fins que es confirma.
+    function markDoughsDraft() {
+      const v = parseInt(document.getElementById('doughs-input').value, 10);
+      const changed = Number.isFinite(v) && doughsState && v !== doughsState.doughs;
+      doughsDirty = !!changed;
+      showDoughsSave(!!changed);
+      setDoughsStatus(changed ? 'Sense desar: prem Desar per confirmar' : '', '#F59E0B');
+      clearTimeout(doughsIdleTimer);
+      if (changed) doughsIdleTimer = setTimeout(revertDoughsInput, 20000);
+    }
+    function onDoughsInput() { markDoughsDraft(); }
+    // Sortir del camp sense desar: es queda com abans (el valor de Supabase).
+    // Passar a +/−/Desar amb el teclat no compta com a sortir.
+    function onDoughsBlur(e) {
+      if (!doughsDirty) return;
+      const to = e && e.relatedTarget;
+      if (to && (to.id === 'doughs-minus' || to.id === 'doughs-plus' || to.id === 'doughs-save')) return;
+      revertDoughsInput();
+    }
+    function revertDoughsInput() {
+      clearTimeout(doughsIdleTimer);
+      doughsDirty = false;
+      showDoughsSave(false);
+      setDoughsStatus('');
+      if (doughsState) document.getElementById('doughs-input').value = doughsState.doughs;
+    }
+    function onDoughsKey(e) {
+      if (e.key === 'Enter') { e.preventDefault(); saveDoughsFromInput(); }
+      else if (e.key === 'Escape') { revertDoughsInput(); e.target.blur(); }
+    }
+    function saveDoughsFromInput() {
+      const v = parseInt(document.getElementById('doughs-input').value, 10);
+      if (!Number.isFinite(v) || v < 0 || v > 500) { revertDoughsInput(); return; }
+      clearTimeout(doughsIdleTimer);
+      doughsDirty = false; setDoughsBtn('saving');
+      saveDoughs(v);
+    }
+
+    // +/−: canvien l'esborrany (a partir del que hi ha al camp) i mostren "Desar".
+    function adjustDoughs(delta) {
+      if (!doughsState) return;
+      const input = document.getElementById('doughs-input');
+      const cur = parseInt(input.value, 10);
+      const base = Number.isFinite(cur) ? cur : doughsState.doughs;
+      input.value = clampDoughs(base + delta);
+      markDoughsDraft();
+    }
+
+    // Escriu a Supabase i mostra el que Supabase ha respost (mai el que
+    // s'esperava): així el número de pantalla i el de la base de dades
+    // no es poden descuadrar.
+    async function saveDoughs(n) {
+      if (doughsSaving) { doughsSaveTimer = setTimeout(() => saveDoughs(n), 200); return; }
+      doughsSaving = true;
+      setDoughsBtn('saving'); setDoughsStatus('');
+      const { data, error } = await supabase.rpc('set_daily_doughs', { p_delivery_date: doughsDate, p_doughs: clampDoughs(n) });
+      doughsSaving = false;
+      if (error) {
+        console.error(error);
+        // Es queda com a esborrany (botó groc) perquè es pugui tornar a provar.
+        doughsDirty = true;
+        document.getElementById('doughs-input').value = clampDoughs(n);
+        setDoughsBtn('unsaved');
+        setDoughsStatus('No s\'ha pogut desar a Supabase. Torna a prémer Desar.', '#EF4444');
+        return;
+      }
+      doughsState = Array.isArray(data) ? data[0] : data;
+      renderDoughs();
+      setDoughsStatus('');
+    }
+    window.onDoughsInput = onDoughsInput;
+    window.onDoughsBlur = onDoughsBlur;
+    window.onDoughsKey = onDoughsKey;
+    window.saveDoughsFromInput = saveDoughsFromInput;
+    window.adjustDoughs = adjustDoughs;
+
+    // ── Carta del dia ──
+    // El pizzero apaga una pizza, la beguda o un ingredient (s'ha acabat el
+    // guanciale...) i la web deixa de deixar-ho demanar. Un ingredient
+    // apagat treu totes les pizzes que el porten. "Només avui" s'aplica a
+    // la data del pase (la mateixa que surt primer a Masses del dia) i
+    // l'endemà ja no compta; "Fins a nou avís" dura fins que es torni a
+    // posar Disponible. Què queda apagat ho calcula Supabase
+    // (get_menu_availability), el mateix que fan servir la web i place-order.
+    let menuCatalog = null;           // { products: [...], ingredients: [...] }
+    let menuBlocks = new Map();       // 'product:carbonara' → block_date (null = fins a nou avís)
+    let menuOff = new Map();          // product_id → { until_notice, missing }
+    let menuTab = 'products';
+    const menuSaving = new Set();
+    const MENU_PANEL_KEY = 'micsas_menu_panel_open';
+
+    function menuPaseDate() { return doughsServiceDates()[0]; }
+    function menuDayWord() {
+      const iso = menuPaseDate();
+      if (iso === businessDateISO()) return 'avui';
+      const d = new Date(iso + 'T00:00:00');
+      return `el ${['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'][d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+    }
+    function menuStateOf(type, id) {
+      const key = type + ':' + id;
+      if (!menuBlocks.has(key)) return 'on';
+      const d = menuBlocks.get(key);
+      if (d === null) return 'indef';
+      return d === menuPaseDate() ? 'day' : 'on';
+    }
+    function menuItemName(type, id) {
+      const list = menuCatalog ? (type === 'product' ? menuCatalog.products : menuCatalog.ingredients) : [];
+      return (list.find(x => x.id === id) || {}).name || id;
+    }
+
+    async function loadMenuBlocks() {
+      const reqs = [
+        supabase.from('menu_blocks').select('item_type, item_id, block_date').eq('off', true),
+        supabase.rpc('get_menu_availability', { p_delivery_date: menuPaseDate() }),
+      ];
+      if (!menuCatalog) {
+        reqs.push(
+          supabase.from('menu_products').select('id, kind, name, sort, ingredients').order('sort'),
+          supabase.from('menu_ingredients').select('id, name, grp, sort').order('sort'),
+        );
+      }
+      const [blocks, off, products, ingredients] = await Promise.all(reqs);
+      const err = blocks.error || off.error || products?.error || ingredients?.error;
+      if (err) {
+        console.error('[carta del dia]', err);
+        if (!menuCatalog) setMenuSummary("No s'ha pogut carregar la carta. Torna-ho a provar en un moment.", '#EF4444');
+        return;
+      }
+      if (products) menuCatalog = { products: products.data || [], ingredients: ingredients.data || [] };
+      // Mentre es desa un canvi, no es trepitja el que ja es veu a la pantalla.
+      if (menuSaving.size) return;
+      menuBlocks = new Map((blocks.data || []).map(b => [b.item_type + ':' + b.item_id, b.block_date]));
+      menuOff = new Map((off.data || []).map(r => [r.product_id, r]));
+      renderMenuPanel();
+    }
+
+    function setMenuSummary(text, color) {
+      const el = document.getElementById('menu-summary');
+      el.textContent = text;
+      el.style.color = color || '#8B93A1';
+    }
+
+    function renderMenuPanel() {
+      if (!menuCatalog) return;
+      const pase = new Date(menuPaseDate() + 'T00:00:00');
+      document.getElementById('menu-pase-label').textContent = `· ${['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'][pase.getDay()]} ${pase.getDate()}/${pase.getMonth() + 1}`;
+
+      const offNames = menuCatalog.products.filter(p => menuOff.has(p.id)).map(p => p.name);
+      if (offNames.length) setMenuSummary('No es pot demanar: ' + offNames.join(', '), '#F59E0B');
+      else setMenuSummary('✓ Tot disponible a la web', '#16A34A');
+
+      const ingOff = menuCatalog.ingredients.filter(i => menuStateOf('ingredient', i.id) !== 'on').length;
+      const badge = (id, n) => {
+        const el = document.getElementById(id);
+        el.textContent = n;
+        el.classList.toggle('hidden', !n);
+      };
+      badge('menu-tab-products-n', offNames.length);
+      badge('menu-tab-ingredients-n', ingOff);
+      ['products', 'ingredients'].forEach(t => {
+        const b = document.getElementById('menu-tab-' + t);
+        b.classList.toggle('bg-white', menuTab === t);
+        b.classList.toggle('text-[#14171C]', menuTab === t);
+      });
+
+      const dayLabel = menuDayWord() === 'avui' ? 'Només avui' : 'Només ' + menuDayWord().replace(/^el /, '');
+      // off: no es pot demanar. Una pizza pot estar "Disponible" però sense
+      // poder-se demanar perquè li falta un ingredient: llavors el botó
+      // Disponible surt en gris, no en verd.
+      const row = (type, item, note, off) => {
+        const state = menuStateOf(type, item.id);
+        const saving = menuSaving.has(type + ':' + item.id);
+        const seg = (mode, label, on) => `<button type="button" onclick="setMenuBlock('${type}','${item.id}','${mode}')" aria-pressed="${state === mode}"
+          class="flex-1 px-2 py-2 rounded-lg text-sm font-bold leading-tight transition-colors ${state === mode ? on : 'text-[#8B93A1] hover:bg-white/5 hover:text-[#E8EAED]'}">${label}</button>`;
+        return `
+          <div class="flex flex-wrap md:flex-nowrap items-center gap-x-4 gap-y-2 rounded-xl px-3 py-2.5 ${off ? 'bg-[#EF4444]/10' : 'bg-white/[0.03]'}">
+            <div class="min-w-0 flex-1">
+              <p class="font-bold ${off ? 'text-[#FCA5A5]' : ''}">${escapeHtml(item.name)}</p>
+              ${note ? `<p class="text-xs mt-0.5 ${off ? 'text-[#FCA5A5]' : 'text-[#8B93A1]'}">${note}</p>` : ''}
+            </div>
+            <div class="menu-seg flex gap-1 p-1 rounded-xl bg-[#0E1013] border border-white/10 w-full md:w-[24rem] shrink-0 ${saving ? 'opacity-60 pointer-events-none' : ''}">
+              ${seg('on', 'Disponible', off ? 'bg-[#3A404B] text-[#E8EAED]' : 'bg-[#16A34A] text-white')}
+              ${seg('day', escapeHtml(dayLabel), 'bg-[#F59E0B] text-[#15181D]')}
+              ${seg('indef', 'Fins a nou avís', 'bg-[#EF4444] text-white')}
+            </div>
+          </div>`;
+      };
+      const head = t => `<h3 class="text-xs font-bold uppercase tracking-widest text-[#5B6270] pt-3 first:pt-0">${escapeHtml(t)}</h3>`;
+
+      let html = '';
+      if (menuTab === 'products') {
+        let lastKind = null;
+        menuCatalog.products.forEach(p => {
+          if (p.kind !== lastKind) { html += head(p.kind === 'drink' ? 'Begudes' : 'Pizzes'); lastKind = p.kind; }
+          const o = menuOff.get(p.id);
+          const note = o && o.missing && o.missing.length ? 'No es pot demanar: falta ' + escapeHtml(o.missing.join(', ')) : '';
+          html += row('product', p, note, !!o);
+        });
+      } else {
+        let lastGrp = null;
+        menuCatalog.ingredients.forEach(i => {
+          if (i.grp !== lastGrp) { html += head(i.grp); lastGrp = i.grp; }
+          const uses = menuCatalog.products.filter(p => (p.ingredients || []).includes(i.id)).map(p => p.name);
+          const note = uses.length ? 'Ho porta: ' + escapeHtml(uses.join(', ')) : '';
+          html += row('ingredient', i, note, menuStateOf('ingredient', i.id) !== 'on');
+        });
+      }
+      document.getElementById('menu-list').innerHTML = html;
+    }
+
+    async function setMenuBlock(type, id, mode) {
+      const key = type + ':' + id;
+      if (menuSaving.has(key) || menuStateOf(type, id) === mode) return;
+      const had = menuBlocks.has(key);
+      const prev = menuBlocks.get(key);
+      // Es veu el canvi a l'instant; si Supabase falla, es desfà.
+      if (mode === 'on') menuBlocks.delete(key);
+      else menuBlocks.set(key, mode === 'day' ? menuPaseDate() : null);
+      menuSaving.add(key);
+      renderMenuPanel();
+      const { error } = await supabase.rpc('set_menu_block', { p_item_type: type, p_item_id: id, p_mode: mode, p_date: menuPaseDate() });
+      menuSaving.delete(key);
+      const name = menuItemName(type, id);
+      if (error) {
+        console.error('[carta del dia]', error);
+        if (had) menuBlocks.set(key, prev); else menuBlocks.delete(key);
+        renderMenuPanel();
+        showToast(`No s'ha pogut desar ${name}. Torna-ho a provar.`, true);
+        return;
+      }
+      showToast(mode === 'on' ? `${name}: disponible a la web`
+        : mode === 'day' ? `${name}: no disponible ${menuDayWord()}`
+        : `${name}: no disponible fins a nou avís`);
+      await loadMenuBlocks();
+    }
+    window.setMenuBlock = setMenuBlock;
+
+    function setMenuTab(t) {
+      menuTab = t;
+      renderMenuPanel();
+    }
+    window.setMenuTab = setMenuTab;
+
+    function applyMenuPanelOpen(open) {
+      document.getElementById('menu-panel-body').classList.toggle('hidden', !open);
+      document.getElementById('menu-panel-toggle').setAttribute('aria-expanded', String(open));
+      document.getElementById('menu-panel-btn').textContent = open ? 'Amagar' : 'Editar';
+    }
+    function toggleMenuPanel() {
+      const open = document.getElementById('menu-panel-body').classList.contains('hidden');
+      applyMenuPanelOpen(open);
+      try { localStorage.setItem(MENU_PANEL_KEY, open ? '1' : '0'); } catch (_) {}
+    }
+    window.toggleMenuPanel = toggleMenuPanel;
+    try { applyMenuPanelOpen(localStorage.getItem(MENU_PANEL_KEY) === '1'); } catch (_) {}
+
     const _seenOrderIds = new Set();
 
     async function loadOrders() {
@@ -411,7 +913,9 @@
       const newIds = detectNewPendingOrders(data || [], _seenOrderIds);
       const newInScope = (data || []).some(o => newIds.includes(o.id) && inDateScope(o));
       ordersCache = data || [];
+      await loadIncidents();
       renderOrders();
+      loadDoughs();
       if (!isFirstLoad && newInScope) playNewOrderSound();
     }
 
@@ -680,6 +1184,7 @@
               </div>
             ` : ''}
             ${allSameStatus && stage !== 'delivered' ? `<div class="border-t border-[#E5E7EB] pt-3">${actionsRow(group.map(o => o.id), stage, 'lg')}</div>` : ''}
+            ${incidentRow(group)}
           </div>
         </div>
       `;
@@ -831,6 +1336,130 @@
       await loadOrders();
     }
     window.advanceStatusBulk = advanceStatusBulk;
+
+    // ── Incidències (pizza cremada, equivocada, queixa...) ──
+    // Es guarden a order_incidents i surten a l'informe del pase. Si la
+    // taula encara no existeix (migració pendent), la càrrega falla en
+    // silenci i el tauler funciona igual.
+    let incidentsByOrder = new Map();
+    let incidentTargetId = null;
+    const INCIDENT_LABEL = { cremada: 'Cremada', equivocada: 'Equivocada', falta: 'Falta producte', retard: 'Retard', queixa: 'Queixa', altres: 'Altres' };
+
+    async function loadIncidents() {
+      const { data, error } = await supabase.from('order_incidents').select('order_id, kind');
+      if (error) return;
+      incidentsByOrder = new Map();
+      for (const i of data || []) {
+        const arr = incidentsByOrder.get(i.order_id) || [];
+        arr.push(i.kind);
+        incidentsByOrder.set(i.order_id, arr);
+      }
+    }
+
+    function incidentRow(group) {
+      const kinds = group.flatMap(o => incidentsByOrder.get(o.id) || []);
+      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-[#DC2626]/10 text-[#DC2626] text-xs font-bold">⚠ ${INCIDENT_LABEL[k] || k}</span>`).join(' ');
+      return `
+        <div class="flex items-center gap-2 flex-wrap">
+          ${tags}
+          <button onclick="openIncident('${group[0].id}')" class="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold text-[#6B7280] hover:text-[#DC2626] hover:bg-[#DC2626]/5 transition-colors">⚠ Incidència</button>
+        </div>`;
+    }
+
+    function openIncident(orderId) {
+      incidentTargetId = orderId;
+      const o = ordersCache.find(x => x.id === orderId);
+      const who = o ? `${o.customers?.name || 'Client'}${o.slot_time ? ' · ' + o.slot_time : ''}` : '';
+      document.getElementById('incident-who').textContent = who;
+      document.getElementById('incident-modal').classList.remove('hidden');
+    }
+    window.openIncident = openIncident;
+
+    function closeIncident() {
+      incidentTargetId = null;
+      document.getElementById('incident-modal').classList.add('hidden');
+    }
+    window.closeIncident = closeIncident;
+
+    async function saveIncident(kind) {
+      if (!incidentTargetId) return;
+      const { error } = await supabase.from('order_incidents').insert({ order_id: incidentTargetId, kind });
+      closeIncident();
+      if (error) { alert("No s'ha pogut desar la incidència: " + error.message); return; }
+      showToast('Incidència apuntada');
+      await loadOrders();
+    }
+    window.saveIncident = saveIncident;
+
+    function showToast(text, isError = false) {
+      const el = document.getElementById('pase-toast');
+      el.textContent = text;
+      el.classList.toggle('bg-[#16A34A]', !isError);
+      el.classList.toggle('bg-[#DC2626]', isError);
+      el.classList.remove('hidden');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    // ── Tancar pase ──
+    // Quan el pizzero acaba, prem "Tancar pase": l'edge function informe-pase
+    // calcula els indicadors del dia i envia l'informe per correu a Micsas
+    // (els diumenges, també el resum setmanal). Si ja s'havia enviat,
+    // pregunta abans de tornar-lo a enviar.
+    function paseButtonState(sentAt) {
+      const btn = document.getElementById('close-pase-btn');
+      if (sentAt) {
+        const t = new Date(sentAt).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+        btn.textContent = `✓ Pase tancat ${t}`;
+        btn.classList.remove('bg-[#E23F2E]', 'hover:bg-[#C9321F]', 'text-white');
+        btn.classList.add('border', 'border-white/15', 'text-[#8B93A1]', 'hover:bg-white/5');
+      } else {
+        btn.textContent = 'Tancar pase';
+        btn.classList.add('bg-[#E23F2E]', 'hover:bg-[#C9321F]', 'text-white');
+        btn.classList.remove('border', 'border-white/15', 'text-[#8B93A1]', 'hover:bg-white/5');
+      }
+    }
+
+    async function refreshPaseButton() {
+      const { data, error } = await supabase.from('pase_reports').select('sent_at').eq('delivery_date', businessDateISO()).maybeSingle();
+      if (error) return;
+      paseButtonState(data?.sent_at || null);
+    }
+
+    async function closePase(force = false) {
+      // ?pase=AAAA-MM-DD permet tancar un pase d'un dia anterior que es va oblidar.
+      const asked = new URLSearchParams(location.search).get('pase');
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(asked || '') && asked <= businessDateISO() ? asked : businessDateISO();
+      const label = new Date(date + 'T00:00:00').toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      if (!force) {
+        const open = ordersCache.filter(o => o.delivery_date === date && isPaymentConfirmed(o) && o.status !== 'delivered' && o.status !== 'cancelled').length;
+        const warn = open ? `\n\nEncara hi ha ${open} ${open === 1 ? 'comanda' : 'comandes'} sense marcar com a ${open === 1 ? 'entregada' : 'entregades'}.` : '';
+        if (!confirm(`Tancar el pase de ${label} i enviar l'informe?${warn}`)) return;
+      }
+      const btn = document.getElementById('close-pase-btn');
+      const prevText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Enviant…';
+      const { data, error } = await supabase.functions.invoke('informe-pase', { body: { deliveryDate: date, force } });
+      btn.disabled = false;
+      btn.textContent = prevText;
+      if (error) {
+        let msg = error.message;
+        try { const b = await error.context.json(); if (b?.error) msg = b.error; } catch (_) {}
+        showToast("No s'ha pogut enviar l'informe: " + msg, true);
+        return;
+      }
+      if (data?.alreadySent) {
+        const t = new Date(data.sentAt).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+        if (confirm(`L'informe d'aquest pase ja es va enviar a les ${t}. El vols tornar a enviar?`)) return closePase(true);
+        return;
+      }
+      if (data?.inProgress) { showToast("L'informe ja s'està enviant."); return; }
+      paseButtonState(new Date().toISOString());
+      const sent = data?.weekly ? 'Informe del pase i resum setmanal enviats' : 'Informe del pase enviat';
+      showToast(data?.invoice ? `${sent} · factura ${data.invoice}` : sent);
+    }
+    window.closePase = closePase;
 
     // Cancel·lar és irreversible des de la UI (no hi ha manera de tornar
     // enrere un cop marcada com a cancel·lada), així que demanem

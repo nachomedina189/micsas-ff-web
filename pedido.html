@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Demana · micsas.ff</title>
-  <meta name="description" content="Demana les teves pizzes napolitanes de micsas.ff, pizzeria a domicili a Matadepera.">
+  <title>Demana pizza a domicili a Matadepera · micsas.ff</title>
+  <meta name="description" content="Fes la teva comanda online de pizza napolitana a micsas.ff. Repartiment a domicili a Matadepera divendres i diumenge de 20:00 a 22:45.">
+  <link rel="canonical" href="https://www.micsasff.com/pedido.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="micsas.ff">
+  <meta property="og:title" content="Demana pizza a domicili · micsas.ff">
+  <meta property="og:description" content="Comanda online de pizza napolitana amb repartiment a Matadepera, divendres i diumenge.">
+  <meta property="og:image" content="https://www.micsasff.com/images/margherita-1889.webp">
+  <meta property="og:url" content="https://www.micsasff.com/pedido.html">
+  <meta property="og:locale" content="ca_ES">
   <link rel="icon" href="logo micsas.png">
   <link rel="apple-touch-icon" href="logo micsas.png">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,10 +21,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="transicion.css">
+  <link rel="stylesheet" href="pedido-pro.css">
   <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
   <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-  <link rel="prefetch" href="index.html">
+  <link rel="prefetch" href="/">
   <link rel="prefetch" href="carta.html">
   <link rel="prefetch" href="menu.html">
   <link rel="prefetch" href="micsas-events.html">
@@ -135,9 +144,12 @@
       color: #2A1A0F !important;
     }
   </style>
+  <link rel="stylesheet" href="pizza-badge.css">
+  <script src="pizza-badge.js"></script>
+  <script src="carta-del-dia.js"></script>
 </head>
 
-<body class="bg-[#c80a07] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
+<body class="pp bg-[#c80a07] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[#E23F2E]/20">
 
   <!-- Paper texture -->
   <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]"
@@ -315,7 +327,6 @@
     </div>
 
     <div id="cart-empty" class="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
-      <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/cb6ab273-5899-4784-bea8-6448c9f5418e_800w.jpg" alt="Vintage Style Pizza Delivery" class="w-48 h-48 object-cover rounded-2xl shadow-sm border border-[#C4B08A]/30 mb-2 mix-blend-multiply">
       <p class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">La cistella és buida</p>
       <p class="text-sm font-light text-[#5A3E28]">Afegeix pizzes des de la carta per començar.</p>
     </div>
@@ -368,6 +379,7 @@
           <button type="button" onclick="selectDeliveryDay('other')" id="cf-day-other" class="px-5 py-2.5 rounded-full border text-sm font-medium transition-all">Un altre dia</button>
         </div>
         <div id="cf-date-pills" class="hidden flex flex-wrap gap-2 justify-center"></div>
+        <div id="cf-pizza-status" class="pzb-wrap" style="display:none" aria-live="polite"></div>
         <div id="cf-time-slots" class="space-y-3"></div>
         <p class="flex items-center justify-center gap-1.5 text-xs text-[#9B8A72] text-center">
           <iconify-icon icon="solar:fire-bold" width="14" style="color:#E23F2E;"></iconify-icon>
@@ -469,19 +481,10 @@
               <label for="cf-phone" class="block text-xs font-medium mb-1.5 text-[#2A1A0F]">
                 Telèfon <span class="text-[#E23F2E]" aria-hidden="true">*</span>
               </label>
-              <div class="flex gap-2">
-                <div class="relative shrink-0">
-                  <select id="cf-phone-prefix" aria-label="Prefix telefònic"
-                    class="appearance-none bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl pl-3 pr-7 py-3 text-[#2A1A0F] text-sm outline-none focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] cursor-pointer transition-all">
-                    <option value="+34">🇪🇸 +34</option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#9B8A72]">
-                    <iconify-icon icon="solar:alt-arrow-down-linear" width="12"></iconify-icon>
-                  </div>
-                </div>
-                <input id="cf-phone" type="tel" autocomplete="tel-national" placeholder="6XX XXX XXX"
+              <div>
+                <input id="cf-phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="30" placeholder="6XX XXX XXX"
                   aria-required="true"
-                  class="flex-1 bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
+                  class="w-full bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-3 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E]">
               </div>
               <p class="cf-field-err hidden text-xs mt-1 text-[#E23F2E]" data-for="cf-phone">Mínim 9 dígits.</p>
             </div>
@@ -562,7 +565,7 @@
             <!-- Card button -->
             <button id="checkout-card-btn" onclick="payWithCard()"
               class="w-full py-4 rounded-full font-['League_Spartan',sans-serif] font-medium text-[16px] text-white bg-[#E23F2E] hover:bg-[#B82A1F] active:bg-[#9A1F12] transition-all">
-              Pagar amb targeta
+              Pagar amb targeta o Bizum
             </button>
 
             <!-- Separator -->
@@ -603,7 +606,7 @@
     </div>
 
     <!-- Success screen -->
-    <div id="cf-success" class="hidden flex-1 flex-col bg-[#F2E6CE]" role="status" aria-live="polite">
+    <div id="cf-success" class="hidden flex-1 min-h-0 flex-col bg-[#F2E6CE]" role="status" aria-live="polite">
 
       <!-- 1. Header -->
       <div class="flex items-center gap-3 px-5 pt-5 pb-1 shrink-0">
@@ -616,7 +619,7 @@
         <h1 class="font-['League_Spartan',sans-serif] font-bold text-lg text-[#2D241D]">La teva comanda</h1>
       </div>
 
-      <div class="flex-1 flex flex-col items-center text-center px-6 pb-8 overflow-y-auto">
+      <div class="flex-1 min-h-0 flex flex-col items-center text-center px-6 pb-8 overflow-y-auto">
 
         <!-- 2. Hero media (reservat per a vídeo/transició futura) + check de confirmació -->
         <div id="hero-media" class="w-full" aria-hidden="true">
@@ -644,6 +647,23 @@
 
         <!-- 6. Barra de progrés (4 estats, controlada per estatComanda) -->
         <div id="cf-progress" class="w-full max-w-sm mb-8" role="list" aria-label="Estat de la comanda"></div>
+
+        <!-- 7a. CTA ressenya a Google (l'enllaç es configura a resenya.js) -->
+        <a href="#" data-review-link target="_blank" rel="noopener noreferrer"
+          class="hidden resenya-cta w-full max-w-sm bg-[#D24A33] rounded-2xl px-5 py-5 mb-3 flex-col items-center gap-2 text-center transition-transform hover:-translate-y-0.5">
+          <span class="flex items-center justify-center gap-1" aria-hidden="true">
+            <svg class="resenya-star" width="24" height="24" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="24" height="24" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="24" height="24" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="24" height="24" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="24" height="24" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+          </span>
+          <span class="font-['League_Spartan',sans-serif] font-extrabold text-xl leading-tight text-[#F2E6CE]" data-i18n="resenya_t">Deixa'ns una ressenya</span>
+          <span class="text-sm text-[#F2E6CE]/90" data-i18n="resenya_sub">T'ha agradat? Explica-ho a Google</span>
+          <span class="mt-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-['League_Spartan',sans-serif] text-[15px] font-semibold text-[#D24A33] bg-[#F2E6CE]">
+            <span data-i18n="resenya_btn">Valorar ara</span> →
+          </span>
+        </a>
 
         <!-- 7. CTA Instagram (substitueix el bloc de contacte anterior) -->
         <a id="cf-instagram-cta" href="#" target="_blank" rel="noopener noreferrer"
@@ -702,9 +722,9 @@
         { id:'sottobosco',            name:'Sottobosco',            desc:'Fior di latte, Xampinyons, Pernil dolç, Parmigiano',                     ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Parmigiano (curat 24 mesos)','Xampinyons','Pernil dolç','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'images/sottobosco.webp', price:11 },
       ],
       classics: [
-        { id:'carbonara',             name:'Carbonara',             desc:'Fior di latte, Parmigiano, Guanciale, crema de carbonara',               ingredients:['Fior di latte artesana Il Grande Desiderio','Formatge Parmigiano (curat 24 mesos)','Alfàbrega fresca','Crema de carbonara','Guanciale',"Oli AOVE intens d'alfàbrega"], img:'images/carbonara.webp', price:14.5 },
+        { id:'carbonara',             name:'Carbonara',             desc:'Fior di latte, Parmigiano, Guanciale, crema de carbonara',               ingredients:['Fior di latte d’Agerola','Formatge Parmigiano (curat 24 mesos)','Alfàbrega fresca','Crema de carbonara','Guanciale',"Oli AOVE intens d'alfàbrega"], img:'images/carbonara.webp', price:14.5 },
         { id:'inferno-di-nduja',      name:"Inferno di 'Nduja",     desc:"Sobrassada picant (Nduja), Gorgonzola, Fior di latte, Parmigiano",       ingredients:["Sobrassada picant (Nduja)",'Gorgonzola picant','Fior di latte artesana','Parmigiano (curat 24 mesos)','Alfàbrega fresca',"Oli d'oliva verge extra"], img:'images/inferno-di-nduja.webp', price:13 },
-        { id:'caramella-affumicata',  name:'Caramella Affumicata',  desc:'Tomàquet datterino, Provola fumada, Caciocavallo, Fior di latte',         ingredients:['Tomàquet datterino caramella','Formatge fumat (Provola)','Fior di latte artesana','Alfàbrega fresca en cru','Caciocavallo',"Oli d'oliva verge extra"], img:'images/caramella-affumicata.webp', price:13, available:false },
+        { id:'caramella-affumicata',  name:'Caramella Affumicata',  desc:'Tomàquet datterino, Provola fumada, Caciocavallo, Fior di latte',         ingredients:['Tomàquet datterino caramella','Formatge fumat (Provola)','Fior di latte artesana','Alfàbrega fresca en cru','Caciocavallo',"Oli d'oliva verge extra"], img:'images/caramella-affumicata.webp', price:13 },
         { id:'antidiavola',           name:'Antidiavola',           desc:'Tomàquet San Marzano DOP, Xoriço ibèric Joselito, Fior di latte',         ingredients:['Tomàquet San Marzano DOP','Fior di latte artesana','Xoriço ibèric de gla Joselito','Alfàbrega fresca','Parmigiano (curat 24 mesos)',"Oli d'oliva verge extra"], img:'images/antidiavola.webp', price:13 },
         { id:'nutellina',             name:'Nutellina',             desc:'Nutella, Festuc de Sicília DOP',                                          ingredients:['Nutella (xocolata i avellanes)','Festuc de Sicília DOP'],                                                                 img:'images/nutellina.webp', price:13 },
       ],
@@ -722,11 +742,22 @@
     function totalCount() { return cart.reduce((s, i) => s + i.qty, 0); }
     function getCartItem(id) { return cart.find(i => i.id === id); }
 
+    // Carta del dia: pizzes i begudes que cuina ha apagat a cocina.html per
+    // a la data d'entrega (_menuOffDate). id → { until_notice, missing }.
+    // Ho diu get_menu_availability (carta-del-dia.js); place-order ho torna
+    // a comprovar sempre.
+    let _menuOff = {};
+    let _menuOffDate = null;
+    let _menuOffKey = '';
+    function isOff(id) { return !!_menuOff[id]; }
+
     function menuCard(item) {
-      // Article temporalment no disponible (ex. Caramella Affumicata) — es
-      // mostra igual que a la Carta (menu.html): imatge en gris, sense
-      // poder-hi clicar, amb l'avís "Tornarà aviat" en lloc del preu.
-      const unavailable = item.available === false;
+      // Article no disponible (apagat a cuina) — es mostra igual que a la
+      // Carta (menu.html): imatge en gris, sense poder-hi clicar, amb
+      // "Tornarà aviat" (fins a nou avís) o "Exhaurida" (només aquell dia)
+      // en lloc del preu.
+      const off = _menuOff[item.id];
+      const unavailable = item.available === false || !!off;
       const imgHtml = item.img
         ? `<img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover${unavailable ? ' grayscale brightness-90' : ''}" loading="lazy" width="800" height="800">`
         : `<div class="w-full h-full flex items-center justify-center bg-[#E6D5B0]"><iconify-icon icon="solar:pizza-slice-bold-duotone" width="48" style="color:#C4B08A;opacity:0.5;"></iconify-icon></div>`;
@@ -740,7 +771,7 @@
             </div>
             <div class="flex items-center justify-between mt-4">
               ${unavailable
-                ? `<span class="font-bold text-sm uppercase tracking-wide text-[#9B8A72]">Tornarà aviat</span>`
+                ? `<span class="font-bold text-sm uppercase tracking-wide text-[#9B8A72]">${off && !off.until_notice ? 'Exhaurida' : 'Tornarà aviat'}</span>`
                 : `<span class="font-medium text-base lg:text-base text-[#E23F2E]">${priceStr}</span>`}
             </div>
           </div>
@@ -758,6 +789,7 @@
           </div>
           <div class="flex items-center gap-4 shrink-0">
             <span class="font-normal text-sm text-[#F2E6CE]">€${item.price.toFixed(2)}</span>
+            ${isOff(item.id) ? `<span class="font-bold text-xs uppercase tracking-wide text-[#9B8A72] px-2 py-1.5">Exhaurida</span>` : `
             <div class="flex flex-col items-end">
               <div class="relative" data-ctrl-wrap="${item.id}">
                 <button type="button" data-btn-add="${item.id}" class="bg-[#F2E6CE] text-[#E23F2E] border border-[#C4B08A]/40 px-4 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 whitespace-nowrap hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-transparent" onclick="addToCartSilent('${item.id}','${safeName}',${item.price})">Afegir</button>
@@ -772,7 +804,7 @@
                 </div>
               </div>
               ${showNote ? `<button type="button" data-note-link="${item.id}" class="hidden mt-2 text-[11px] font-medium text-[#E23F2E] hover:opacity-70 transition-opacity" onclick="togglePizzaNote('${item.id}')">✎ Afegir nota</button>` : ''}
-            </div>
+            </div>`}
           </div>
           ${showNote ? `<div data-note-panel="${item.id}" class="hidden w-full sm:w-auto sm:ml-auto sm:pl-4">
             <textarea data-note-ta="${item.id}" rows="2" placeholder="Modificacions o ingredients a retirar..." class="w-full sm:w-[320px] bg-[#E6D5B0]/20 border border-[#C4B08A]/40 rounded-xl px-4 py-2.5 text-[#2A1A0F] text-sm outline-none transition-all placeholder:text-[#9B8A72] focus:border-[#E23F2E] focus:ring-1 focus:ring-[#E23F2E] resize-none" oninput="setPizzaNote('${item.id}', this.value)"></textarea>
@@ -832,9 +864,11 @@
       }
     }
 
-    function addToCartSilent(id, name, price) {
+    function addToCartSilent(id, name, price, quiet) {
+      if (isOff(id)) return;
       const ex = cart.find(i => i.id === id);
       if (ex) ex.qty++; else cart.push({ id, name, price, qty: 1, note: '' });
+      if (!quiet) window.ppNotifyAdded?.(id, name);
       const wrap = document.querySelector(`[data-ctrl-wrap="${id}"]`);
       if (wrap) wrap.animate([{ transform:'translateY(0px)' },{ transform:'translateY(-2px)' },{ transform:'translateY(0px)' }], { duration:220, easing:'cubic-bezier(0.16,1,0.3,1)' });
       renderCart(false); syncMenuRow(id);
@@ -845,6 +879,7 @@
       if (!it) return;
       it.qty = Math.max(0, it.qty + delta);
       if (it.qty === 0) cart = cart.filter(i => i.id !== id);
+      if (delta > 0) window.ppNotifyAdded?.(id, it.name);
       renderCart(false); syncMenuRow(id);
     }
 
@@ -1020,21 +1055,22 @@
     // que una franja concreta estigui plena, és que ja no es fan més
     // pizzes. El servidor (create_order_with_slot) ho torna a comprovar
     // sempre igualment: això només evita que el client arribi a intentar-ho.
-    const DAILY_PIZZA_CAP = 45;
     let _cfDailySoldOut = false;
+    let _cfPizzaStatus = null;
 
     async function loadSlotCountsFor(date) {
       _slotCounts = {};
       _cfDailySoldOut = false;
+      _cfPizzaStatus = null;
       if (!window.supabase) return;
       // get_slot_capacity és una funció agregada (no exposa dades del
       // client) accessible per a qualsevol usuari, a diferència d'un
       // select directe a "orders" — bloquejat per RLS per a un client
       // anònim, cosa que deixava _slotCounts sempre buit i cap franja es
       // marcava mai com a completa.
-      const [{ data }, { data: dailyTotal }] = await Promise.all([
+      const [{ data }, { data: pizzaStatus }] = await Promise.all([
         window.supabase.rpc('get_slot_capacity', { p_delivery_date: date }),
-        window.supabase.rpc('get_daily_pizza_count', { p_delivery_date: date }),
+        window.supabase.rpc('get_pizza_status', { p_delivery_date: date }),
       ]);
       if (data) {
         data.forEach(row => {
@@ -1042,8 +1078,11 @@
           _slotCounts[row.slot_time] = row.pizza_count || 0;
         });
       }
-      _cfDailySoldOut = typeof dailyTotal === 'number' && dailyTotal >= DAILY_PIZZA_CAP;
+      _cfPizzaStatus = Array.isArray(pizzaStatus) ? pizzaStatus[0] : pizzaStatus;
+      _cfDailySoldOut = _cfPizzaStatus?.status === 'soldout';
     }
+
+
 
     function updateDayAvailability() {
       const todayBtn = document.getElementById('cf-day-today');
@@ -1092,6 +1131,7 @@
     }
 
     async function refreshTimeSlots() {
+      refreshMenuAvailability(cfDeliveryDate);
       await loadSlotCountsFor(cfDeliveryDate);
       renderTimeSlots();
     }
@@ -1115,6 +1155,8 @@
     function renderTimeSlots() {
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
+      const statusEl = document.getElementById('cf-pizza-status');
+      window.renderPizzaBadge(statusEl, _cfPizzaStatus);
       if (_cfDailySoldOut) {
         container.innerHTML = `
           <div class="flex flex-col items-center text-center gap-2 py-6 px-5 rounded-2xl border border-[#E23F2E]/30 bg-[#E23F2E]/5">
@@ -1311,7 +1353,7 @@
         const setVal = (id, val) => { const el = document.getElementById(id); if (el && !el.value && val) el.value = val; };
         setVal('cf-name', name);
         setVal('cf-email', email);
-        setVal('cf-phone', phone);
+        setVal('cf-phone', stripPhonePrefix(phone));
         validateCheckout();
       } catch(e) {}
     }
@@ -1435,7 +1477,10 @@
         return;
       }
       if (errEl) errEl.classList.add('hidden');
-      _pendingOrderData = _collectOrderData();
+      // Aquest botó és sempre pagament online, encara que abans s'hagi tocat
+      // "Pagament al repartidor": sense forçar-ho, la comanda es desava com a
+      // efectiu i cuina la veia com "Efectiu al repartidor" ja pagada.
+      _pendingOrderData = { ..._collectOrderData(), paymentMethod: 'card_delivery' };
       openStripeOverlay(_pendingOrderData.total);
     }
 
@@ -1460,6 +1505,8 @@
         cfDeliveryDate = isValidOrderDay(todayISO()) ? todayISO() : nextValidDate(todayISO());
         cfSelectedTime = null;
       }
+
+      refreshMenuAvailability(cfDeliveryDate);
 
       // Skip time step if already selected (from pre-pedido or previous selection)
       if (cfSelectedTime) {
@@ -1554,7 +1601,7 @@
         const phone = (document.getElementById('cf-phone') || {}).value || '';
         const nameOk  = name.trim().length >= 2;
         const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-        const phoneOk = phone.replace(/\D/g, '').length >= 9;
+        const phoneOk = stripPhonePrefix(phone).length >= 9;
         clientOk = nameOk && emailOk && phoneOk;
       }
       const baseOk = clientOk && tnc && privacy;
@@ -1585,7 +1632,8 @@
     function showClientCard(name, email, phone) {
       cfClientName  = name  || '';
       cfClientEmail = email || '';
-      cfClientPhone = phone || '';
+      phone = stripPhonePrefix(phone);
+      cfClientPhone = phone ? '+34 ' + phone : '';
       const nameEl  = document.getElementById('cf-card-name');
       const emailEl = document.getElementById('cf-card-email');
       const phoneEl = document.getElementById('cf-card-phone');
@@ -1654,7 +1702,7 @@
       if (name || phone) {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
         setVal('cf-name',  name);
-        setVal('cf-phone', phone.replace(/^\+\d+\s?/, ''));
+        setVal('cf-phone', stripPhonePrefix(phone));
         setVal('cf-email', email);
 
         if (name && phone) {
@@ -1845,6 +1893,32 @@
       if (!validateCheckout()) return;
       if (cart.length === 0) return;
 
+      // Alguna cosa del cistell s'ha apagat a cuina mentre el client
+      // omplia el formulari: es treu i se li ensenya abans de cobrar res.
+      const gone = await refreshMenuAvailability(cfDeliveryDate);
+      if (gone.length) {
+        const errEl = document.getElementById('cf-global-err');
+        errEl.textContent = cart.length
+          ? 'Hem tret del cistell el que ja no està disponible. Revisa el total i torna a prémer el botó.'
+          : "El que tenies al cistell ja no està disponible per a aquest dia. Torna a la carta per triar una altra cosa.";
+        errEl.classList.remove('hidden');
+        validateCheckout();
+        return;
+      }
+
+      // Sold out: mai es deixa comprar. Es torna a consultar just ara perquè
+      // la pàgina pot portar oberta una estona i les pizzes s'han pogut acabar.
+      await loadSlotCountsFor(cfDeliveryDate);
+      if (_cfDailySoldOut) {
+        cfSelectedTime = null;
+        document.getElementById('cf-global-err').textContent = 'Sold ooout, moltes gràcies família! Ja no queden pizzes per a aquest dia.';
+        document.getElementById('cf-global-err').classList.remove('hidden');
+        document.getElementById('cf-scroll').classList.add('hidden');
+        document.getElementById('cf-time-step').classList.remove('hidden');
+        renderTimeSlots();
+        return;
+      }
+
       if (!isValidOrderDay(cfDeliveryDate)) {
         cfSelectedTime = null;
         document.getElementById('cf-global-err').textContent = 'Només fem comandes per divendres i diumenge. Tria un altre dia.';
@@ -1908,6 +1982,28 @@
       }
     }
 
+    // El client només escriu el seu número de 9 dígits; si l'autocompletat o
+    // un "enganxar" hi posa +34 / 0034 / 34, el traiem. Es desa com "+34 XXXXXXXXX".
+    function stripPhonePrefix(v) {
+      // Només dígits; un telèfon d'Espanya té 9 dígits, així que qualsevol
+      // prefix davant (+34, 0034, 34 repetits) es descarta, però mai les xifres del número.
+      let d = String(v || '').replace(/\D/g, '');
+      while (d.length > 9 && /^(0034|34)/.test(d)) d = d.replace(/^(0034|34)/, '');
+      return d;
+    }
+    (function () {
+      const ph = document.getElementById('cf-phone');
+      if (!ph) return;
+      const clean = () => {
+        let d = ph.value.replace(/\D/g, '');
+        while (d.length > 9 && /^(0034|34)/.test(d)) d = d.replace(/^(0034|34)/, '');
+        d = d.slice(0, 9);
+        if (d !== ph.value) ph.value = d;
+      };
+      ph.addEventListener('input', clean);
+      ph.addEventListener('change', clean);
+    })();
+
     function _collectOrderData() {
       const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       let name, email, phone;
@@ -1918,9 +2014,7 @@
       } else {
         name  = g('cf-name');
         email = g('cf-email') || null;
-        const prefix   = document.getElementById('cf-phone-prefix');
-        const phoneRaw = g('cf-phone');
-        phone = (prefix ? prefix.value : '+34') + ' ' + phoneRaw;
+        phone = '+34 ' + stripPhonePrefix(g('cf-phone'));
       }
       const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
       const floor      = sessionStorage.getItem('micsas_floor')   || null;
@@ -1966,7 +2060,11 @@
           street: d.street, floor: d.floor, postalCode: d.postalCode, city: d.city,
           lat: d.lat, lng: d.lng,
           delivNotes: d.delivNotes, finalNotes: d.finalNotes,
-          paymentMethod: d.paymentMethod, paymentStatus,
+          paymentMethod: d.paymentMethod,
+          // place-order ja l'ignora i el decideix ell mateix; s'envia només
+          // perquè la pàgina segueixi funcionant amb una versió antiga de
+          // place-order mentre no s'ha redesplegat.
+          paymentStatus,
           tipAmount: d.tipAmount,
           authUserId: currentUser ? currentUser.id : null,
           slotTime: cfSelectedTime || null,
@@ -1975,6 +2073,9 @@
         }),
       });
       const json = await res.json().catch(() => ({}));
+      if (!res.ok && Array.isArray(json.unavailable) && json.unavailable.length) {
+        await refreshMenuAvailability(d.deliveryDate || cfDeliveryDate);
+      }
       if (!res.ok) throw new Error(json.error || 'Error desant la comanda');
       // El servidor pot haver assignat una franja diferent de la demanada si
       // s'ha omplert just abans de confirmar (rollover automàtic a la
@@ -2032,7 +2133,11 @@
         }).catch(() => {});
       } catch (_) { /* si falla, el límit de 15 min de l'aforo ho cobreix igualment */ }
     }
-    window.addEventListener('pagehide', releasePendingOrder);
+    // Bizum (i qualsevol mètode amb redirecció) surt de la pàgina per
+    // aprovar el pagament: aquí NO s'ha d'alliberar la comanda, perquè es
+    // cancel·laria el PaymentIntent mentre el client paga al banc.
+    let _payRedirecting = false;
+    window.addEventListener('pagehide', () => { if (!_payRedirecting) releasePendingOrder(); });
 
     // El client tanca la finestra de pagament sense pagar.
     function cancelStripeOverlay() {
@@ -2040,97 +2145,7 @@
       closeStripeOverlay();
     }
 
-    async function openWalletPayment(totalEuros) {
-      const btn = document.getElementById('cf-submit');
-      btn.textContent = 'Obrint pagament...';
-      btn.disabled = true;
-
-      try {
-        if (!_stripe) _stripe = Stripe(STRIPE_PK);
-
-        const pr = _stripe.paymentRequest({
-          country: 'ES',
-          currency: 'eur',
-          total: { label: 'micsas.ff', amount: Math.round(totalEuros * 100) },
-          requestPayerName: true,
-          requestPayerEmail: false,
-        });
-
-        const canPay = await pr.canMakePayment();
-        if (!canPay) {
-          showCfToast('El teu dispositiu no suporta Google Pay ni Apple Pay. Tria targeta o repartidor.');
-          btn.textContent = 'Pagar ' + fmtComma(totalEuros);
-          btn.disabled = false;
-          return;
-        }
-
-        // Create PaymentIntent
-        const res = await fetch(EDGE_FN_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ amount: Math.round(totalEuros * 100), currency: 'eur' }),
-        });
-        const json = await res.json();
-        if (json.error) throw new Error(json.error);
-
-        pr.on('paymentmethod', async (ev) => {
-          const { paymentIntent, error: confirmErr } = await _stripe.confirmCardPayment(
-            json.clientSecret,
-            { payment_method: ev.paymentMethod.id },
-            { handleActions: false }
-          );
-
-          if (confirmErr) {
-            ev.complete('fail');
-            showCfToast('Error al processar el pagament. Torna-ho a intentar.');
-            btn.textContent = 'Pagar ' + fmtComma(totalEuros);
-            btn.disabled = false;
-            return;
-          }
-
-          ev.complete('success');
-
-          // Handle 3DS if needed
-          if (paymentIntent.status === 'requires_action') {
-            const { error } = await _stripe.confirmCardPayment(json.clientSecret);
-            if (error) {
-              showCfToast('Autenticació fallida. Torna-ho a intentar.');
-              btn.textContent = 'Pagar ' + fmtComma(totalEuros);
-              btn.disabled = false;
-              return;
-            }
-          }
-
-          // Payment succeeded — save order
-          try {
-            const d = { ..._pendingOrderData };
-            await _saveOrderToSupabase(d, 'paid');
-            document.getElementById('cf-global-err').classList.add('hidden');
-            document.getElementById('cf-scroll').classList.add('hidden');
-            updateSuccessDeliveryEstimate();
-            const success = document.getElementById('cf-success');
-            success.classList.remove('hidden');
-            success.classList.add('flex');
-            resetCart();
-          } catch (saveErr) {
-            console.error('[wallet save]', saveErr);
-            showCfToast('Pagament OK però error en guardar. Contacta amb nosaltres.');
-          }
-        });
-
-        pr.show();
-        btn.textContent = 'Pagar ' + fmtComma(totalEuros);
-        btn.disabled = false;
-
-      } catch (err) {
-        console.error('[openWalletPayment]', err);
-        showCfToast('Error al iniciar el pagament. Torna-ho a intentar.');
-        btn.textContent = 'Pagar ' + fmtComma(totalEuros);
-        btn.disabled = false;
-      }
-    }
-
-    async function openStripeOverlay(totalEuros, walletOnly = false) {
+    async function openStripeOverlay(totalEuros) {
       const overlay = document.getElementById('stripe-overlay');
       // Un segon toc a "Pagar" amb la finestra ja oberta creava una segona
       // comanda, i la primera es quedava ocupant franja sense pagar mai.
@@ -2153,7 +2168,7 @@
         _stripeElements = _stripe.elements({
           clientSecret,
           locale: 'ca',
-          paymentMethodOrder: ['card'],
+          paymentMethodOrder: ['card', 'bizum'],
           appearance: {
             theme: 'flat',
             variables: {
@@ -2205,53 +2220,6 @@
             },
           },
         });
-        // Payment Request Button (Apple Pay / Google Pay natiu)
-        const pr = _stripe.paymentRequest({
-          country: 'ES',
-          currency: 'eur',
-          total: { label: 'Micsas', amount: Math.round(totalEuros * 100) },
-          requestPayerName: true,
-        });
-        const canPay = await pr.canMakePayment();
-
-        if (walletOnly) {
-          if (!canPay) {
-            cancelStripeOverlay();
-            showCfToast('El teu dispositiu no suporta Apple Pay ni Google Pay.');
-            return;
-          }
-          document.getElementById('stripe-pay-btn').classList.add('hidden');
-          document.getElementById('stripe-wallet-separator').classList.add('hidden');
-          document.getElementById('stripe-payment-element').classList.add('hidden');
-          document.getElementById('stripe-wallet-btn').classList.remove('hidden');
-          const prBtn = _stripeElements.create('paymentRequestButton', {
-            paymentRequest: pr,
-            style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '52px' } },
-          });
-          document.getElementById('stripe-payment-request-button').innerHTML = '';
-          prBtn.mount('#stripe-payment-request-button');
-          pr.on('paymentmethod', async (ev) => {
-            const { error, paymentIntent } = await _stripe.confirmCardPayment(
-              clientSecret,
-              { payment_method: ev.paymentMethod.id },
-              { handleActions: false }
-            );
-            if (error) { ev.complete('fail'); showCfToast('Error al processar el pagament. Torna-ho a intentar.'); return; }
-            ev.complete('success');
-            if (paymentIntent.status === 'requires_action') {
-              const { error: actionErr } = await _stripe.confirmCardPayment(clientSecret);
-              if (actionErr) { showCfToast('Autenticació fallida.'); return; }
-            }
-            _pendingOrderRef = null;
-            closeStripeOverlay();
-            updateSuccessDeliveryEstimate();
-            const success = document.getElementById('cf-success');
-            success.classList.remove('hidden');
-            success.classList.add('flex');
-          });
-          return;
-        }
-
         const pe = _stripeElements.create('payment', {
           layout: { type: 'accordion', defaultCollapsed: false, radios: false },
           wallets: { googlePay: 'never', applePay: 'never' },
@@ -2291,10 +2259,21 @@
       btn.textContent = 'Processant...';
       errEl.classList.add('hidden');
 
+      // Si el client tria Bizum, Stripe el porta a aprovar el pagament i el
+      // retorna a return_url: el cistell (només en memòria) es perd, així que
+      // guardem el que cal per ensenyar la pantalla de "Gràcies!" en tornar.
+      try {
+        sessionStorage.setItem('micsas_pay_return', JSON.stringify({
+          date: cfDeliveryDate, time: cfSelectedTime, reassigned: !!window._cfSlotReassigned,
+        }));
+      } catch (_) {}
+      _payRedirecting = true;
       const { error, paymentIntent } = await _stripe.confirmPayment({
         elements: _stripeElements,
         redirect: 'if_required',
+        confirmParams: { return_url: location.origin + location.pathname + '?pagament=retorn' },
       });
+      _payRedirecting = false;
 
       if (error) {
         btn.disabled = false;
@@ -2315,6 +2294,55 @@
         success.classList.add('flex');
       }
     }
+
+    // Tornada d'un pagament amb redirecció (Bizum). Stripe afegeix
+    // payment_intent_client_secret i redirect_status a l'URL. La comanda ja
+    // existeix i és el webhook qui la marca com a pagada: aquí només
+    // ensenyem el resultat al client.
+    async function handlePaymentReturn() {
+      const params = new URLSearchParams(location.search);
+      const clientSecret = params.get('payment_intent_client_secret');
+      if (!clientSecret) return;
+      history.replaceState(null, '', location.pathname);
+      let saved = {};
+      try { saved = JSON.parse(sessionStorage.getItem('micsas_pay_return') || '{}'); } catch (_) {}
+      sessionStorage.removeItem('micsas_pay_return');
+      let status = params.get('redirect_status');
+      try {
+        if (!_stripe) _stripe = Stripe(STRIPE_PK);
+        const { paymentIntent } = await _stripe.retrievePaymentIntent(clientSecret);
+        if (paymentIntent) status = paymentIntent.status;
+      } catch (e) { console.warn('[payment-return]', e); }
+
+      if (status !== 'succeeded' && status !== 'processing') {
+        showPaymentReturnFailed();
+        return;
+      }
+      if (saved.date) cfDeliveryDate = saved.date;
+      if (saved.time) cfSelectedTime = saved.time;
+      window._cfSlotReassigned = !!saved.reassigned;
+      const fs = document.getElementById('checkout-fullscreen');
+      fs.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('cf-time-step').classList.add('hidden');
+      document.getElementById('cf-scroll').classList.add('hidden');
+      updateSuccessDeliveryEstimate();
+      const success = document.getElementById('cf-success');
+      success.classList.remove('hidden');
+      success.classList.add('flex');
+    }
+
+    // El client ha cancel·lat o el banc ha rebutjat el Bizum. La comanda no
+    // s'ha cobrat (Stripe la cancel·larà), així que ha de tornar a fer-la.
+    function showPaymentReturnFailed() {
+      const box = document.createElement('div');
+      box.setAttribute('role', 'alert');
+      box.className = 'fixed left-4 right-4 top-4 z-[9500] mx-auto max-w-sm rounded-xl bg-white border border-[#E23F2E] px-4 py-3 text-sm text-[#2A1A0F] shadow-lg';
+      box.textContent = "El pagament no s'ha completat i no s'ha cobrat res. Torna a fer la comanda i prova-ho de nou o tria un altre mètode.";
+      document.body.appendChild(box);
+      setTimeout(() => box.remove(), 9000);
+    }
+    window.addEventListener('load', handlePaymentReturn);
 
     function resetCart() {
       cart = []; renderCart(false); cfPayMethod = null; cfPlacesAddress = ''; cfSelectedTime = null;
@@ -2388,7 +2416,7 @@
         showFieldErr('cf-email', v.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
       }
       if (id === 'cf-phone') {
-        const digits = e.target.value.replace(/\D/g,'');
+        const digits = stripPhonePrefix(e.target.value);
         showFieldErr('cf-phone', digits.length > 0 && digits.length < 9);
       }
     });
@@ -2419,6 +2447,62 @@
       sessionStorage.removeItem('micsas_repeat');
     }
 
+    // ── Carta del dia: el que cuina ha apagat no es pot demanar ──
+    // Data per defecte: la triada a pre-pedido o, si no n'hi ha, el proper
+    // divendres/diumenge. Al checkout passa a ser cfDeliveryDate.
+    function initialMenuDate() {
+      const ss = sessionStorage.getItem('micsas_delivery_date');
+      if (ss && isValidOrderDay(ss) && ss >= todayISO()) return ss;
+      return isValidOrderDay(todayISO()) ? todayISO() : nextValidDate(todayISO());
+    }
+
+    // Torna a demanar què està apagat per a `date`, repinta la carta només
+    // si ha canviat i treu del cistell el que ja no es pot demanar.
+    // Retorna els articles trets.
+    let _menuOffSeq = 0;
+    async function refreshMenuAvailability(date) {
+      date = date || _menuOffDate || initialMenuDate();
+      _menuOffDate = date;
+      // Si mentrestant s'ha demanat una altra data (o una consulta més
+      // nova), aquesta resposta ja no val.
+      const seq = ++_menuOffSeq;
+      const off = await window.fetchMenuOff(date);
+      if (seq !== _menuOffSeq) return [];
+      const key = JSON.stringify(off);
+      if (key !== _menuOffKey) {
+        _menuOff = off;
+        _menuOffKey = key;
+        renderPizzaGrid('menu-casa', MENU.casa);
+        renderPizzaGrid('menu-classics', MENU.classics);
+        renderSection('menu-drinks', MENU.drinks, false);
+        [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
+      }
+      return pruneUnavailableFromCart();
+    }
+
+    function pruneUnavailableFromCart() {
+      const gone = cart.filter(i => isOff(i.id));
+      if (!gone.length) return [];
+      cart = cart.filter(i => !isOff(i.id));
+      renderCart(false);
+      gone.forEach(i => syncMenuRow(i.id));
+      const cfSub = document.getElementById('cf-subtotal-display');
+      if (cfSub) cfSub.textContent = fmtComma(subtotal());
+      const cfCount = document.getElementById('cf-items-count');
+      if (cfCount) cfCount.textContent = totalCount() + (totalCount() === 1 ? ' article' : ' articles');
+      refreshTotals();
+      const names = gone.map(i => i.name);
+      const list = names.length === 1 ? names[0] : names.slice(0, -1).join(', ') + ' i ' + names[names.length - 1];
+      showCfToast(names.length === 1
+        ? `${list} ja no està disponible per a aquest dia i l'hem tret del cistell.`
+        : `${list} ja no estan disponibles per a aquest dia i els hem tret del cistell.`);
+      return gone;
+    }
+
+    refreshMenuAvailability(initialMenuDate());
+    setInterval(() => refreshMenuAvailability(), 30000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshMenuAvailability(); });
+
     /* ── Item modal ── */
     let _modalItemId = null;
     let _modalQty = 1;
@@ -2430,7 +2514,7 @@
 
     function openItemModal(id) {
       const item = [...MENU.casa, ...MENU.classics].find(i => i.id === id);
-      if (!item || item.available === false) return;
+      if (!item || item.available === false || isOff(id)) return;
       _modalItemId = id;
 
       document.getElementById('item-modal-title').textContent = item.name.toUpperCase();
@@ -2458,7 +2542,7 @@
 
       const sel = document.getElementById('item-modal-drink');
       sel.innerHTML = '<option value="">Sense beguda</option>' +
-        MENU.drinks.map(d => `<option value="${d.id}">${d.name} — ${d.price.toFixed(2).replace('.', ',')} €</option>`).join('');
+        MENU.drinks.filter(d => !isOff(d.id)).map(d => `<option value="${d.id}">${d.name} — ${d.price.toFixed(2).replace('.', ',')} €</option>`).join('');
       sel.value = '';
       document.getElementById('item-modal-allergies').value = '';
       _modalQty = 1;
@@ -2500,7 +2584,8 @@
       if (removed.length) note += 'Sense: ' + removed.join(', ');
       if (allergy) note += (note ? ' · ' : '') + 'Al·lèrgia: ' + allergy;
 
-      for (let i = 0; i < _modalQty; i++) addToCartSilent(item.id, item.name, item.price);
+      for (let i = 0; i < _modalQty; i++) addToCartSilent(item.id, item.name, item.price, true);
+      window.ppNotifyAdded?.(item.id, item.name, _modalQty);
       if (note) setPizzaNote(item.id, note);
 
       const drinkId = document.getElementById('item-modal-drink').value;
@@ -2751,7 +2836,9 @@
 
   <script src="https://js.stripe.com/v3/"></script>
   <script src="i18n.js"></script>
+  <script src="resenya.js"></script>
   <script src="cookie-consent.js" defer></script>
+  <script src="pedido-pro.js"></script>
 
 </body>
 </html>

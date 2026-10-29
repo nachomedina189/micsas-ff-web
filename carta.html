@@ -5,7 +5,7 @@
     <title>micsas.ff · Pizzeria a domicili a Matadepera</title>
     <meta name="description" content="Pizzeria a domicili a Matadepera. Pizza napolitana artesanal, repartiment a casa cada divendres i diumenge. Fes la teva comanda online a micsas.ff.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.micsasff.com/carta.html">
+    <link rel="canonical" href="https://www.micsasff.com/">
     <link rel="icon" href="logo micsas.png">
     <link rel="apple-touch-icon" href="logo micsas.png">
 
@@ -15,7 +15,7 @@
     <meta property="og:title" content="micsas.ff · Pizzeria a domicili a Matadepera">
     <meta property="og:description" content="Pizza napolitana artesanal, repartiment a casa cada divendres i diumenge a Matadepera. Fes la teva comanda online.">
     <meta property="og:image" content="https://www.micsasff.com/images/margherita-1889.webp">
-    <meta property="og:url" content="https://www.micsasff.com/carta.html">
+    <meta property="og:url" content="https://www.micsasff.com/">
     <meta property="og:locale" content="ca_ES">
 
     <!-- Twitter/X Card -->
@@ -33,13 +33,20 @@
       "@context": "https://schema.org",
       "@type": "Restaurant",
       "name": "micsas.ff",
-      "image": "https://www.micsasff.com/images/margherita-1889.webp",
-      "logo": "https://www.micsasff.com/logo%20micsas.png",
+      "@id": "https://www.micsasff.com/#restaurant",
+      "description": "Pizzeria a domicili a Matadepera. Pizza napolitana artesanal amb repartiment a casa cada divendres i diumenge.",
+      "image": [
+        "https://www.micsasff.com/images/margherita-1889.webp",
+        "https://www.micsasff.com/images/carbonara.webp",
+        "https://www.micsasff.com/images/inferno-di-nduja.webp"
+      ],
+      "logo": "https://www.micsasff.com/images/logo-micsas.png",
       "url": "https://www.micsasff.com/",
       "telephone": "+34614714053",
       "servesCuisine": ["Pizza", "Pizza napolitana", "Italiana"],
       "priceRange": "€€",
       "menu": "https://www.micsasff.com/menu.html",
+      "hasMenu": "https://www.micsasff.com/menu.html",
       "acceptsReservations": false,
       "address": {
         "@type": "PostalAddress",
@@ -82,7 +89,6 @@
     <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="prefetch" href="index.html">
     <link rel="prefetch" href="menu.html">
     <link rel="prefetch" href="pedido.html">
     <link rel="prefetch" href="micsas-events.html">
@@ -221,6 +227,17 @@
         animation: none;
         transform: translateX(4px);
       }
+      /* Pizza apagada a cocina.html (carta-del-dia.js hi posa la classe i el segell) */
+      .menu-off img { filter: grayscale(0.85) brightness(0.92); }
+      .menu-off-stamp {
+        position: absolute; top: 76%; left: 50%; z-index: 5;
+        transform: translate(-50%, -50%) rotate(-10deg);
+        border: 3px solid #c80a07; border-radius: 6px; padding: 8px 20px;
+        background: rgba(242,230,206,0.92); color: #c80a07;
+        font-family: 'League Spartan', sans-serif; font-weight: 900; font-size: 18px;
+        line-height: 1.2; letter-spacing: 0.05em; text-transform: uppercase; text-align: center;
+        pointer-events: none; box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      }
     </style>
   </head>
   <body class="text-[var(--foreground)] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
@@ -346,7 +363,7 @@
           <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">Tomàquet San Marzano, xoriço ibèric Joselito i Fior di latte. Una combinació que encén les papil·les.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              <div data-menu-id="antidiavola" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                 <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/8a1e2f8f-5b86-4d99-8d7d-d7271d3fdf40_800w.png" alt="ANTIDIAVOLA" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
                   <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">
@@ -362,7 +379,7 @@
                   Antidiavola
                 </h3>
                 <p class="text-sm md:text-base font-light text-[#F2E6CE] leading-relaxed max-w-md mx-auto" data-i18n="bs_ad_desc">
-                  Tomàquet San Marzano DOP, Fior di latte artesana Il grande Desiderio, Xoriço ibèric de gla Joselito, Alfàbrega fresca, Formatge Parmigiano (curat 24 mesos) i Oli d'oliva verge extra Valpolicella Slow Food.
+                  Tomàquet San Marzano DOP, Fior di latte d’Agerola, Xoriço ibèric de gla Joselito, Alfàbrega fresca, Formatge Parmigiano (curat 24 mesos) i Oli d'oliva verge extra Valpolicella Slow Food.
                 </p>
                 <span class="mt-6 font-medium text-lg text-[#F2E6CE]">€13</span>
               </div>
@@ -375,7 +392,7 @@
           <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">Nduja picant, Gorgonzola cremós i Fior di latte. Per als que no li fan por al foc.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#F2E6CE]/30">
+              <div data-menu-id="inferno-di-nduja" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow border border-[#F2E6CE]/30">
                 <div class="absolute top-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-[#F2E6CE] text-[#c80a07] text-[10px] md:text-xs uppercase tracking-widest font-medium z-10 whitespace-nowrap shadow-md" data-i18n="bs_recom">
                   ⭐ La nostra recomanació
                 </div>
@@ -394,7 +411,7 @@
                   Inferno di 'Nduja
                 </h3>
                 <p class="text-sm md:text-base font-light text-[#5A3E28] leading-relaxed max-w-md mx-auto" data-i18n="bs_in_desc">
-                  Sobrassada picant (Nduja), Formatge Gorgonzola picant, Fior di latte artesana Il grande Desiderio, Formatge Parmigiano (curat 24 mesos), Alfàbrega fresca i Oli d'oliva verge extra Valpolicella Slow Food.
+                  Sobrassada picant (Nduja), Formatge Gorgonzola picant, Fior di latte d’Agerola, Formatge Parmigiano (curat 24 mesos), Alfàbrega fresca i Oli d'oliva verge extra Valpolicella Slow Food.
                 </p>
                 <span class="mt-6 font-medium text-lg text-[#c80a07]">€13</span>
               </div>
@@ -407,7 +424,7 @@
           <p class="text-sm font-light text-[#F2E6CE] italic leading-relaxed">La pizza per gaudir al final. Nutella i festuc de Sicília: pura llaminadura.</p>
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
-              <div class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              <div data-menu-id="nutellina" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                 <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="Gourmet Chocolate and Pistachio Dessert Pizza" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
                   <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">
@@ -550,7 +567,7 @@
           </div>
 
           <!-- Horizontal row of actions -->
-          <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-12">
+          <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 w-full mt-12 mb-6">
             <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#F2E6CE]/40 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#F2E6CE] shrink-0" aria-label="Instagram">
               <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
             </a>
@@ -563,6 +580,23 @@
               <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
             </div>
           </div>
+
+          <!-- Ressenya a Google (l'enllaç es configura a resenya.js) -->
+          <a href="#" data-review-link target="_blank" rel="noopener noreferrer"
+            class="hidden resenya-cta flex-col items-center gap-3 w-full max-w-[340px] px-6 py-6 mb-12 rounded-3xl bg-[#F2E6CE] text-center border-2 border-[#F5B301] transition-transform hover:-translate-y-1">
+            <span class="flex items-center justify-center gap-1" aria-hidden="true">
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            <svg class="resenya-star" width="26" height="26" viewBox="0 0 24 24" fill="#F5B301" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+            </span>
+            <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-2xl leading-tight text-[#c80a07]" data-i18n="resenya">Deixa'ns una ressenya a Google</span>
+            <span class="text-sm font-normal text-[#5A3E28]" data-i18n="resenya_help">Ens ajuda moltíssim i només triga 10 segons</span>
+            <span class="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] font-semibold text-[#F2E6CE] bg-[#c80a07]">
+              <span data-i18n="resenya_btn">Valorar ara</span> →
+            </span>
+          </a>
         </div>
       </div>
 
@@ -695,7 +729,9 @@
       })();
     </script>
     <script src="i18n.js"></script>
+    <script src="resenya.js"></script>
     <script src="transicion.js"></script>
+    <script src="carta-del-dia.js" defer></script>
     <script src="cookie-consent.js" defer></script>
 
 </body></html>

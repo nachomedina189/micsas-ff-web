@@ -1,10 +1,9 @@
 {
+  "rewrites": [
+    { "source": "/", "destination": "/carta.html" }
+  ],
   "redirects": [
-    {
-      "source": "/",
-      "destination": "/carta.html",
-      "permanent": true
-    }
+    { "source": "/index.html", "destination": "/", "permanent": true }
   ],
   "headers": [
     {

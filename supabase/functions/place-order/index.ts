@@ -9,15 +9,17 @@ import { sendOrderConfirmationEmail } from "../_shared/email.ts";
 // això, qualsevol (DevTools, o una crida directa a la funció) podia
 // enviar el total/preu per article que volgués i la comanda es desava
 // (i, en pagament amb targeta, es cobrava) a aquell import fabricat.
-const CATALOG: Record<string, { name: string; price: number; available?: boolean }> = {
+//
+// Què es pot demanar cada dia (pizzes o ingredients apagats des de
+// cocina.html) NO es decideix aquí: ho diu get_menu_availability.
+const CATALOG: Record<string, { name: string; price: number }> = {
   "margherita-1889":      { name: "Margherita 1889",      price: 9 },
   "marinara-olivata":     { name: "Marinara Olivata",     price: 8 },
   "bianca-suprema":       { name: "Bianca Suprema",       price: 11 },
   "sottobosco":           { name: "Sottobosco",           price: 11 },
   "carbonara":            { name: "Carbonara",            price: 14.5 },
   "inferno-di-nduja":     { name: "Inferno di 'Nduja",    price: 13 },
-  // Temporalment fora de carta ("Tornarà aviat" a la Carta i a pedido.html)
-  "caramella-affumicata": { name: "Caramella Affumicata", price: 13, available: false },
+  "caramella-affumicata": { name: "Caramella Affumicata", price: 13 },
   "antidiavola":          { name: "Antidiavola",          price: 13 },
   "nutellina":            { name: "Nutellina",            price: 13 },
   "d3":                   { name: "Cervesa artesana Moretti", price: 3 },
@@ -37,6 +39,20 @@ function madridNow(): { date: string; mins: number } {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, mins: hour * 60 + Number(get("minute")) };
 }
 
+// Apunta una comanda rebutjada (demanda perduda) per a l'informe del pase.
+// Mai ha de trencar la resposta al client: qualsevol error es registra i prou.
+async function logRejection(
+  sb: ReturnType<typeof createClient>,
+  row: { delivery_date: string | null; requested_slot: string | null; pizza_count: number; reason: string },
+): Promise<void> {
+  try {
+    const { error } = await sb.from("order_rejections").insert(row);
+    if (error) console.error("[place-order] order_rejections", error.message);
+  } catch (err) {
+    console.error("[place-order] order_rejections", err);
+  }
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req.headers.get("origin"));
   if (req.method === "OPTIONS") {
@@ -54,7 +70,7 @@ Deno.serve(async (req) => {
       name, email, phone,
       street, floor, postalCode, city, delivNotes, finalNotes,
       lat, lng,
-      paymentMethod, paymentStatus,
+      paymentMethod,
       tipAmount,
       authUserId,
       slotTime, deliveryDate,
@@ -74,7 +90,7 @@ Deno.serve(async (req) => {
     for (const it of items) {
       const catalogItem = CATALOG[it?.id];
       const quantity = Number(it?.quantity);
-      if (!catalogItem || catalogItem.available === false || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
+      if (!catalogItem || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
         return new Response(JSON.stringify({ error: "Article no vàlid a la comanda." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -125,10 +141,83 @@ Deno.serve(async (req) => {
     // comença a buscar per la PRIMERA franja de la nit i la comanda acabaria
     // assignada a les 20:00.
     if (slotTime && !REAL_SLOTS.includes(slotTime)) {
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "slot_closed" });
       return new Response(JSON.stringify({ error: `Aquesta franja ja no està disponible: l'última franja és a les ${LAST_SLOT}h. Tria una altra hora.` }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // L'estat de pagament el decideix SEMPRE el servidor, mai el client:
+    // abans es feia servir el paymentStatus de la petició, i qualsevol podia
+    // crear una comanda amb targeta ja "paid" (visible a cuina com a pagada)
+    // sense haver pagat res. Efectiu → 'pending' (es cobra a l'entrega);
+    // qualsevol altre mètode → 'processing' fins que stripe-webhook rebi
+    // payment_intent.succeeded.
+    const paymentStatus = paymentMethod === "cash" ? "pending" : "processing";
+
+    // Dia exhaurit: no s'accepta cap comanda, ni tan sols només de begudes
+    // (create_order_with_slot només bloqueja si hi ha pizzes a la comanda).
+    const { data: dayStatus } = await sb.rpc("get_pizza_status", { p_delivery_date: deliveryDate });
+    const dayRow = Array.isArray(dayStatus) ? dayStatus[0] : dayStatus;
+    if (dayRow?.status === "soldout") {
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
+      return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true, remaining: 0 }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Pizzes, begudes o ingredients apagats a cocina.html per a aquest dia:
+    // la web ja no els deixa afegir, però una pàgina oberta d'abans (o una
+    // crida directa) encara els podria enviar. Es comprova abans de crear
+    // res. Si la consulta falla, no es bloqueja la comanda (igual que el
+    // control de dia exhaurit de dalt).
+    const { data: offRows, error: offErr } = await sb.rpc("get_menu_availability", { p_delivery_date: deliveryDate });
+    if (offErr) console.error("[place-order] get_menu_availability", offErr.message);
+    const offIds = new Set(((offRows ?? []) as { product_id: string }[]).map((r) => r.product_id));
+    const unavailable = [...new Set(items.map((it: { id: string }) => String(it.id)))].filter((id) => offIds.has(id));
+    if (unavailable.length) {
+      const names = unavailable.map((id) => CATALOG[id].name);
+      const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} i ${names[names.length - 1]}`;
+      const msg = names.length === 1
+        ? `Ho sentim, ${list} ja no està disponible per a aquest dia. Treu-la del cistell i torna-ho a provar.`
+        : `Ho sentim, ${list} ja no estan disponibles per a aquest dia. Treu-les del cistell i torna-ho a provar.`;
+      return new Response(JSON.stringify({ error: msg, unavailable }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Marge mínim de preparació (mateixos 15 min que ASAP_LEAD_MIN a
+    // pedido.html) aplicat com a última barrera real — la de la UI es pot
+    // saltar cridant aquest endpoint directament. Només afecta comandes
+    // per avui; no rebutgem la comanda, sinó que pugem la franja demanada
+    // (mai la baixem) fins que tingui marge suficient, i deixem que
+    // create_order_with_slot faci la seva pròpia comprovació d'aforo a
+    // partir d'aquí — exactament el mateix mecanisme que ja fa servir
+    // quan la franja triada està plena.
+    // Va ABANS de crear client i adreça: si es rebutja, no queda cap fila orfe.
+    const SLOT_LEAD_MIN = 15;
+    let effectiveSlotTime = slotTime ?? null;
+    if (effectiveSlotTime) {
+      const { date: madridToday, mins: madridNowMins } = madridNow();
+      if (deliveryDate === madridToday) {
+        const earliestSafeSlot = REAL_SLOTS.find((s) => {
+          const [h, m] = s.split(":").map(Number);
+          return h * 60 + m > madridNowMins + SLOT_LEAD_MIN;
+        }) ?? null;
+        if (!earliestSafeSlot) {
+          await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "too_late" });
+          return new Response(JSON.stringify({ error: "Ja no queda marge suficient per preparar cap comanda avui. Si us plau, tria un altre dia." }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (effectiveSlotTime < earliestSafeSlot) {
+          effectiveSlotTime = earliestSafeSlot;
+        }
+      }
     }
 
     // Find or create customer
@@ -188,35 +277,6 @@ Deno.serve(async (req) => {
       .single();
     if (addrErr) throw addrErr;
 
-    // Marge mínim de preparació (mateixos 15 min que ASAP_LEAD_MIN a
-    // pedido.html) aplicat com a última barrera real — la de la UI es pot
-    // saltar cridant aquest endpoint directament. Només afecta comandes
-    // per avui; no rebutgem la comanda, sinó que pugem la franja demanada
-    // (mai la baixem) fins que tingui marge suficient, i deixem que
-    // create_order_with_slot faci la seva pròpia comprovació d'aforo a
-    // partir d'aquí — exactament el mateix mecanisme que ja fa servir
-    // quan la franja triada està plena.
-    const SLOT_LEAD_MIN = 15;
-    let effectiveSlotTime = slotTime ?? null;
-    if (effectiveSlotTime) {
-      const { date: madridToday, mins: madridNowMins } = madridNow();
-      if (deliveryDate === madridToday) {
-        const earliestSafeSlot = REAL_SLOTS.find((s) => {
-          const [h, m] = s.split(":").map(Number);
-          return h * 60 + m > madridNowMins + SLOT_LEAD_MIN;
-        }) ?? null;
-        if (!earliestSafeSlot) {
-          return new Response(JSON.stringify({ error: "Ja no queda marge suficient per preparar cap comanda avui. Si us plau, tria un altre dia." }), {
-            status: 409,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        if (effectiveSlotTime < earliestSafeSlot) {
-          effectiveSlotTime = earliestSafeSlot;
-        }
-      }
-    }
-
     // Comprova l'aforo (màx. 6 pizzes per franja) i insereix la comanda en
     // una única transacció de servidor (veure migrations/20260909000000_atomic_order_slot.sql).
     // Fer-ho tot dins la mateixa funció de BD, protegida amb un advisory
@@ -227,7 +287,7 @@ Deno.serve(async (req) => {
       p_customer_id:    customerId,
       p_address_id:     address.id,
       p_payment_method: paymentMethod,
-      p_payment_status: paymentStatus ?? "pending",
+      p_payment_status: paymentStatus,
       p_subtotal:       subtotal,
       p_delivery_fee:   0,
       p_tip_amount:     safeTip,
@@ -238,13 +298,18 @@ Deno.serve(async (req) => {
       p_delivery_date:  deliveryDate,
       p_slots:          REAL_SLOTS,
     });
-    // Aforo diari exhaurit (45 pizzes/dia): create_order_with_slot llança
-    // una excepció amb el prefix "DAILY_SOLDOUT" en lloc de simplement no
-    // retornar franja, perquè el missatge sigui diferent de "no queden
-    // franges" — aquí no és que aquella hora estigui plena, és que ja no
-    // es fan més pizzes avui.
+    // Masses del dia exhaurides (les posa el pizzero a cocina.html):
+    // create_order_with_slot llança "DAILY_SOLDOUT remaining=N" en lloc de
+    // simplement no retornar franja, perquè el missatge sigui diferent de
+    // "no queden franges" — aquí no és que aquella hora estigui plena, és
+    // que ja no hi ha prou masses. Si en queden algunes, diem quantes.
     if (rpcErr && rpcErr.message?.includes("DAILY_SOLDOUT")) {
-      return new Response(JSON.stringify({ error: "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!", soldOut: true }), {
+      const left = Number(/remaining=(\d+)/.exec(rpcErr.message)?.[1] ?? 0);
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
+      const msg = left > 0
+        ? `Només en queden ${left} per a aquest dia. Treu-ne alguna del cistell i torna-ho a provar.`
+        : "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!";
+      return new Response(JSON.stringify({ error: msg, soldOut: left === 0, remaining: left }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -253,12 +318,20 @@ Deno.serve(async (req) => {
 
     const orderRow = rpcRows?.[0] as { order_id: string; slot_time: string | null } | undefined;
     if (slotTime && !orderRow) {
+      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "no_slots" });
       return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
         status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (!orderRow) throw new Error("create_order_with_slot no ha retornat cap comanda");
+
+    // Franja que va triar el client: si estava plena, la comanda ha quedat
+    // en una de posterior, i l'informe del pase compta aquests desplaçaments.
+    if (slotTime) {
+      const { error: reqErr } = await sb.from("orders").update({ requested_slot: slotTime }).eq("id", orderRow.order_id);
+      if (reqErr) console.error("[place-order] requested_slot", reqErr.message);
+    }
 
     // Insert order items — sempre amb els valors RECALCULATS (resolvedItems),
     // mai amb el que hagués enviat el client.

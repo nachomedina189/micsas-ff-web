@@ -58,7 +58,9 @@ Deno.serve(async (req) => {
             .eq("status", "cancelled");
           if (reviveErr) console.error("[stripe-webhook] error recuperant comanda", orderId, reviveErr);
 
-          const { error } = await sb.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
+          // Si Stripe ha cobrat, la comanda és online encara que s'hagi desat
+          // com a efectiu: cuina no ha de dir "Efectiu al repartidor".
+          const { error } = await sb.from("orders").update({ payment_status: "paid", payment_method: "card_delivery" }).eq("id", orderId);
           if (error) console.error("[stripe-webhook] error marcant pagada", orderId, error);
 
           // Email de confirmació — aquí (i només aquí) sabem del cert que
@@ -102,6 +104,8 @@ Deno.serve(async (req) => {
       case "payment_intent.canceled": {
         const pi = event.data.object as Stripe.PaymentIntent;
         const orderId = pi.metadata?.order_id;
+        // Per saber després per què ha fallat (targeta, Bizum, abandonat...).
+        console.log("[stripe-webhook]", event.type, pi.id, pi.last_payment_error?.payment_method?.type ?? "-", pi.last_payment_error?.code ?? pi.cancellation_reason ?? "-");
         if (orderId) {
           const { error } = await sb.from("orders")
             .update({ payment_status: "failed", status: "cancelled" })
