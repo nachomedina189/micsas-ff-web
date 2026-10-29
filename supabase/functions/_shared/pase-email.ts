@@ -233,6 +233,20 @@ export function renderPaseEmail(r: PaseReport): string {
     ],
   );
 
+  // Propines
+  const tp = r.tipsDetail;
+  const tipsBody = `${table(`<tr>
+      ${td(`color:${C.text};font-size:28px;font-weight:700;line-height:1.2;`, euro(d.tips, d.tips % 1 ? 2 : 0))}
+      ${td(`text-align:right;`, delta(d.tips, p?.tips, { unit: "abs", d: 0, suffix: " €" }) + (p ? ` <span style="color:${C.faint};font-size:11px;">${vs}</span>` : ""), 'align="right"')}
+    </tr>`)}
+    <div style="height:14px;line-height:14px;font-size:0;">&nbsp;</div>
+    ${table(`
+      ${barRow("Comandes amb propina", `${tp.orders} de ${d.orders}`, d.orders ? (tp.orders / d.orders) * 100 : 0)}
+      ${barRow("Amb targeta", euro(tp.card, tp.card % 1 ? 2 : 0), d.tips ? (tp.card / d.tips) * 100 : 0)}
+      ${barRow("En efectiu", euro(tp.cash, tp.cash % 1 ? 2 : 0), d.tips ? (tp.cash / d.tips) * 100 : 0)}
+    `)}
+    <div style="font-family:${FONT};font-size:12px;line-height:1.6;color:${C.muted};">${tp.orders ? `Mitjana ${euro(tp.avg, 2)} per comanda amb propina · la més alta, ${euro(tp.max, tp.max % 1 ? 2 : 0)}. ` : "Avui ningú ha deixat propina. "}${a ? `Mitjana dels últims 4 pases: ${euro(a.tips, 2)}.` : ""}</div>`;
+
   // Hores punta
   const slotCols = SLOTS.map((s) => ({ label: s.endsWith(":00") ? s : s.slice(2), value: d.slots[s] ?? 0, hi: (d.slots[s] ?? 0) >= SLOT_CAPACITY }));
   const peak = r.peakHour && r.peakHour.pizzas > 0 ? pill(`Punta ${r.peakHour.from}–${r.peakHour.to} · ${r.peakHour.pizzas} pizzes`, "neutral") : "";
@@ -330,6 +344,7 @@ export function renderPaseEmail(r: PaseReport): string {
   const body = [
     `<tr><td style="padding:0 0 4px;">${kpis}</td></tr>`,
     card("Per decidir", "Avisos automàtics d'aquest pase", insightsList(r.insights)),
+    card("Propines", "El que han deixat els clients en fer la comanda per la web", tipsBody, pill(plural(tp.orders, "propina", "propines"), tp.orders ? "good" : "neutral")),
     card("Hores punta", `Pizzes per franja de 15 minuts · el forn n'admet ${SLOT_CAPACITY}`, slotsBody, peak),
     card("Masses", "Venudes respecte a les masses fetes", doughsBody),
     card("Temps d'operació", "Velocitat de cuina i repartiment", opsBody),
@@ -342,7 +357,7 @@ export function renderPaseEmail(r: PaseReport): string {
   ].join("");
 
   return shell({
-    preheader: `${plural(d.pizzas, "pizza", "pizzes")}, ${euro(d.revenue)}, ${plural(d.orders, "comanda", "comandes")}.`,
+    preheader: `${plural(d.pizzas, "pizza", "pizzes")}, ${euro(d.revenue)}, ${plural(d.orders, "comanda", "comandes")}, ${euro(d.tips, d.tips % 1 ? 2 : 0)} de propines.`,
     eyebrow: "Informe del pase",
     title: longDate(r.date),
     subtitle: `Pase de ${SLOTS[0]} a ${SLOTS[SLOTS.length - 1]}${p ? ` · comparat amb el ${dayName(p.date)} ${shortDate(p.date).split(" ")[1]}` : ""}`,

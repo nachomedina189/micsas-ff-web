@@ -173,6 +173,8 @@ export interface PaseReport {
   ordersPerHour: number;
   timing: { before: number; morning: number; evening: number; during: number };  // pizzes
   payments: { card: number; cash: number };
+  // Propines del dia: total a `day.tips`; aquí, quantes comandes n'han deixat i com.
+  tipsDetail: { orders: number; card: number; cash: number; max: number; avg: number };
   abandoned: { orders: number; pizzas: number };
   cancelled: number;
   doughs: { total: number; set: boolean; used: number; left: number };
@@ -254,6 +256,15 @@ export function buildPaseReport(input: ReportInput, summaries = daySummaries(inp
   }
 
   const payments = { card: confirmed.filter((o) => o.payment_method !== "cash").length, cash: confirmed.filter((o) => o.payment_method === "cash").length };
+  const tipped = confirmed.filter((o) => (Number(o.tip_amount) || 0) > 0);
+  const tipOf = (o: OrderRow) => Number(o.tip_amount) || 0;
+  const tipsDetail = {
+    orders: tipped.length,
+    card: sum(tipped.filter((o) => o.payment_method !== "cash").map(tipOf)),
+    cash: sum(tipped.filter((o) => o.payment_method === "cash").map(tipOf)),
+    max: Math.max(0, ...tipped.map(tipOf)),
+    avg: tipped.length ? day.tips / tipped.length : 0,
+  };
   const abandonedOrders = dayOrders.filter((o) => o.payment_method !== "cash" && o.payment_status !== "paid");
   const abandoned = { orders: abandonedOrders.length, pizzas: sum(abandonedOrders.map((o) => o.pizza_count || 0)) };
   const cancelled = dayOrders.filter((o) => o.status === "cancelled" && (o.payment_method === "cash" || o.payment_status === "paid")).length;
@@ -337,7 +348,7 @@ export function buildPaseReport(input: ReportInput, summaries = daySummaries(inp
     date, closedAt: input.closedAt ?? null, day, prevSameDay, avg4, drinks, products,
     fullSlots, emptySlots, displaced, peakHour,
     pizzasPerHour: day.pizzas / serviceHours, ordersPerHour: day.orders / serviceHours,
-    timing, payments, abandoned, cancelled, doughs, ops, incidents, rejections, insights: [],
+    timing, payments, tipsDetail, abandoned, cancelled, doughs, ops, incidents, rejections, insights: [],
   };
   report.insights = paseInsights(report);
   return report;
