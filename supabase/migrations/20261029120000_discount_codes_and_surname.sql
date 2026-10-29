@@ -34,8 +34,8 @@ alter table public.discount_codes enable row level security;
 alter table public.orders add column if not exists discount_code   text;
 alter table public.orders add column if not exists discount_amount numeric(8,2) not null default 0;
 
--- Codi d'exemple, APAGAT: 10 % de descompte. Per fer-lo servir, posa
--- active = true (o crea'n un de nou amb el codi i descompte que vulguis).
+-- Codi triat per nacho el 29/10/2026: MICSAS10, 10 % de descompte, sense
+-- caducitat ni límit d'usos. Per apagar-lo, posa active = false.
 insert into public.discount_codes (code, kind, value, active, description)
-values ('BENVINGUT10', 'percent', 10, false, 'Exemple: 10 % de descompte. Apagat fins que es decideixi el codi real.')
+values ('MICSAS10', 'percent', 10, true, '10 % de descompte')
 on conflict (code) do nothing;
