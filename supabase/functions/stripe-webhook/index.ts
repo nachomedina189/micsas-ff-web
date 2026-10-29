@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
           if (!error) {
             const { data: order, error: fetchErr } = await sb
               .from("orders")
-              .select("total, payment_method, delivery_date, slot_time, customers(name, email), addresses(street, floor, postal_code, city), order_items(product_name, quantity, unit_price, notes)")
+              .select("total, discount_code, discount_amount, payment_method, delivery_date, slot_time, customers(name, email), addresses(street, floor, postal_code, city), order_items(product_name, quantity, unit_price, notes)")
               .eq("id", orderId)
               .single();
             if (fetchErr || !order) {
@@ -82,7 +82,13 @@ Deno.serve(async (req) => {
               await sendOrderConfirmationEmail({
                 toEmail: cust.email,
                 toName: cust.name,
-                items: (order.order_items as { product_name: string; quantity: number; unit_price: number; notes: string | null }[]) ?? [],
+                items: [
+                  ...((order.order_items as { product_name: string; quantity: number; unit_price: number; notes: string | null }[]) ?? []),
+                  // El descompte surt al correu com una línia més, en negatiu.
+                  ...(Number(order.discount_amount) > 0
+                    ? [{ product_name: `Descompte ${order.discount_code ?? ""}`.trim(), quantity: 1, unit_price: -Number(order.discount_amount), notes: null }]
+                    : []),
+                ],
                 total: Number(order.total),
                 paymentMethod: order.payment_method as string,
                 deliveryDate: order.delivery_date as string,
