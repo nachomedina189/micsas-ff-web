@@ -1333,6 +1333,12 @@
     async function advanceStatusBulk(ids, newStatus) {
       const { error } = await supabase.from('orders').update({ status: newStatus }).in('id', ids);
       if (error) { alert('Error actualitzant la comanda: ' + error.message); return; }
+      // Email "la teva comanda és en camí" al client. No s'espera: si falla,
+      // el tauler segueix igual (la comanda ja és en repartiment).
+      if (newStatus === 'out_for_delivery') {
+        supabase.functions.invoke('order-on-the-way', { body: { orderIds: ids } })
+          .then(({ error: e }) => { if (e) console.error('[order-on-the-way]', e); });
+      }
       await loadOrders();
     }
     window.advanceStatusBulk = advanceStatusBulk;

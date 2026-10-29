@@ -7,6 +7,9 @@
 //   - stripe-webhook: per a comandes amb targeta, quan Stripe confirma el
 //     cobrament real (payment_intent.succeeded) — mai abans.
 //
+// I l'email "la teva comanda és en camí" (sendOnTheWayEmail), que envia
+// order-on-the-way quan cuina prem "En repartiment" a cocina.html.
+//
 // Un error enviant l'email NO ha de trencar mai la comanda ni el pagament
 // — sempre es fa un try/catch i només es registra l'error a la consola.
 
@@ -168,5 +171,113 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     }
   } catch (err) {
     console.error("[email] error enviant confirmació", err);
+  }
+}
+
+export interface OnTheWayEmailData {
+  toEmail: string | null | undefined;
+  toName: string;
+  total: number;
+  paymentMethod: string; // 'cash' | 'card_delivery'
+  address: {
+    street: string;
+    floor?: string | null;
+    postalCode: string;
+    city: string;
+  };
+}
+
+function buildOnTheWayHtml(data: OnTheWayEmailData): string {
+  const addressLine1 = [data.address.street, data.address.floor].filter(Boolean).map(escapeHtml).join(", ");
+  const addressLine2 = [data.address.postalCode, data.address.city].filter(Boolean).map(escapeHtml).join(" ");
+  const paymentNote = data.paymentMethod === "cash"
+    ? `Recorda tenir a punt <strong>${fmtEuro(data.total)}</strong> en efectiu per al repartidor.`
+    : "Ja està pagada, només cal que obris la porta.";
+
+  return `<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La teva comanda és en camí</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F2E6CE;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F2E6CE;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#FFFFFF;border-radius:16px;overflow:hidden;">
+        <tr>
+          <td style="background-color:#2A1A0F;padding:28px 32px;text-align:center;">
+            <img src="${LOGO_URL}" alt="micsas.ff" width="120" style="display:block;margin:0 auto;max-width:120px;filter:invert(1) brightness(2);">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px;">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.06em;text-transform:uppercase;color:#E23F2E;">En repartiment</p>
+            <h1 style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:22px;color:#2A1A0F;">${escapeHtml(data.toName)}, la teva pizza és en camí!</h1>
+            <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#5A3E28;">
+              Acaba de sortir del forn i el repartidor ja va cap a casa teva. Arribarà en pocs minuts. ${paymentNote}
+            </p>
+
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F7EDD8;border-radius:12px;padding:16px;margin-bottom:28px;">
+              <tr><td style="padding:16px 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.04em;color:#9B8A72;">ADREÇA</td></tr>
+              <tr><td style="padding:2px 16px 16px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#2A1A0F;">${addressLine1}<br>${addressLine2}</td></tr>
+            </table>
+
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center">
+                  <a href="${INSTAGRAM_URL}" style="display:inline-block;padding:13px 28px;border-radius:999px;background-color:#E23F2E;color:#F2E6CE;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;">
+                    Segueix-nos a Instagram @micsas.ff
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:18px 32px;text-align:center;border-top:1px solid #E6D5B0;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9B8A72;">micsas.ff · Matadepera</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
+// Retorna true si Resend l'ha acceptat (order-on-the-way ho fa servir per
+// saber si pot marcar la comanda com a avisada).
+export async function sendOnTheWayEmail(data: OnTheWayEmailData): Promise<boolean> {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) {
+    console.error("[email] RESEND_API_KEY no configurada — no s'envia l'email d'en camí.");
+    return false;
+  }
+  if (!data.toEmail) {
+    console.error("[email] Comanda sense email de client — no s'envia l'email d'en camí.");
+    return false;
+  }
+  try {
+    const res = await fetch(RESEND_API_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: FROM_ADDRESS,
+        to: [data.toEmail],
+        subject: "La teva comanda és en camí — micsas.ff",
+        html: buildOnTheWayHtml(data),
+      }),
+    });
+    if (!res.ok) {
+      console.error("[email] Resend ha retornat error (en camí):", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[email] error enviant l'email d'en camí", err);
+    return false;
   }
 }
