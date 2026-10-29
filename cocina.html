@@ -154,6 +154,14 @@
       </div>
     </header>
 
+    <!-- ════ SO: iOS no deixa sonar res fins que no es toca la pantalla ════ -->
+    <button id="sound-banner" onclick="enableKitchenSound()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#F59E0B] text-[#15181D] font-bold text-sm">
+      🔇 Toca aquí per activar el so de les comandes noves
+    </button>
+    <div id="new-order-flash" onclick="dismissNewOrderFlash()" class="hidden fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-3 px-4 py-6 bg-[#E23F2E] text-white font-black text-2xl shadow-2xl animate-pulse cursor-pointer">
+      🔔 Comanda nova! <span class="text-sm font-semibold opacity-80">(toca per tancar)</span>
+    </div>
+
     <!-- ════ MASSES DEL DIA: el pizzero posa quantes masses (=pizzes) fa per a cada dia ════ -->
     <section id="doughs-panel" class="mx-6 mt-6 bg-[#15181D] rounded-2xl p-4 md:p-5 border border-white/8">
       <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -478,42 +486,135 @@
       }
     }
 
-    // Avís sonor quan arriba una comanda nova a "Sense afegir" — generat amb
-    // Web Audio API (dos tons curts), sense necessitar cap fitxer d'àudio.
-    // En mòbil (sobretot iPhone/Safari, però també Chrome Android) el
-    // navegador bloqueja l'àudio fins que hi ha hagut una interacció real
-    // (toc/clic) DINS del mateix gest — un AudioContext creat des d'un
-    // esdeveniment de Supabase Realtime (no un toc humà) es queda
-    // "suspended" per sempre i el so mai arriba a sortir, en silenci total,
-    // sense cap error. Abans es creava un AudioContext nou cada vegada, cosa
-    // que ho patia sempre. Ara es crea UN sol cop i es desbloqueja (resume)
-    // en el primer toc/clic que el pizzero faci a la pantalla — cosa que farà
-    // segur en algun moment (només sigui per prémer "Preparar") — i queda
-    // desbloquejat per a la resta de la sessió.
+    // Avís sonor quan arriba una comanda nova a "Sense afegir".
+    // A l'iPhone/iPad hi havia tres coses que el feien callar:
+    //  1. Web Audio fa cas de l'interruptor de silenci: amb el mòbil en
+    //     silenci no sonava res. Ara el so principal és un <audio> (un WAV
+    //     generat aquí mateix, sense fitxers), que iOS reprodueix com a
+    //     "multimèdia" i ignora l'interruptor; i a iOS 17+ marquem la sessió
+    //     d'àudio com a "playback" perquè el Web Audio de reserva també soni.
+    //  2. iOS només deixa sonar un element/AudioContext si abans s'ha
+    //     engegat dins d'un toc real (touchend/click; touchstart no compta).
+    //     Per això hi ha la barra "Toca per activar el so", que desapareix
+    //     quan l'àudio ja està desbloquejat.
+    //  3. Amb la pantalla bloquejada Safari congela la pàgina i no rep
+    //     comandes. Demanem el Wake Lock perquè la pantalla no s'apagui, i
+    //     en tornar a la pàgina es recarreguen les comandes (i sona si n'ha
+    //     entrat cap mentrestant).
+    // A més, cada comanda nova mostra un avís gran a pantalla fins que es toca.
+    function _buildChimeWavUrl() {
+      const rate = 22050, len = Math.floor(rate * 1.1);
+      const pcm = new Float32Array(len);
+      [[880, 0], [1175, 0.2], [880, 0.4], [1175, 0.6]].forEach(([freq, at]) => {
+        const from = Math.floor(at * rate), n = Math.floor(0.4 * rate);
+        for (let i = 0; i < n && from + i < len; i++) {
+          const t = i / rate;
+          pcm[from + i] += Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 12);
+        }
+      });
+      const buf = new ArrayBuffer(44 + len * 2), v = new DataView(buf);
+      const str = (o, x) => { for (let i = 0; i < x.length; i++) v.setUint8(o + i, x.charCodeAt(i)); };
+      str(0, 'RIFF'); v.setUint32(4, 36 + len * 2, true); str(8, 'WAVEfmt ');
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true);
+      v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+      str(36, 'data'); v.setUint32(40, len * 2, true);
+      for (let i = 0; i < len; i++) {
+        const x = Math.max(-1, Math.min(1, pcm[i] * 0.9));
+        v.setInt16(44 + i * 2, x * 0x7fff, true);
+      }
+      return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+    }
+    const _alertAudio = new Audio(_buildChimeWavUrl());
+    _alertAudio.preload = 'auto';
+    let _alertAudioReady = false;
+
     let _kitchenAudioCtx = null;
     function _getKitchenAudioCtx() {
       if (!_kitchenAudioCtx) {
         const Ctor = window.AudioContext || window.webkitAudioContext;
         if (!Ctor) return null;
         _kitchenAudioCtx = new Ctor();
+        _kitchenAudioCtx.onstatechange = refreshSoundBanner;
       }
       return _kitchenAudioCtx;
     }
-    function _unlockKitchenAudio() {
-      const ctx = _getKitchenAudioCtx();
-      if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+
+    function _soundUnlocked() {
+      return _alertAudioReady || (_kitchenAudioCtx && _kitchenAudioCtx.state === 'running');
     }
-    ['touchstart', 'click', 'keydown'].forEach(evt => {
+    function refreshSoundBanner() {
+      const el = document.getElementById('sound-banner');
+      if (el) el.classList.toggle('hidden', !!_soundUnlocked());
+    }
+
+    // S'ha de cridar DINS d'un toc/clic: és l'únic moment en què iOS ho permet.
+    function _unlockKitchenAudio() {
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
+      const ctx = _getKitchenAudioCtx();
+      if (ctx) {
+        if (ctx.state !== 'running') ctx.resume().catch(() => {});
+        try {
+          const src = ctx.createBufferSource();
+          src.buffer = ctx.createBuffer(1, 1, 22050);
+          src.connect(ctx.destination);
+          src.start(0);
+        } catch (_) {}
+      }
+      if (!_alertAudioReady) {
+        _alertAudio.muted = true;
+        const p = _alertAudio.play();
+        if (p) p.then(() => {
+          _alertAudio.pause();
+          _alertAudio.currentTime = 0;
+          _alertAudio.muted = false;
+          _alertAudioReady = true;
+          refreshSoundBanner();
+        }).catch(() => { _alertAudio.muted = false; });
+      }
+      requestWakeLock();
+      refreshSoundBanner();
+    }
+    ['touchend', 'click', 'keydown'].forEach(evt => {
       document.addEventListener(evt, _unlockKitchenAudio, { passive: true });
     });
 
-    // Volum al màxim (abans només al 20%) i un patró de 4 tons en lloc de 2
-    // perquè es noti clarament fins i tot amb soroll de cuina de fons.
-    function playNewOrderSound() {
+    // Botó de la barra: desbloqueja i fa sonar l'avís perquè es comprovi
+    // que se sent (si no se sent, és el volum del mòbil).
+    function enableKitchenSound() {
+      _unlockKitchenAudio();
+      _alertAudio.muted = false;
+      _alertAudio.currentTime = 0;
+      const p = _alertAudio.play();
+      if (p) p.then(() => { _alertAudioReady = true; refreshSoundBanner(); }).catch(() => _playToneFallback());
+    }
+    window.enableKitchenSound = enableKitchenSound;
+
+    // Pantalla sempre encesa (Safari iOS 16.4+, Chrome Android). El sistema
+    // l'allibera quan la pàgina queda en segon pla; es torna a demanar en tornar.
+    let _wakeLock = null, _wakeLockPending = false;
+    async function requestWakeLock() {
+      if (!('wakeLock' in navigator) || _wakeLock || _wakeLockPending || document.visibilityState !== 'visible') return;
+      _wakeLockPending = true;
+      try {
+        _wakeLock = await navigator.wakeLock.request('screen');
+        _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+      } catch (_) { /* no suportat o denegat */ }
+      _wakeLockPending = false;
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      requestWakeLock();
+      refreshSoundBanner();
+      // Mentre la pàgina estava congelada el realtime no rebia res.
+      if (_dataFeedStarted) loadOrders();
+    });
+
+    function _playToneFallback() {
       try {
         const ctx = _getKitchenAudioCtx();
         if (!ctx) return;
-        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+        if (ctx.state !== 'running') ctx.resume().catch(() => {});
         const tone = (freq, delay) => setTimeout(() => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -528,9 +629,30 @@
         tone(1175, 200);
         tone(880, 400);
         tone(1175, 600);
-        // Vibració addicional a Android (iOS no suporta l'API i l'ignora sol).
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
       } catch (e) { /* àudio bloquejat o no suportat — silenci */ }
+    }
+
+    const _baseTitle = document.title;
+    function showNewOrderFlash() {
+      document.getElementById('new-order-flash').classList.remove('hidden');
+      document.title = '🔔 Comanda nova · ' + _baseTitle;
+    }
+    function dismissNewOrderFlash() {
+      document.getElementById('new-order-flash').classList.add('hidden');
+      document.title = _baseTitle;
+    }
+    window.dismissNewOrderFlash = dismissNewOrderFlash;
+
+    function playNewOrderSound() {
+      showNewOrderFlash();
+      // Vibració addicional a Android (iOS no suporta l'API i l'ignora sol).
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+      if (!_alertAudioReady) { _playToneFallback(); return; }
+      try {
+        _alertAudio.currentTime = 0;
+        const p = _alertAudio.play();
+        if (p) p.catch(() => _playToneFallback());
+      } catch (_) { _playToneFallback(); }
     }
 
     // Compara les comandes rebudes contra les ja vistes en aquesta sessió de
