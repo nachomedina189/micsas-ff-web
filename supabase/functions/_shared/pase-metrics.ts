@@ -3,7 +3,7 @@
 // de Supabase ni de Deno, només rep files ja carregades i retorna números,
 // així es pot provar i previsualitzar fora de l'edge function.
 
-export const SLOTS = ["20:00", "20:15", "20:30", "20:45", "21:00", "21:15", "21:30", "21:45", "22:00", "22:15", "22:30"];
+export const SLOTS = ["20:00", "20:15", "20:30", "20:45", "21:00", "21:15", "21:30", "21:45", "22:00", "22:15", "22:30", "22:45"];
 export const SLOT_CAPACITY = 6;
 // Pizzes de la carta (mateixos noms que CATALOG a place-order). Les que no
 // s'han venut surten amb 0 a l'informe; qualsevol altra línia és beguda.

@@ -21,7 +21,7 @@
       <div class="pp-chips">
         <span class="pp-chip">${svg(ICON.truck)}Enviament gratuït</span>
         <span class="pp-chip">${svg(ICON.tag)}Sense comanda mínima</span>
-        <span class="pp-chip">${svg(ICON.clock)}Dv i Dg · 20:00 – 22:30</span>
+        <span class="pp-chip">${svg(ICON.clock)}Dv i Dg · 20:00 – 22:45</span>
         <span class="pp-chip">${svg(ICON.pin)}Matadepera</span>
       </div>`);
   }

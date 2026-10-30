@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
 
     // Mateixes franges de 15 min que pedido.html / pre-pedido.html. L'última
     // franja és LAST_SLOT (política des del 02/10/2026; abans era les 23:30).
-    const LAST_SLOT = "22:30";
+    const LAST_SLOT = "22:45";
     const REAL_SLOTS: string[] = (() => {
       const [lh, lm] = LAST_SLOT.split(":").map(Number);
       const slots: string[] = [];
@@ -225,6 +225,37 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Marge mínim de preparació (mateixos 15 min que ASAP_LEAD_MIN a
+    // pedido.html) aplicat com a última barrera real — la de la UI es pot
+    // saltar cridant aquest endpoint directament. Només afecta comandes
+    // per avui; no rebutgem la comanda, sinó que pugem la franja demanada
+    // (mai la baixem) fins que tingui marge suficient, i deixem que
+    // create_order_with_slot faci la seva pròpia comprovació d'aforo a
+    // partir d'aquí — exactament el mateix mecanisme que ja fa servir
+    // quan la franja triada està plena.
+    // Va ABANS de crear client i adreça: si es rebutja, no queda cap fila orfe.
+    const SLOT_LEAD_MIN = 15;
+    let effectiveSlotTime = slotTime ?? null;
+    if (effectiveSlotTime) {
+      const { date: madridToday, mins: madridNowMins } = madridNow();
+      if (deliveryDate === madridToday) {
+        const earliestSafeSlot = REAL_SLOTS.find((s) => {
+          const [h, m] = s.split(":").map(Number);
+          return h * 60 + m > madridNowMins + SLOT_LEAD_MIN;
+        }) ?? null;
+        if (!earliestSafeSlot) {
+          await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "too_late" });
+          return new Response(JSON.stringify({ error: "Ja no queda marge suficient per preparar cap comanda avui. Si us plau, tria un altre dia." }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (effectiveSlotTime < earliestSafeSlot) {
+          effectiveSlotTime = earliestSafeSlot;
+        }
+      }
+    }
+
     // Find or create customer
     let customerId: string;
 
@@ -281,36 +312,6 @@ Deno.serve(async (req) => {
       .select("id")
       .single();
     if (addrErr) throw addrErr;
-
-    // Marge mínim de preparació (mateixos 15 min que ASAP_LEAD_MIN a
-    // pedido.html) aplicat com a última barrera real — la de la UI es pot
-    // saltar cridant aquest endpoint directament. Només afecta comandes
-    // per avui; no rebutgem la comanda, sinó que pugem la franja demanada
-    // (mai la baixem) fins que tingui marge suficient, i deixem que
-    // create_order_with_slot faci la seva pròpia comprovació d'aforo a
-    // partir d'aquí — exactament el mateix mecanisme que ja fa servir
-    // quan la franja triada està plena.
-    const SLOT_LEAD_MIN = 15;
-    let effectiveSlotTime = slotTime ?? null;
-    if (effectiveSlotTime) {
-      const { date: madridToday, mins: madridNowMins } = madridNow();
-      if (deliveryDate === madridToday) {
-        const earliestSafeSlot = REAL_SLOTS.find((s) => {
-          const [h, m] = s.split(":").map(Number);
-          return h * 60 + m > madridNowMins + SLOT_LEAD_MIN;
-        }) ?? null;
-        if (!earliestSafeSlot) {
-          await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "too_late" });
-          return new Response(JSON.stringify({ error: "Ja no queda marge suficient per preparar cap comanda avui. Si us plau, tria un altre dia." }), {
-            status: 409,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        if (effectiveSlotTime < earliestSafeSlot) {
-          effectiveSlotTime = earliestSafeSlot;
-        }
-      }
-    }
 
     // Comprova l'aforo (màx. 6 pizzes per franja) i insereix la comanda en
     // una única transacció de servidor (veure migrations/20260909000000_atomic_order_slot.sql).

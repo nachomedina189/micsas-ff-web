@@ -33,7 +33,7 @@
   // (mateix criteri que el comptador de pizzes de menu.html).
   function nextServiceDate() {
     var d = new Date();
-    if (d.getHours() * 60 + d.getMinutes() >= 22 * 60 + 15) d.setDate(d.getDate() + 1);
+    if (d.getHours() * 60 + d.getMinutes() >= 22 * 60 + 30) d.setDate(d.getDate() + 1);
     for (var i = 0; i < 7; i++) {
       if (d.getDay() === 5 || d.getDay() === 0) return d;
       d.setDate(d.getDate() + 1);
