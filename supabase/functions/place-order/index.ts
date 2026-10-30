@@ -292,6 +292,11 @@ Deno.serve(async (req) => {
     // quan la franja triada està plena.
     const SLOT_LEAD_MIN = 15;
     let effectiveSlotTime = slotTime ?? null;
+    // Franges on create_order_with_slot pot posar pizzes. Per a una comanda
+    // gran, ara pot començar la primera tanda ABANS de la franja demanada
+    // (perquè tot estigui llest a l'hora triada) — per avui, mai abans de
+    // la primera franja amb marge de preparació.
+    let bookableSlots = REAL_SLOTS;
     if (effectiveSlotTime) {
       const { date: madridToday, mins: madridNowMins } = madridNow();
       if (deliveryDate === madridToday) {
@@ -309,6 +314,7 @@ Deno.serve(async (req) => {
         if (effectiveSlotTime < earliestSafeSlot) {
           effectiveSlotTime = earliestSafeSlot;
         }
+        bookableSlots = REAL_SLOTS.filter((s) => s >= earliestSafeSlot);
       }
     }
 
@@ -331,7 +337,7 @@ Deno.serve(async (req) => {
       p_requested_slot: effectiveSlotTime,
       p_pizza_count:    pizzaCount,
       p_delivery_date:  deliveryDate,
-      p_slots:          REAL_SLOTS,
+      p_slots:          bookableSlots,
     });
     // Masses del dia exhaurides (les posa el pizzero a cocina.html):
     // create_order_with_slot llança "DAILY_SOLDOUT remaining=N" en lloc de

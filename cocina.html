@@ -1211,6 +1211,20 @@
         </div>`;
     }
 
+    // Les notes porten davant "Hora: HH:MM" (l'hora que va triar el client a
+    // pedido.html). Si el servidor li ha assignat una altra franja, aquesta
+    // hora contradeia la de la capçalera de la targeta (p. ex. capçalera
+    // 21:30 i "Hora: 21:15"), així que es treu: l'hora bona és la de la
+    // capçalera, i si és diferent de la demanada ho diu requestedSlotHtml.
+    function cleanNotes(o) {
+      return (o.notes || '').replace(/^Hora: \d{1,2}:\d{2}( · )?/, '').trim();
+    }
+
+    function requestedSlotHtml(o) {
+      if (!o.requested_slot || !o.slot_time || o.requested_slot === o.slot_time) return '';
+      return `<p class="text-xs font-bold text-[#DC2626]">⚠ El client la volia a les ${escapeHtml(o.requested_slot)} — se li ha dit que arribarà a partir de les ${escapeHtml(o.slot_time)}</p>`;
+    }
+
     function renderOrderCard(group) {
       const isGroup = group.length > 1;
       const first = group[0];
@@ -1245,7 +1259,7 @@
               <span class="${o.payment_method !== 'cash' && o.payment_status !== 'paid' ? 'text-[#DC2626] font-semibold' : 'text-[#6B7280]'}">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : (o.payment_status === 'paid' ? 'Pagat online' : '⚠ Verificant pagament…')}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
               <span class="font-bold">${fmt(o.total)}</span>
             </div>
-            ${o.notes ? `<p class="text-xs italic text-[#6B7280]">${escapeHtml(o.notes)}</p>` : ''}
+            ${cleanNotes(o) ? `<p class="text-xs italic text-[#6B7280]">${escapeHtml(cleanNotes(o))}</p>` : ''}
             ${isGroup && !allSameStatus ? actionsRow([o.id], stageOf(o), 'sm') : ''}
           </div>
         `;
@@ -1266,7 +1280,7 @@
         ).join(' · ');
         return `
           <div class="bg-[#F59E0B]/15 border border-[#F59E0B]/50 rounded-xl px-4 py-2.5">
-            <p class="text-xs font-black uppercase tracking-wide text-[#B45309]">⚠ Comanda gran — ${bigOrder.pizza_count} pizzes</p>
+            <p class="text-xs font-black uppercase tracking-wide text-[#B45309]">⚠ Comanda gran — ${bigOrder.pizza_count} pizzes · tot llest a les ${escapeHtml(bigOrder.slot_time || '')}</p>
             <p class="text-xs font-medium text-[#92400E] mt-1">${rounds}</p>
           </div>`;
       })() : '';
@@ -1282,6 +1296,7 @@
               <p class="js-elapsed text-xs font-bold text-[#6B7280]" data-since="${waitingSinceMs}">⏱ Esperant...</p>
             ` : ''}
             ${bigOrderHtml}
+            ${requestedSlotHtml(first)}
             <div>
               <p class="font-bold text-lg">${escapeHtml(cust.name || 'Client')}</p>
               <a href="tel:${escapeHtml(cust.phone || '')}" class="text-sm text-[#2563EB] font-semibold">${escapeHtml(cust.phone || '')}</a>
