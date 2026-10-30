@@ -1336,7 +1336,12 @@
       const reassignedEl = document.getElementById('cf-success-reassigned');
       if (reassignedEl) {
         if (window._cfSlotReassigned) {
-          reassignedEl.textContent = `La franja que havies triat s'havia omplert — t'hem assignat la franja de les ${cfSelectedTime}.`;
+          // Una comanda de més de 6 pizzes no cap en una sola tanda de forn:
+          // si no s'ha pogut tenir llesta a l'hora triada, no és que la franja
+          // estigués plena, és que calen més tandes.
+          reassignedEl.textContent = window._cfBigOrder
+            ? `La teva comanda és gran i la fem en més d'una tanda de forn — no la podíem tenir llesta abans: arribarà a partir de les ${cfSelectedTime}.`
+            : `La franja que havies triat s'havia omplert — t'hem assignat la franja de les ${cfSelectedTime}.`;
           reassignedEl.classList.remove('hidden');
         } else {
           reassignedEl.classList.add('hidden');
@@ -2129,6 +2134,7 @@
       // s'ha omplert just abans de confirmar (rollover automàtic a la
       // següent franja amb lloc) — reflectim aquí la franja real assignada.
       window._cfSlotReassigned = !!(json.slotTime && json.slotTime !== cfSelectedTime);
+      window._cfBigOrder = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0) > 6;
       if (json.slotTime) cfSelectedTime = json.slotTime;
       return json;
     }
@@ -2325,7 +2331,7 @@
       // guardem el que cal per ensenyar la pantalla de "Gràcies!" en tornar.
       try {
         sessionStorage.setItem('micsas_pay_return', JSON.stringify({
-          date: cfDeliveryDate, time: cfSelectedTime, reassigned: !!window._cfSlotReassigned,
+          date: cfDeliveryDate, time: cfSelectedTime, reassigned: !!window._cfSlotReassigned, big: !!window._cfBigOrder,
         }));
       } catch (_) {}
       _payRedirecting = true;
@@ -2382,6 +2388,7 @@
       if (saved.date) cfDeliveryDate = saved.date;
       if (saved.time) cfSelectedTime = saved.time;
       window._cfSlotReassigned = !!saved.reassigned;
+      window._cfBigOrder = !!saved.big;
       const fs = document.getElementById('checkout-fullscreen');
       fs.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
       document.body.style.overflow = 'hidden';
