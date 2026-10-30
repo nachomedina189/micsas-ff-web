@@ -1276,11 +1276,18 @@
       const bigOrder = group.find(o => o.slot_allocations && Object.keys(o.slot_allocations).length > 1);
       const bigOrderHtml = bigOrder ? (() => {
         const rounds = Object.keys(bigOrder.slot_allocations).sort().map((s, i) =>
-          `Tanda ${i + 1}: ${bigOrder.slot_allocations[s]} pizzes des de les ${escapeHtml(s)}`
+          `Tanda ${i + 1}: ${bigOrder.slot_allocations[s]} ${bigOrder.slot_allocations[s] === 1 ? 'pizza' : 'pizzes'} des de les ${escapeHtml(s)}`
         ).join(' · ');
+        // Només és "gran" si no cap en una tanda de forn (més de 6 pizzes).
+        // Una comanda petita també es pot partir si la seva franja només
+        // tenia lloc per a una part (p. ex. 2 pizzes: 1 a les 20:45 i 1 a
+        // les 21:00); llavors només s'avisa que va en més d'una tanda.
+        const title = bigOrder.pizza_count > 6
+          ? `⚠ Comanda gran — ${bigOrder.pizza_count} pizzes`
+          : `Repartida en ${Object.keys(bigOrder.slot_allocations).length} tandes — ${bigOrder.pizza_count} pizzes`;
         return `
           <div class="bg-[#F59E0B]/15 border border-[#F59E0B]/50 rounded-xl px-4 py-2.5">
-            <p class="text-xs font-black uppercase tracking-wide text-[#B45309]">⚠ Comanda gran — ${bigOrder.pizza_count} pizzes · tot llest a les ${escapeHtml(bigOrder.slot_time || '')}</p>
+            <p class="text-xs font-black uppercase tracking-wide text-[#B45309]">${title} · tot llest a les ${escapeHtml(bigOrder.slot_time || '')}</p>
             <p class="text-xs font-medium text-[#92400E] mt-1">${rounds}</p>
           </div>`;
       })() : '';
