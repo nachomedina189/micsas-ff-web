@@ -1222,10 +1222,20 @@
         return;
       }
 
+      // Una comanda de fins a 6 pizzes ha de cabre sencera en la franja: si
+      // només hi queda 1 lloc i en vols 2, la franja es mostra com a completa
+      // (abans es partia en dues tandes i arribava a la franja següent). Una
+      // comanda gran (més de 6) pot repartir-se en tandes, així que només
+      // exigim que la franja no estigui plena.
+      const cartPizzas = cart.filter(i => !i.id.startsWith('d')).reduce((t, i) => t + i.qty, 0);
+      const slotFits = (s) => {
+        const used = _slotCounts[s] || 0;
+        return cartPizzas > 6 ? used < 6 : used + Math.max(cartPizzas, 1) <= 6;
+      };
       const realSlots = CF_REAL_SLOTS;
       const earliestSlot = realSlots.find(s => {
         const [h, m] = s.split(':').map(Number);
-        return h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6;
+        return h * 60 + m > nowMins + ASAP_LEAD_MIN && slotFits(s);
       }) || null;
       window._cfEarliestSlot = earliestSlot;
       // Si avui ja no queda cap franja amb marge suficient, no oferim el
@@ -1241,7 +1251,7 @@
         // pizzer rebia la comanda sense marge de preparació.
         const isPast = isToday && !isAsap && slotMins <= nowMins;
         const isTooSoon = isToday && !isAsap && !isPast && slotMins <= nowMins + ASAP_LEAD_MIN;
-        const full = !isAsap && !isPast && !isTooSoon && (_slotCounts[s] || 0) >= 6;
+        const full = !isAsap && !isPast && !isTooSoon && !slotFits(s);
         const blocked = full || isPast || isTooSoon;
         const label = isAsap
           ? `${s} <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>`
