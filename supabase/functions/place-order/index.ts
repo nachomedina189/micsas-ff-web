@@ -296,7 +296,17 @@ Deno.serve(async (req) => {
     // gran, ara pot començar la primera tanda ABANS de la franja demanada
     // (perquè tot estigui llest a l'hora triada) — per avui, mai abans de
     // la primera franja amb marge de preparació.
-    let bookableSlots = REAL_SLOTS;
+    //
+    // A més, abans de la primera franja (20:00) hi ha tandes internes de forn
+    // (PREP_SLOTS) que el client no pot triar com a hora d'entrega, però que
+    // una comanda gran sí pot fer servir per començar abans i arribar a
+    // l'hora: p. ex. 10 pizzes per a les 20:00 → 19:45 (5) + 20:00 (5).
+    // create_order_with_slot només hi arriba omplint cap enrere, mai com a
+    // franja final. Per avui tenen un marge més curt (PREP_LEAD_MIN): el
+    // forn ja està encès i n'hi ha prou amb 10 min per tenir-les llestes.
+    const PREP_SLOTS = ["19:30", "19:45"];
+    const PREP_LEAD_MIN = 10;
+    let bookableSlots = [...PREP_SLOTS, ...REAL_SLOTS];
     if (effectiveSlotTime) {
       const { date: madridToday, mins: madridNowMins } = madridNow();
       if (deliveryDate === madridToday) {
@@ -314,7 +324,11 @@ Deno.serve(async (req) => {
         if (effectiveSlotTime < earliestSafeSlot) {
           effectiveSlotTime = earliestSafeSlot;
         }
-        bookableSlots = REAL_SLOTS.filter((s) => s >= earliestSafeSlot);
+        const prepSlots = PREP_SLOTS.filter((s) => {
+          const [h, m] = s.split(":").map(Number);
+          return h * 60 + m > madridNowMins + PREP_LEAD_MIN;
+        });
+        bookableSlots = [...prepSlots, ...REAL_SLOTS.filter((s) => s >= earliestSafeSlot)];
       }
     }
 
