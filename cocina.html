@@ -132,7 +132,7 @@
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2 pr-3 border-r border-white/10">
             <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Avui (pase)</button>
-            <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Setmana</button>
+            <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Pròxims dies</button>
           </div>
           <button onclick="closePase()" id="close-pase-btn" class="px-4 py-2 rounded-lg text-sm font-semibold bg-[#E23F2E] hover:bg-[#C9321F] text-white transition-all">Tancar pase</button>
           <button onclick="openHistory()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 hover:bg-white/5 transition-all">Historial</button>
@@ -1052,11 +1052,10 @@
     function inDateScope(o) {
       const today = businessDateISO();
       if (currentDateScope === 'today') return o.delivery_date === today;
-      if (currentDateScope === 'week') {
-        const weekEnd = new Date(today + 'T00:00:00'); weekEnd.setDate(weekEnd.getDate() + 6);
-        const weekEndStr = localDateStr(weekEnd);
-        return !!o.delivery_date && o.delivery_date >= today && o.delivery_date <= weekEndStr;
-      }
+      // Tots els pedidos d'avui endavant: la web deixa reservar fins a 13
+      // dies vista, i abans aquí només se'n veien 6 (un encàrrec per al
+      // diumenge següent quedava invisible a cuina).
+      if (currentDateScope === 'week') return !!o.delivery_date && o.delivery_date >= today;
       return true;
     }
 
@@ -1076,15 +1075,19 @@
     // hora, sense haver de canviar de filtre.
     function renderColumnWithTimeHeaders(groups) {
       if (!groups.length) return '<p class="text-sm text-[#5B6270] text-center py-10">Cap comanda</p>';
-      const sorted = [...groups].sort((a, b) => {
-        const ta = a[0].slot_time || '';
-        const tb = b[0].slot_time || '';
-        return ta.localeCompare(tb);
-      });
+      // Per dia i després per franja: a "Pròxims dies" els pedidos de dies
+      // diferents no es poden barrejar sota el mateix "20:00".
+      const sortKey = g => (g[0].delivery_date || '') + ' ' + (g[0].slot_time || '');
+      const sorted = [...groups].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+      const showDay = currentDateScope !== 'today';
       let html = '';
       let lastTime = null;
       sorted.forEach(group => {
-        const t = group[0].slot_time || 'Sense franja';
+        const slot = group[0].slot_time || 'Sense franja';
+        const iso = group[0].delivery_date;
+        const t = showDay && iso
+          ? `${['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'][new Date(iso + 'T00:00:00').getDay()]} ${Number(iso.slice(8, 10))}/${Number(iso.slice(5, 7))} · ${slot}`
+          : slot;
         if (t !== lastTime) {
           html += `<h3 class="text-xs font-bold uppercase tracking-widest text-[#5B6270] pt-2 first:pt-0">${escapeHtml(t)}</h3>`;
           lastTime = t;
