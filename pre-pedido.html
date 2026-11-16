@@ -402,6 +402,10 @@
     // demanar, tant triant-la directament com amb "Com més aviat millor".
     // Mateix marge que pedido.html i que SLOT_LEAD_MIN de place-order.
     const ASAP_LEAD_MIN = 15;
+    // La franja és quan la comanda surt de cuina; al client se li ensenya
+    // l'hora aproximada d'arribada (mateix CF_DELIVERY_MIN que pedido.html).
+    const PP_DELIVERY_MIN = 15;
+    function ppArrival(slot) { const [h, m] = slot.split(':').map(Number); const t = h * 60 + m + PP_DELIVERY_MIN; return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; }
 
     function resolveAsap() {
       if (ppDeliveryDate !== todayISO() || _ppDailySoldOut) return null;
@@ -443,7 +447,7 @@
 
       if (isToday) {
         if (asap) {
-          options.push({ value: 'cuanto-antes', label: `Com més aviat millor (cap a les ${asap})` });
+          options.push({ value: 'cuanto-antes', label: `Com més aviat millor (arriba cap a les ${ppArrival(asap)})` });
         } else {
           options.push({ value: '', label: 'Com més aviat millor (sense disponibilitat)', disabled: true });
         }
@@ -458,10 +462,12 @@
         // triar les 20:30 essent les 20:29, sense marge per al pizzer.
         const isTooSoon = isToday && !isPast && (h * 60 + m) <= nowMins + ASAP_LEAD_MIN;
         const full = (_slotCounts[s] || 0) >= 6;
-        if (isPast) options.push({ value: '', label: `${s} — Ja ha passat`, disabled: true });
-        else if (isTooSoon) options.push({ value: '', label: `${s} — Massa aviat`, disabled: true });
-        else if (full) options.push({ value: '', label: `${s} — Complet`, disabled: true });
-        else options.push({ value: s, label: s });
+        // Es mostra l'hora aproximada d'arribada; el valor és la franja.
+        const shown = `Arriba cap a les ${ppArrival(s)}`;
+        if (isPast) options.push({ value: '', label: `${shown} — Ja ha passat`, disabled: true });
+        else if (isTooSoon) options.push({ value: '', label: `${shown} — Massa aviat`, disabled: true });
+        else if (full) options.push({ value: '', label: `${shown} — Complet`, disabled: true });
+        else options.push({ value: s, label: shown });
       });
 
       ppTimeOptions = options;
@@ -579,7 +585,7 @@
       const resolved = val === 'cuanto-antes' ? resolveAsap() : val;
       ppSelectedTime = resolved || null;
       if (val === 'cuanto-antes' && resolved) {
-        alert(`Començarem a preparar la teva comanda a les ${resolved}.`);
+        alert(`La teva comanda arribarà cap a les ${ppArrival(resolved)}.`);
       }
       const labelEl = document.getElementById('pp-time-select-label');
       if (labelEl) {

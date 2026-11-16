@@ -372,7 +372,7 @@
       <div class="max-w-lg mx-auto px-4 py-10 space-y-6 pb-12">
         <div class="text-center">
           <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F] mb-2">Quan vols rebre la pizza?</h2>
-          <p class="text-sm font-light text-[#5A3E28]">Tria el dia i una franja horària</p>
+          <p class="text-sm font-light text-[#5A3E28]">Tria el dia i a quina hora la vols rebre (hora aproximada d'arribada)</p>
         </div>
         <div class="flex gap-2 justify-center">
           <button type="button" onclick="selectDeliveryDay('today')" id="cf-day-today" class="px-5 py-2.5 rounded-full border text-sm font-medium transition-all">Avui</button>
@@ -1192,6 +1192,60 @@
       return out;
     })();
 
+    // Tandes internes de forn abans de la primera franja (les mateixes que
+    // PREP_SLOTS i PREP_LEAD_MIN de place-order): el client no les pot triar,
+    // però una comanda gran les fa servir per estar llesta a l'hora.
+    const CF_PREP_SLOTS = ['19:30', '19:45'];
+    const CF_PREP_LEAD_MIN = 10;
+    const CF_SLOT_CAPACITY = 6;
+    // La franja és quan la comanda surt de cuina; al client se li ensenya
+    // l'hora aproximada en què arriba a casa (termes: 15-20 min després).
+    const CF_DELIVERY_MIN = 15;
+    const cfMins = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+    const cfArrival = slot => { const t = cfMins(slot) + CF_DELIVERY_MIN; return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+    const cfPizzaCount = () => cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
+
+    // Franges on el servidor pot posar pizzes (mateixa llista que
+    // bookableSlots a place-order).
+    function cfBookableSlots() {
+      if (cfDeliveryDate !== todayISO()) return [...CF_PREP_SLOTS, ...CF_REAL_SLOTS];
+      const now = new Date(); const nowMins = now.getHours() * 60 + now.getMinutes();
+      const earliestSafe = CF_REAL_SLOTS.find(s => cfMins(s) > nowMins + ASAP_LEAD_MIN);
+      if (!earliestSafe) return [];
+      return [
+        ...CF_PREP_SLOTS.filter(s => cfMins(s) > nowMins + CF_PREP_LEAD_MIN),
+        ...CF_REAL_SLOTS.filter(s => cfMins(s) >= cfMins(earliestSafe)),
+      ];
+    }
+
+    // On acabaria una comanda de `pizzas` pizzes demanada per a `requested`:
+    // mateix algorisme que create_order_with_slot (1r: llesta a l'hora
+    // demanada omplint cap enrere; 2n: tandes cap endavant). Abans la web
+    // només marcava "Complet" una franja amb 6 pizzes, i qui en demanava 3
+    // a una franja amb 5 acabava, un cop pagat, en una franja més tardana.
+    function cfPredictSlot(requested, pizzas) {
+      const slots = cfBookableSlots();
+      const room = s => CF_SLOT_CAPACITY - (_slotCounts[s] || 0);
+      let start = slots.indexOf(requested);
+      if (start < 0) start = 0;
+      let remaining = pizzas;
+      for (let i = start; i >= 0; i--) {
+        if (room(slots[i]) <= 0) break;
+        remaining -= Math.min(remaining, room(slots[i]));
+        if (remaining <= 0) return slots[start];
+      }
+      for (let i = start; i < slots.length; i++) {
+        remaining = pizzas;
+        for (let j = i; j < slots.length; j++) {
+          if (room(slots[j]) <= 0) break;
+          remaining -= Math.min(remaining, room(slots[j]));
+          if (remaining <= 0) return slots[j];
+        }
+      }
+      return null;
+    }
+    const cfSlotFitsCart = () => !cfSelectedTime || cfPredictSlot(cfSelectedTime, cfPizzaCount()) === cfSelectedTime;
+
     function renderTimeSlots() {
       const container = document.getElementById('cf-time-slots');
       if (!container) return;
@@ -1223,9 +1277,11 @@
       }
 
       const realSlots = CF_REAL_SLOTS;
+      const pizzas = cfPizzaCount();
+      const fits = s => cfPredictSlot(s, pizzas) === s;
       const earliestSlot = realSlots.find(s => {
         const [h, m] = s.split(':').map(Number);
-        return h * 60 + m > nowMins + ASAP_LEAD_MIN && (_slotCounts[s] || 0) < 6;
+        return (!isToday || h * 60 + m > nowMins + ASAP_LEAD_MIN) && fits(s);
       }) || null;
       window._cfEarliestSlot = earliestSlot;
       // Si avui ja no queda cap franja amb marge suficient, no oferim el
@@ -1241,11 +1297,16 @@
         // pizzer rebia la comanda sense marge de preparació.
         const isPast = isToday && !isAsap && slotMins <= nowMins;
         const isTooSoon = isToday && !isAsap && !isPast && slotMins <= nowMins + ASAP_LEAD_MIN;
-        const full = !isAsap && !isPast && !isTooSoon && (_slotCounts[s] || 0) >= 6;
+        // Es mostra l'hora aproximada d'arribada (franja + CF_DELIVERY_MIN);
+        // el valor que es desa i que veu cuina continua sent la franja.
+        const full = !isAsap && !isPast && !isTooSoon && !fits(s);
+        const fullLabel = (_slotCounts[s] || 0) >= CF_SLOT_CAPACITY || pizzas <= 1
+          ? 'Complet'
+          : `No hi caben ${pizzas} pizzes`;
         const blocked = full || isPast || isTooSoon;
         const label = isAsap
-          ? `${s} <span class="opacity-70 font-normal text-sm">(cap a les ${earliestSlot})</span>`
-          : `${s}${isPast ? ' · Ja ha passat' : isTooSoon ? ' · Massa aviat' : full ? ' · Complet' : ''}`;
+          ? `${s} <span class="opacity-70 font-normal text-sm">(arriba cap a les ${cfArrival(earliestSlot)})</span>`
+          : `${cfArrival(s)}${isPast ? ' · Ja ha passat' : isTooSoon ? ' · Massa aviat' : full ? ' · ' + fullLabel : ''}`;
         return `<button type="button" ${blocked ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
           class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isAsap ? 'lg' : 'base'} ${blocked ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
           <iconify-icon icon="${isAsap ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isAsap ? 20 : 16}" style="color:${isAsap ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
@@ -1297,15 +1358,8 @@
     function computeEstimacioEntrega() {
       const m = cfSelectedTime && /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
       if (!m) return '30–45 minuts';
-      const pizzaCount = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
-      // Marge de 15 min (1 pizza) fins a 20 min (6 pizzes, l'aforo màxim
-      // d'una franja) — cada pizza extra hi afegeix 1 min.
-      const extraMin = Math.min(Math.max(pizzaCount - 1, 0) * 1, 5);
-      const windowMin = 15 + extraMin;
-      const start = new Date(); start.setHours(Number(m[1]), Number(m[2]), 0, 0);
-      const end = new Date(start.getTime() + windowMin * 60000);
-      const fmtH = d => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-      return `${fmtH(start)}–${fmtH(end)}`;
+      // La mateixa hora d'arribada que el client ha vist en triar.
+      return `Cap a les ${cfArrival(cfSelectedTime)}`;
     }
 
     // Format català "Divendres 13 de setembre" a partir d'una data YYYY-MM-DD.
@@ -1330,7 +1384,7 @@
       } else {
         estimacioEntrega = '';
         if (labelEl) labelEl.textContent = 'Comanda registrada';
-        if (el) el.textContent = `${formatDeliveryDayLabel(cfDeliveryDate)} a les ${cfSelectedTime}`;
+        if (el) el.textContent = `${formatDeliveryDayLabel(cfDeliveryDate)}, arriba cap a les ${cfArrival(cfSelectedTime)}`;
       }
 
       const reassignedEl = document.getElementById('cf-success-reassigned');
@@ -1340,8 +1394,8 @@
           // si no s'ha pogut tenir llesta a l'hora triada, no és que la franja
           // estigués plena, és que calen més tandes.
           reassignedEl.textContent = window._cfBigOrder
-            ? `La teva comanda és gran i la fem en més d'una tanda de forn — no la podíem tenir llesta abans: arribarà a partir de les ${cfSelectedTime}.`
-            : `La franja que havies triat s'havia omplert — t'hem assignat la franja de les ${cfSelectedTime}.`;
+            ? `La teva comanda és gran i la fem en més d'una tanda de forn — no la podíem tenir llesta abans: arribarà cap a les ${cfArrival(cfSelectedTime)}.`
+            : `L'hora que havies triat s'havia omplert — la teva comanda arribarà cap a les ${cfArrival(cfSelectedTime)}.`;
           reassignedEl.classList.remove('hidden');
         } else {
           reassignedEl.classList.add('hidden');
@@ -1368,7 +1422,7 @@
       const isAsap = time === 'Com més aviat millor';
       cfSelectedTime = isAsap ? (window._cfEarliestSlot || time) : time;
       if (isAsap && window._cfEarliestSlot) {
-        showCfToast(`Començarem a preparar la teva comanda a les ${window._cfEarliestSlot}.`);
+        showCfToast(`La teva comanda arribarà cap a les ${cfArrival(window._cfEarliestSlot)}.`);
       }
       const timeStep = document.getElementById('cf-time-step');
       const scroll   = document.getElementById('cf-scroll');
@@ -1514,6 +1568,12 @@
         return;
       }
       if (errEl) errEl.classList.add('hidden');
+      // Aquest botó no passava per placeOrder: obria el pagament sense tornar
+      // a comprovar exhaurit, marge ni lloc a la franja.
+      await loadSlotCountsFor(cfDeliveryDate);
+      if (_cfDailySoldOut) { cfBackToTimeStep('Sold ooout, moltes gràcies família! Ja no queden pizzes per a aquest dia.'); return; }
+      if (!isSlotStillValid()) { cfBackToTimeStep('Aquesta hora ja no té marge suficient. Tria una altra hora.'); return; }
+      if (!cfCheckSlotFits()) return;
       // Aquest botó és sempre pagament online, encara que abans s'hagi tocat
       // "Pagament al repartidor": sense forçar-ho, la comanda es desava com a
       // efectiu i cuina la veia com "Efectiu al repartidor" ja pagada.
@@ -1930,6 +1990,26 @@
       return (Number(m[1]) * 60 + Number(m[2])) > (now.getHours() * 60 + now.getMinutes()) + ASAP_LEAD_MIN;
     }
 
+    // Torna al pas de l'hora amb un missatge, sense cobrar res.
+    function cfBackToTimeStep(msg) {
+      cfSelectedTime = null;
+      document.getElementById('cf-global-err').textContent = msg;
+      document.getElementById('cf-global-err').classList.remove('hidden');
+      document.getElementById('cf-scroll').classList.add('hidden');
+      document.getElementById('cf-time-step').classList.remove('hidden');
+      selectDeliveryDay(cfDeliveryDate === todayISO() ? 'today' : 'other');
+    }
+
+    // Les pizzes del cistell han de cabre a l'hora triada (pot venir de
+    // pre-pedido, on encara no hi havia cistell, o algú altre pot haver
+    // reservat el lloc mentre omplia el formulari). Cal _slotCounts fresc.
+    function cfCheckSlotFits() {
+      if (cfSlotFitsCart()) return true;
+      const n = cfPizzaCount();
+      cfBackToTimeStep(`A les ${cfArrival(cfSelectedTime)} ja no hi caben ${n === 1 ? 'la teva pizza' : `les teves ${n} pizzes`}. Tria una altra hora.`);
+      return false;
+    }
+
     async function placeOrder() {
       if (!validateCheckout()) return;
       if (cart.length === 0) return;
@@ -1979,6 +2059,8 @@
         selectDeliveryDay(cfDeliveryDate === todayISO() ? 'today' : 'other');
         return;
       }
+
+      if (!cfCheckSlotFits()) return;
 
       // Online payment: collect order data and open Stripe
       if (cfPayMethod === 'online') {
@@ -2200,6 +2282,11 @@
     function cancelStripeOverlay() {
       releasePendingOrder();
       closeStripeOverlay();
+      // Ha tancat després de veure que l'hora havia canviat: que en triï una altra.
+      if (window._cfSlotReassigned) {
+        window._cfSlotReassigned = false;
+        cfBackToTimeStep("Tria una altra hora d'arribada.");
+      }
     }
 
     async function openStripeOverlay(totalEuros) {
@@ -2214,6 +2301,7 @@
       panel.classList.add('enter-modal');
       document.getElementById('stripe-amount-label').textContent = fmtComma(totalEuros);
       document.getElementById('stripe-error').classList.add('hidden');
+      document.getElementById('stripe-reassigned').classList.add('hidden');
       document.getElementById('stripe-pay-btn').disabled = true;
       document.getElementById('stripe-payment-element').innerHTML =
         '<div class="flex items-center justify-center h-40"><svg class="animate-spin w-6 h-6 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg></div>';
@@ -2222,6 +2310,16 @@
         const { clientSecret } = await createPendingOrderAndIntent(totalEuros);
         totalEuros = _pendingOrderData?.total ?? totalEuros;
         document.getElementById('stripe-amount-label').textContent = fmtComma(totalEuros);
+        // El servidor ja ha reservat la franja: si l'ha hagut de moure (algú
+        // ha agafat l'últim lloc fa un moment), el client ho ha de saber
+        // ABANS de pagar, no a la pantalla final.
+        const movedEl = document.getElementById('stripe-reassigned');
+        if (window._cfSlotReassigned) {
+          movedEl.textContent = `⚠ L'hora que havies triat s'acaba d'omplir: la teva comanda arribarà cap a les ${cfArrival(cfSelectedTime)}. Si no et va bé, tanca aquesta finestra i tria una altra hora.`;
+          movedEl.classList.remove('hidden');
+        } else {
+          movedEl.classList.add('hidden');
+        }
 
         if (!_stripe) _stripe = Stripe(STRIPE_PK);
         _stripeElements = _stripe.elements({
@@ -2877,6 +2975,7 @@
         </button>
       </div>
       <div class="px-5 pb-5">
+        <p id="stripe-reassigned" class="hidden mb-4 rounded-xl bg-[#FEF3C7] border border-[#F59E0B]/40 px-3 py-2.5 text-sm font-medium text-[#7C4A03]"></p>
         <div id="stripe-wallet-btn" class="hidden mb-4">
           <div id="stripe-payment-request-button"></div>
           <div id="stripe-wallet-separator" class="flex items-center gap-3 my-4">
