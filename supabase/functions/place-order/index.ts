@@ -40,6 +40,37 @@ function madridNow(): { date: string; mins: number } {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, mins: hour * 60 + Number(get("minute")) };
 }
 
+// Zona de repartiment: Matadepera i, com a única excepció, la gasolinera Q8
+// de la Ctra. de Matadepera 383 (Terrassa). Mateixa regla que pre-pedido.html,
+// repetida aquí perquè la pàgina es pot saltar o pot ser una versió antiga.
+const MATADEPERA_CENTER = { lat: 41.60361, lng: 2.02444 };
+const MATADEPERA_MAX_KM = 6;
+const Q8_PICKUP = { lat: 41.5852391, lng: 2.0190405, radiusKm: 0.5 };
+
+function normalizeText(s: unknown): string {
+  return String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+}
+
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (d: number) => d * Math.PI / 180;
+  const a = Math.sin(toRad(lat2 - lat1) / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(toRad(lng2 - lng1) / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function isDeliverable(street: unknown, postalCode: unknown, city: unknown, lat: unknown, lng: unknown): boolean {
+  const hasCoords = typeof lat === "number" && typeof lng === "number";
+  if (normalizeText(city) === "matadepera") {
+    return hasCoords
+      ? distanceKm(lat, lng, MATADEPERA_CENTER.lat, MATADEPERA_CENTER.lng) <= MATADEPERA_MAX_KM
+      : String(postalCode ?? "").trim() === "08230";
+  }
+  const s = normalizeText(street);
+  if (!s.startsWith("carretera de matadepera")) return false;
+  return /\b383\b/.test(s) ||
+    (hasCoords && distanceKm(lat, lng, Q8_PICKUP.lat, Q8_PICKUP.lng) <= Q8_PICKUP.radiusKm);
+}
+
 // Apunta una comanda rebutjada (demanda perduda) per a l'informe del pase.
 // Mai ha de trencar la resposta al client: qualsevol error es registra i prou.
 async function logRejection(
@@ -88,6 +119,13 @@ Deno.serve(async (req) => {
     const last = cleanName(lastName);
     const name = [first, last].filter(Boolean).join(" ") || cleanName(legacyName);
     const nameParts = first || last ? { first_name: first || null, last_name: last || null } : {};
+
+    if (!isDeliverable(street, postalCode, city || "Matadepera", lat, lng)) {
+      return new Response(JSON.stringify({ error: "Només fem entregues a Matadepera. Revisa l'adreça d'entrega." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: "La comanda no té cap article." }), {

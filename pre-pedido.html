@@ -1294,12 +1294,8 @@
     window._ppLat = null;
     window._ppLng = null;
 
-    // micsas.ff només reparteix a Matadepera. La taula delivery_zones ja
-    // filtra per codi postal, però com a segona barrera comprovem també el
-    // nom de la ciutat que retorna Google Places — evita falsos positius si
-    // algun dia un CP coincident d'un altre municipi acaba a la taula per error.
+    // micsas.ff només reparteix a Matadepera (més el punt Q8 de Terrassa).
     const PP_ALLOWED_CITY = 'Matadepera';
-    const PP_ZONE_ERR_DEFAULT = 'No fem entregues a aquesta zona';
     function _ppNormalize(s) {
       return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
     }
@@ -1341,23 +1337,27 @@
       });
     }
 
-    // Segona oportunitat quan el text no diu "Matadepera" enlloc: mirem si
-    // el punt que ha resolt Google Places cau dins del poble + un marge
-    // d'error raonable. Ha passat que una adreça real de Matadepera arriba
-    // amb la ciutat etiquetada d'una altra manera (límit de terme, barri
-    // classificat diferent...) i quedava rebutjada tot i ser vàlida. El
-    // radi és petit a propòsit (poble + ~1km de marge) perquè no torni a
-    // colar-se cap adreça d'un altre municipi com Argentona — allà la
-    // distància real és de desenes de km, molt per sobre d'aquest llindar.
-    // La comprovació real i definitiva segueix sent el codi postal contra
-    // delivery_zones (_ppValidateZone) — això només decideix si hi arribem.
+    // Municipi que diu Google (locality / postal_town). Si n'hi ha un i no és
+    // Matadepera, l'adreça és d'un altre poble i es rebutja, encara que caigui
+    // a prop: el radi de proximitat deixava passar mig Terrassa nord.
+    function _ppOtherMunicipality(addressComponents) {
+      const target = _ppNormalize(PP_ALLOWED_CITY);
+      return (addressComponents || []).some(c =>
+        (c.types || []).some(t => t === 'locality' || t === 'postal_town') &&
+        _ppNormalize(c.longText || c.shortText || '') !== target
+      );
+    }
+    function _ppMentionsTerrassa(addressComponents) {
+      return (addressComponents || []).some(c => _ppNormalize(c.longText || c.shortText || '') === 'terrassa');
+    }
+
+    // Només quan Google no dona cap municipi: llavors el CP i, si no n'hi ha,
+    // la distància decideixen. Mai s'aplica a una adreça etiquetada com
+    // Terrassa o un altre poble.
     const MATADEPERA_CENTER = { lat: 41.60361, lng: 2.02444 };
-    // 4km: totes les urbanitzacions del terme (Can Solà, les Pedritxes,
-    // Can Vinyals...) + un marge al voltant, tal com vol el negoci.
-    const MATADEPERA_RADIUS_KM = 4;
-    // Tot el codi postal 08230 és Matadepera: s'accepta sempre, sense
-    // dependre de com Google etiqueti la ciutat ni de la taula.
+    const MATADEPERA_RADIUS_KM = 3;
     const MATADEPERA_ZIP = '08230';
+    const TERRASSA_ZIPS = ['08220', '08221', '08222', '08223', '08224', '08225', '08226', '08227', '08228'];
     function _ppDistanceKm(lat1, lng1, lat2, lng2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1372,25 +1372,21 @@
       return _ppDistanceKm(lat, lng, MATADEPERA_CENTER.lat, MATADEPERA_CENTER.lng) <= MATADEPERA_RADIUS_KM;
     }
 
-    // Punts de recollida fora de Matadepera, afegits explícitament pel
-    // titular del negoci: gent que no viu a Matadepera pot triar recollir
-    // aquí en lloc d'una entrega a domicili. S'identifiquen pel nom del
-    // carrer (no per coordenades: la clau de Google Maps té restricció de
-    // referrer i no es pot geocodificar amb fiabilitat des del servidor —
-    // el mateix Google Places que el client ja resol al navegador és la
-    // font de veritat), amb el codi postal o la ciutat com a segona
-    // confirmació. NOMÉS aquesta adreça exacta queda exempta del requisit
-    // de Matadepera — no s'obre tot un codi postal ni una ciutat sencera.
+    // Únic punt fora de Matadepera on es pot demanar, afegit pel titular del
+    // negoci: Àrea de Serveis Tiempo Libre Q8, Ctra. de Matadepera 383
+    // (km 1,75), Terrassa. Ha de ser aquesta carretera I (el número 383 o a
+    // menys de 500 m de la gasolinera). Abans bastava que el carrer
+    // contingués "matadepera", i entrava tot el Passeig de Matadepera de
+    // Terrassa. La mateixa regla es torna a comprovar a place-order.
     const PP_PICKUP_POINTS = [
-      // Àrea de Serveis Tiempo Libre Q8, Ctra. de Matadepera, 08225 Terrassa.
-      { streetContains: 'matadepera', postalCode: '08225', cityNormalized: 'terrassa' },
+      { route: 'carretera de matadepera', number: '383', lat: 41.5852391, lng: 2.0190405, radiusKm: 0.5 },
     ];
-    function _ppMatchesPickupPoint(postalCode, city, streetText) {
-      const street = _ppNormalize(streetText || '');
-      const zip = (postalCode || '').trim();
-      const cityNorm = _ppNormalize(city || '');
+    function _ppMatchesPickupPoint(route, streetNumber, lat, lng) {
+      const r = _ppNormalize(route || '');
+      const num = (streetNumber || '').trim();
       return PP_PICKUP_POINTS.some(p =>
-        street.includes(p.streetContains) && (zip === p.postalCode || cityNorm === p.cityNormalized)
+        r === p.route && (num === p.number ||
+          (typeof lat === 'number' && typeof lng === 'number' && _ppDistanceKm(lat, lng, p.lat, p.lng) <= p.radiusKm))
       );
     }
     function _ppShowZoneOk(zip) {
@@ -1401,43 +1397,6 @@
       document.getElementById('pp-zone-spin').classList.add('hidden');
       ppAddressValid = true;
       if (typeof validateForm === 'function') validateForm();
-    }
-
-    async function _ppValidateZone(zip) {
-      const feedbackEl = document.getElementById('pp-zone-feedback');
-      const badgeEl    = document.getElementById('pp-zip-badge');
-      const okEl       = document.getElementById('pp-zone-ok');
-      const errEl      = document.getElementById('pp-zone-err');
-      const spinEl     = document.getElementById('pp-zone-spin');
-
-      badgeEl.textContent = zip;
-      feedbackEl.classList.remove('hidden');
-      okEl.classList.add('hidden');
-      errEl.textContent = '· ' + PP_ZONE_ERR_DEFAULT;
-      errEl.classList.add('hidden');
-      spinEl.classList.remove('hidden');
-
-      if (!window.supabase) { spinEl.classList.add('hidden'); return; }
-
-      try {
-        const { data } = await window.supabase
-          .from('delivery_zones').select('id')
-          .eq('postal_code', zip).eq('active', true).maybeSingle();
-        spinEl.classList.add('hidden');
-        if (data) {
-          ppAddressValid = true;
-          okEl.classList.remove('hidden');
-        } else {
-          ppAddressValid = false;
-          errEl.classList.remove('hidden');
-        }
-      } catch (e) {
-        console.warn('[validateZone]', e);
-        ppAddressValid = false;
-        spinEl.classList.add('hidden');
-        errEl.classList.remove('hidden');
-      }
-      if (typeof validateForm === "function") validateForm();
     }
 
     function _ppClearPlaceData() {
@@ -1593,39 +1552,28 @@
         window._ppLat = place.location ? place.location.lat() : null;
         window._ppLng = place.location ? place.location.lng() : null;
 
-        ppAddressValid = false; // la marca _ppValidateZone si el CP está en la zona de reparto
+        ppAddressValid = false;
         _ppSetNeedsNumber(!streetNumber);
-        // Es comprova ABANS que res i sense dependre del resultat del check
-        // de Matadepera: alguns punts de recollida (ex. la Ctra. de
-        // Matadepera) cauen dins del radi de proximitat a Matadepera però
-        // tenen un codi postal diferent (08225, no 08230) — si es deixés
-        // córrer primer el check de Matadepera, aquest cas acabaria
-        // consultant delivery_zones amb un CP que no hi és i es rebutjaria
-        // per error.
-        const isPickupPoint = _ppMatchesPickupPoint(
-          window._ppExtractedZip, window._ppExtractedCity, route || place.formattedAddress
-        );
+        // Ordre: 1) el punt Q8 de Terrassa (excepció explícita), 2) qualsevol
+        // adreça de Terrassa o d'un altre municipi es rebutja, 3) Matadepera
+        // passa encara que el CP sigui del límit (08227...), 4) sense municipi
+        // de Google, decideixen el CP i la distància.
         const zip = (window._ppExtractedZip || '').trim();
-        const inMatadepera = zip === MATADEPERA_ZIP
-          || _ppAddressIsInMatadepera(comps)
-          || _ppAddressNearMatadepera(window._ppLat, window._ppLng);
-        if (isPickupPoint || inMatadepera) {
-          // Punt de recollida conegut, CP 08230, "Matadepera" al text o a
-          // prop del poble: vàlida. Abans, una adreça de Matadepera amb un
-          // CP del límit (08225/08227 de Terrassa) es tornava a rebutjar a
-          // delivery_zones, i una sense CP (Google no sempre en dona) deixava
-          // el botó bloquejat sense cap missatge — comandes perdudes.
-          if (!zip && inMatadepera) window._ppExtractedZip = MATADEPERA_ZIP;
+        const zoneErr = `Només fem entregues a ${PP_ALLOWED_CITY}.`;
+        if (_ppMatchesPickupPoint(route, streetNumber, window._ppLat, window._ppLng)) {
           _ppShowZoneOk(window._ppExtractedZip);
-        } else if (zip) {
-          // Fora de Matadepera i rodalies: només passa si el CP està actiu
-          // a delivery_zones (zones extra que el negoci obri a la taula).
-          await _ppValidateZone(zip);
-          if (!ppAddressValid) {
-            _ppShowZoneError(zip, `Només fem entregues a ${PP_ALLOWED_CITY} i rodalies.`);
-          }
+        } else if (_ppMentionsTerrassa(comps) ||
+                   (_ppOtherMunicipality(comps) && !_ppAddressIsInMatadepera(comps))) {
+          _ppShowZoneError(zip, zoneErr);
+        } else if (_ppAddressIsInMatadepera(comps) || zip === MATADEPERA_ZIP ||
+                   (!TERRASSA_ZIPS.includes(zip) && _ppAddressNearMatadepera(window._ppLat, window._ppLng))) {
+          // El servidor valida per ciutat: una adreça acceptada com a
+          // Matadepera s'hi envia sempre com a Matadepera.
+          window._ppExtractedCity = PP_ALLOWED_CITY;
+          if (!zip) window._ppExtractedZip = MATADEPERA_ZIP;
+          _ppShowZoneOk(window._ppExtractedZip);
         } else {
-          _ppShowZoneError('', `Només fem entregues a ${PP_ALLOWED_CITY} i rodalies.`);
+          _ppShowZoneError(zip, zoneErr);
         }
       } catch (e) {
         console.error("Error obteniendo lugar:", e);
