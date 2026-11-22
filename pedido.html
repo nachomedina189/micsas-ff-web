@@ -1198,11 +1198,10 @@
     const CF_PREP_SLOTS = ['19:30', '19:45'];
     const CF_PREP_LEAD_MIN = 10;
     const CF_SLOT_CAPACITY = 6;
-    // La franja és quan la comanda surt de cuina; al client se li ensenya
-    // l'hora aproximada en què arriba a casa (termes: 15-20 min després).
-    const CF_DELIVERY_MIN = 15;
+    // Al client se li ensenya la franja tal qual (20:00 ... 22:30), la
+    // mateixa hora que veu cuina. Sumar-hi 15 min feia que el primer
+    // horari visible fos les 20:15 i ningú pogués demanar per a les 20:00.
     const cfMins = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
-    const cfArrival = slot => { const t = cfMins(slot) + CF_DELIVERY_MIN; return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
     const cfPizzaCount = () => cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
 
     // Franges on el servidor pot posar pizzes (mateixa llista que
@@ -1297,16 +1296,14 @@
         // pizzer rebia la comanda sense marge de preparació.
         const isPast = isToday && !isAsap && slotMins <= nowMins;
         const isTooSoon = isToday && !isAsap && !isPast && slotMins <= nowMins + ASAP_LEAD_MIN;
-        // Es mostra l'hora aproximada d'arribada (franja + CF_DELIVERY_MIN);
-        // el valor que es desa i que veu cuina continua sent la franja.
         const full = !isAsap && !isPast && !isTooSoon && !fits(s);
         const fullLabel = (_slotCounts[s] || 0) >= CF_SLOT_CAPACITY || pizzas <= 1
           ? 'Complet'
           : `No hi caben ${pizzas} pizzes`;
         const blocked = full || isPast || isTooSoon;
         const label = isAsap
-          ? `${s} <span class="opacity-70 font-normal text-sm">(arriba cap a les ${cfArrival(earliestSlot)})</span>`
-          : `${cfArrival(s)}${isPast ? ' · Ja ha passat' : isTooSoon ? ' · Massa aviat' : full ? ' · ' + fullLabel : ''}`;
+          ? `${s} <span class="opacity-70 font-normal text-sm">(arriba cap a les ${earliestSlot})</span>`
+          : `${s}${isPast ? ' · Ja ha passat' : isTooSoon ? ' · Massa aviat' : full ? ' · ' + fullLabel : ''}`;
         return `<button type="button" ${blocked ? 'disabled' : `onclick="selectTimeSlot('${s}')"`}
           class="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl border font-medium transition-all text-${isAsap ? 'lg' : 'base'} ${blocked ? 'border-[#C4B08A]/20 text-[#9B8A72] bg-[#E6D5B0]/10 cursor-not-allowed opacity-60' : 'border-[#C4B08A]/40 text-[#2A1A0F] hover:border-[#E23F2E]/60 hover:bg-[#E23F2E]/5 active:scale-[0.98] cursor-pointer'}">
           <iconify-icon icon="${isAsap ? 'solar:bolt-bold' : 'solar:clock-circle-linear'}" width="${isAsap ? 20 : 16}" style="color:${isAsap ? '#E23F2E' : '#9B8A72'};"></iconify-icon>
@@ -1359,7 +1356,7 @@
       const m = cfSelectedTime && /^(\d{1,2}):(\d{2})$/.exec(cfSelectedTime);
       if (!m) return '30–45 minuts';
       // La mateixa hora d'arribada que el client ha vist en triar.
-      return `Cap a les ${cfArrival(cfSelectedTime)}`;
+      return `Cap a les ${cfSelectedTime}`;
     }
 
     // Format català "Divendres 13 de setembre" a partir d'una data YYYY-MM-DD.
@@ -1384,7 +1381,7 @@
       } else {
         estimacioEntrega = '';
         if (labelEl) labelEl.textContent = 'Comanda registrada';
-        if (el) el.textContent = `${formatDeliveryDayLabel(cfDeliveryDate)}, arriba cap a les ${cfArrival(cfSelectedTime)}`;
+        if (el) el.textContent = `${formatDeliveryDayLabel(cfDeliveryDate)}, arriba cap a les ${cfSelectedTime}`;
       }
 
       const reassignedEl = document.getElementById('cf-success-reassigned');
@@ -1394,8 +1391,8 @@
           // si no s'ha pogut tenir llesta a l'hora triada, no és que la franja
           // estigués plena, és que calen més tandes.
           reassignedEl.textContent = window._cfBigOrder
-            ? `La teva comanda és gran i la fem en més d'una tanda de forn — no la podíem tenir llesta abans: arribarà cap a les ${cfArrival(cfSelectedTime)}.`
-            : `L'hora que havies triat s'havia omplert — la teva comanda arribarà cap a les ${cfArrival(cfSelectedTime)}.`;
+            ? `La teva comanda és gran i la fem en més d'una tanda de forn — no la podíem tenir llesta abans: arribarà cap a les ${cfSelectedTime}.`
+            : `L'hora que havies triat s'havia omplert — la teva comanda arribarà cap a les ${cfSelectedTime}.`;
           reassignedEl.classList.remove('hidden');
         } else {
           reassignedEl.classList.add('hidden');
@@ -1422,7 +1419,7 @@
       const isAsap = time === 'Com més aviat millor';
       cfSelectedTime = isAsap ? (window._cfEarliestSlot || time) : time;
       if (isAsap && window._cfEarliestSlot) {
-        showCfToast(`La teva comanda arribarà cap a les ${cfArrival(window._cfEarliestSlot)}.`);
+        showCfToast(`La teva comanda arribarà cap a les ${window._cfEarliestSlot}.`);
       }
       const timeStep = document.getElementById('cf-time-step');
       const scroll   = document.getElementById('cf-scroll');
@@ -2006,7 +2003,7 @@
     function cfCheckSlotFits() {
       if (cfSlotFitsCart()) return true;
       const n = cfPizzaCount();
-      cfBackToTimeStep(`A les ${cfArrival(cfSelectedTime)} ja no hi caben ${n === 1 ? 'la teva pizza' : `les teves ${n} pizzes`}. Tria una altra hora.`);
+      cfBackToTimeStep(`A les ${cfSelectedTime} ja no hi caben ${n === 1 ? 'la teva pizza' : `les teves ${n} pizzes`}. Tria una altra hora.`);
       return false;
     }
 
@@ -2315,7 +2312,7 @@
         // ABANS de pagar, no a la pantalla final.
         const movedEl = document.getElementById('stripe-reassigned');
         if (window._cfSlotReassigned) {
-          movedEl.textContent = `⚠ L'hora que havies triat s'acaba d'omplir: la teva comanda arribarà cap a les ${cfArrival(cfSelectedTime)}. Si no et va bé, tanca aquesta finestra i tria una altra hora.`;
+          movedEl.textContent = `⚠ L'hora que havies triat s'acaba d'omplir: la teva comanda arribarà cap a les ${cfSelectedTime}. Si no et va bé, tanca aquesta finestra i tria una altra hora.`;
           movedEl.classList.remove('hidden');
         } else {
           movedEl.classList.add('hidden');
