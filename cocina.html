@@ -71,7 +71,6 @@
       #history-modal input[type="date"] { min-height: 44px; font-size: 16px; }
       #history-modal > div > div:nth-child(2) > button { min-height: 44px; }
       #history-list { padding: 1rem; overflow-wrap: anywhere; }
-      #history-list button[aria-label] { width: 44px; height: 44px; }
       #login-email { font-size: 16px; } /* evita el zoom automàtic d'iOS */
     }
   </style>
@@ -128,6 +127,7 @@
           <h1 class="font-black tracking-tight text-2xl">Comandes</h1>
           <span id="order-count" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
           <span id="role-indicator" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
+          <span id="conn-status" role="status" aria-live="polite" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold whitespace-nowrap text-[#8B93A1]">Connectant…</span>
         </div>
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-2 pr-3 border-r border-white/10">
@@ -312,7 +312,6 @@
         <label class="text-xs font-semibold text-[#6B7280]">Fins a</label>
         <input type="date" id="history-to" onchange="renderHistoryList()"
           class="bg-white border border-[#D1D5DB] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#2563EB]">
-        <button onclick="confirmClearHistory()" class="ml-auto px-3 py-1.5 rounded-lg border border-[#DC2626]/30 text-xs font-bold text-[#DC2626] hover:bg-[#DC2626]/10 transition-colors">🗑 Eliminar historial</button>
       </div>
       <div id="history-list" class="flex-1 overflow-y-auto p-6 space-y-3"></div>
     </div>
@@ -480,6 +479,11 @@
         loadMenuBlocks();
         refreshPaseButton();
         subscribeRealtime();
+        // Xarxa de seguretat: si el realtime es talla (wifi, mòbil en
+        // segon pla...) els canvis d'aquella estona no es tornen a enviar.
+        // Recarregant cada 30 s cap comanda queda més de mig minut amagada.
+        setInterval(() => loadOrders(), 30000);
+        setInterval(updateConnStatus, 5000);
         setInterval(updateElapsedCounters, 30000);
         setInterval(loadDoughs, 60000);
         setInterval(loadMenuBlocks, 60000);
@@ -1025,29 +1029,77 @@
 
     const _seenOrderIds = new Set();
 
+    // Cada càrrega porta un número: si una de més antiga arriba tard (xarxa
+    // lenta), no trepitja una de més nova ja pintada.
+    let _loadSeq = 0;
+    let _lastLoadOk = 0;      // ms de l'última càrrega correcta
+    let _lastLoadFailed = false;
+    let _rtStatus = '';       // estat del canal realtime de Supabase
     async function loadOrders() {
+      const seq = ++_loadSeq;
       const { data, error } = await supabase
         .from('orders')
         .select('*, customers(name, phone, email), addresses(street, floor, postal_code, city, notes, lat, lng), order_items(*)')
         .order('created_at', { ascending: true });
-      if (error) { console.error(error); return; }
+      if (seq !== _loadSeq) return;
+      if (error) { console.error(error); _lastLoadFailed = true; updateConnStatus(); return; }
+      _lastLoadOk = Date.now(); _lastLoadFailed = false; updateConnStatus();
       const isFirstLoad = _seenOrderIds.size === 0;
       const newIds = detectNewPendingOrders(data || [], _seenOrderIds);
       const newInScope = (data || []).some(o => newIds.includes(o.id) && inDateScope(o));
       ordersCache = data || [];
       await loadIncidents();
+      if (seq !== _loadSeq) return;
       renderOrders();
       loadDoughs();
       if (!isFirstLoad && newInScope) playNewOrderSound();
     }
 
+    // Una comanda nova arriba com 1 canvi a orders + 1 per pizza a
+    // order_items: s'agrupen en una sola recàrrega.
+    let _reloadTimer = null;
+    function scheduleLoadOrders() {
+      clearTimeout(_reloadTimer);
+      _reloadTimer = setTimeout(() => loadOrders(), 300);
+    }
+
     function subscribeRealtime() {
       supabase
         .channel('cocina-orders')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadOrders())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => loadOrders())
-        .subscribe();
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, scheduleLoadOrders)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, scheduleLoadOrders)
+        .subscribe(status => {
+          _rtStatus = status;
+          updateConnStatus();
+          // En tornar a connectar, es recupera el que hagi entrat mentrestant.
+          if (status === 'SUBSCRIBED' && _lastLoadOk) loadOrders();
+        });
     }
+
+    // Verd: en directe. Groc: el directe ha caigut però la recàrrega de
+    // cada 30 s funciona. Vermell: fa més d'1 minut que no hi ha dades
+    // noves (sense internet o sessió caducada) — el tauler pot no ser al dia.
+    function updateConnStatus() {
+      const el = document.getElementById('conn-status');
+      if (!el) return;
+      const ago = _lastLoadOk ? Math.round((Date.now() - _lastLoadOk) / 1000) : null;
+      const agoTxt = ago === null ? '' : ago < 60 ? `fa ${ago} s` : `fa ${Math.floor(ago / 60)} min`;
+      let text, color;
+      if (!navigator.onLine || (_lastLoadOk && ago > 75) || (_lastLoadFailed && !_lastLoadOk)) {
+        text = _lastLoadOk ? `● Sense connexió · últimes dades ${agoTxt}` : '● Sense connexió';
+        color = '#EF4444';
+      } else if (!_lastLoadOk) {
+        text = 'Connectant…'; color = '#8B93A1';
+      } else if (_rtStatus === 'SUBSCRIBED' && !_lastLoadFailed) {
+        text = '● En directe'; color = '#22C55E';
+      } else {
+        text = `● Actualitzat ${agoTxt}`; color = '#F59E0B';
+      }
+      el.textContent = text;
+      el.style.color = color;
+    }
+    window.addEventListener('online', () => { updateConnStatus(); if (_dataFeedStarted) loadOrders(); });
+    window.addEventListener('offline', updateConnStatus);
 
     function inDateScope(o) {
       const today = businessDateISO();
@@ -1209,8 +1261,8 @@
       const next = ACTIONS_NEXT[stage];
       return `
         <div class="flex gap-2">
-          <button onclick="advanceStatusBulk(['${idsJs}'],'${next.status}')" class="flex-1 ${pad} rounded-lg ${next.color} text-white font-semibold transition-all">${next.label}</button>
-          <button onclick="confirmCancelOrder(['${idsJs}'])" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
+          <button data-ids="${ids.join(',')}" onclick="advanceStatusBulk(['${idsJs}'],'${next.status}')" class="flex-1 ${pad} rounded-lg ${next.color} text-white font-semibold transition-all">${next.label}</button>
+          <button data-ids="${ids.join(',')}" onclick="confirmCancelOrder(['${idsJs}'])" aria-label="Cancel·lar comanda" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
         </div>`;
     }
 
@@ -1223,9 +1275,18 @@
       return (o.notes || '').replace(/^Hora: \d{1,2}:\d{2}( · )?/, '').trim();
     }
 
+    // La web ensenya al client l'hora d'ARRIBADA (franja + 15 min), no la
+    // franja de forn: el text ha de parlar el mateix idioma que ell.
+    const DELIVERY_MIN = 15;
+    function arrivalOf(slot) {
+      const m = /^(\d{1,2}):(\d{2})$/.exec(slot || '');
+      if (!m) return slot || '';
+      const t = Number(m[1]) * 60 + Number(m[2]) + DELIVERY_MIN;
+      return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+    }
     function requestedSlotHtml(o) {
       if (!o.requested_slot || !o.slot_time || o.requested_slot === o.slot_time) return '';
-      return `<p class="text-xs font-bold text-[#DC2626]">⚠ El client la volia a les ${escapeHtml(o.requested_slot)} — se li ha dit que arribarà a partir de les ${escapeHtml(o.slot_time)}</p>`;
+      return `<p class="text-xs font-bold text-[#DC2626]">⚠ El client la volia cap a les ${escapeHtml(arrivalOf(o.requested_slot))} — se li ha dit que arribarà cap a les ${escapeHtml(arrivalOf(o.slot_time))}</p>`;
     }
 
     function renderOrderCard(group) {
@@ -1249,13 +1310,13 @@
         const items = o.order_items || [];
         const itemsHtml = items.map(it => `
           <div class="flex justify-between gap-2 text-sm">
-            <span>${it.quantity}× ${it.product_name}${it.notes ? `<span class="block text-xs text-[#DC2626] font-semibold">⚠ ${escapeHtml(it.notes)}</span>` : ''}</span>
+            <span>${it.quantity}× ${escapeHtml(it.product_name)}${it.notes ? `<span class="block text-xs text-[#DC2626] font-semibold">⚠ ${escapeHtml(it.notes)}</span>` : ''}</span>
             <span class="shrink-0 text-[#6B7280]">${fmt(it.unit_price * it.quantity)}</span>
           </div>
         `).join('');
         return `
           <div class="space-y-2">
-            ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + (STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
+            ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + escapeHtml(STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
             <div class="space-y-1.5">${itemsHtml}</div>
             ${Number(o.discount_amount) > 0 ? `<div class="flex justify-between gap-2 text-sm text-[#059669]"><span>Descompte ${escapeHtml(o.discount_code || '')}</span><span class="shrink-0">−${fmt(o.discount_amount)}</span></div>` : ''}
             <div class="flex items-center justify-between text-sm">
@@ -1309,7 +1370,7 @@
             ${requestedSlotHtml(first)}
             <div>
               <p class="font-bold text-lg">${escapeHtml(cust.name || 'Client')}</p>
-              <a href="tel:${escapeHtml(cust.phone || '')}" class="text-sm text-[#2563EB] font-semibold">${escapeHtml(cust.phone || '')}</a>
+              <a href="${escapeHtml(telHref(cust.phone))}" class="text-sm text-[#2563EB] font-semibold">${escapeHtml(cust.phone || '')}</a>
             </div>
             <div class="text-sm text-[#4B5563] leading-relaxed">
               ${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}<br>
@@ -1474,22 +1535,82 @@
       }
     }
 
+    // També les cometes: el text del client (nom, telèfon, notes) acaba
+    // dins d'atributs com href="tel:...". Sense escapar " un telèfon fet a
+    // mida podia afegir atributs (i codi) a la targeta de la tablet.
     function escapeHtml(s) {
-      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    // Enllaç per trucar: només xifres i el + inicial. Alguns clients antics
+    // tenen el prefix repetit ("+34 +34 6..."): es deixa un sol +34.
+    function telHref(phone) {
+      const raw = String(phone || '').trim();
+      const d = raw.replace(/\D/g, '');
+      if (!d) return '';
+      if (d.length > 9 && d.startsWith('34')) return 'tel:+34' + d.slice(-9);
+      return 'tel:' + (raw.startsWith('+') ? '+' : '') + d;
+    }
+
+    // Doble toc: mentre es desa, els botons de la comanda queden bloquejats,
+    // i durant 1,2 s després s'ignoren més tocs — si no, el segon toc queia
+    // sobre el botó de l'etapa següent (que surt al mateix lloc) i se la
+    // saltava, o enviava dues vegades el correu "en camí".
+    const _busyIds = new Set();
+    const _lastChangeAt = new Map();
+    const ADVANCE_LOCK_MS = 1200;
+
+    function setButtonsBusy(ids, busy) {
+      document.querySelectorAll('button[data-ids]').forEach(b => {
+        if (b.dataset.ids.split(',').some(id => ids.includes(id))) {
+          b.disabled = busy;
+          b.classList.toggle('opacity-50', busy);
+        }
+      });
     }
 
     async function advanceStatusBulk(ids, newStatus) {
+      const now = Date.now();
+      if (ids.some(id => _busyIds.has(id) || now - (_lastChangeAt.get(id) || 0) < ADVANCE_LOCK_MS)) return;
+      const prev = ids.map(id => ({ id, status: (ordersCache.find(o => o.id === id) || {}).status }));
+      ids.forEach(id => _busyIds.add(id));
+      setButtonsBusy(ids, true);
       const { error } = await supabase.from('orders').update({ status: newStatus }).in('id', ids);
-      if (error) { alert('Error actualitzant la comanda: ' + error.message); return; }
+      ids.forEach(id => { _busyIds.delete(id); _lastChangeAt.set(id, Date.now()); });
+      if (error) {
+        setButtonsBusy(ids, false);
+        showToast('Error actualitzant la comanda: ' + error.message, true);
+        return;
+      }
       // Email "la teva comanda és en camí" al client. No s'espera: si falla,
       // el tauler segueix igual (la comanda ja és en repartiment).
       if (newStatus === 'out_for_delivery') {
         supabase.functions.invoke('order-on-the-way', { body: { orderIds: ids } })
           .then(({ error: e }) => { if (e) console.error('[order-on-the-way]', e); });
       }
+      const o = ordersCache.find(x => x.id === ids[0]);
+      const who = (o && o.customers && o.customers.name) || 'Comanda';
+      const canUndo = prev.every(p => p.status && p.status !== newStatus);
+      showToast(`${who}: ${STATUS_LABEL[newStatus] || newStatus}`, false,
+        canUndo ? { label: 'Desfer', fn: () => undoStatusChange(prev, newStatus) } : null);
       await loadOrders();
     }
     window.advanceStatusBulk = advanceStatusBulk;
+
+    // Torna cada comanda a l'estat que tenia. (Si s'havia marcat "En
+    // repartiment", el correu "en camí" ja ha sortit i no es pot recuperar.)
+    async function undoStatusChange(prev, fromStatus) {
+      const byStatus = new Map();
+      prev.forEach(p => { if (!byStatus.has(p.status)) byStatus.set(p.status, []); byStatus.get(p.status).push(p.id); });
+      for (const [status, ids] of byStatus) {
+        // Només si encara és on l'hem deixat: si algú l'ha tornat a moure, no es trepitja.
+        const { error } = await supabase.from('orders').update({ status }).in('id', ids).eq('status', fromStatus);
+        if (error) { showToast("No s'ha pogut desfer: " + error.message, true); await loadOrders(); return; }
+        ids.forEach(id => _lastChangeAt.set(id, Date.now()));
+      }
+      showToast('Desfet');
+      await loadOrders();
+    }
 
     // ── Incidències (pizza cremada, equivocada, queixa...) ──
     // Es guarden a order_incidents i surten a l'informe del pase. Si la
@@ -1512,7 +1633,7 @@
 
     function incidentRow(group) {
       const kinds = group.flatMap(o => incidentsByOrder.get(o.id) || []);
-      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-[#DC2626]/10 text-[#DC2626] text-xs font-bold">⚠ ${INCIDENT_LABEL[k] || k}</span>`).join(' ');
+      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-[#DC2626]/10 text-[#DC2626] text-xs font-bold">⚠ ${escapeHtml(INCIDENT_LABEL[k] || k)}</span>`).join(' ');
       return `
         <div class="flex items-center gap-2 flex-wrap">
           ${tags}
@@ -1545,14 +1666,29 @@
     }
     window.saveIncident = saveIncident;
 
-    function showToast(text, isError = false) {
+    // action = { label, fn }: botó dins l'avís (p. ex. "Desfer"), que
+    // llavors es queda més estona a la pantalla.
+    function showToast(text, isError = false, action = null) {
       const el = document.getElementById('pase-toast');
-      el.textContent = text;
+      el.textContent = '';
+      const span = document.createElement('span');
+      span.textContent = text;
+      el.appendChild(span);
+      if (action) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = action.label;
+        b.className = 'ml-4 px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 font-black uppercase tracking-wide';
+        b.onclick = () => { clearTimeout(showToast._t); el.classList.add('hidden'); action.fn(); };
+        el.appendChild(b);
+      }
+      el.classList.toggle('flex', !!action);
+      el.classList.toggle('items-center', !!action);
       el.classList.toggle('bg-[#16A34A]', !isError);
       el.classList.toggle('bg-[#DC2626]', isError);
       el.classList.remove('hidden');
       clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => el.classList.add('hidden'), 4000);
+      showToast._t = setTimeout(() => el.classList.add('hidden'), action ? 8000 : 4000);
     }
 
     // ── Tancar pase ──
@@ -1618,17 +1754,26 @@
     // Cancel·lar és irreversible des de la UI (no hi ha manera de tornar
     // enrere un cop marcada com a cancel·lada), així que demanem
     // confirmació abans — evita cancel·lacions per un toc accidental.
+    // Una comanda pagada amb targeta no es retorna sola: cancel·lar-la aquí
+    // només la treu del tauler. Cal fer la devolució des de Stripe.
     function confirmCancelOrder(ids) {
-      if (confirm('Estàs segur que vols eliminar aquesta comanda?')) {
-        advanceStatusBulk(ids, 'cancelled');
+      const orders = ids.map(id => ordersCache.find(o => o.id === id)).filter(Boolean);
+      const paid = orders.filter(o => o.payment_method !== 'cash' && o.payment_status === 'paid');
+      const paidTotal = paid.reduce((s, o) => s + (Number(o.total) || 0), 0);
+      const n = ids.length;
+      let msg = n > 1 ? `Cancel·lar aquestes ${n} comandes?` : 'Cancel·lar aquesta comanda?';
+      if (paid.length) {
+        msg += `\n\n⚠ ${paid.length === n ? (n > 1 ? 'Estan PAGADES' : 'Està PAGADA') : `${paid.length} de ${n} estan PAGADES`} amb targeta (${fmt(paidTotal)}).`
+          + '\nCancel·lar-la aquí NO retorna els diners al client: cal fer la devolució des de Stripe.';
       }
+      if (confirm(msg)) advanceStatusBulk(ids, 'cancelled');
     }
     window.confirmCancelOrder = confirmCancelOrder;
 
     // ── Historial: comandes ja entregades o cancel·lades, per consultar-les
     // si cal revisar algun problema — no apareixen al tauler actiu. Té el seu
     // propi rang de dates (Des de / Fins a), independent del filtre Avui/Setmana
-    // del tauler, per poder buscar qualsevol període passat. ──
+    // del tauler, per poder buscar qualsevol període passat. Només lectura. ──
     function openHistory() {
       // Recalcula el rang per defecte (últims 7 dies fins avui) cada vegada
       // que s'obre, encara que la tablet porti dies oberta sense recarregar
@@ -1647,9 +1792,7 @@
     // quedar entregada/cancel·lada), no per delivery_date — una comanda
     // per endavant té delivery_date a un dia FUTUR, així que filtrar per
     // delivery_date podia deixar fora del rang per defecte (últims 7
-    // dies fins avui) comandes que s'acabaven de completar. Compartida
-    // entre renderHistoryList i "Eliminar historial", perquè l'esborrat
-    // esborri exactament el que es veu a la pantalla en aquell moment.
+    // dies fins avui) comandes que s'acabaven de completar.
     function getFilteredHistoryOrders() {
       const from = document.getElementById('history-from').value;
       const to   = document.getElementById('history-to').value;
@@ -1685,35 +1828,10 @@
     }
     window.renderHistoryList = renderHistoryList;
 
-    // Esborrar és permanent (no hi ha paperera) — les línies de la
-    // comanda (order_items) s'esborren soles gràcies a un ON DELETE
-    // CASCADE a la base de dades.
-    async function deleteOrdersAndRefresh(ids) {
-      const { error } = await supabase.from('orders').delete().in('id', ids);
-      if (error) { alert('Error eliminant: ' + error.message); return; }
-      await loadOrders();
-      renderHistoryList();
-    }
-
-    function confirmDeleteHistoryOrder(id) {
-      if (confirm('Estàs segur que vols eliminar aquesta comanda de l\'historial? Aquesta acció no es pot desfer.')) {
-        deleteOrdersAndRefresh([id]);
-      }
-    }
-    window.confirmDeleteHistoryOrder = confirmDeleteHistoryOrder;
-
-    // Esborra totes les comandes que es veuen ara mateix a l'historial
-    // (respecta el filtre "Des de / Fins a" triat) — no tot l'historial
-    // sencer sense mirar, per no esborrar per error comandes fora de vista.
-    function confirmClearHistory() {
-      const ids = getFilteredHistoryOrders().map(({ o }) => o.id);
-      if (!ids.length) { alert('No hi ha comandes en aquest període per eliminar.'); return; }
-      const n = ids.length;
-      if (confirm(`Estàs segur que vols eliminar ${n} comanda${n > 1 ? 's' : ''} de l'historial (període seleccionat)? Aquesta acció no es pot desfer.`)) {
-        deleteOrdersAndRefresh(ids);
-      }
-    }
-    window.confirmClearHistory = confirmClearHistory;
+    // L'historial és només de consulta. Abans hi havia botons per esborrar
+    // comandes de la base de dades, però això les treia també de l'informe
+    // del pase, del resum setmanal i de la factura. Una comanda de prova o
+    // equivocada es cancel·la (✕) i prou.
 
     function closeHistory() {
       document.getElementById('history-modal').classList.add('hidden');
@@ -1740,10 +1858,7 @@
         <div class="border border-[#E5E7EB] rounded-xl px-4 py-3">
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="font-bold">${escapeHtml(cust.name || 'Client')}</span>
-            <span class="flex items-center gap-2">
-              <span class="text-xs font-bold uppercase ${statusColor}">${STATUS_LABEL[o.status] || o.status}</span>
-              <button onclick="confirmDeleteHistoryOrder('${o.id}')" aria-label="Eliminar comanda" class="w-6 h-6 flex items-center justify-center rounded-full text-[#9CA3AF] hover:bg-[#DC2626]/10 hover:text-[#DC2626] transition-colors">🗑</button>
-            </span>
+            <span class="text-xs font-bold uppercase ${statusColor}">${escapeHtml(STATUS_LABEL[o.status] || o.status)}</span>
           </div>
           <p class="text-xs text-[#6B7280] mb-1">Comanda per al ${deliveryDayLabel} ${escapeHtml(o.slot_time || '')} · ${statusVerb} a les ${completedTime} · ${fmt(o.total)}</p>
           ${addressText ? `<p class="text-sm text-[#4B5563]">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
