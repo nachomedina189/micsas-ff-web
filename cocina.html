@@ -1408,7 +1408,14 @@
         </div>`;
     }
 
-    // view 'cuina': el pizzero veu el nom, les pizzes en gran i les notes.
+    // Adreça discreta per a la targeta del pizzero: una sola línia petita
+    // ("Carrer Major, 12, 2n 1a · Matadepera"), sense codi postal ni notes.
+    function cuinaAddress(addr) {
+      const street = [addr.street, addr.floor].filter(Boolean).join(', ');
+      return [street, addr.city].filter(Boolean).join(' · ');
+    }
+
+    // view 'cuina': el pizzero veu el nom, l'adreça en petit, les pizzes en gran i les notes.
     // view 'repartiment': adreça, telèfon, quant cobrar i navegació.
     function renderOrderCard(group, view = 'cuina') {
       const isGroup = group.length > 1;
@@ -1439,6 +1446,7 @@
         <div class="flex items-start gap-2">
           <div class="min-w-0 flex-1">
             <p class="font-bold text-lg leading-tight break-words">${escapeHtml(cust.name || 'Client')}</p>
+            ${view === 'cuina' && cuinaAddress(addr) ? `<p class="text-xs text-kmute mt-0.5 break-words">${escapeHtml(cuinaAddress(addr))}</p>` : ''}
             ${isGroup ? `<p class="text-xs font-semibold text-kmute mt-0.5">${group.length} comandes juntes</p>` : ''}
           </div>
           ${view === 'cuina' && stage === 'pending' && !isNaN(created) ? `<span class="js-new hidden shrink-0 px-2 py-0.5 rounded-full bg-kamber/15 text-kamber text-xs font-bold" data-created="${created}">Nova</span>` : ''}
