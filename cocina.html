@@ -28,6 +28,10 @@
       kfg: '#F2F4F7', kmute: '#8E96A3', kfaint: '#5D6573',
       kamber: '#F5A524', kblue: '#5B9BFF', kgreen: '#34C77B', kteal: '#2DD4BF', kred: '#FF6B6B',
       kbtnblue: '#2563EB', kbtngreen: '#15803D', kbtnteal: '#0F766E',
+      // Targetes de comanda: crema i marró de la marca, com la web de comandes.
+      tpaper: '#F4ECDC', tink: '#2A1A0F', tmute: '#76624C', tline: 'rgba(42,26,15,0.12)',
+      tamber: '#8F4500', tamberbg: '#FBE3B4', tamberline: 'rgba(180,100,0,0.35)',
+      tred: '#B91C1C', tblue: '#1D4ED8', tgreen: '#1B6E33',
     } } } };
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -64,6 +68,12 @@
       border-radius: .75rem; border: 1px solid rgba(255,255,255,.1); font-size: .875rem; font-weight: 600; color: #F2F4F7; transition: background-color .15s; }
     .ghost-btn:hover { background: rgba(255,255,255,.06); }
     #close-pase-btn[data-sent] { color: #8E96A3; }
+
+    /* Targeta de comanda: crema sobre el fons fosc, perquè ressalti. */
+    .ticket { background: #F4ECDC; color: #2A1A0F; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 10px 28px rgba(0,0,0,.45); }
+    .ticket-btn { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; min-height: 40px; padding: .5rem .875rem;
+      border-radius: .75rem; border: 1px solid rgba(42,26,15,.18); font-size: .875rem; font-weight: 600; color: #2A1A0F; }
+    .ticket-btn:hover { background: rgba(42,26,15,.06); }
 
     .chev { flex-shrink: 0; font-size: .8125rem; font-weight: 600; color: #8E96A3; padding: .375rem .75rem; border-radius: .5rem; border: 1px solid rgba(255,255,255,.1); }
 
@@ -1425,7 +1435,7 @@
     }
     function requestedSlotHtml(o) {
       if (!o.requested_slot || !o.slot_time || o.requested_slot === o.slot_time) return '';
-      return `<p class="text-xs font-bold text-kred">⚠ El client la volia cap a les ${escapeHtml(arrivalOf(o.requested_slot))} — se li ha dit que arribarà cap a les ${escapeHtml(arrivalOf(o.slot_time))}</p>`;
+      return `<p class="text-xs font-bold text-tred">⚠ El client la volia cap a les ${escapeHtml(arrivalOf(o.requested_slot))} — se li ha dit que arribarà cap a les ${escapeHtml(arrivalOf(o.slot_time))}</p>`;
     }
 
     // Menú ⋯ de cada targeta. Es recorda quin està obert perquè la
@@ -1450,14 +1460,14 @@
 
     function itemsHtml(o) {
       const items = o.order_items || [];
-      const note = it => it.notes ? `<span class="block text-sm font-bold text-kred">⚠ ${escapeHtml(it.notes)}</span>` : '';
+      const note = it => it.notes ? `<span class="block text-sm font-bold text-tred">⚠ ${escapeHtml(it.notes)}</span>` : '';
       const pizzas = items.filter(it => !isDrinkName(it.product_name)).map(it => `
         <li class="flex gap-3 text-[17px] leading-snug">
           <span class="w-6 shrink-0 text-right font-black tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0 font-semibold">${escapeHtml(it.product_name)}${note(it)}</span>
         </li>`).join('');
       const drinks = items.filter(it => isDrinkName(it.product_name)).map(it => `
-        <li class="flex gap-3 text-sm text-kmute">
+        <li class="flex gap-3 text-sm text-tmute">
           <span class="w-6 shrink-0 text-right font-bold tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0">${escapeHtml(it.product_name)}${note(it)}</span>
         </li>`).join('');
@@ -1465,12 +1475,12 @@
     }
     function itemsInline(o) {
       const items = o.order_items || [];
-      const notes = items.filter(it => it.notes).map(it => `<span class="block text-sm font-bold text-kred">⚠ ${escapeHtml(it.product_name)}: ${escapeHtml(it.notes)}</span>`).join('');
-      return `<p class="text-sm text-kmute">${items.map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ')}</p>${notes}`;
+      const notes = items.filter(it => it.notes).map(it => `<span class="block text-sm font-bold text-tred">⚠ ${escapeHtml(it.product_name)}: ${escapeHtml(it.notes)}</span>`).join('');
+      return `<p class="text-sm text-tmute">${items.map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ')}</p>${notes}`;
     }
     function notesHtml(o) {
       const n = cleanNotes(o);
-      return n ? `<p class="rounded-lg bg-kamber/10 border border-kamber/30 px-3 py-2 text-sm font-semibold text-kamber">📝 ${escapeHtml(n)}</p>` : '';
+      return n ? `<p class="rounded-lg bg-tamberbg border border-tamberline px-3 py-2 text-sm font-semibold text-tamber">📝 ${escapeHtml(n)}</p>` : '';
     }
 
     // Comanda gran o partida en tandes de forn (slot_allocations amb més
@@ -1482,9 +1492,9 @@
       const rounds = keys.map((s, i) => `Tanda ${i + 1}: ${big.slot_allocations[s]} des de les ${escapeHtml(s)}`).join(' · ');
       const title = big.pizza_count > 6 ? `⚠ Comanda gran · ${big.pizza_count} pizzes` : `Repartida en ${keys.length} tandes · ${big.pizza_count} pizzes`;
       return `
-        <div class="rounded-lg bg-kamber/10 border border-kamber/30 px-3 py-2">
-          <p class="text-sm font-bold text-kamber">${title} · tot llest a les ${escapeHtml(big.slot_time || '')}</p>
-          <p class="text-xs text-kmute mt-0.5">${rounds}</p>
+        <div class="rounded-lg bg-tamberbg border border-tamberline px-3 py-2">
+          <p class="text-sm font-bold text-tamber">${title} · tot llest a les ${escapeHtml(big.slot_time || '')}</p>
+          <p class="text-xs text-tmute mt-0.5">${rounds}</p>
         </div>`;
     }
 
@@ -1509,12 +1519,12 @@
       const tel = telHref(cust.phone);
       const created = Math.max(...group.map(o => new Date(o.created_at).getTime()).filter(t => !isNaN(t)));
       const kinds = group.flatMap(o => incidentsByOrder.get(o.id) || []);
-      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-kred/15 text-kred text-xs font-bold">⚠ ${escapeHtml(INCIDENT_LABEL[k] || k)}</span>`).join('');
+      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-tred/10 text-tred text-xs font-bold">⚠ ${escapeHtml(INCIDENT_LABEL[k] || k)}</span>`).join('');
       const done = stage === 'delivered';
 
       const menu = `
         <details class="card-more relative shrink-0" data-key="${escapeHtml(key)}" ${_openCardMenus.has(key) ? 'open' : ''} ontoggle="onCardMenuToggle(this)">
-          <summary class="w-10 h-10 -mr-2 -mt-1.5 flex items-center justify-center rounded-lg text-kmute text-xl leading-none hover:bg-white/5 hover:text-kfg cursor-pointer" aria-label="Més opcions de la comanda">⋯</summary>
+          <summary class="w-10 h-10 -mr-2 -mt-1.5 flex items-center justify-center rounded-lg text-tmute text-xl leading-none hover:bg-black/5 hover:text-tink cursor-pointer" aria-label="Més opcions de la comanda">⋯</summary>
           <div class="absolute right-0 top-full mt-1 w-60 bg-kcard2 border border-kline rounded-xl shadow-2xl p-1.5 z-20">
             ${tel ? `<a href="${escapeHtml(tel)}" class="menu-item">📞 Trucar · ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
             <button type="button" onclick="closeCardMenu(this); openIncident('${first.id}')" class="menu-item">⚠ Apuntar incidència</button>
@@ -1526,17 +1536,17 @@
         <div class="flex items-start gap-2">
           <div class="min-w-0 flex-1">
             <p class="font-bold text-lg leading-tight break-words">${escapeHtml(cust.name || 'Client')}</p>
-            ${view === 'cuina' && cuinaAddress(addr) ? `<p class="text-xs text-kmute mt-0.5 break-words">${escapeHtml(cuinaAddress(addr))}</p>` : ''}
-            ${isGroup ? `<p class="text-xs font-semibold text-kmute mt-0.5">${group.length} comandes juntes</p>` : ''}
+            ${view === 'cuina' && cuinaAddress(addr) ? `<p class="text-xs text-tmute mt-0.5 break-words">${escapeHtml(cuinaAddress(addr))}</p>` : ''}
+            ${isGroup ? `<p class="text-xs font-semibold text-tmute mt-0.5">${group.length} comandes juntes</p>` : ''}
           </div>
-          ${view === 'cuina' && stage === 'pending' && !isNaN(created) ? `<span class="js-new hidden shrink-0 px-2 py-0.5 rounded-full bg-kamber/15 text-kamber text-xs font-bold" data-created="${created}">Nova</span>` : ''}
+          ${view === 'cuina' && stage === 'pending' && !isNaN(created) ? `<span class="js-new hidden shrink-0 px-2 py-0.5 rounded-full bg-tamberbg text-tamber text-xs font-bold" data-created="${created}">Nova</span>` : ''}
           ${menu}
         </div>
         ${tags ? `<div class="flex flex-wrap gap-1.5">${tags}</div>` : ''}`;
 
       const orders = group.map((o, idx) => `
-        <div class="space-y-2 ${idx ? 'pt-3 border-t border-dashed border-kline' : ''}">
-          ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-kmute">Comanda ${idx + 1}${allSameStatus ? '' : ' · ' + escapeHtml(STATUS_LABEL[o.status] || o.status)}</p>` : ''}
+        <div class="space-y-2 ${idx ? 'pt-3 border-t border-dashed border-tline' : ''}">
+          ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-tmute">Comanda ${idx + 1}${allSameStatus ? '' : ' · ' + escapeHtml(STATUS_LABEL[o.status] || o.status)}</p>` : ''}
           ${view === 'cuina' ? itemsHtml(o) : itemsInline(o)}
           ${notesHtml(o)}
           ${isGroup && !allSameStatus && o.status !== 'delivered' ? actionButton([o.id], stageOf(o), 'sm') : ''}
@@ -1546,7 +1556,7 @@
 
       if (view === 'cuina') {
         return `
-          <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
+          <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="ticket rounded-2xl p-4 space-y-3">
             ${top}
             ${bigOrderHtml(group)}
             ${orders}
@@ -1561,25 +1571,25 @@
       const tip = group.reduce((s, o) => s + (Number(o.tip_amount) || 0), 0);
       const payment = `
         ${cash.length ? `
-          <div class="flex items-center justify-between gap-3 rounded-xl bg-kamber/10 border border-kamber/40 px-4 py-2.5">
-            <span class="text-xs font-black uppercase tracking-wide text-kamber">Cobrar en efectiu</span>
+          <div class="flex items-center justify-between gap-3 rounded-xl bg-tamberbg border border-tamberline px-4 py-2.5">
+            <span class="text-xs font-black uppercase tracking-wide text-tamber">Cobrar en efectiu</span>
             <span class="text-2xl font-black tabular-nums">${fmt(cashTotal)}</span>
           </div>` : ''}
-        ${paidTotal > 0 ? `<p class="text-sm font-semibold text-kgreen">✓ Pagat online · ${fmt(paidTotal)}</p>` : ''}
-        ${tip > 0 ? `<p class="text-xs text-kmute">Inclou propina de ${fmt(tip)}</p>` : ''}`;
+        ${paidTotal > 0 ? `<p class="text-sm font-semibold text-tgreen">✓ Pagat online · ${fmt(paidTotal)}</p>` : ''}
+        ${tip > 0 ? `<p class="text-xs text-tmute">Inclou propina de ${fmt(tip)}</p>` : ''}`;
       const nav = stage === 'ready' || stage === 'out_for_delivery' ? `
         <div class="grid grid-cols-2 gap-2">
-          <a href="${escapeHtml(buildMapsUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ghost-btn h-11">🗺️ Maps</a>
-          <a href="${escapeHtml(buildWazeUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ghost-btn h-11">🚗 Waze</a>
+          <a href="${escapeHtml(buildMapsUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ticket-btn h-11">🗺️ Maps</a>
+          <a href="${escapeHtml(buildWazeUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ticket-btn h-11">🚗 Waze</a>
         </div>` : '';
       return `
-        <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="bg-kcard border border-kline rounded-2xl p-4 space-y-3 ${done ? 'opacity-60' : ''}">
+        <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="ticket rounded-2xl p-4 space-y-3 ${done ? 'opacity-60' : ''}">
           ${top}
           <div>
             <p class="font-semibold leading-snug">${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}</p>
-            <p class="text-sm text-kmute">${escapeHtml(addr.postal_code || '')} ${escapeHtml(addr.city || '')}</p>
-            ${addr.notes ? `<p class="text-sm font-semibold text-kamber mt-1">${escapeHtml(addr.notes)}</p>` : ''}
-            ${tel ? `<a href="${escapeHtml(tel)}" class="inline-flex items-center gap-1.5 mt-1.5 min-h-[36px] text-kblue font-semibold">📞 ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
+            <p class="text-sm text-tmute">${escapeHtml(addr.postal_code || '')} ${escapeHtml(addr.city || '')}</p>
+            ${addr.notes ? `<p class="text-sm font-semibold text-tamber mt-1">${escapeHtml(addr.notes)}</p>` : ''}
+            ${tel ? `<a href="${escapeHtml(tel)}" class="inline-flex items-center gap-1.5 mt-1.5 min-h-[36px] text-tblue font-semibold">📞 ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
           </div>
           ${requestedSlotHtml(first)}
           ${orders}
