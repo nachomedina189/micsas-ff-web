@@ -295,6 +295,7 @@
       </section>
       <section id="section-out-for-delivery" class="min-w-0">
         <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kteal"></span>En repartiment <span class="count" data-count="out">0</span></h2>
+        <div id="route-panel-out" class="hidden mb-3"></div>
         <div id="col-out-for-delivery" class="space-y-3"></div>
       </section>
       <section id="section-delivered" class="min-w-0">
@@ -440,6 +441,7 @@
       document.getElementById('tools-strip').classList.toggle('hidden', v !== 'cuina');
       document.getElementById('view-repartiment').classList.toggle('hidden', v !== 'repartiment');
       document.getElementById('mcols-repartiment').classList.toggle('hidden', v !== 'repartiment');
+      renderRoutePanels();
     }
     window.setView = setView;
 
@@ -1332,7 +1334,8 @@
       document.getElementById('col-ready-repartiment').innerHTML = renderColumn(ready, 'ready', 'repartiment');
       document.getElementById('col-out-for-delivery').innerHTML = renderColumn(out, 'out_for_delivery', 'repartiment');
       document.getElementById('col-delivered').innerHTML = renderColumn(delivered, 'delivered', 'repartiment');
-      renderRoutePanel(ready.map(e => e.group));
+      _routeGroups = { ready: ready.map(e => e.group), out: out.map(e => e.group) };
+      renderRoutePanels();
       updateTimers();
       flipPlay(before, !_paintedOnce);
       _paintedOnce = true;
@@ -1368,6 +1371,7 @@
       });
     }
     const updateElapsedCounters = updateTimers;
+    setInterval(() => { if (currentView === 'repartiment') renderRoutePanels(); }, 30000);
 
     // Agrupa pedidos del mateix client (per telèfon) per a la mateixa
     // delivery_date + slot_time — perquè el pizzero vegi d'un cop tot el que
@@ -1615,8 +1619,11 @@
         </article>`;
     }
 
-    // ── Navegació del repartidor: adreces i enllaços de mapes ──
-    const KITCHEN_ORIGIN = "Carrer Coll d'Estenalles 24, 08230 Matadepera, Barcelona";
+    // ── Repartiment: navegació i ruta ──
+    // Coordenades de la pizzeria (Carrer Coll d'Estenalles 24, resoltes per
+    // Google): punt de sortida i de tornada de cada ruta.
+    const KITCHEN = { lat: 41.611333, lng: 2.010208 };
+    const SERVICE_SEC = 120;   // temps a cada porta (aparcar, donar la comanda, cobrar)
 
     function formatAddress(order) {
       const addr = order.addresses || {};
@@ -1624,94 +1631,250 @@
       const line2 = [addr.postal_code, addr.city].filter(Boolean).join(' ');
       return [line1, line2].filter(Boolean).join(', ');
     }
-    // Destí per a navegació: si tenim les coordenades precises que Google
-    // Places ja va resoldre en triar l'adreça (guardades a addresses.lat/lng),
-    // les fem servir directament — "lat,lng" apunta al punt exacte, sense
-    // passar per una re-geocodificació del text que pot fallar amb carrers
-    // ambigus o poc coneguts (havia arribat a apuntar al mig de la zona
-    // forestal del Sant Llorenç del Munt). Si l'adreça és anterior a aquest
-    // canvi i no té lat/lng desades, cau al text com abans.
+    // Destí per navegar: les coordenades exactes que Google Places va donar
+    // quan el client va triar l'adreça (addresses.lat/lng). Sense elles
+    // (client que no va passar per pre-pedido), el text de l'adreça, que
+    // Google ha de tornar a buscar i que en un carrer ambigu pot fallar.
+    const COORDS_RE = /^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/;
     function addressDestination(order) {
       const addr = order.addresses || {};
-      if (typeof addr.lat === 'number' && typeof addr.lng === 'number') {
-        return `${addr.lat},${addr.lng}`;
-      }
+      if (typeof addr.lat === 'number' && typeof addr.lng === 'number') return `${addr.lat},${addr.lng}`;
       return formatAddress(order);
     }
-    function buildMapsUrl(address) {
-      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}&travelmode=driving`;
+    // Sense "origin": Google Maps surt de la ubicació actual del mòbil, que és
+    // l'única manera que obri la navegació pas a pas (amb un origen fix només
+    // ensenya la vista prèvia si no ets just allà). dir_action=navigate
+    // l'arrenca directament.
+    function buildMapsUrl(destination) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving&dir_action=navigate`;
     }
-    function buildWazeUrl(address) {
-      return `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
+    // Waze: amb coordenades cal "ll=" (amb "q=" les tractava com una cerca de text).
+    function buildWazeUrl(destination) {
+      return COORDS_RE.test(destination)
+        ? `https://waze.com/ul?ll=${encodeURIComponent(destination)}&navigate=yes`
+        : `https://waze.com/ul?q=${encodeURIComponent(destination)}&navigate=yes`;
     }
-    function buildRouteWaypoints(readyGroups) {
-      return readyGroups
-        .map(group => ({
-          label: (group[0].customers && group[0].customers.name) || 'Client',
-          address: formatAddress(group[0]),
-          destination: addressDestination(group[0]),
-        }))
-        .filter(w => w.destination.trim().length > 0);
-    }
-    function buildMultiStopMapsUrl(origin, orderedStops) {
-      const originParam = encodeURIComponent(origin);
-      const destination = encodeURIComponent(orderedStops[orderedStops.length - 1].destination);
-      const waypointsParam = orderedStops.slice(0, -1).map(s => encodeURIComponent(s.destination)).join('|');
-      let url = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${destination}&travelmode=driving`;
-      if (waypointsParam) url += `&waypoints=${waypointsParam}`;
+    // Ruta amb diverses parades: les del mig com a "waypoints" i l'última com
+    // a destí. L'app de Google Maps n'accepta fins a 9 de mig (10 parades).
+    function buildMultiStopMapsUrl(orderedStops) {
+      const last = orderedStops[orderedStops.length - 1];
+      const mids = orderedStops.slice(0, -1).map(s => encodeURIComponent(s.destination)).join('%7C');
+      let url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(last.destination)}&travelmode=driving&dir_action=navigate`;
+      if (mids) url += `&waypoints=${mids}`;
       return url;
     }
 
+    // ── Ordre de les parades ──
+    // Abans: Google només reordenava les parades del mig i l'última era
+    // sempre la darrera de la columna, així que amb 2 comandes no
+    // s'optimitzava res. Ara es demana a Google una sola matriu amb els temps
+    // reals en cotxe entre la pizzeria i totes les adreces, i aquí es proven
+    // TOTS els ordres possibles (fins a 8 parades) quedant-se amb el que fa
+    // esperar menys els clients, penalitzant 3× cada minut que algú arribi
+    // més tard de l'hora que li vam prometre (franja + 15) i comptant la
+    // tornada a la pizzeria.
+    function planRoute(M, stops, departAt, serviceSec = SERVICE_SEC) {
+      const n = stops.length;
+      const evalOrder = order => {
+        let t = departAt, prev = 0, sumWait = 0, late = 0;
+        const etas = [];
+        for (const i of order) {
+          const leg = M[prev][i + 1];
+          if (leg == null) return null;
+          t += leg * 1000;
+          etas.push(t);
+          sumWait += t - departAt;
+          if (stops[i].promisedAt) late += Math.max(0, t - stops[i].promisedAt);
+          t += serviceSec * 1000;
+          prev = i + 1;
+        }
+        const back = M[prev][0];
+        if (back == null) return null;
+        return { order, etas, backAt: t + back * 1000, cost: sumWait + 3 * late + back * 1000 };
+      };
+      let best = null;
+      const consider = o => { const r = evalOrder(o); if (r && (!best || r.cost < best.cost)) best = r; };
+      if (n <= 8) {
+        const perm = (rest, acc) => {
+          if (!rest.length) return consider(acc);
+          rest.forEach((x, k) => perm([...rest.slice(0, k), ...rest.slice(k + 1)], [...acc, x]));
+        };
+        perm([...Array(n).keys()], []);
+      } else {
+        // Moltes parades (no passa a la pràctica): la més propera cada vegada.
+        const left = new Set([...Array(n).keys()]); const order = []; let prev = 0;
+        while (left.size) {
+          let bi = null;
+          for (const i of left) if (bi === null || (M[prev][i + 1] ?? 1e9) < (M[prev][bi + 1] ?? 1e9)) bi = i;
+          order.push(bi); left.delete(bi); prev = bi + 1;
+        }
+        consider(order);
+      }
+      return best;
+    }
+
+    // Matriu de temps (segons) entre [pizzeria, ...destins], demanada a Google
+    // un sol cop per conjunt d'adreces; marcar/desmarcar parades no torna a
+    // trucar a Google. Primer l'API nova (RouteMatrix) i, si falla, l'antiga.
     let _routesLib = null;
-    let _lastRouteKey = '';
     async function _getRoutesLib() {
       if (!_routesLib) _routesLib = await google.maps.importLibrary('routes');
       return _routesLib;
     }
-
-    // Calcula i mostra la ruta optimitzada entre les comandes de la columna
-    // "Llest" quan n'hi ha 2 o més a la vegada. Amb 0 o 1 no hi ha res a
-    // optimitzar — el panell es queda amagat. Si Google falla (adreça no
-    // localitzable, quota, sense connexió...) es mostra un avís curt i es
-    // continua funcionant amb la navegació individual de cada targeta —
-    // això mai bloqueja marcar comandes com llestes/entregades.
-    async function renderRoutePanel(readyGroups) {
-      const panel = document.getElementById('route-panel');
-      const stops = buildRouteWaypoints(readyGroups);
-      if (stops.length < 2) { panel.classList.add('hidden'); panel.innerHTML = ''; _lastRouteKey = ''; return; }
-
-      const key = stops.map(s => s.destination).join('|');
-      if (key === _lastRouteKey && panel.innerHTML) return;
-      _lastRouteKey = key;
-
-      panel.classList.remove('hidden');
-      panel.innerHTML = '<p class="text-xs text-kmute">Calculant ruta…</p>';
-
+    const _matrixCache = new Map();   // clau → { M } | { error } | { pending: Promise }
+    function _asPoint(dest) {
+      if (COORDS_RE.test(dest)) { const [lat, lng] = dest.split(',').map(Number); return { lat, lng }; }
+      return dest;
+    }
+    async function _fetchMatrix(dests) {
+      const lib = await _getRoutesLib();
+      const pts = [KITCHEN, ...dests.map(_asPoint)];
       try {
-        const { DirectionsService } = await _getRoutesLib();
-        const svc = new DirectionsService();
-        const waypoints = stops.slice(0, -1).map(s => ({ location: s.destination, stopover: true }));
-        const result = await svc.route({
-          origin: KITCHEN_ORIGIN,
-          destination: stops[stops.length - 1].destination,
-          waypoints,
-          optimizeWaypoints: true,
-          travelMode: google.maps.TravelMode.DRIVING,
-        });
-        const order = result.routes[0].waypoint_order;
-        const orderedStops = [...order.map(i => stops[i]), stops[stops.length - 1]];
-        const listHtml = orderedStops.map((s, i) => `<li>${i + 1}. ${escapeHtml(s.label)} — ${escapeHtml(s.address)}</li>`).join('');
-        const mapsUrl = buildMultiStopMapsUrl(KITCHEN_ORIGIN, orderedStops);
-        panel.innerHTML = `
-          <div class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
-            <p class="text-xs font-bold uppercase tracking-widest text-kmute">Ruta suggerida</p>
-            <ol class="text-sm space-y-1.5 list-none">${listHtml}</ol>
-            <a href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener" class="flex items-center justify-center h-12 rounded-xl bg-kbtngreen hover:brightness-110 text-white font-bold transition">🗺️ Navegar ruta completa</a>
-          </div>`;
+        const res = await lib.RouteMatrix.computeRouteMatrix({ origins: pts, destinations: pts, travelMode: 'DRIVING', fields: ['durationMillis', 'condition'] });
+        return res.matrix.rows.map(r => r.items.map(it => it.condition === 'ROUTE_EXISTS' && it.durationMillis != null ? Math.round(it.durationMillis / 1000) : null));
       } catch (e) {
-        console.error('[route]', e);
-        _lastRouteKey = '';
-        panel.innerHTML = '<p class="text-xs text-kred">No s\'ha pogut calcular la ruta — utilitza la navegació individual de cada comanda.</p>';
+        console.warn('[ruta] RouteMatrix ha fallat, provo DistanceMatrix', e);
+        const dm = new lib.DistanceMatrixService();
+        const res = await dm.getDistanceMatrix({ origins: pts, destinations: pts, travelMode: 'DRIVING' });
+        return res.rows.map(r => r.elements.map(el => el.status === 'OK' ? el.duration.value : null));
+      }
+    }
+    function getMatrix(dests) {
+      const key = dests.join('|');
+      const hit = _matrixCache.get(key);
+      if (hit) return hit;
+      const entry = { pending: null };
+      entry.pending = _fetchMatrix(dests)
+        .then(M => { _matrixCache.set(key, { M }); })
+        .catch(e => { console.error('[ruta]', e); _matrixCache.set(key, { error: true }); })
+        .finally(() => renderRoutePanels());
+      _matrixCache.set(key, entry);
+      return entry;
+    }
+
+    // Parades d'avui a partir dels grups (un grup = un client = una parada).
+    function routeStops(groups) {
+      const today = businessDateISO();
+      return groups.filter(g => g[0].delivery_date === today).map(g => {
+        const o = g[0];
+        const addr = o.addresses || {};
+        const at = slotAt(o.delivery_date, o.slot_time);
+        return {
+          key: g.map(x => x.id).join(','),
+          ids: g.map(x => x.id),
+          label: (o.customers && o.customers.name) || 'Client',
+          address: [[addr.street, addr.floor].filter(Boolean).join(', '), addr.city].filter(Boolean).join(' · '),
+          destination: addressDestination(o),
+          exact: typeof addr.lat === 'number' && typeof addr.lng === 'number',
+          promisedAt: isNaN(at) ? null : at + DELIVERY_MIN * 60000,
+          slot: o.slot_time || '',
+        };
+      }).filter(s => s.destination.trim());
+    }
+
+    // Planifica un conjunt de parades. Retorna { state: 'ok'|'pending'|'fallback', ordered, etas, backAt }.
+    function planStops(stops, allDests) {
+      const byTime = [...stops].sort((a, b) => (a.slot || '').localeCompare(b.slot || ''));
+      if (stops.length < 2) return { state: 'ok', ordered: stops, etas: null };
+      const entry = getMatrix(allDests);
+      if (entry.pending) return { state: 'pending', ordered: byTime, etas: null };
+      if (entry.error || !entry.M) return { state: 'fallback', ordered: byTime, etas: null };
+      const idx = [0, ...stops.map(s => allDests.indexOf(s.destination) + 1)];
+      const M = idx.map(a => idx.map(b => entry.M[a][b]));
+      const plan = planRoute(M, stops, Date.now());
+      if (!plan) return { state: 'fallback', ordered: byTime, etas: null };
+      return { state: 'ok', ordered: plan.order.map(i => stops[i]), etas: plan.etas, backAt: plan.backAt };
+    }
+
+    const hhmm = ms => { const d = new Date(ms); return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+    const _routeExcluded = new Set();   // parades de "Llest" que el repartidor no s'emporta ara
+    let _routeGroups = { ready: [], out: [] };
+
+    function setRouteStop(key, on) {
+      if (on) _routeExcluded.delete(key); else _routeExcluded.add(key);
+      renderRoutePanels();
+    }
+    window.setRouteStop = setRouteStop;
+    function routeMarkOut() {
+      const stops = routeStops(_routeGroups.ready).filter(s => !_routeExcluded.has(s.key));
+      const ids = stops.flatMap(s => s.ids);
+      if (ids.length) advanceStatusBulk(ids, 'out_for_delivery');
+    }
+    window.routeMarkOut = routeMarkOut;
+
+    // Panells de ruta del repartidor: "Llest" (proposta per sortir, amb
+    // caselles per triar què s'emporta, hores estimades i hora promesa) i
+    // "En repartiment" (la ruta en curs). Només es calcula a la vista de
+    // repartiment: la tauleta de cuina no fa cap petició a Google.
+    function renderRoutePanels() {
+      const readyEl = document.getElementById('route-panel');
+      const outEl = document.getElementById('route-panel-out');
+      if (!readyEl || !outEl) return;
+      if (currentView !== 'repartiment') { readyEl.classList.add('hidden'); outEl.classList.add('hidden'); return; }
+      const ready = routeStops(_routeGroups.ready);
+      const out = routeStops(_routeGroups.out);
+      const allDests = [...new Set([...ready, ...out].map(s => s.destination))].sort();
+      const paint = (el, html) => { el.classList.toggle('hidden', !html); if (el.innerHTML !== html) el.innerHTML = html; };
+
+      // ── Llest ──
+      if (ready.length < 2) paint(readyEl, '');
+      else {
+        const chosen = ready.filter(s => !_routeExcluded.has(s.key));
+        const skipped = ready.filter(s => _routeExcluded.has(s.key));
+        const plan = planStops(chosen, allDests);
+        const row = (s, i, eta) => {
+          const lateMin = eta && s.promisedAt ? Math.round((eta - s.promisedAt) / 60000) : null;
+          const promise = s.promisedAt ? `<span class="${lateMin > 10 ? 'text-kred' : lateMin > 0 ? 'text-kamber' : 'text-kmute'}">promès ${hhmm(s.promisedAt)}${lateMin > 0 ? ` · +${lateMin} min` : ''}</span>` : '';
+          return `
+            <li class="flex items-start gap-3 py-2 ${i === null ? 'opacity-50' : ''}">
+              <input type="checkbox" ${i === null ? '' : 'checked'} onchange="setRouteStop('${s.key}', this.checked)" aria-label="Portar ${escapeHtml(s.label)}" class="mt-1 w-5 h-5 shrink-0 accent-[#34C77B]">
+              <span class="w-5 shrink-0 font-black tabular-nums">${i === null ? '–' : i + 1}</span>
+              <span class="min-w-0 flex-1">
+                <span class="flex items-baseline gap-2 flex-wrap">
+                  <b class="font-semibold">${escapeHtml(s.label)}</b>
+                  ${eta ? `<span class="text-sm font-bold tabular-nums">~${hhmm(eta)}</span>` : ''}
+                  <span class="text-xs">${promise}</span>
+                </span>
+                <span class="block text-xs text-kmute break-words">${escapeHtml(s.address)}${s.exact ? '' : ' · <span class="text-kamber">sense ubicació exacta, comprova l\'adreça</span>'}</span>
+              </span>
+            </li>`;
+        };
+        const status = plan.state === 'pending' ? '<p class="text-xs text-kmute">Calculant la millor ruta amb Google…</p>'
+          : plan.state === 'fallback' ? '<p class="text-xs text-kamber">Google no ha respost: ordre per hora de franja. La navegació funciona igual.</p>'
+          : plan.etas ? `<p class="text-xs text-kmute">Hores estimades sortint ara · tornada a la pizzeria ~${hhmm(plan.backAt)}</p>` : '';
+        const n = chosen.length;
+        const tooMany = n > 10 ? '<p class="text-xs text-kamber">Google Maps només admet 10 parades: la resta, afegeix-les a mà.</p>'
+          : n > 4 ? '<p class="text-xs text-kmute">Amb més de 4 parades cal l\'app de Google Maps (al navegador només n\'hi caben 4).</p>' : '';
+        paint(readyEl, `
+          <div class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
+            <div class="flex items-baseline justify-between gap-2">
+              <p class="text-xs font-bold uppercase tracking-widest text-kmute">Ruta suggerida</p>
+              <p class="text-xs text-kmute">${n} de ${ready.length} parades</p>
+            </div>
+            ${status}
+            <ol class="divide-y divide-white/5">${plan.ordered.map((s, i) => row(s, i, plan.etas && plan.etas[i])).join('')}${skipped.map(s => row(s, null, null)).join('')}</ol>
+            ${tooMany}
+            ${n ? `
+              <div class="grid grid-cols-1 gap-2">
+                <a href="${escapeHtml(n === 1 ? buildMapsUrl(plan.ordered[0].destination) : buildMultiStopMapsUrl(plan.ordered.slice(0, 10)))}" target="_blank" rel="noopener"
+                  class="flex items-center justify-center h-12 rounded-xl bg-kbtngreen hover:brightness-110 text-white font-bold">🗺️ Navegar ${n === 1 ? '' : `(${n} parades)`}</a>
+                <button type="button" onclick="routeMarkOut()" class="h-12 rounded-xl bg-kbtnteal hover:brightness-110 text-white font-bold">🛵 ${n === 1 ? 'Marcar en repartiment' : `Marcar les ${n} en repartiment`}</button>
+              </div>` : '<p class="text-xs text-kmute">Marca almenys una parada.</p>'}
+          </div>`);
+      }
+
+      // ── En repartiment: la ruta en curs ──
+      if (out.length < 2) paint(outEl, '');
+      else {
+        const plan = planStops(out, allDests);
+        paint(outEl, `
+          <div class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
+            <p class="text-xs font-bold uppercase tracking-widest text-kmute">Ruta en curs</p>
+            ${plan.state === 'pending' ? '<p class="text-xs text-kmute">Calculant…</p>' : plan.state === 'fallback' ? '<p class="text-xs text-kamber">Ordre per hora de franja (Google no ha respost).</p>' : ''}
+            <ol class="space-y-1.5 text-sm">${plan.ordered.map((s, i) => `<li><b class="tabular-nums">${i + 1}.</b> ${escapeHtml(s.label)} <span class="text-kmute">— ${escapeHtml(s.address)}</span></li>`).join('')}</ol>
+            <a href="${escapeHtml(buildMultiStopMapsUrl(plan.ordered.slice(0, 10)))}" target="_blank" rel="noopener"
+              class="flex items-center justify-center h-12 rounded-xl bg-kbtngreen hover:brightness-110 text-white font-bold">🗺️ Navegar la ruta (des d'on ets)</a>
+          </div>`);
       }
     }
 
@@ -1775,7 +1938,8 @@
           .then(({ error: e }) => { if (e) console.error('[order-on-the-way]', e); });
       }
       const o = ordersCache.find(x => x.id === ids[0]);
-      const who = (o && o.customers && o.customers.name) || 'Comanda';
+      const people = new Set(ids.map(id => { const x = ordersCache.find(y => y.id === id); return x && x.customers && x.customers.phone; }));
+      const who = people.size > 1 ? `${people.size} comandes` : ((o && o.customers && o.customers.name) || 'Comanda');
       const canUndo = prev.every(p => p.status && p.status !== newStatus);
       showToast(`${who}: ${STATUS_LABEL[newStatus] || newStatus}`, false,
         canUndo ? { label: 'Desfer', fn: () => undoStatusChange(prev, newStatus) } : null);
