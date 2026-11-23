@@ -67,6 +67,40 @@
 
     .chev { flex-shrink: 0; font-size: .8125rem; font-weight: 600; color: #8E96A3; padding: .375rem .75rem; border-radius: .5rem; border: 1px solid rgba(255,255,255,.1); }
 
+    /* ── Moviment suau ──
+       Botons: canvis de color suaus i un petit "enfonsament" en prémer
+       (:not([data-x]) puja l'especificitat per sobre de les classes de
+       Tailwind tipus transition-colors, que si no traurien el transform). */
+    html { scroll-behavior: smooth; }
+    :is(button, a, summary, .seg-btn):not([data-x]) {
+      transition-property: color, background-color, border-color, opacity, transform, filter, box-shadow;
+      transition-duration: .18s; transition-timing-function: cubic-bezier(.2, .8, .2, 1);
+    }
+    :is(button, a, summary):not(:disabled):active { transform: scale(.97); }
+    #history-list, #menu-list { overscroll-behavior: contain; }
+
+    /* Tot el que apareix (es passa de display:none a visible) entra suau:
+       menús, panells de Masses/Carta, modals, avisos i columnes del mòbil. */
+    @keyframes k-in    { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+    @keyframes k-pop   { from { opacity: 0; transform: translateY(-4px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes k-up    { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    @keyframes k-fade  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes k-toast { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @keyframes k-ring  { 0% { box-shadow: 0 0 0 0 rgba(245,165,36,.0); } 25% { box-shadow: 0 0 0 4px rgba(245,165,36,.65); } 100% { box-shadow: 0 0 0 0 rgba(245,165,36,0); } }
+    #doughs-body, #menu-panel-body { animation: k-in .24s cubic-bezier(.2, .8, .2, 1); }
+    #more-menu, details.card-more[open] > div { animation: k-pop .16s cubic-bezier(.2, .8, .2, 1); transform-origin: top right; }
+    #history-modal, #incident-modal { animation: k-fade .18s ease-out; }
+    #history-modal > div, #incident-modal > div { animation: k-up .26s cubic-bezier(.2, .8, .2, 1); }
+    #pase-toast { animation: k-toast .22s cubic-bezier(.2, .8, .2, 1); }
+    #view-cuina > section, #view-repartiment > section, #view-cuina, #view-repartiment, #tools-strip { animation: k-fade .22s ease-out; }
+    #role-screen > div, #login-screen > div { animation: k-up .3s cubic-bezier(.2, .8, .2, 1); }
+    .k-ring { animation: k-ring 1.6s ease-out 2; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html, html.scroll-smooth { scroll-behavior: auto !important; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+
     /* ── Mòbil: una columna cada vegada, triada amb les pestanyes ── */
     @media (max-width: 767px) {
       body { overflow-x: hidden; }
@@ -403,7 +437,7 @@
     function setMobileCol(view, col) {
       document.getElementById('view-' + view).dataset.col = col;
       document.querySelectorAll(`#mcols-${view} [data-col]`).forEach(b => b.classList.toggle('is-on', b.dataset.col === col));
-      window.scrollTo({ top: 0 });
+      if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: _reduceMotion.matches ? 'auto' : 'smooth' });
     }
     window.setMobileCol = setMobileCol;
 
@@ -643,9 +677,21 @@
       document.getElementById('new-order-flash').classList.remove('hidden');
       document.title = '🔔 Comanda nova · ' + _baseTitle;
     }
+    // En tocar l'avís, la pantalla llisca fins a la comanda nova i la
+    // ressalta un moment (al mòbil, primer es posa la pestanya Sense afegir).
+    let _lastNewIds = [];
     function dismissNewOrderFlash() {
       document.getElementById('new-order-flash').classList.add('hidden');
       document.title = _baseTitle;
+      const id = _lastNewIds[_lastNewIds.length - 1];
+      if (!id || currentView !== 'cuina') return;
+      if (window.matchMedia('(max-width: 767px)').matches) setMobileCol('cuina', 'pending');
+      const card = [...document.querySelectorAll('#view-cuina article[data-ids]')].find(a => a.dataset.ids.split(',').includes(id));
+      if (!card) return;
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: _reduceMotion.matches ? 'auto' : 'smooth', block: 'center' });
+        card.classList.remove('k-ring'); void card.offsetWidth; card.classList.add('k-ring');
+      }, 60);
     }
     window.dismissNewOrderFlash = dismissNewOrderFlash;
 
@@ -1083,7 +1129,7 @@
       const sig = JSON.stringify(ordersCache) + JSON.stringify([...incidentsByOrder]) + businessDateISO();
       if (sig !== _lastRenderSig) { _lastRenderSig = sig; renderOrders(); } else updateTimers();
       loadDoughs();
-      if (!isFirstLoad && newInScope) playNewOrderSound();
+      if (!isFirstLoad && newInScope) { _lastNewIds = newIds.filter(id => ordersCache.some(o => o.id === id && inDateScope(o))); playNewOrderSound(); }
     }
 
     // Una comanda nova arriba com 1 canvi a orders + 1 per pizza a
@@ -1201,7 +1247,7 @@
         const day = showDay && iso ? `${DAY_SHORT[new Date(iso + 'T00:00:00').getDay()]} ${Number(iso.slice(8, 10))}/${Number(iso.slice(5, 7))}` : '';
         const at = iso === today ? slotAt(iso, slot) : NaN;
         const head = `
-          <div class="flex items-baseline gap-2 pt-3 first:pt-0">
+          <div class="flex items-baseline gap-2 pt-3 first:pt-0" data-flip="h:${view}:${stage}:${escapeHtml(keyOf(es[0]))}">
             ${day ? `<span class="text-sm font-bold text-kmute">${day}</span>` : ''}
             <span class="text-2xl font-black tabular-nums tracking-tight">${escapeHtml(slot || 'Sense hora')}</span>
             <span class="text-sm font-semibold text-kmute">${pizzas} ${pizzas === 1 ? 'pizza' : 'pizzes'}</span>
@@ -1215,7 +1261,39 @@
       document.querySelectorAll(`[data-count="${key}"]`).forEach(el => { el.textContent = n; });
     }
 
+    // Animació FLIP: abans de repintar es mira on és cada targeta i capçalera,
+    // i després cadascuna llisca des del lloc antic al nou (p. ex. de
+    // Preparant a Llest). Les que no hi eren entren amb un fos suau.
+    const _reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+    function flipSnapshot() {
+      const m = new Map();
+      document.querySelectorAll('[data-flip]').forEach(el => {
+        const r = el.getBoundingClientRect();
+        if (r.width || r.height) m.set(el.dataset.flip, r);
+      });
+      return m;
+    }
+    function flipPlay(before, firstPaint) {
+      if (_reduceMotion.matches || !Element.prototype.animate) return;
+      const ease = 'cubic-bezier(.2, .8, .2, 1)';
+      document.querySelectorAll('[data-flip]').forEach(el => {
+        const a = el.getBoundingClientRect();
+        if (!a.width && !a.height) return;          // vista amagada
+        if (a.bottom < -200 || a.top > innerHeight + 200) return;  // fora de pantalla: res a animar
+        const b = before.get(el.dataset.flip);
+        if (!b) {
+          if (!firstPaint) el.animate([{ opacity: 0, transform: 'translateY(10px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: ease });
+          return;
+        }
+        const dx = b.left - a.left, dy = b.top - a.top;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+        el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 360, easing: ease });
+      });
+    }
+    let _paintedOnce = false;
+
     function renderOrders() {
+      const before = flipSnapshot();
       const scoped = ordersCache.filter(inDateScope);
       const board = scoped.filter(o => isPaymentConfirmed(o) && o.status !== 'delivered' && o.status !== 'cancelled');
       const groups = groupOrders(board);
@@ -1246,6 +1324,8 @@
       document.getElementById('col-delivered').innerHTML = renderColumn(delivered, 'delivered', 'repartiment');
       renderRoutePanel(ready.map(e => e.group));
       updateTimers();
+      flipPlay(before, !_paintedOnce);
+      _paintedOnce = true;
     }
 
     // Compte enrere de cada franja i etiqueta "Nova" (10 min). Es crida en
@@ -1466,7 +1546,7 @@
 
       if (view === 'cuina') {
         return `
-          <article class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
+          <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
             ${top}
             ${bigOrderHtml(group)}
             ${orders}
@@ -1493,7 +1573,7 @@
           <a href="${escapeHtml(buildWazeUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ghost-btn h-11">🚗 Waze</a>
         </div>` : '';
       return `
-        <article class="bg-kcard border border-kline rounded-2xl p-4 space-y-3 ${done ? 'opacity-60' : ''}">
+        <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="bg-kcard border border-kline rounded-2xl p-4 space-y-3 ${done ? 'opacity-60' : ''}">
           ${top}
           <div>
             <p class="font-semibold leading-snug">${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}</p>
@@ -1518,7 +1598,7 @@
       const cust = o.customers || {};
       const items = (o.order_items || []).map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ');
       return `
-        <article class="rounded-2xl border border-dashed border-white/15 px-4 py-3 space-y-1 text-kmute">
+        <article data-flip="u:${o.id}" data-ids="${o.id}" class="rounded-2xl border border-dashed border-white/15 px-4 py-3 space-y-1 text-kmute">
           <p class="text-xs font-bold uppercase tracking-wide">🔄 Verificant pagament…</p>
           <p class="font-semibold text-kfg/70">${escapeHtml(cust.name || 'Client')}</p>
           <p class="text-sm">${items}</p>
