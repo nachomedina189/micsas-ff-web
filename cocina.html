@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Cuina">
-  <meta name="theme-color" content="#0F1115">
+  <meta name="theme-color" content="#0D0F13">
   <meta name="color-scheme" content="dark">
   <!-- ════ GOOGLE MAPS LOADER (bootstrap oficial, mateixa clau que pre-pedido.html) ════ -->
   <script>
@@ -21,299 +21,283 @@
     });
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Paleta del tauler: fosc i sobri, el color només per a l'estat.
+    tailwind.config = { theme: { extend: { colors: {
+      kbg: '#0D0F13', kcard: '#16191F', kcard2: '#1E222A', kline: 'rgba(255,255,255,0.08)',
+      kfg: '#F2F4F7', kmute: '#8E96A3', kfaint: '#5D6573',
+      kamber: '#F5A524', kblue: '#5B9BFF', kgreen: '#34C77B', kteal: '#2DD4BF', kred: '#FF6B6B',
+      kbtnblue: '#2563EB', kbtngreen: '#15803D', kbtnteal: '#0F766E',
+    } } } };
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- ════ MÒBIL: només ajustos responsive i tàctils (≤767px); l'escriptori no canvia ════ -->
   <style>
+    :root { color-scheme: dark; }
     html { -webkit-text-size-adjust: 100%; }
-    button, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    button, a, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    summary { list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* Selectors segmentats (Avui / Pròxims dies, columnes al mòbil, carta) */
+    .seg { display: flex; gap: .25rem; padding: .25rem; border-radius: .75rem; background: #16191F; border: 1px solid rgba(255,255,255,.08); }
+    .seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; padding: .5rem .875rem; border-radius: .5rem;
+      font-size: .875rem; font-weight: 600; color: #8E96A3; white-space: nowrap; transition: background-color .15s, color .15s; }
+    .seg-btn:hover { color: #F2F4F7; }
+    .seg-btn.is-on { background: #F2F4F7; color: #0D0F13; }
+    .seg-btn .count { background: rgba(255,255,255,.08); }
+    .seg-btn.is-on .count { background: rgba(13,15,19,.12); }
+
+    .count { display: inline-block; min-width: 1.5rem; padding: .0625rem .4375rem; border-radius: 999px; background: rgba(255,255,255,.08);
+      font-size: .75rem; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+    .dot { width: .5rem; height: .5rem; border-radius: 999px; display: inline-block; }
+
+    /* Menús (⋯ de la capçalera i de cada targeta) */
+    .menu-item { display: flex; align-items: center; gap: .5rem; width: 100%; min-height: 44px; padding: .5rem .75rem; border-radius: .5rem;
+      font-size: .875rem; font-weight: 600; text-align: left; color: #F2F4F7; }
+    .menu-item:hover { background: rgba(255,255,255,.06); }
+    .menu-item.is-danger { color: #FF6B6B; }
+
+    .ghost-btn { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; min-height: 40px; padding: .5rem .875rem;
+      border-radius: .75rem; border: 1px solid rgba(255,255,255,.1); font-size: .875rem; font-weight: 600; color: #F2F4F7; transition: background-color .15s; }
+    .ghost-btn:hover { background: rgba(255,255,255,.06); }
+    #close-pase-btn[data-sent] { color: #8E96A3; }
+
+    .chev { flex-shrink: 0; font-size: .8125rem; font-weight: 600; color: #8E96A3; padding: .375rem .75rem; border-radius: .5rem; border: 1px solid rgba(255,255,255,.1); }
+
+    /* ── Mòbil: una columna cada vegada, triada amb les pestanyes ── */
     @media (max-width: 767px) {
       body { overflow-x: hidden; }
-      /* Capçalera: files que s'embolcallen en lloc de sortir de pantalla */
-      #kitchen-screen > header > div:first-child { flex-wrap: wrap; gap: .5rem; padding: .625rem .75rem; }
-      #kitchen-screen > header > div:first-child > div { flex-wrap: wrap; gap: .5rem; min-width: 0; }
-      #kitchen-screen > header > div:first-child > div:last-child { width: 100%; }
-      #kitchen-screen > header > div:first-child > div:last-child > div { padding-right: .5rem; }
-      #kitchen-screen > header h1 { font-size: 1.25rem; }
-      #kitchen-screen > header button { min-height: 44px; padding-left: .75rem; padding-right: .75rem; }
-      #role-tabs { padding: 0 .75rem .625rem; }
-      #role-tabs button { flex: 1; justify-content: center; min-height: 48px; }
-      /* Marges laterals més ajustades i columnes apilades */
-      #doughs-panel { margin: .75rem .75rem 0; }
-      #view-cuina, #view-repartiment { padding: .75rem; gap: .75rem; }
-      #view-cuina section, #view-repartiment section { min-width: 0; }
-      /* Masses del dia: tot a ample complet, controls grans per al polze */
-      #doughs-panel > div { gap: .75rem; }
-      #doughs-panel > div > div { min-width: 0; }
-      #doughs-panel > div > div:last-child { width: 100%; margin-left: 0; align-items: stretch; }
-      #doughs-panel > div > div:last-child > div { width: 100%; }
-      #doughs-panel > div > div:last-child > div > div { flex: 1; }
-      #doughs-input { flex: 1; width: auto; min-width: 0; font-size: 1.5rem; }
-      #doughs-minus, #doughs-plus { width: 4rem; }
-      #doughs-save { min-width: 6.5rem; }
-      #doughs-dates button { min-height: 44px; }
-      /* Carta del dia: segments grans per al polze */
-      #menu-panel { margin: .75rem .75rem 0; }
-      #menu-panel-btn { min-height: 44px; display: inline-flex; align-items: center; }
-      #menu-panel-body > div:first-child button { flex: 1; justify-content: center; min-height: 44px; }
+      #view-cuina > section, #view-repartiment > section { display: none; }
+      #view-cuina[data-col="pending"] #section-pending,
+      #view-cuina[data-col="preparing"] #section-preparing,
+      #view-cuina[data-col="ready"] #section-ready-cuina,
+      #view-repartiment[data-col="ready"] #section-ready-repartiment,
+      #view-repartiment[data-col="out"] #section-out-for-delivery,
+      #view-repartiment[data-col="delivered"] #section-delivered { display: block; }
+      #view-cuina .col-title, #view-repartiment .col-title { display: none; }
+      .mcols .seg-btn { flex: 1; padding-left: .25rem; padding-right: .25rem; min-height: 44px; }
+      #menu-panel-body > div:first-child button { flex: 1; min-height: 44px; }
       #menu-list .menu-seg button { min-height: 44px; font-size: .8125rem; }
-      /* Targetes de comanda: botons i enllaços amb zona tàctil >=48px */
-      #view-cuina button, #view-repartiment button,
-      #view-cuina a[href^="http"], #view-repartiment a[href^="http"] { min-height: 48px; }
-      #view-cuina a[href^="tel:"], #view-repartiment a[href^="tel:"] { display: inline-block; padding: .5rem 0; font-size: 1rem; }
-      #view-cuina .overflow-hidden, #view-repartiment .overflow-hidden { overflow-wrap: anywhere; }
-      #route-panel a { min-height: 48px; display: flex; align-items: center; justify-content: center; }
-      /* Historial: ocupa gairebé tota la pantalla, camps de data còmodes */
+      #doughs-dates button { min-height: 44px; }
       #history-modal > div { max-height: 92vh; }
-      #history-modal > div > div:first-child, #history-modal > div > div:nth-child(2) { padding-left: 1rem; padding-right: 1rem; }
-      #history-modal > div > div:first-child button { width: 44px; height: 44px; }
       #history-modal input[type="date"] { min-height: 44px; font-size: 16px; }
-      #history-modal > div > div:nth-child(2) > button { min-height: 44px; }
-      #history-list { padding: 1rem; overflow-wrap: anywhere; }
       #login-email { font-size: 16px; } /* evita el zoom automàtic d'iOS */
     }
   </style>
 </head>
-<body class="bg-[#0F1115] text-[#E8EAED] font-['Inter',sans-serif] antialiased min-h-screen">
+<body class="bg-kbg text-kfg font-['Inter',sans-serif] antialiased min-h-screen">
 
-  <!-- ════ LOGIN SCREEN ════ -->
+  <!-- ════ LOGIN ════ -->
   <div id="login-screen" class="min-h-screen flex items-center justify-center px-6">
-    <div class="w-full max-w-sm bg-[#F7F8FA] text-[#14171C] rounded-2xl shadow-2xl p-8 space-y-5">
-      <div class="text-center">
-        <h1 class="font-black tracking-tight text-3xl">Cuina</h1>
-        <p class="text-sm text-[#6B7280] mt-1">micsas.ff · panell intern</p>
+    <div class="w-full max-w-sm bg-kcard border border-kline rounded-2xl p-8 space-y-6">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-kmute">micsas.ff</p>
+        <h1 class="font-black tracking-tight text-3xl mt-1">Cuina</h1>
       </div>
-      <div class="space-y-3">
-        <input id="login-email" type="email" placeholder="Email" autocomplete="username"
-          class="w-full bg-white border border-[#D1D5DB] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
-      </div>
-      <p id="login-error" class="hidden text-xs text-[#DC2626] text-center"></p>
-      <button id="login-btn" onclick="doLogin()"
-        class="w-full py-3.5 rounded-xl font-semibold text-[15px] text-white bg-[#2563EB] hover:bg-[#1D4ED8] transition-all shadow-sm">
-        Entrar
-      </button>
+      <input id="login-email" type="email" placeholder="Email" autocomplete="username" onkeydown="if (event.key === 'Enter') doLogin()"
+        class="w-full bg-kbg border border-kline rounded-xl px-4 py-3.5 text-base outline-none focus:border-kblue">
+      <p id="login-error" class="hidden text-sm text-kred"></p>
+      <button id="login-btn" onclick="doLogin()" class="w-full h-12 rounded-xl font-bold text-white bg-kbtnblue hover:brightness-110 transition">Entrar</button>
     </div>
   </div>
 
-  <!-- ════ ROLE SCREEN: tria única, un cop entrat, quin apartat veu aquest
-       dispositiu — així el cuiner només veu Cuina i el repartidor només
-       veu Repartiment, sense haver de triar cada vegada (es recorda amb
-       localStorage a aquest dispositiu). ════ -->
+  <!-- ════ ROL: cada dispositiu queda fixat a Cuina o Repartiment (localStorage) ════ -->
   <div id="role-screen" class="hidden min-h-screen flex items-center justify-center px-6">
-    <div class="w-full max-w-sm bg-[#F7F8FA] text-[#14171C] rounded-2xl shadow-2xl p-8 space-y-5">
-      <div class="text-center">
-        <h1 class="font-black tracking-tight text-2xl">Ets cuiner o repartidor?</h1>
-        <p class="text-sm text-[#6B7280] mt-1">Tria per anar directe al teu apartat</p>
+    <div class="w-full max-w-sm bg-kcard border border-kline rounded-2xl p-8 space-y-6">
+      <div>
+        <h1 class="font-black tracking-tight text-2xl">Qui fa servir aquest dispositiu?</h1>
+        <p class="text-sm text-kmute mt-1">Es recorda en aquest mòbil o tauleta.</p>
       </div>
       <div class="space-y-3">
-        <button onclick="selectRole('cuina')"
-          class="w-full py-5 rounded-xl font-bold text-lg text-white bg-[#2563EB] hover:bg-[#1D4ED8] transition-all shadow-sm flex items-center justify-center gap-2">
-          🍕 Cuiner
-        </button>
-        <button onclick="selectRole('repartiment')"
-          class="w-full py-5 rounded-xl font-bold text-lg text-white bg-[#0D9488] hover:bg-[#0F766E] transition-all shadow-sm flex items-center justify-center gap-2">
-          🛵 Repartidor
-        </button>
+        <button onclick="selectRole('cuina')" class="w-full h-16 rounded-xl font-bold text-lg text-white bg-kbtnblue hover:brightness-110 transition">🍕 Cuina</button>
+        <button onclick="selectRole('repartiment')" class="w-full h-16 rounded-xl font-bold text-lg text-white bg-kbtnteal hover:brightness-110 transition">🛵 Repartiment</button>
       </div>
     </div>
   </div>
 
-  <!-- ════ KITCHEN SCREEN ════ -->
+  <!-- ════ TAULER ════ -->
   <div id="kitchen-screen" class="hidden min-h-screen">
-    <header class="sticky top-0 z-20 bg-[#15181D] border-b border-white/8">
-      <div class="flex items-center justify-between px-6 py-4">
-        <div class="flex items-center gap-3">
-          <h1 class="font-black tracking-tight text-2xl">Comandes</h1>
-          <span id="order-count" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
-          <span id="role-indicator" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold"></span>
-          <span id="conn-status" role="status" aria-live="polite" class="px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold whitespace-nowrap text-[#8B93A1]">Connectant…</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-2 pr-3 border-r border-white/10">
-            <button onclick="setDateScope('today')" id="scope-today" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Avui (pase)</button>
-            <button onclick="setDateScope('week')" id="scope-week" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all">Pròxims dies</button>
+    <header class="sticky top-0 z-30 bg-kbg/90 backdrop-blur border-b border-kline">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 md:px-6 py-3">
+        <h1 class="font-black tracking-tight text-xl">Comandes</h1>
+        <span id="order-count" class="count text-sm"></span>
+        <span id="conn-status" role="status" aria-live="polite" class="text-xs font-semibold whitespace-nowrap text-kmute">Connectant…</span>
+        <div class="order-last w-full md:order-none md:w-auto md:ml-auto flex items-center gap-2">
+          <div class="seg flex-1 md:flex-none">
+            <button id="scope-today" onclick="setDateScope('today')" class="seg-btn flex-1">Avui</button>
+            <button id="scope-week" onclick="setDateScope('week')" class="seg-btn flex-1">Pròxims dies</button>
           </div>
-          <button onclick="closePase()" id="close-pase-btn" class="px-4 py-2 rounded-lg text-sm font-semibold bg-[#E23F2E] hover:bg-[#C9321F] text-white transition-all">Tancar pase</button>
-          <button onclick="openHistory()" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 hover:bg-white/5 transition-all">Historial</button>
-          <button onclick="changeRole()" class="px-4 py-2 rounded-lg text-sm font-semibold text-[#8B93A1] hover:text-[#E8EAED] transition-colors">
-            Canviar rol
-          </button>
-          <button onclick="doLogout()" class="px-4 py-2 rounded-lg text-sm font-semibold text-[#8B93A1] hover:text-[#E8EAED] transition-colors">
-            Sortir
-          </button>
+          <button id="close-pase-btn" onclick="closePase()" class="ghost-btn h-11 shrink-0">Tancar pase</button>
         </div>
-      </div>
-      <div id="role-tabs" class="hidden flex gap-2 px-6 pb-3">
-        <button onclick="setView('cuina')" id="tab-cuina" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
-          Cuina <span id="tab-cuina-badge" class="px-2 py-0.5 rounded-full bg-white/15 text-xs font-bold">0</span>
-        </button>
-        <button onclick="setView('repartiment')" id="tab-repartiment" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
-          Repartiment <span id="tab-repartiment-badge" class="px-2 py-0.5 rounded-full bg-white/15 text-xs font-bold">0</span>
-        </button>
+        <div class="relative ml-auto md:ml-0">
+          <button id="more-btn" onclick="toggleMoreMenu()" aria-label="Més opcions" aria-expanded="false" aria-controls="more-menu"
+            class="w-11 h-11 rounded-xl border border-kline text-xl leading-none text-kmute hover:text-kfg hover:bg-white/5 transition">⋯</button>
+          <div id="more-menu" class="hidden absolute right-0 top-full mt-2 w-64 bg-kcard2 border border-kline rounded-xl shadow-2xl p-1.5 z-40">
+            <p class="px-3 py-2 text-xs text-kmute">Aquest dispositiu: <b id="role-indicator" class="text-kfg"></b></p>
+            <button type="button" onclick="closeMoreMenu(); openHistory()" class="menu-item">🕘 Historial</button>
+            <button type="button" onclick="closeMoreMenu(); changeRole()" class="menu-item">🔁 Canviar de rol</button>
+            <button type="button" onclick="doLogout()" class="menu-item is-danger">Sortir</button>
+          </div>
+        </div>
       </div>
     </header>
 
     <!-- ════ SO: iOS no deixa sonar res fins que no es toca la pantalla ════ -->
-    <button id="sound-banner" onclick="enableKitchenSound()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#F59E0B] text-[#15181D] font-bold text-sm">
+    <button id="sound-banner" onclick="enableKitchenSound()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-kamber text-kbg font-bold text-sm">
       🔇 Toca aquí per activar el so de les comandes noves
     </button>
     <div id="new-order-flash" onclick="dismissNewOrderFlash()" class="hidden fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-3 px-4 py-6 bg-[#E23F2E] text-white font-black text-2xl shadow-2xl animate-pulse cursor-pointer">
       🔔 Comanda nova! <span class="text-sm font-semibold opacity-80">(toca per tancar)</span>
     </div>
 
-    <!-- ════ MASSES DEL DIA: el pizzero posa quantes masses (=pizzes) fa per a cada dia ════ -->
-    <section id="doughs-panel" class="mx-6 mt-6 bg-[#15181D] rounded-2xl p-4 md:p-5 border border-white/8">
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div>
-          <h2 class="font-black text-lg uppercase tracking-wide">Masses del dia</h2>
-          <div id="doughs-dates" class="flex flex-wrap gap-2 mt-2"></div>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="text-center">
-            <p id="doughs-left" class="font-black text-5xl leading-none">–</p>
-            <p class="text-xs font-bold uppercase tracking-widest text-[#8B93A1] mt-1">Queden</p>
-          </div>
-          <div class="text-sm text-[#8B93A1] leading-snug">
-            <p>Masses: <b id="doughs-total" class="text-[#E8EAED]">–</b></p>
-            <p>Venudes: <b id="doughs-used" class="text-[#E8EAED]">–</b></p>
-          </div>
-        </div>
-        <div class="flex flex-col items-end gap-1.5 ml-auto">
+    <!-- ════ MASSES I CARTA: dues línies compactes que es despleguen ════ -->
+    <div id="tools-strip" class="px-4 md:px-6 pt-4 flex flex-wrap gap-3">
+      <section id="doughs-panel" class="flex-1 min-w-[17rem] bg-kcard border border-kline rounded-2xl">
+        <button type="button" id="doughs-toggle" onclick="toggleDoughsPanel()" aria-expanded="false" aria-controls="doughs-body"
+          class="w-full flex items-center gap-4 px-4 py-3 text-left">
+          <span class="min-w-0 flex-1">
+            <span class="block text-xs font-bold uppercase tracking-widest text-kmute">Masses <span id="doughs-day" class="normal-case tracking-normal"></span></span>
+            <span class="flex items-baseline gap-2 mt-0.5">
+              <b id="doughs-left" class="text-2xl font-black tabular-nums leading-none">–</b>
+              <span class="text-sm text-kmute">queden · <b id="doughs-used" class="font-semibold text-kfg">–</b> venudes de <b id="doughs-total" class="font-semibold text-kfg">–</b></span>
+            </span>
+            <span id="doughs-note" class="block text-xs font-semibold mt-1 empty:hidden"></span>
+          </span>
+          <span id="doughs-chev" class="chev">Editar</span>
+        </button>
+        <div id="doughs-body" class="hidden px-4 pb-4 space-y-3">
+          <div id="doughs-dates" class="flex flex-wrap gap-2"></div>
           <div class="flex items-center gap-3">
-            <div class="flex items-stretch h-14 rounded-xl border border-white/15 bg-[#0E1013] overflow-hidden">
+            <div class="flex flex-1 sm:flex-none items-stretch h-14 rounded-xl border border-kline bg-kbg overflow-hidden">
               <button type="button" id="doughs-minus" onmousedown="event.preventDefault()" onclick="adjustDoughs(-1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Treure una massa">−</button>
               <input id="doughs-input" type="number" inputmode="numeric" min="0" max="500" aria-label="Nombre de masses"
                 oninput="onDoughsInput()" onblur="onDoughsBlur(event)" onkeydown="onDoughsKey(event)"
-                class="w-24 bg-transparent border-x border-white/15 text-center text-2xl font-black outline-none focus:bg-white/5">
+                class="w-full sm:w-24 min-w-0 bg-transparent border-x border-kline text-center text-2xl font-black tabular-nums outline-none focus:bg-white/5">
               <button type="button" id="doughs-plus" onmousedown="event.preventDefault()" onclick="adjustDoughs(1)" class="w-14 text-2xl font-black hover:bg-white/10 active:bg-white/15 transition-colors" aria-label="Afegir una massa">+</button>
             </div>
-            <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" disabled class="h-14 min-w-[8.5rem] px-5 rounded-xl bg-[#3A404B] text-[#8B93A1] text-sm font-black uppercase tracking-wide transition-colors">Desar</button>
+            <button type="button" id="doughs-save" onmousedown="event.preventDefault()" onclick="saveDoughsFromInput()" disabled class="h-14 min-w-[7.5rem] px-5 rounded-xl bg-kcard2 text-kmute text-sm font-black uppercase tracking-wide transition-colors">Desar</button>
           </div>
-          <p id="doughs-status" class="text-xs font-bold h-4 text-[#8B93A1]" aria-live="polite"></p>
+          <p id="doughs-status" class="text-xs font-bold h-4 text-kmute" aria-live="polite"></p>
         </div>
-      </div>
-      <p id="doughs-note" class="text-sm mt-3 text-[#8B93A1]"></p>
-    </section>
+      </section>
 
-    <!-- ════ CARTA DEL DIA: apagar pizzes, begudes o ingredients perquè la web no els deixi demanar ════ -->
-    <section id="menu-panel" class="mx-6 mt-4 bg-[#15181D] rounded-2xl border border-white/8">
-      <button type="button" id="menu-panel-toggle" onclick="toggleMenuPanel()" aria-expanded="false" aria-controls="menu-panel-body"
-        class="w-full flex items-center gap-3 px-4 py-3.5 md:px-5 text-left">
-        <span class="min-w-0 flex-1">
-          <span class="block font-black text-lg uppercase tracking-wide">Carta del dia <span id="menu-pase-label" class="ml-1 text-xs font-bold text-[#8B93A1] normal-case tracking-normal whitespace-nowrap"></span></span>
-          <span id="menu-summary" class="block text-sm font-semibold text-[#8B93A1] mt-0.5">Carregant…</span>
-        </span>
-        <span id="menu-panel-btn" class="shrink-0 px-4 py-2 rounded-lg border border-white/15 text-sm font-semibold">Editar</span>
-      </button>
-      <div id="menu-panel-body" class="hidden px-4 pb-4 md:px-5 md:pb-5">
-        <div class="flex gap-2 mb-3">
-          <button type="button" id="menu-tab-products" onclick="setMenuTab('products')" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
-            Pizzes <span id="menu-tab-products-n" class="hidden px-2 py-0.5 rounded-full bg-[#EF4444] text-white text-xs font-bold"></span>
-          </button>
-          <button type="button" id="menu-tab-ingredients" onclick="setMenuTab('ingredients')" class="px-4 py-2 rounded-lg text-sm font-semibold border border-white/15 transition-all flex items-center gap-2">
-            Ingredients <span id="menu-tab-ingredients-n" class="hidden px-2 py-0.5 rounded-full bg-[#EF4444] text-white text-xs font-bold"></span>
-          </button>
+      <section id="menu-panel" class="flex-1 min-w-[17rem] bg-kcard border border-kline rounded-2xl">
+        <button type="button" id="menu-panel-toggle" onclick="toggleMenuPanel()" aria-expanded="false" aria-controls="menu-panel-body"
+          class="w-full flex items-center gap-4 px-4 py-3 text-left">
+          <span class="min-w-0 flex-1">
+            <span class="block text-xs font-bold uppercase tracking-widest text-kmute">Carta <span id="menu-pase-label" class="normal-case tracking-normal"></span></span>
+            <span id="menu-summary" class="block text-sm font-semibold mt-1">Carregant…</span>
+          </span>
+          <span id="menu-panel-btn" class="chev">Editar</span>
+        </button>
+        <div id="menu-panel-body" class="hidden px-4 pb-4">
+          <div class="seg mb-3 w-full sm:w-auto sm:inline-flex">
+            <button type="button" id="menu-tab-products" onclick="setMenuTab('products')" class="seg-btn">
+              Pizzes <span id="menu-tab-products-n" class="hidden count !bg-kred text-white"></span>
+            </button>
+            <button type="button" id="menu-tab-ingredients" onclick="setMenuTab('ingredients')" class="seg-btn">
+              Ingredients <span id="menu-tab-ingredients-n" class="hidden count !bg-kred text-white"></span>
+            </button>
+          </div>
+          <p class="text-xs text-kmute mb-3 leading-relaxed">
+            <b class="text-kfg">Només avui</b>: l'endemà torna a estar disponible sol.
+            <b class="text-kfg">Fins a nou avís</b>: apagat fins que el tornis a posar.
+            Si apagues un ingredient, no es pot demanar cap pizza que el porti.
+          </p>
+          <div id="menu-list" class="space-y-2"></div>
         </div>
-        <p class="text-xs text-[#8B93A1] mb-3 leading-relaxed">
-          <b class="text-[#E8EAED]">Només avui</b>: l'endemà torna a estar disponible sol.
-          <b class="text-[#E8EAED]">Fins a nou avís</b>: apagat fins que el tornis a posar.
-          Si apagues un ingredient, no es pot demanar cap pizza que el porti.
-        </p>
-        <div id="menu-list" class="space-y-2"></div>
-      </div>
-    </section>
+      </section>
+    </div>
 
-    <!-- ════ VISTA CUINA: Sense afegir → Preparant → Llest (confirmació) ════ -->
-    <main id="view-cuina" class="p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
-      <section id="section-pending" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#F59E0B] border-x border-b border-white/8">
-        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span> Sense afegir
-          <span id="count-pending" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#F59E0B]/15 text-[#F59E0B] text-sm font-bold">0</span>
-        </h2>
-        <div id="col-pending" class="space-y-4"></div>
+    <!-- ════ VISTA CUINA: Sense afegir (a Aronium) → Preparant → Llest ════ -->
+    <div id="mcols-cuina" class="mcols md:hidden px-4 pt-4">
+      <div class="seg">
+        <button type="button" data-col="pending" onclick="setMobileCol('cuina','pending')" class="seg-btn is-on">Sense afegir <span class="count" data-count="pending">0</span></button>
+        <button type="button" data-col="preparing" onclick="setMobileCol('cuina','preparing')" class="seg-btn">Preparant <span class="count" data-count="preparing">0</span></button>
+        <button type="button" data-col="ready" onclick="setMobileCol('cuina','ready')" class="seg-btn">Llest <span class="count" data-count="ready">0</span></button>
+      </div>
+    </div>
+    <main id="view-cuina" data-col="pending" class="px-4 md:px-6 py-5 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
+      <section id="section-pending" class="min-w-0">
+        <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kamber"></span>Sense afegir <span class="count" data-count="pending">0</span></h2>
+        <div id="col-pending" class="space-y-3"></div>
       </section>
-      <section id="section-preparing" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#3B82F6] border-x border-b border-white/8">
-        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></span> Preparant
-          <span id="count-preparing" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 text-[#3B82F6] text-sm font-bold">0</span>
-        </h2>
-        <div id="col-preparing" class="space-y-4"></div>
+      <section id="section-preparing" class="min-w-0">
+        <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kblue"></span>Preparant <span class="count" data-count="preparing">0</span></h2>
+        <div id="col-preparing" class="space-y-3"></div>
       </section>
-      <section id="section-ready-cuina" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#16A34A] border-x border-b border-white/8">
-        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#16A34A]"></span> Llest
-          <span id="count-ready-cuina" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#16A34A]/15 text-[#16A34A] text-sm font-bold">0</span>
-        </h2>
-        <div id="col-ready-cuina" class="space-y-4"></div>
+      <section id="section-ready-cuina" class="min-w-0">
+        <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kgreen"></span>Llest <span class="count" data-count="ready">0</span></h2>
+        <div id="col-ready-cuina" class="space-y-3"></div>
       </section>
     </main>
 
     <!-- ════ VISTA REPARTIMENT: Llest (amb ruta) → En repartiment → Entregat ════ -->
-    <main id="view-repartiment" class="hidden p-6 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
-      <section id="section-ready-repartiment" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#16A34A] border-x border-b border-white/8">
-        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#16A34A]"></span> Llest
-          <span id="count-ready-repartiment" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#16A34A]/15 text-[#16A34A] text-sm font-bold">0</span>
-        </h2>
-        <div id="route-panel" class="hidden mb-4"></div>
-        <div id="col-ready-repartiment" class="space-y-4"></div>
+    <div id="mcols-repartiment" class="mcols hidden md:hidden px-4 pt-4">
+      <div class="seg">
+        <button type="button" data-col="ready" onclick="setMobileCol('repartiment','ready')" class="seg-btn is-on">Llest <span class="count" data-count="ready">0</span></button>
+        <button type="button" data-col="out" onclick="setMobileCol('repartiment','out')" class="seg-btn">En camí <span class="count" data-count="out">0</span></button>
+        <button type="button" data-col="delivered" onclick="setMobileCol('repartiment','delivered')" class="seg-btn">Entregat <span class="count" data-count="delivered">0</span></button>
+      </div>
+    </div>
+    <main id="view-repartiment" data-col="ready" class="hidden px-4 md:px-6 py-5 grid gap-6 grid-cols-1 md:grid-cols-3 items-start">
+      <section id="section-ready-repartiment" class="min-w-0">
+        <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kgreen"></span>Llest <span class="count" data-count="ready">0</span></h2>
+        <div id="route-panel" class="hidden mb-3"></div>
+        <div id="col-ready-repartiment" class="space-y-3"></div>
       </section>
-      <section id="section-out-for-delivery" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#0D9488] border-x border-b border-white/8">
-        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#0D9488]"></span> En repartiment
-          <span id="count-out-for-delivery" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#0D9488]/15 text-[#0D9488] text-sm font-bold">0</span>
-        </h2>
-        <div id="col-out-for-delivery" class="space-y-4"></div>
+      <section id="section-out-for-delivery" class="min-w-0">
+        <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kteal"></span>En repartiment <span class="count" data-count="out">0</span></h2>
+        <div id="col-out-for-delivery" class="space-y-3"></div>
       </section>
-      <section id="section-delivered" class="bg-[#15181D] rounded-2xl p-4 md:p-5 border-t-4 border-[#374151] border-x border-b border-white/8">
-        <h2 class="flex items-center gap-2 font-black text-lg uppercase tracking-wide mb-4">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#374151]"></span> Entregat
-          <span id="count-delivered" class="ml-auto px-2.5 py-0.5 rounded-full bg-[#374151]/40 text-[#9CA3AF] text-sm font-bold">0</span>
-        </h2>
-        <div id="col-delivered" class="space-y-4"></div>
+      <section id="section-delivered" class="min-w-0">
+        <h2 class="col-title flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-widest text-kmute"><span class="dot bg-kfaint"></span>Entregat <span class="count" data-count="delivered">0</span></h2>
+        <div id="col-delivered" class="space-y-3"></div>
       </section>
     </main>
   </div>
 
   <!-- ════ INCIDÈNCIA (modal) ════ -->
-  <div id="incident-modal" class="hidden fixed inset-0 z-[950] bg-black/60 flex items-end md:items-center justify-center" onclick="if (event.target === this) closeIncident()">
-    <div class="bg-[#F7F8FA] text-[#14171C] w-full md:max-w-md md:rounded-2xl rounded-t-2xl p-6 space-y-4">
+  <div id="incident-modal" class="hidden fixed inset-0 z-[950] bg-black/70 flex items-end md:items-center justify-center" onclick="if (event.target === this) closeIncident()">
+    <div class="bg-kcard border border-kline w-full md:max-w-md md:rounded-2xl rounded-t-2xl p-6 space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="font-black tracking-tight text-xl">Apuntar incidència</h2>
-        <button onclick="closeIncident()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#E5E7EB] text-[#6B7280] hover:text-[#14171C] transition-colors" aria-label="Tancar">✕</button>
+        <button onclick="closeIncident()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-kmute hover:text-kfg transition-colors" aria-label="Tancar">✕</button>
       </div>
-      <p id="incident-who" class="text-sm text-[#6B7280]"></p>
+      <p id="incident-who" class="text-sm text-kmute"></p>
       <div class="grid grid-cols-2 gap-2">
-        <button onclick="saveIncident('cremada')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">🔥 Cremada</button>
-        <button onclick="saveIncident('equivocada')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">🔄 Equivocada</button>
-        <button onclick="saveIncident('falta')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">➖ Falta producte</button>
-        <button onclick="saveIncident('retard')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">⏱ Retard</button>
-        <button onclick="saveIncident('queixa')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">💬 Queixa client</button>
-        <button onclick="saveIncident('altres')" class="py-3 rounded-xl border border-[#D1D5DB] font-semibold hover:border-[#DC2626]/50 hover:text-[#DC2626] transition-all">Altres</button>
+        <button onclick="saveIncident('cremada')" class="h-12 rounded-xl border border-kline font-semibold hover:border-kred/50 hover:text-kred transition">🔥 Cremada</button>
+        <button onclick="saveIncident('equivocada')" class="h-12 rounded-xl border border-kline font-semibold hover:border-kred/50 hover:text-kred transition">🔄 Equivocada</button>
+        <button onclick="saveIncident('falta')" class="h-12 rounded-xl border border-kline font-semibold hover:border-kred/50 hover:text-kred transition">➖ Falta producte</button>
+        <button onclick="saveIncident('retard')" class="h-12 rounded-xl border border-kline font-semibold hover:border-kred/50 hover:text-kred transition">⏱ Retard</button>
+        <button onclick="saveIncident('queixa')" class="h-12 rounded-xl border border-kline font-semibold hover:border-kred/50 hover:text-kred transition">💬 Queixa client</button>
+        <button onclick="saveIncident('altres')" class="h-12 rounded-xl border border-kline font-semibold hover:border-kred/50 hover:text-kred transition">Altres</button>
       </div>
-      <p class="text-xs text-[#6B7280]">Surt a l'informe del pase.</p>
+      <p class="text-xs text-kmute">Surt a l'informe del pase.</p>
     </div>
   </div>
 
   <div id="pase-toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-[1000] max-w-[90vw] px-5 py-3 rounded-xl bg-[#16A34A] text-white text-sm font-bold shadow-lg" role="status" aria-live="polite"></div>
 
-  <!-- ════ HISTORIAL (modal) ════ -->
-  <div id="history-modal" class="hidden fixed inset-0 z-[900] bg-black/60 flex items-end md:items-center justify-center">
-    <div class="bg-[#F7F8FA] text-[#14171C] w-full md:max-w-2xl md:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] shrink-0">
+  <!-- ════ HISTORIAL (modal, només consulta) ════ -->
+  <div id="history-modal" class="hidden fixed inset-0 z-[900] bg-black/70 flex items-end md:items-center justify-center" onclick="if (event.target === this) closeHistory()">
+    <div class="bg-kcard border border-kline w-full md:max-w-2xl md:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-kline shrink-0">
         <h2 class="font-black tracking-tight text-2xl">Historial</h2>
-        <button onclick="closeHistory()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#E5E7EB] text-[#6B7280] hover:text-[#14171C] transition-colors">✕</button>
+        <button onclick="closeHistory()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-kmute hover:text-kfg transition-colors" aria-label="Tancar">✕</button>
       </div>
-      <div class="px-6 py-3 border-b border-[#E5E7EB] flex items-center gap-3 flex-wrap shrink-0">
-        <label class="text-xs font-semibold text-[#6B7280]">Des de</label>
+      <div class="px-6 py-3 border-b border-kline flex items-center gap-3 flex-wrap shrink-0">
+        <label for="history-from" class="text-xs font-semibold text-kmute">Des de</label>
         <input type="date" id="history-from" onchange="renderHistoryList()"
-          class="bg-white border border-[#D1D5DB] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#2563EB]">
-        <label class="text-xs font-semibold text-[#6B7280]">Fins a</label>
+          class="bg-kbg border border-kline rounded-lg px-3 py-1.5 text-sm outline-none focus:border-kblue">
+        <label for="history-to" class="text-xs font-semibold text-kmute">Fins a</label>
         <input type="date" id="history-to" onchange="renderHistoryList()"
-          class="bg-white border border-[#D1D5DB] rounded-lg px-3 py-1.5 text-sm outline-none focus:border-[#2563EB]">
+          class="bg-kbg border border-kline rounded-lg px-3 py-1.5 text-sm outline-none focus:border-kblue">
       </div>
-      <div id="history-list" class="flex-1 overflow-y-auto p-6 space-y-3"></div>
+      <div id="history-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3"></div>
     </div>
   </div>
 
@@ -395,10 +379,8 @@
 
     function setDateScope(s) {
       currentDateScope = s;
-      document.getElementById('scope-today').classList.toggle('bg-white', s === 'today');
-      document.getElementById('scope-today').classList.toggle('text-[#14171C]', s === 'today');
-      document.getElementById('scope-week').classList.toggle('bg-white', s === 'week');
-      document.getElementById('scope-week').classList.toggle('text-[#14171C]', s === 'week');
+      document.getElementById('scope-today').classList.toggle('is-on', s === 'today');
+      document.getElementById('scope-week').classList.toggle('is-on', s === 'week');
       renderOrders();
     }
     window.setDateScope = setDateScope;
@@ -409,16 +391,35 @@
     let currentView = 'cuina';
     function setView(v) {
       currentView = v;
-      document.getElementById('tab-cuina').classList.toggle('bg-white', v === 'cuina');
-      document.getElementById('tab-cuina').classList.toggle('text-[#14171C]', v === 'cuina');
-      document.getElementById('tab-repartiment').classList.toggle('bg-white', v === 'repartiment');
-      document.getElementById('tab-repartiment').classList.toggle('text-[#14171C]', v === 'repartiment');
       document.getElementById('view-cuina').classList.toggle('hidden', v !== 'cuina');
-      document.getElementById('doughs-panel').classList.toggle('hidden', v !== 'cuina');
-      document.getElementById('menu-panel').classList.toggle('hidden', v !== 'cuina');
+      document.getElementById('mcols-cuina').classList.toggle('hidden', v !== 'cuina');
+      document.getElementById('tools-strip').classList.toggle('hidden', v !== 'cuina');
       document.getElementById('view-repartiment').classList.toggle('hidden', v !== 'repartiment');
+      document.getElementById('mcols-repartiment').classList.toggle('hidden', v !== 'repartiment');
     }
     window.setView = setView;
+
+    // Al mòbil es veu una sola columna, triada amb les pestanyes de dalt.
+    function setMobileCol(view, col) {
+      document.getElementById('view-' + view).dataset.col = col;
+      document.querySelectorAll(`#mcols-${view} [data-col]`).forEach(b => b.classList.toggle('is-on', b.dataset.col === col));
+      window.scrollTo({ top: 0 });
+    }
+    window.setMobileCol = setMobileCol;
+
+    // Menú ⋯ de la capçalera: Historial, Canviar de rol, Sortir.
+    function toggleMoreMenu() {
+      const m = document.getElementById('more-menu');
+      const open = m.classList.contains('hidden');
+      m.classList.toggle('hidden', !open);
+      document.getElementById('more-btn').setAttribute('aria-expanded', String(open));
+    }
+    function closeMoreMenu() {
+      document.getElementById('more-menu').classList.add('hidden');
+      document.getElementById('more-btn').setAttribute('aria-expanded', 'false');
+    }
+    window.toggleMoreMenu = toggleMoreMenu;
+    window.closeMoreMenu = closeMoreMenu;
 
     // Rol triat a la pantalla "Ets cuiner o repartidor?" — es guarda per
     // dispositiu (localStorage), no per usuari (tots comparteixen el
@@ -457,6 +458,7 @@
     // avui la tablet que normalment fa servir el cuiner). No cal tornar a
     // fer login — la sessió de Supabase segueix vàlida.
     function changeRole() {
+      closeMoreMenu();
       localStorage.removeItem(STAFF_ROLE_KEY);
       document.getElementById('kitchen-screen').classList.add('hidden');
       document.getElementById('role-screen').classList.remove('hidden');
@@ -484,7 +486,7 @@
         // Recarregant cada 30 s cap comanda queda més de mig minut amagada.
         setInterval(() => loadOrders(), 30000);
         setInterval(updateConnStatus, 5000);
-        setInterval(updateElapsedCounters, 30000);
+        setInterval(updateTimers, 20000);
         setInterval(loadDoughs, 60000);
         setInterval(loadMenuBlocks, 60000);
       }
@@ -701,9 +703,31 @@
       document.getElementById('doughs-dates').innerHTML = doughsServiceDates().map(iso => {
         const d = new Date(iso + 'T00:00:00');
         const on = iso === doughsDate;
-        return `<button onclick="selectDoughsDate('${iso}')" class="px-3 py-1.5 rounded-lg text-sm font-semibold border ${on ? 'bg-white text-[#15181D] border-white' : 'border-white/15 hover:bg-white/5'}">${names[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}</button>`;
+        return `<button onclick="selectDoughsDate('${iso}')" class="px-3 py-1.5 rounded-lg text-sm font-semibold border ${on ? 'bg-kfg text-kbg border-kfg' : 'border-kline text-kmute hover:text-kfg hover:bg-white/5'}">${names[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}</button>`;
       }).join('');
+      if (doughsDate) {
+        const d = new Date(doughsDate + 'T00:00:00');
+        document.getElementById('doughs-day').textContent = `· ${names[d.getDay()]} ${d.getDate()}/${d.getMonth() + 1}`;
+      }
     }
+
+    // Masses i Carta: plegades per defecte (durant el servei només cal el
+    // resum); cada dispositiu recorda si les té obertes. Oberta, ocupa tota
+    // l'amplada.
+    const DOUGHS_PANEL_KEY = 'micsas_doughs_panel_open';
+    function applyDoughsPanelOpen(open) {
+      document.getElementById('doughs-body').classList.toggle('hidden', !open);
+      document.getElementById('doughs-panel').classList.toggle('basis-full', open);
+      document.getElementById('doughs-toggle').setAttribute('aria-expanded', String(open));
+      document.getElementById('doughs-chev').textContent = open ? 'Amagar' : 'Editar';
+    }
+    function toggleDoughsPanel() {
+      const open = document.getElementById('doughs-body').classList.contains('hidden');
+      applyDoughsPanelOpen(open);
+      try { localStorage.setItem(DOUGHS_PANEL_KEY, open ? '1' : '0'); } catch (_) {}
+    }
+    window.toggleDoughsPanel = toggleDoughsPanel;
+    try { applyDoughsPanelOpen(localStorage.getItem(DOUGHS_PANEL_KEY) === '1'); } catch (_) {}
 
     function renderDoughs() {
       const st = doughsState;
@@ -899,7 +923,11 @@
         if (!menuCatalog) setMenuSummary("No s'ha pogut carregar la carta. Torna-ho a provar en un moment.", '#EF4444');
         return;
       }
-      if (products) menuCatalog = { products: products.data || [], ingredients: ingredients.data || [] };
+      if (products) {
+        menuCatalog = { products: products.data || [], ingredients: ingredients.data || [] };
+        // Amb la carta ja es poden separar pizzes i begudes a les targetes.
+        if (ordersCache.length) renderOrders();
+      }
       // Mentre es desa un canvi, no es trepitja el que ja es veu a la pantalla.
       if (menuSaving.size) return;
       menuBlocks = new Map((blocks.data || []).map(b => [b.item_type + ':' + b.item_id, b.block_date]));
@@ -931,9 +959,7 @@
       badge('menu-tab-products-n', offNames.length);
       badge('menu-tab-ingredients-n', ingOff);
       ['products', 'ingredients'].forEach(t => {
-        const b = document.getElementById('menu-tab-' + t);
-        b.classList.toggle('bg-white', menuTab === t);
-        b.classList.toggle('text-[#14171C]', menuTab === t);
+        document.getElementById('menu-tab-' + t).classList.toggle('is-on', menuTab === t);
       });
 
       const dayLabel = menuDayWord() === 'avui' ? 'Només avui' : 'Només ' + menuDayWord().replace(/^el /, '');
@@ -1016,6 +1042,7 @@
 
     function applyMenuPanelOpen(open) {
       document.getElementById('menu-panel-body').classList.toggle('hidden', !open);
+      document.getElementById('menu-panel').classList.toggle('basis-full', open);
       document.getElementById('menu-panel-toggle').setAttribute('aria-expanded', String(open));
       document.getElementById('menu-panel-btn').textContent = open ? 'Amagar' : 'Editar';
     }
@@ -1035,6 +1062,7 @@
     let _lastLoadOk = 0;      // ms de l'última càrrega correcta
     let _lastLoadFailed = false;
     let _rtStatus = '';       // estat del canal realtime de Supabase
+    let _lastRenderSig = '';
     async function loadOrders() {
       const seq = ++_loadSeq;
       const { data, error } = await supabase
@@ -1050,7 +1078,10 @@
       ordersCache = data || [];
       await loadIncidents();
       if (seq !== _loadSeq) return;
-      renderOrders();
+      // La recàrrega de cada 30 s sovint porta el mateix: llavors no es
+      // repinta (no parpelleja ni tanca el menú ⋯ que s'estigui fent servir).
+      const sig = JSON.stringify(ordersCache) + JSON.stringify([...incidentsByOrder]) + businessDateISO();
+      if (sig !== _lastRenderSig) { _lastRenderSig = sig; renderOrders(); } else updateTimers();
       loadDoughs();
       if (!isFirstLoad && newInScope) playNewOrderSound();
     }
@@ -1121,95 +1152,132 @@
       return o.payment_method === 'cash' || o.payment_status === 'paid';
     }
 
-    // Ordena els grups d'una columna per franja horària i insereix un
-    // subtítol cada vegada que la franja canvia — així durant una nit amb
-    // moltes franges a la vegada es veu d'un cop de vista què toca a cada
-    // hora, sense haver de canviar de filtre.
-    function renderColumnWithTimeHeaders(groups) {
-      if (!groups.length) return '<p class="text-sm text-[#5B6270] text-center py-10">Cap comanda</p>';
-      // Per dia i després per franja: a "Pròxims dies" els pedidos de dies
-      // diferents no es poden barrejar sota el mateix "20:00".
-      const sortKey = g => (g[0].delivery_date || '') + ' ' + (g[0].slot_time || '');
-      const sorted = [...groups].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
-      const showDay = currentDateScope !== 'today';
-      let html = '';
-      let lastTime = null;
-      sorted.forEach(group => {
-        const slot = group[0].slot_time || 'Sense franja';
-        const iso = group[0].delivery_date;
-        const t = showDay && iso
-          ? `${['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'][new Date(iso + 'T00:00:00').getDay()]} ${Number(iso.slice(8, 10))}/${Number(iso.slice(5, 7))} · ${slot}`
-          : slot;
-        if (t !== lastTime) {
-          html += `<h3 class="text-xs font-bold uppercase tracking-widest text-[#5B6270] pt-2 first:pt-0">${escapeHtml(t)}</h3>`;
-          lastTime = t;
-        }
-        html += renderOrderCard(group);
+    // ── Columnes per franja ──
+    // Cada columna s'agrupa per franja (l'hora que la comanda ha de sortir
+    // del forn): la hora en gran, quantes pizzes hi ha i un compte enrere
+    // ("surt en 8 min", "3 min tard") que s'actualitza sol. A "Pròxims dies"
+    // la franja porta també el dia, i no hi ha compte enrere.
+    const DAY_SHORT = ['Diu', 'Dl', 'Dt', 'Dc', 'Dj', 'Div', 'Ds'];
+
+    function slotAt(iso, slot) {
+      const m = /^(\d{1,2}):(\d{2})$/.exec(slot || '');
+      if (!iso || !m) return NaN;
+      const d = new Date(iso + 'T00:00:00');
+      d.setHours(Number(m[1]), Number(m[2]), 0, 0);
+      return d.getTime();
+    }
+    // Begudes: es distingeixen per la carta (menu_products.kind). Si la
+    // carta encara no s'ha carregat, pel nom.
+    function isDrinkName(name) {
+      const p = menuCatalog && menuCatalog.products.find(x => x.name === name);
+      if (p) return p.kind === 'drink';
+      return /cervesa|moretti|aigua|refresc|coca|beguda/i.test(name || '');
+    }
+    function pizzasOf(o) {
+      if (o.pizza_count !== null && o.pizza_count !== undefined && Number.isFinite(Number(o.pizza_count))) return Number(o.pizza_count);
+      return (o.order_items || []).filter(it => !isDrinkName(it.product_name)).reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+    }
+
+    // entries: [{ group: [comandes], unconfirmed?: true }]
+    function renderColumn(entries, stage, view) {
+      if (!entries.length) return '<p class="text-sm text-kfaint text-center py-10">Cap comanda</p>';
+      const firstOf = e => e.group[0];
+      const keyOf = e => (firstOf(e).delivery_date || '') + ' ' + (firstOf(e).slot_time || '99:99');
+      const createdOf = e => Math.min(...e.group.map(o => new Date(o.created_at).getTime() || 0));
+      const sorted = [...entries].sort((a, b) => keyOf(a).localeCompare(keyOf(b)) || createdOf(a) - createdOf(b));
+      const slots = [];
+      sorted.forEach(e => {
+        const k = keyOf(e);
+        if (!slots.length || slots[slots.length - 1].k !== k) slots.push({ k, entries: [] });
+        slots[slots.length - 1].entries.push(e);
       });
-      return html;
+      const today = businessDateISO();
+      const showDay = currentDateScope !== 'today';
+      return slots.map(({ entries: es }) => {
+        const o = firstOf(es[0]);
+        const slot = o.slot_time || '';
+        const iso = o.delivery_date;
+        const pizzas = es.reduce((s, e) => s + e.group.reduce((t, x) => t + pizzasOf(x), 0), 0);
+        const day = showDay && iso ? `${DAY_SHORT[new Date(iso + 'T00:00:00').getDay()]} ${Number(iso.slice(8, 10))}/${Number(iso.slice(5, 7))}` : '';
+        const at = iso === today ? slotAt(iso, slot) : NaN;
+        const head = `
+          <div class="flex items-baseline gap-2 pt-3 first:pt-0">
+            ${day ? `<span class="text-sm font-bold text-kmute">${day}</span>` : ''}
+            <span class="text-2xl font-black tabular-nums tracking-tight">${escapeHtml(slot || 'Sense hora')}</span>
+            <span class="text-sm font-semibold text-kmute">${pizzas} ${pizzas === 1 ? 'pizza' : 'pizzes'}</span>
+            ${isNaN(at) ? '' : `<span class="js-countdown ml-auto text-sm font-bold tabular-nums" data-at="${at}" data-stage="${stage}"></span>`}
+          </div>`;
+        return head + es.map(e => e.unconfirmed ? renderUnconfirmedCard(firstOf(e)) : renderOrderCard(e.group, view)).join('');
+      }).join('');
+    }
+
+    function setCount(key, n) {
+      document.querySelectorAll(`[data-count="${key}"]`).forEach(el => { el.textContent = n; });
     }
 
     function renderOrders() {
-      const board = ordersCache.filter(o => inDateScope(o) && isPaymentConfirmed(o) && o.status !== 'delivered' && o.status !== 'cancelled');
+      const scoped = ordersCache.filter(inDateScope);
+      const board = scoped.filter(o => isPaymentConfirmed(o) && o.status !== 'delivered' && o.status !== 'cancelled');
       const groups = groupOrders(board);
-      const pendingGroups         = groups.filter(g => stageOfGroup(g) === 'pending');
-      const preparingGroups       = groups.filter(g => stageOfGroup(g) === 'preparing');
-      const readyGroups           = groups.filter(g => stageOfGroup(g) === 'ready');
-      const outForDeliveryGroups  = groups.filter(g => stageOfGroup(g) === 'out_for_delivery');
+      const byStage = st => groups.filter(g => stageOfGroup(g) === st).map(group => ({ group }));
+      const pending = byStage('pending');
+      const preparing = byStage('preparing');
+      const ready = byStage('ready');
+      const out = byStage('out_for_delivery');
+      // Comandes amb targeta encara pendents de Stripe: es veuen (en gris,
+      // sense botons) dins la seva franja des del primer moment.
+      const unconfirmed = scoped
+        .filter(o => !isPaymentConfirmed(o) && o.status !== 'cancelled' && o.status !== 'delivered')
+        .map(o => ({ group: [o], unconfirmed: true }));
+      const delivered = groupOrders(scoped.filter(o => isPaymentConfirmed(o) && o.status === 'delivered')).map(group => ({ group }));
 
-      // Comandes amb targeta encara pendents de confirmació de Stripe — es
-      // veuen igualment (en gris, sense accions) perquè el pizzero sàpiga
-      // que hi ha alguna cosa en camí des del primer moment, en lloc de
-      // desaparèixer fins que es confirmi el pagament.
-      const unconfirmedOrders = ordersCache.filter(o =>
-        inDateScope(o) && !isPaymentConfirmed(o) && o.status !== 'cancelled' && o.status !== 'delivered'
-      );
+      document.getElementById('order-count').textContent = groups.length + unconfirmed.length;
+      setCount('pending', pending.length + unconfirmed.length);
+      setCount('preparing', preparing.length);
+      setCount('ready', ready.length);
+      setCount('out', out.length);
+      setCount('delivered', delivered.length);
 
-      // Les comandes entregades es calculen a part (no formen part del
-      // "board" actiu) — són per a la columna "Entregat" de la vista
-      // Repartiment, perquè el repartidor tingui constància del que ja ha
-      // deixat fet.
-      const deliveredBoard  = ordersCache.filter(o => inDateScope(o) && isPaymentConfirmed(o) && o.status === 'delivered');
-      const deliveredGroups = groupOrders(deliveredBoard);
-
-      document.getElementById('order-count').textContent = groups.length + unconfirmedOrders.length;
-      document.getElementById('count-pending').textContent = pendingGroups.length + unconfirmedOrders.length;
-      document.getElementById('count-preparing').textContent = preparingGroups.length;
-      document.getElementById('count-ready-cuina').textContent = readyGroups.length;
-      document.getElementById('count-ready-repartiment').textContent = readyGroups.length;
-      document.getElementById('count-out-for-delivery').textContent = outForDeliveryGroups.length;
-      document.getElementById('count-delivered').textContent = deliveredGroups.length;
-      document.getElementById('tab-cuina-badge').textContent = pendingGroups.length + preparingGroups.length + unconfirmedOrders.length;
-      document.getElementById('tab-repartiment-badge').textContent = readyGroups.length + outForDeliveryGroups.length;
-
-      const unconfirmedHtml = unconfirmedOrders.map(renderUnconfirmedCard).join('');
-      const pendingHtml     = pendingGroups.length ? renderColumnWithTimeHeaders(pendingGroups) : '';
-      document.getElementById('col-pending').innerHTML =
-        (unconfirmedHtml + pendingHtml) || renderColumnWithTimeHeaders(pendingGroups);
-      document.getElementById('col-preparing').innerHTML = renderColumnWithTimeHeaders(preparingGroups);
-      // El mateix contingut de "Llest" es mostra tant a la vista Cuina
-      // (confirmació per al pizzero) com a la vista Repartiment (amb el
-      // panell de ruta i els botons de navegació a sota).
-      const readyHtml = renderColumnWithTimeHeaders(readyGroups);
-      document.getElementById('col-ready-cuina').innerHTML      = readyHtml;
-      document.getElementById('col-ready-repartiment').innerHTML = readyHtml;
-      document.getElementById('col-out-for-delivery').innerHTML = renderColumnWithTimeHeaders(outForDeliveryGroups);
-      document.getElementById('col-delivered').innerHTML = renderColumnWithTimeHeaders(deliveredGroups);
-      renderRoutePanel(readyGroups);
-      updateElapsedCounters();
+      document.getElementById('col-pending').innerHTML = renderColumn([...unconfirmed, ...pending], 'pending', 'cuina');
+      document.getElementById('col-preparing').innerHTML = renderColumn(preparing, 'preparing', 'cuina');
+      document.getElementById('col-ready-cuina').innerHTML = renderColumn(ready, 'ready', 'cuina');
+      document.getElementById('col-ready-repartiment').innerHTML = renderColumn(ready, 'ready', 'repartiment');
+      document.getElementById('col-out-for-delivery').innerHTML = renderColumn(out, 'out_for_delivery', 'repartiment');
+      document.getElementById('col-delivered').innerHTML = renderColumn(delivered, 'delivered', 'repartiment');
+      renderRoutePanel(ready.map(e => e.group));
+      updateTimers();
     }
 
-    // Actualitza el text de cada contador "⏱ Esperant..." sense refer tota
-    // la targeta — es crida cada 30s des d'un setInterval perquè el temps
-    // avanci encara que no arribi cap comanda nova via realtime.
-    function updateElapsedCounters() {
-      document.querySelectorAll('.js-elapsed').forEach(el => {
-        const since = Number(el.dataset.since);
-        if (!since) return;
-        const mins = Math.floor((Date.now() - since) / 60000);
-        el.textContent = mins <= 0 ? '⏱ Just ara' : `⏱ Esperant fa ${mins} min`;
+    // Compte enrere de cada franja i etiqueta "Nova" (10 min). Es crida en
+    // pintar i cada 20 s, sense refer les targetes.
+    function updateTimers() {
+      const now = Date.now();
+      document.querySelectorAll('.js-countdown').forEach(el => {
+        const at = Number(el.dataset.at);
+        const stage = el.dataset.stage;
+        const mins = Math.round((at - now) / 60000);
+        let text = '', color = '#8E96A3';
+        if (!at) { /* res */ }
+        else if (stage === 'pending' || stage === 'preparing') {
+          if (mins > 90) text = '';
+          else if (mins > 0) { text = `surt en ${mins} min`; if (mins <= 10) color = '#F5A524'; }
+          else if (mins === 0) { text = 'surt ara'; color = '#F5A524'; }
+          else { text = `${-mins} min tard`; color = '#FF6B6B'; }
+        } else if (stage === 'ready') {
+          if (mins > 0) text = `surt en ${mins} min`;
+          else { text = mins === 0 ? 'surt ara' : `esperant ${-mins} min`; color = -mins > 10 ? '#FF6B6B' : '#F5A524'; }
+        } else if (stage === 'out_for_delivery') {
+          const arr = new Date(at + DELIVERY_MIN * 60000);
+          text = `arriba cap a les ${arr.getHours()}:${String(arr.getMinutes()).padStart(2, '0')}`;
+        }
+        el.textContent = text;
+        el.style.color = color;
+      });
+      document.querySelectorAll('.js-new').forEach(el => {
+        el.classList.toggle('hidden', now - Number(el.dataset.created) > 10 * 60000);
       });
     }
+    const updateElapsedCounters = updateTimers;
 
     // Agrupa pedidos del mateix client (per telèfon) per a la mateixa
     // delivery_date + slot_time — perquè el pizzero vegi d'un cop tot el que
@@ -1226,7 +1294,8 @@
       return Array.from(map.values());
     }
 
-    // Etapa visual d'una comanda individual: 5 etapes reals ara.
+    // Etapa d'una comanda i d'un grup (el grup va a la columna del membre
+    // menys avançat: si en queda algun sense afegir, tot el grup hi va).
     function stageOf(o) {
       if (o.status === 'pending') return 'pending';
       if (o.status === 'preparing') return 'preparing';
@@ -1234,12 +1303,6 @@
       if (o.status === 'out_for_delivery') return 'out_for_delivery';
       return 'delivered';
     }
-    // Etapa d'un grup: es mostra a la columna menys avançada dels seus
-    // membres — si en queda algun sense afegir, tot el grup va a "Sense
-    // afegir"; si en queda algun preparant-se, tot va a "Preparant"; si en
-    // queda algun llest (però no entregat/agafat), tot va a "Llest"; si en
-    // queda algun en repartiment, tot va a "En repartiment"; només si TOTS
-    // estan entregats, el grup va a "Entregat".
     function stageOfGroup(group) {
       if (group.some(o => o.status === 'pending')) return 'pending';
       if (group.some(o => o.status === 'preparing')) return 'preparing';
@@ -1249,28 +1312,24 @@
     }
 
     const ACTIONS_NEXT = {
-      pending:           { status: 'preparing',        label: 'Preparar',           color: 'bg-[#2563EB] hover:bg-[#1D4ED8]' },
-      preparing:         { status: 'ready',             label: 'Llest per repartir', color: 'bg-[#16A34A] hover:bg-[#15803D]' },
-      ready:             { status: 'out_for_delivery',  label: 'En repartiment',     color: 'bg-[#0D9488] hover:bg-[#0F766E]' },
-      out_for_delivery:  { status: 'delivered',         label: 'Entregat',           color: 'bg-[#16A34A] hover:bg-[#15803D]' },
+      pending:          { status: 'preparing',        label: 'Preparar',       cls: 'bg-kbtnblue' },
+      preparing:        { status: 'ready',            label: 'Llest',          cls: 'bg-kbtngreen' },
+      ready:            { status: 'out_for_delivery', label: 'En repartiment', cls: 'bg-kbtnteal' },
+      out_for_delivery: { status: 'delivered',        label: 'Entregat',       cls: 'bg-kbtngreen' },
     };
 
-    function actionsRow(ids, stage, size) {
-      const pad = size === 'sm' ? 'py-2 text-xs' : 'py-3 text-sm';
-      const idsJs = ids.join("','");
+    // Un sol botó gran per avançar. Cancel·lar i incidències són al menú ⋯
+    // de la targeta, lluny d'aquest botó, perquè no es toquin per error.
+    function actionButton(ids, stage, size) {
       const next = ACTIONS_NEXT[stage];
-      return `
-        <div class="flex gap-2">
-          <button data-ids="${ids.join(',')}" onclick="advanceStatusBulk(['${idsJs}'],'${next.status}')" class="flex-1 ${pad} rounded-lg ${next.color} text-white font-semibold transition-all">${next.label}</button>
-          <button data-ids="${ids.join(',')}" onclick="confirmCancelOrder(['${idsJs}'])" aria-label="Cancel·lar comanda" class="px-4 ${pad} rounded-lg border border-[#D1D5DB] text-[#6B7280] hover:border-[#DC2626]/40 hover:text-[#DC2626] transition-all">✕</button>
-        </div>`;
+      if (!next) return '';
+      const sz = size === 'sm' ? 'h-10 text-sm' : 'h-12 text-base';
+      return `<button type="button" data-ids="${ids.join(',')}" onclick="advanceStatusBulk(['${ids.join("','")}'],'${next.status}')"
+        class="w-full ${sz} rounded-xl ${next.cls} text-white font-bold tracking-wide hover:brightness-110 active:brightness-95 transition">${next.label}</button>`;
     }
 
     // Les notes porten davant "Hora: HH:MM" (l'hora que va triar el client a
-    // pedido.html). Si el servidor li ha assignat una altra franja, aquesta
-    // hora contradeia la de la capçalera de la targeta (p. ex. capçalera
-    // 21:30 i "Hora: 21:15"), així que es treu: l'hora bona és la de la
-    // capçalera, i si és diferent de la demanada ho diu requestedSlotHtml.
+    // pedido.html); es treu perquè l'hora bona és la de la franja.
     function cleanNotes(o) {
       return (o.notes || '').replace(/^Hora: \d{1,2}:\d{2}( · )?/, '').trim();
     }
@@ -1286,153 +1345,176 @@
     }
     function requestedSlotHtml(o) {
       if (!o.requested_slot || !o.slot_time || o.requested_slot === o.slot_time) return '';
-      return `<p class="text-xs font-bold text-[#DC2626]">⚠ El client la volia cap a les ${escapeHtml(arrivalOf(o.requested_slot))} — se li ha dit que arribarà cap a les ${escapeHtml(arrivalOf(o.slot_time))}</p>`;
+      return `<p class="text-xs font-bold text-kred">⚠ El client la volia cap a les ${escapeHtml(arrivalOf(o.requested_slot))} — se li ha dit que arribarà cap a les ${escapeHtml(arrivalOf(o.slot_time))}</p>`;
     }
 
-    function renderOrderCard(group) {
+    // Menú ⋯ de cada targeta. Es recorda quin està obert perquè la
+    // recàrrega automàtica (cada 30 s) no el tanqui mentre s'usa.
+    const _openCardMenus = new Set();
+    function onCardMenuToggle(el) {
+      if (el.open) _openCardMenus.add(el.dataset.key); else _openCardMenus.delete(el.dataset.key);
+    }
+    function closeCardMenu(el) {
+      const d = el.closest('details');
+      if (d) { d.open = false; _openCardMenus.delete(d.dataset.key); }
+    }
+    window.onCardMenuToggle = onCardMenuToggle;
+    window.closeCardMenu = closeCardMenu;
+    document.addEventListener('click', e => {
+      document.querySelectorAll('details.card-more[open]').forEach(d => {
+        if (!d.contains(e.target)) { d.open = false; _openCardMenus.delete(d.dataset.key); }
+      });
+      const mm = document.getElementById('more-menu');
+      if (mm && !mm.classList.contains('hidden') && !e.target.closest('#more-menu, #more-btn')) closeMoreMenu();
+    });
+
+    function itemsHtml(o) {
+      const items = o.order_items || [];
+      const note = it => it.notes ? `<span class="block text-sm font-bold text-kred">⚠ ${escapeHtml(it.notes)}</span>` : '';
+      const pizzas = items.filter(it => !isDrinkName(it.product_name)).map(it => `
+        <li class="flex gap-3 text-[17px] leading-snug">
+          <span class="w-6 shrink-0 text-right font-black tabular-nums">${Number(it.quantity) || 0}</span>
+          <span class="min-w-0 font-semibold">${escapeHtml(it.product_name)}${note(it)}</span>
+        </li>`).join('');
+      const drinks = items.filter(it => isDrinkName(it.product_name)).map(it => `
+        <li class="flex gap-3 text-sm text-kmute">
+          <span class="w-6 shrink-0 text-right font-bold tabular-nums">${Number(it.quantity) || 0}</span>
+          <span class="min-w-0">${escapeHtml(it.product_name)}${note(it)}</span>
+        </li>`).join('');
+      return `<ul class="space-y-1">${pizzas}${drinks}</ul>`;
+    }
+    function itemsInline(o) {
+      const items = o.order_items || [];
+      const notes = items.filter(it => it.notes).map(it => `<span class="block text-sm font-bold text-kred">⚠ ${escapeHtml(it.product_name)}: ${escapeHtml(it.notes)}</span>`).join('');
+      return `<p class="text-sm text-kmute">${items.map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ')}</p>${notes}`;
+    }
+    function notesHtml(o) {
+      const n = cleanNotes(o);
+      return n ? `<p class="rounded-lg bg-kamber/10 border border-kamber/30 px-3 py-2 text-sm font-semibold text-kamber">📝 ${escapeHtml(n)}</p>` : '';
+    }
+
+    // Comanda gran o partida en tandes de forn (slot_allocations amb més
+    // d'una franja): a quina hora comença cada tanda.
+    function bigOrderHtml(group) {
+      const big = group.find(o => o.slot_allocations && Object.keys(o.slot_allocations).length > 1);
+      if (!big) return '';
+      const keys = Object.keys(big.slot_allocations).sort();
+      const rounds = keys.map((s, i) => `Tanda ${i + 1}: ${big.slot_allocations[s]} des de les ${escapeHtml(s)}`).join(' · ');
+      const title = big.pizza_count > 6 ? `⚠ Comanda gran · ${big.pizza_count} pizzes` : `Repartida en ${keys.length} tandes · ${big.pizza_count} pizzes`;
+      return `
+        <div class="rounded-lg bg-kamber/10 border border-kamber/30 px-3 py-2">
+          <p class="text-sm font-bold text-kamber">${title} · tot llest a les ${escapeHtml(big.slot_time || '')}</p>
+          <p class="text-xs text-kmute mt-0.5">${rounds}</p>
+        </div>`;
+    }
+
+    // view 'cuina': el pizzero veu el nom, les pizzes en gran i les notes.
+    // view 'repartiment': adreça, telèfon, quant cobrar i navegació.
+    function renderOrderCard(group, view = 'cuina') {
       const isGroup = group.length > 1;
       const first = group[0];
       const cust = first.customers || {};
       const addr = first.addresses || {};
       const allSameStatus = group.every(o => o.status === first.status);
-      const dateLabel = first.delivery_date ? new Date(first.delivery_date + 'T00:00:00').toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' }) : '';
-      const timeLabel = first.slot_time || '';
-      const grandTotal = group.reduce((s, o) => s + (Number(o.total) || 0), 0);
       const stage = stageOfGroup(group);
-      const BAND_COLOR = { pending: 'bg-[#F59E0B]', preparing: 'bg-[#3B82F6]', ready: 'bg-[#16A34A]', out_for_delivery: 'bg-[#0D9488]', delivered: 'bg-[#374151]' };
-      // Contador ascendent: temps que fa que espera la comanda MÉS ANTIGA
-      // del grup (no la més nova), perquè el pizzero vegi el pitjor cas —
-      // el client que porta més estona esperant dins d'aquest grup.
-      const waitingSinceMs = Math.min(...group.map(o => new Date(o.created_at).getTime()).filter(t => !isNaN(t)));
-      const headerBand = !allSameStatus ? 'bg-[#6B7280]' : BAND_COLOR[stage];
+      const ids = group.map(o => o.id);
+      const key = view + ':' + ids.join(',');
+      const tel = telHref(cust.phone);
+      const created = Math.max(...group.map(o => new Date(o.created_at).getTime()).filter(t => !isNaN(t)));
+      const kinds = group.flatMap(o => incidentsByOrder.get(o.id) || []);
+      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-kred/15 text-kred text-xs font-bold">⚠ ${escapeHtml(INCIDENT_LABEL[k] || k)}</span>`).join('');
+      const done = stage === 'delivered';
 
-      const ordersHtml = group.map((o, idx) => {
-        const items = o.order_items || [];
-        const itemsHtml = items.map(it => `
-          <div class="flex justify-between gap-2 text-sm">
-            <span>${it.quantity}× ${escapeHtml(it.product_name)}${it.notes ? `<span class="block text-xs text-[#DC2626] font-semibold">⚠ ${escapeHtml(it.notes)}</span>` : ''}</span>
-            <span class="shrink-0 text-[#6B7280]">${fmt(it.unit_price * it.quantity)}</span>
+      const menu = `
+        <details class="card-more relative shrink-0" data-key="${escapeHtml(key)}" ${_openCardMenus.has(key) ? 'open' : ''} ontoggle="onCardMenuToggle(this)">
+          <summary class="w-10 h-10 -mr-2 -mt-1.5 flex items-center justify-center rounded-lg text-kmute text-xl leading-none hover:bg-white/5 hover:text-kfg cursor-pointer" aria-label="Més opcions de la comanda">⋯</summary>
+          <div class="absolute right-0 top-full mt-1 w-60 bg-kcard2 border border-kline rounded-xl shadow-2xl p-1.5 z-20">
+            ${tel ? `<a href="${escapeHtml(tel)}" class="menu-item">📞 Trucar · ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
+            <button type="button" onclick="closeCardMenu(this); openIncident('${first.id}')" class="menu-item">⚠ Apuntar incidència</button>
+            ${done ? '' : `<button type="button" onclick="closeCardMenu(this); confirmCancelOrder(['${ids.join("','")}'])" class="menu-item is-danger">✕ Cancel·lar ${isGroup ? `les ${group.length} comandes` : 'comanda'}</button>`}
           </div>
-        `).join('');
-        return `
-          <div class="space-y-2">
-            ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-[#6B7280]">Comanda ${idx + 1}${!allSameStatus ? ' · ' + escapeHtml(STATUS_LABEL[o.status] || o.status) : ''}</p>` : ''}
-            <div class="space-y-1.5">${itemsHtml}</div>
-            ${Number(o.discount_amount) > 0 ? `<div class="flex justify-between gap-2 text-sm text-[#059669]"><span>Descompte ${escapeHtml(o.discount_code || '')}</span><span class="shrink-0">−${fmt(o.discount_amount)}</span></div>` : ''}
-            <div class="flex items-center justify-between text-sm">
-              <span class="${o.payment_method !== 'cash' && o.payment_status !== 'paid' ? 'text-[#DC2626] font-semibold' : 'text-[#6B7280]'}">${o.payment_method === 'cash' ? 'Efectiu al repartidor' : (o.payment_status === 'paid' ? 'Pagat online' : '⚠ Verificant pagament…')}${o.tip_amount > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
-              <span class="font-bold">${fmt(o.total)}</span>
-            </div>
-            ${cleanNotes(o) ? `<p class="text-xs italic text-[#6B7280]">${escapeHtml(cleanNotes(o))}</p>` : ''}
-            ${isGroup && !allSameStatus ? actionsRow([o.id], stageOf(o), 'sm') : ''}
-          </div>
-        `;
-      }).join(isGroup ? '<div class="border-t border-dashed border-[#E5E7EB]"></div>' : '');
+        </details>`;
 
-      const headerStatus = allSameStatus ? (STATUS_LABEL[first.status] || first.status) : 'Diverses comandes';
-
-      // Comanda gran: ocupa més d'una franja de forn (slot_allocations té
-      // més d'una clau). Avís destacat a dalt de tot de la targeta, amb el
-      // desglossament "Tanda 1 / Tanda 2" (quantes pizzes i a quina hora
-      // comença cada tanda) — així el pizzero sap d'un cop de vista que
-      // aquesta comanda necessita més d'un forn seguit i quan començar
-      // cada part, en lloc de descobrir-ho comptant els articles un a un.
-      const bigOrder = group.find(o => o.slot_allocations && Object.keys(o.slot_allocations).length > 1);
-      const bigOrderHtml = bigOrder ? (() => {
-        const rounds = Object.keys(bigOrder.slot_allocations).sort().map((s, i) =>
-          `Tanda ${i + 1}: ${bigOrder.slot_allocations[s]} ${bigOrder.slot_allocations[s] === 1 ? 'pizza' : 'pizzes'} des de les ${escapeHtml(s)}`
-        ).join(' · ');
-        // Només és "gran" si no cap en una tanda de forn (més de 6 pizzes).
-        // Una comanda petita també es pot partir si la seva franja només
-        // tenia lloc per a una part (p. ex. 2 pizzes: 1 a les 20:45 i 1 a
-        // les 21:00); llavors només s'avisa que va en més d'una tanda.
-        const title = bigOrder.pizza_count > 6
-          ? `⚠ Comanda gran — ${bigOrder.pizza_count} pizzes`
-          : `Repartida en ${Object.keys(bigOrder.slot_allocations).length} tandes — ${bigOrder.pizza_count} pizzes`;
-        return `
-          <div class="bg-[#F59E0B]/15 border border-[#F59E0B]/50 rounded-xl px-4 py-2.5">
-            <p class="text-xs font-black uppercase tracking-wide text-[#B45309]">${title} · tot llest a les ${escapeHtml(bigOrder.slot_time || '')}</p>
-            <p class="text-xs font-medium text-[#92400E] mt-1">${rounds}</p>
-          </div>`;
-      })() : '';
-
-      return `
-        <div class="bg-[#F7F8FA] text-[#14171C] rounded-2xl shadow-lg overflow-hidden">
-          <div class="px-5 py-3 flex items-center justify-between ${headerBand} text-white">
-            <span class="font-black text-sm uppercase tracking-wide">${headerStatus}${isGroup ? ` · ${group.length} comandes` : ''}</span>
-            <span class="text-xs font-semibold opacity-90">${dateLabel} ${timeLabel}</span>
+      const top = `
+        <div class="flex items-start gap-2">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-lg leading-tight break-words">${escapeHtml(cust.name || 'Client')}</p>
+            ${isGroup ? `<p class="text-xs font-semibold text-kmute mt-0.5">${group.length} comandes juntes</p>` : ''}
           </div>
-          <div class="p-5 space-y-4">
-            ${!isNaN(waitingSinceMs) && stage !== 'delivered' ? `
-              <p class="js-elapsed text-xs font-bold text-[#6B7280]" data-since="${waitingSinceMs}">⏱ Esperant...</p>
-            ` : ''}
-            ${bigOrderHtml}
-            ${requestedSlotHtml(first)}
-            <div>
-              <p class="font-bold text-lg">${escapeHtml(cust.name || 'Client')}</p>
-              <a href="${escapeHtml(telHref(cust.phone))}" class="text-sm text-[#2563EB] font-semibold">${escapeHtml(cust.phone || '')}</a>
-            </div>
-            <div class="text-sm text-[#4B5563] leading-relaxed">
-              ${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}<br>
-              ${escapeHtml(addr.postal_code || '')} ${escapeHtml(addr.city || '')}
-              ${addr.notes ? `<br><span class="italic">${escapeHtml(addr.notes)}</span>` : ''}
-            </div>
-            <div class="border-t border-[#E5E7EB] pt-3 space-y-3">
-              ${ordersHtml}
-            </div>
-            ${isGroup ? `
-              <div class="border-t border-[#E5E7EB] pt-3 flex items-center justify-between text-sm">
-                <span class="text-[#4B5563] font-semibold">Total combinat</span>
-                <span class="font-black text-lg">${fmt(grandTotal)}</span>
-              </div>
-            ` : ''}
-            ${stage === 'ready' || stage === 'out_for_delivery' ? `
-              <div class="flex gap-2 pt-1">
-                <a href="${buildMapsUrl(addressDestination(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🗺️ Maps</a>
-                <a href="${buildWazeUrl(addressDestination(first))}" target="_blank" class="flex-1 text-center py-2 rounded-lg border border-[#D1D5DB] text-sm font-semibold hover:border-[#2563EB]/40 hover:text-[#2563EB] transition-all">🚗 Waze</a>
-              </div>
-            ` : ''}
-            ${allSameStatus && stage !== 'delivered' ? `<div class="border-t border-[#E5E7EB] pt-3">${actionsRow(group.map(o => o.id), stage, 'lg')}</div>` : ''}
-            ${incidentRow(group)}
-          </div>
+          ${view === 'cuina' && stage === 'pending' && !isNaN(created) ? `<span class="js-new hidden shrink-0 px-2 py-0.5 rounded-full bg-kamber/15 text-kamber text-xs font-bold" data-created="${created}">Nova</span>` : ''}
+          ${menu}
         </div>
-      `;
+        ${tags ? `<div class="flex flex-wrap gap-1.5">${tags}</div>` : ''}`;
+
+      const orders = group.map((o, idx) => `
+        <div class="space-y-2 ${idx ? 'pt-3 border-t border-dashed border-kline' : ''}">
+          ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-kmute">Comanda ${idx + 1}${allSameStatus ? '' : ' · ' + escapeHtml(STATUS_LABEL[o.status] || o.status)}</p>` : ''}
+          ${view === 'cuina' ? itemsHtml(o) : itemsInline(o)}
+          ${notesHtml(o)}
+          ${isGroup && !allSameStatus && o.status !== 'delivered' ? actionButton([o.id], stageOf(o), 'sm') : ''}
+        </div>`).join('');
+
+      const footer = allSameStatus && !done ? actionButton(ids, stage, 'lg') : '';
+
+      if (view === 'cuina') {
+        return `
+          <article class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
+            ${top}
+            ${bigOrderHtml(group)}
+            ${orders}
+            ${footer}
+          </article>`;
+      }
+
+      // Repartiment
+      const cash = group.filter(o => o.payment_method === 'cash');
+      const cashTotal = cash.reduce((s, o) => s + (Number(o.total) || 0), 0);
+      const paidTotal = group.filter(o => o.payment_method !== 'cash').reduce((s, o) => s + (Number(o.total) || 0), 0);
+      const tip = group.reduce((s, o) => s + (Number(o.tip_amount) || 0), 0);
+      const payment = `
+        ${cash.length ? `
+          <div class="flex items-center justify-between gap-3 rounded-xl bg-kamber/10 border border-kamber/40 px-4 py-2.5">
+            <span class="text-xs font-black uppercase tracking-wide text-kamber">Cobrar en efectiu</span>
+            <span class="text-2xl font-black tabular-nums">${fmt(cashTotal)}</span>
+          </div>` : ''}
+        ${paidTotal > 0 ? `<p class="text-sm font-semibold text-kgreen">✓ Pagat online · ${fmt(paidTotal)}</p>` : ''}
+        ${tip > 0 ? `<p class="text-xs text-kmute">Inclou propina de ${fmt(tip)}</p>` : ''}`;
+      const nav = stage === 'ready' || stage === 'out_for_delivery' ? `
+        <div class="grid grid-cols-2 gap-2">
+          <a href="${escapeHtml(buildMapsUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ghost-btn h-11">🗺️ Maps</a>
+          <a href="${escapeHtml(buildWazeUrl(addressDestination(first)))}" target="_blank" rel="noopener" class="ghost-btn h-11">🚗 Waze</a>
+        </div>` : '';
+      return `
+        <article class="bg-kcard border border-kline rounded-2xl p-4 space-y-3 ${done ? 'opacity-60' : ''}">
+          ${top}
+          <div>
+            <p class="font-semibold leading-snug">${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}</p>
+            <p class="text-sm text-kmute">${escapeHtml(addr.postal_code || '')} ${escapeHtml(addr.city || '')}</p>
+            ${addr.notes ? `<p class="text-sm font-semibold text-kamber mt-1">${escapeHtml(addr.notes)}</p>` : ''}
+            ${tel ? `<a href="${escapeHtml(tel)}" class="inline-flex items-center gap-1.5 mt-1.5 min-h-[36px] text-kblue font-semibold">📞 ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
+          </div>
+          ${requestedSlotHtml(first)}
+          ${orders}
+          ${done ? '' : payment}
+          ${nav}
+          ${footer}
+        </article>`;
     }
 
-    // Targeta grisa per a comandes amb targeta encara no confirmades per
-    // Stripe (payment_status = 'processing'). Abans, aquestes comandes eren
-    // totalment invisibles fins que el webhook les marcava "paid" — el so
-    // de "comanda nova" sonava igualment en crear-se la fila (detectNewPendingOrders
-    // no distingeix pagament confirmat), així que el pizzero sentia l'avís
-    // però no veia res, i quan la targeta apareixia de veritat uns segons o
-    // minuts després ja no hi havia cap segon avís — fàcil de perdre en una
-    // nit amb moltes comandes a la vegada (és el que li va passar a la
-    // comanda de la Xenia l'11/09/2026: mai es va arribar a marcar com a
-    // "Preparant" ni "Entregat" a l'app, tot i que la pizza sí que es va fer
-    // i portar). Ara la comanda es veu des del primer moment, en gris i
-    // sense botons d'acció (no volem que el pizzero es posi a fer una
-    // comanda que Stripe encara podria no confirmar) — i en confirmar-se el
-    // pagament, la mateixa targeta passa a ser una comanda normal.
+    // Comandes amb targeta encara no confirmades per Stripe
+    // (payment_status = 'processing'): es veuen des del primer moment, en
+    // gris i sense botons — en confirmar-se el pagament passen a ser una
+    // targeta normal. (Abans eren invisibles i el pizzero sentia l'avís
+    // sense veure res: cas de la Xenia, 11/09/2026.)
     function renderUnconfirmedCard(o) {
       const cust = o.customers || {};
-      const items = o.order_items || [];
-      const itemsHtml = items.map(it => `<div class="flex justify-between gap-2 text-sm">
-        <span>${it.quantity}× ${escapeHtml(it.product_name)}</span>
-        <span class="shrink-0">${fmt(it.unit_price * it.quantity)}</span>
-      </div>`).join('');
-      const since = new Date(o.created_at).getTime();
+      const items = (o.order_items || []).map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ');
       return `
-        <div class="bg-[#F3F4F6] text-[#6B7280] rounded-2xl border-2 border-dashed border-[#D1D5DB] overflow-hidden">
-          <div class="px-5 py-3 flex items-center justify-between bg-[#9CA3AF] text-white">
-            <span class="font-black text-sm uppercase tracking-wide">🔄 Verificant pagament...</span>
-            <span class="text-xs font-semibold opacity-90">${escapeHtml(o.slot_time || '')}</span>
-          </div>
-          <div class="p-5 space-y-3">
-            ${!isNaN(since) ? `<p class="js-elapsed text-xs font-bold" data-since="${since}">⏱ Esperant...</p>` : ''}
-            <p class="font-bold text-base">${escapeHtml(cust.name || 'Client')}</p>
-            <div class="space-y-1.5">${itemsHtml}</div>
-          </div>
-        </div>`;
+        <article class="rounded-2xl border border-dashed border-white/15 px-4 py-3 space-y-1 text-kmute">
+          <p class="text-xs font-bold uppercase tracking-wide">🔄 Verificant pagament…</p>
+          <p class="font-semibold text-kfg/70">${escapeHtml(cust.name || 'Client')}</p>
+          <p class="text-sm">${items}</p>
+        </article>`;
     }
 
     // ── Navegació del repartidor: adreces i enllaços de mapes ──
@@ -1505,7 +1587,7 @@
       _lastRouteKey = key;
 
       panel.classList.remove('hidden');
-      panel.innerHTML = '<p class="text-xs text-[#8B93A1]">Calculant ruta...</p>';
+      panel.innerHTML = '<p class="text-xs text-kmute">Calculant ruta…</p>';
 
       try {
         const { DirectionsService } = await _getRoutesLib();
@@ -1523,15 +1605,15 @@
         const listHtml = orderedStops.map((s, i) => `<li>${i + 1}. ${escapeHtml(s.label)} — ${escapeHtml(s.address)}</li>`).join('');
         const mapsUrl = buildMultiStopMapsUrl(KITCHEN_ORIGIN, orderedStops);
         panel.innerHTML = `
-          <div class="bg-[#16A34A]/10 border border-[#16A34A]/30 rounded-xl p-3 space-y-2">
-            <p class="text-xs font-bold uppercase tracking-wide text-[#16A34A]">Ruta suggerida</p>
-            <ol class="text-sm space-y-1 list-none">${listHtml}</ol>
-            <a href="${mapsUrl}" target="_blank" class="block text-center py-2.5 rounded-lg bg-[#16A34A] hover:bg-[#15803D] text-white font-semibold text-sm transition-all">🗺️ Navegar ruta completa</a>
+          <div class="bg-kcard border border-kline rounded-2xl p-4 space-y-3">
+            <p class="text-xs font-bold uppercase tracking-widest text-kmute">Ruta suggerida</p>
+            <ol class="text-sm space-y-1.5 list-none">${listHtml}</ol>
+            <a href="${escapeHtml(mapsUrl)}" target="_blank" rel="noopener" class="flex items-center justify-center h-12 rounded-xl bg-kbtngreen hover:brightness-110 text-white font-bold transition">🗺️ Navegar ruta completa</a>
           </div>`;
       } catch (e) {
         console.error('[route]', e);
         _lastRouteKey = '';
-        panel.innerHTML = '<p class="text-xs text-[#DC2626]">No s\'ha pogut calcular la ruta — utilitza la navegació individual de cada comanda.</p>';
+        panel.innerHTML = '<p class="text-xs text-kred">No s\'ha pogut calcular la ruta — utilitza la navegació individual de cada comanda.</p>';
       }
     }
 
@@ -1550,6 +1632,12 @@
       if (!d) return '';
       if (d.length > 9 && d.startsWith('34')) return 'tel:+34' + d.slice(-9);
       return 'tel:' + (raw.startsWith('+') ? '+' : '') + d;
+    }
+    // Telèfon per mostrar: "+34 600 111 222" (sense prefixos repetits).
+    function phoneLabel(phone) {
+      const t = telHref(phone).replace(/^tel:/, '');
+      const m = /^\+34(\d{3})(\d{3})(\d{3})$/.exec(t);
+      return m ? `+34 ${m[1]} ${m[2]} ${m[3]}` : String(phone || '').trim();
     }
 
     // Doble toc: mentre es desa, els botons de la comanda queden bloquejats,
@@ -1631,16 +1719,6 @@
       }
     }
 
-    function incidentRow(group) {
-      const kinds = group.flatMap(o => incidentsByOrder.get(o.id) || []);
-      const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-[#DC2626]/10 text-[#DC2626] text-xs font-bold">⚠ ${escapeHtml(INCIDENT_LABEL[k] || k)}</span>`).join(' ');
-      return `
-        <div class="flex items-center gap-2 flex-wrap">
-          ${tags}
-          <button onclick="openIncident('${group[0].id}')" class="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold text-[#6B7280] hover:text-[#DC2626] hover:bg-[#DC2626]/5 transition-colors">⚠ Incidència</button>
-        </div>`;
-    }
-
     function openIncident(orderId) {
       incidentTargetId = orderId;
       const o = ordersCache.find(x => x.id === orderId);
@@ -1701,12 +1779,10 @@
       if (sentAt) {
         const t = new Date(sentAt).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
         btn.textContent = `✓ Pase tancat ${t}`;
-        btn.classList.remove('bg-[#E23F2E]', 'hover:bg-[#C9321F]', 'text-white');
-        btn.classList.add('border', 'border-white/15', 'text-[#8B93A1]', 'hover:bg-white/5');
+        btn.dataset.sent = '1';
       } else {
         btn.textContent = 'Tancar pase';
-        btn.classList.add('bg-[#E23F2E]', 'hover:bg-[#C9321F]', 'text-white');
-        btn.classList.remove('border', 'border-white/15', 'text-[#8B93A1]', 'hover:bg-white/5');
+        delete btn.dataset.sent;
       }
     }
 
@@ -1807,7 +1883,7 @@
       const hist = getFilteredHistoryOrders();
       const list = document.getElementById('history-list');
       if (!hist.length) {
-        list.innerHTML = '<p class="text-center text-[#6B7280] py-10">Sense comandes completades en aquest període.</p>';
+        list.innerHTML = '<p class="text-center text-kmute py-10">Sense comandes completades en aquest període.</p>';
         return;
       }
 
@@ -1821,10 +1897,10 @@
 
       list.innerHTML = Array.from(byDay.entries()).map(([day, orders]) => `
         <div>
-          <h3 class="text-xs font-bold uppercase tracking-widest text-[#6B7280] mb-2">${formatDayLabel(day)} · ${orders.length} comanda${orders.length > 1 ? 's' : ''}</h3>
+          <h3 class="text-xs font-bold uppercase tracking-widest text-kmute mb-2">${formatDayLabel(day)} · ${orders.length} comanda${orders.length > 1 ? 's' : ''}</h3>
           <div class="space-y-2">${orders.map(renderHistoryRow).join('')}</div>
         </div>
-      `).join('<div class="border-t border-[#E5E7EB] my-4"></div>');
+      `).join('<div class="border-t border-kline my-4"></div>');
     }
     window.renderHistoryList = renderHistoryList;
 
@@ -1851,18 +1927,18 @@
       const itemsText = items.map(it => `${it.quantity}× ${it.product_name}`).join(', ');
       const completedTime = new Date(o.updated_at || o.created_at).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
       const deliveryDayLabel = o.delivery_date ? new Date(o.delivery_date + 'T00:00:00').toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' }) : '';
-      const statusColor = o.status === 'cancelled' ? 'text-[#DC2626]' : 'text-[#16A34A]';
+      const statusColor = o.status === 'cancelled' ? 'text-kred' : 'text-kgreen';
       const statusVerb = o.status === 'cancelled' ? 'cancel·lat' : 'entregat';
       const addressText = [addr.street, addr.floor].filter(Boolean).join(', ');
       return `
-        <div class="border border-[#E5E7EB] rounded-xl px-4 py-3">
+        <div class="border border-kline rounded-xl px-4 py-3">
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="font-bold">${escapeHtml(cust.name || 'Client')}</span>
             <span class="text-xs font-bold uppercase ${statusColor}">${escapeHtml(STATUS_LABEL[o.status] || o.status)}</span>
           </div>
-          <p class="text-xs text-[#6B7280] mb-1">Comanda per al ${deliveryDayLabel} ${escapeHtml(o.slot_time || '')} · ${statusVerb} a les ${completedTime} · ${fmt(o.total)}</p>
-          ${addressText ? `<p class="text-sm text-[#4B5563]">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
-          ${itemsText ? `<p class="text-sm text-[#374151] mt-1">${escapeHtml(itemsText)}</p>` : ''}
+          <p class="text-xs text-kmute mb-1">Comanda per al ${deliveryDayLabel} ${escapeHtml(o.slot_time || '')} · ${statusVerb} a les ${completedTime} · ${fmt(o.total)}</p>
+          ${addressText ? `<p class="text-sm text-kmute">${escapeHtml(addressText)}${addr.postal_code ? ' · ' + escapeHtml(addr.postal_code) : ''}${addr.city ? ' ' + escapeHtml(addr.city) : ''}</p>` : ''}
+          ${itemsText ? `<p class="text-sm mt-1">${escapeHtml(itemsText)}</p>` : ''}
         </div>`;
     }
 
