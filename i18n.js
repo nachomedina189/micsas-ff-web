@@ -5,7 +5,7 @@
       demana: 'Demana ja! →', contacte: 'Contacte', horaris: 'Horaris',
       resenya: "Deixa'ns una ressenya a Google", resenya_t: "Deixa'ns una ressenya", resenya_sub: "T'ha agradat? Explica-ho a Google", resenya_help: 'Ens ajuda moltíssim i només triga 10 segons', resenya_btn: 'Valorar ara',
       hor_dl: 'Dl – Dj:', hor_tancat: 'Tancat', hor_dv: 'Div i Diu:',
-      copyright: '© 2025 micsas.ff · Tots els drets reservats', privacitat: 'Privacitat',
+      copyright: '© ' + new Date().getFullYear() + ' micsas.ff · Tots els drets reservats', privacitat: 'Privacitat',
       // INDEX
       idx_demana: 'Demana aquí! →', idx_carta: 'Experiència micsas',
       // CARTA NAV
@@ -23,7 +23,7 @@
       banner_sub: "Sense pressa, només amor i temps. L'olor de la massa al matí, el so de les motos al vespre, la calor del forn de pedra. Així és Micsas. Així és el nostre barri.",
       // NOSALTRES
       nos_label: 'la meva història', nos_t1: 'Nascuts a Matadepera,', nos_t2: 'fets', nos_t3: 'per compartir.',
-      nos_p1: "Micsas neix a Matadepera, d'un noi obsessionat per la pizza napolitana de veritat: massa fermentada 30 hores i ingredients de proximitat escollits un per un.",
+      nos_p1: "Micsas neix a Matadepera, d'un noi obsessionat per la pizza napolitana de veritat: massa fermentada 24 hores i ingredients de proximitat escollits un per un.",
       nos_p2: "Cuinem i entreguem nosaltres mateixos perquè la pizza arribi al teu portal encara calenta. També tenim el servei d'esdeveniments, per a tot aquell públic que vol la pizza tradicional napolitana en la seva festa.",
       // SHOP
       shop_desc: "Aviat tindreu novetats sobre la nostra botiga. Estigueu atents al nostre Instagram @micsas.ff!",
@@ -54,7 +54,7 @@
       ev_c2_t: 'Pizzaiolo professional',
       ev_c2_d: "El nostre equip expert s'encarrega de tot. Cuinem les pizzes en directe.",
       ev_c3_t: 'Massa artesana i ingredients',
-      ev_c3_d: "Massa de 72h de fermentació i ingredients frescos de primera qualitat.",
+      ev_c3_d: "Massa de 24h de fermentació i ingredients frescos de primera qualitat.",
       ev_c4_t: "Adaptació total a l'espai",
       ev_c4_d: "Muntem la parada on necessitis, només necessitem un petit racó al teu event.",
       ev_tipus: 'Per a qualsevol celebració',
@@ -70,7 +70,21 @@
       ev_tel: 'Telèfon de contacte', ev_inst: 'Escriu-nos per Insta',
       ev_f_nom: 'Nom o Empresa', ev_f_data: 'Data event', ev_f_inv: 'Nº Convidats',
       ev_f_det: 'Més detalls', ev_f_nom_ph: 'El teu nom',
-      ev_f_det_ph: "Lloc, tipus d'event...", ev_f_btn: 'Demanar pressupost',
+      ev_f_det_ph: "Horari, espai, al·lèrgies…", ev_f_btn: 'Demanar pressupost',
+      // CARTA: HERO, CONFIANÇA I EVENTS
+      hero_tagline: 'Pizza napolitana a domicili a Matadepera',
+      hero_f_hores: 'Dv i Dg · 20:00–22:30', hero_f_enviament: 'Enviament gratuït', hero_f_minim: 'Sense comanda mínima',
+      conf_title: 'Ja ens coneixen a Matadepera', conf_pizzes: 'pizzes servides', conf_clients: "veïns ja l'han provada",
+      conf_repeteix: 'clients repeteix', conf_repeteix_n: '1 de 4', conf_insta: 'Mira què en diuen a @micsas.ff',
+      hev_title: 'Portem el forn a la teva festa',
+      hev_desc: "Casaments, aniversaris, sopars d'empresa o festes de barri. Muntem el forn mòbil i fem pizza napolitana al moment, on tu vulguis.",
+      hev_b1: 'Pressupost a mida en menys de 24 h', hev_b2: 'Pizzaiolo i forn inclosos, nosaltres ho muntem tot', hev_b3: 'Opcions vegetarianes i veganes',
+      hev_cta: 'Demana pressupost →',
+      // EVENTS: FORMULARI I WHATSAPP
+      ev_wa: 'Escriu-nos per WhatsApp',
+      ev_f_tipus: "Tipus d'event", ev_f_tipus_ph: 'Tria…', ev_f_t_casament: 'Casament', ev_f_t_aniv: 'Aniversari',
+      ev_f_t_empresa: 'Empresa o equip', ev_f_t_privada: 'Festa privada', ev_f_t_altres: 'Altres',
+      ev_f_lloc: "Lloc de l'event", ev_f_lloc_ph: 'Ex: Matadepera',
       // PEDIDO ITEM MODAL
       modal_rm_ingr: 'Vols treure algun ingredient?',
       modal_allergy: 'Al·lèrgies o intoleràncies?',
@@ -82,7 +96,7 @@
       demana: '¡Pide ya! →', contacte: 'Contacto', horaris: 'Horarios',
       resenya: 'Déjanos una reseña en Google', resenya_t: 'Déjanos una reseña', resenya_sub: '¿Te ha gustado? Cuéntalo en Google', resenya_help: 'Nos ayuda muchísimo y solo tarda 10 segundos', resenya_btn: 'Valorar ahora',
       hor_dl: 'Lun – Jue:', hor_tancat: 'Cerrado', hor_dv: 'Vie y Dom:',
-      copyright: '© 2025 micsas.ff · Todos los derechos reservados', privacitat: 'Privacidad',
+      copyright: '© ' + new Date().getFullYear() + ' micsas.ff · Todos los derechos reservados', privacitat: 'Privacidad',
       // INDEX
       idx_demana: '¡Pide aquí! →', idx_carta: 'Experiencia micsas',
       // CARTA NAV
@@ -100,7 +114,7 @@
       banner_sub: "Sin prisa, solo amor y tiempo. El olor de la masa por la mañana, el sonido de las motos al atardecer, el calor del horno de piedra. Así es Micsas. Así es nuestro barrio.",
       // NOSALTRES
       nos_label: 'mi historia', nos_t1: 'Nacidos en Matadepera,', nos_t2: 'hechos', nos_t3: 'para compartir.',
-      nos_p1: "Micsas nace en Matadepera, de un chico obsesionado con la pizza napolitana de verdad: masa fermentada 30 horas e ingredientes de proximidad elegidos uno a uno.",
+      nos_p1: "Micsas nace en Matadepera, de un chico obsesionado con la pizza napolitana de verdad: masa fermentada 24 horas e ingredientes de proximidad elegidos uno a uno.",
       nos_p2: "Cocinamos y entregamos nosotros mismos para que la pizza llegue a tu puerta todavía caliente. También tenemos el servicio de eventos, para todo aquel público que quiera la pizza napolitana tradicional en su fiesta.",
       // SHOP
       shop_desc: "Pronto tendréis novedades sobre nuestra tienda. ¡Estad atentos a nuestro Instagram @micsas.ff!",
@@ -131,7 +145,7 @@
       ev_c2_t: 'Pizzaiolo profesional',
       ev_c2_d: "Nuestro equipo experto se encarga de todo. Cocinamos las pizzas en directo.",
       ev_c3_t: 'Masa artesana e ingredientes',
-      ev_c3_d: "Masa de 72h de fermentación e ingredientes frescos de primera calidad.",
+      ev_c3_d: "Masa de 24h de fermentación e ingredientes frescos de primera calidad.",
       ev_c4_t: "Adaptación total al espacio",
       ev_c4_d: "Montamos el puesto donde necesites, solo necesitamos un pequeño rincón en tu evento.",
       ev_tipus: 'Para cualquier celebración',
@@ -147,7 +161,21 @@
       ev_tel: 'Teléfono de contacto', ev_inst: 'Escríbenos por Insta',
       ev_f_nom: 'Nombre o Empresa', ev_f_data: 'Fecha del evento', ev_f_inv: 'Nº Invitados',
       ev_f_det: 'Más detalles', ev_f_nom_ph: 'Tu nombre',
-      ev_f_det_ph: "Lugar, tipo de evento...", ev_f_btn: 'Pedir presupuesto',
+      ev_f_det_ph: "Horario, espacio, alergias…", ev_f_btn: 'Pedir presupuesto',
+      // CARTA: HERO, CONFIANZA Y EVENTOS
+      hero_tagline: 'Pizza napolitana a domicilio en Matadepera',
+      hero_f_hores: 'Vie y Dom · 20:00–22:30', hero_f_enviament: 'Envío gratis', hero_f_minim: 'Sin pedido mínimo',
+      conf_title: 'Ya nos conocen en Matadepera', conf_pizzes: 'pizzas servidas', conf_clients: 'vecinos ya la han probado',
+      conf_repeteix: 'clientes repite', conf_repeteix_n: '1 de 4', conf_insta: 'Mira lo que dicen en @micsas.ff',
+      hev_title: 'Llevamos el horno a tu fiesta',
+      hev_desc: 'Bodas, cumpleaños, cenas de empresa o fiestas de barrio. Montamos el horno móvil y hacemos pizza napolitana al momento, donde tú quieras.',
+      hev_b1: 'Presupuesto a medida en menos de 24 h', hev_b2: 'Pizzaiolo y horno incluidos, nosotros lo montamos todo', hev_b3: 'Opciones vegetarianas y veganas',
+      hev_cta: 'Pide presupuesto →',
+      // EVENTOS: FORMULARIO Y WHATSAPP
+      ev_wa: 'Escríbenos por WhatsApp',
+      ev_f_tipus: 'Tipo de evento', ev_f_tipus_ph: 'Elige…', ev_f_t_casament: 'Boda', ev_f_t_aniv: 'Cumpleaños',
+      ev_f_t_empresa: 'Empresa o equipo', ev_f_t_privada: 'Fiesta privada', ev_f_t_altres: 'Otros',
+      ev_f_lloc: 'Lugar del evento', ev_f_lloc_ph: 'Ej: Matadepera',
       // PEDIDO ITEM MODAL
       modal_rm_ingr: '¿Quieres quitar algún ingrediente?',
       modal_allergy: '¿Alergias o intolerancias?',

@@ -86,6 +86,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="transicion.css">
+    <link rel="stylesheet" href="pizza-badge.css">
     <link rel="dns-prefetch" href="https://hoirqrkdgbmvpwutwuwj.supabase.co">
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -207,6 +208,7 @@
       .hero-item { animation: hero-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both; }
       .hero-subtitle       { animation-delay: 0.1s; }
       .hero-title          { animation-delay: 0.35s; }
+      .hero-tagline        { animation-delay: 0.7s; }
       .hero-ctas-primary   { animation-delay: 1.2s; }
       .hero-ctas-secondary { animation-delay: 1.5s; }
       .hero-scroll         { animation-delay: 1.8s; }
@@ -316,9 +318,18 @@
           <span class="w-8 h-[1px] bg-gradient-to-l from-transparent to-[#F2E6CE]/50"></span>
         </p>
 
-        <h1 class="hero-item hero-title mb-6 w-full flex items-center justify-center" aria-label="micsas" style="height:clamp(180px,38vw,360px);">
-          <img src="images/micsas-wordmark-cream.png" alt="micsas" style="height:clamp(180px,38vw,360px);width:auto;">
+        <h1 class="hero-item hero-title mb-4 w-full flex items-center justify-center" aria-label="micsas" style="height:clamp(150px,32vw,320px);">
+          <img src="images/micsas-wordmark-cream.png" alt="micsas" style="height:clamp(150px,32vw,320px);width:auto;">
         </h1>
+        <p class="hero-item hero-tagline text-[#F2E6CE] font-['League_Spartan',sans-serif] font-bold text-[22px] sm:text-[28px] leading-tight tracking-tight max-w-[22ch] sm:max-w-none" data-i18n="hero_tagline">
+          Pizza napolitana a domicili a Matadepera
+        </p>
+        <ul class="hero-item hero-tagline mt-4 mb-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[#F2E6CE]/90 text-[14px] sm:text-[15px] font-medium">
+          <li class="flex items-center gap-1.5"><iconify-icon icon="solar:clock-circle-linear" width="17"></iconify-icon><span data-i18n="hero_f_hores">Dv i Dg · 20:00–22:30</span></li>
+          <li class="flex items-center gap-1.5"><iconify-icon icon="solar:delivery-linear" width="17"></iconify-icon><span data-i18n="hero_f_enviament">Enviament gratuït</span></li>
+          <li class="flex items-center gap-1.5"><iconify-icon icon="solar:tag-linear" width="17"></iconify-icon><span data-i18n="hero_f_minim">Sense comanda mínima</span></li>
+        </ul>
+        <div id="pizza-counter" class="pzb-wrap -mt-2 mb-6" style="display:none" aria-live="polite"></div>
       </div>
 
       <div class="flex flex-col items-center gap-4 w-full relative z-10">
@@ -347,6 +358,29 @@
       <!-- gradient fade to next section -->
       <div class="absolute bottom-0 left-0 w-full h-48 md:h-64 bg-gradient-to-b from-transparent to-[#c80a07] pointer-events-none z-10"></div>
     </header>
+
+    <!-- ──── CONFIANÇA: xifres reals (orders a Supabase, nov. 2026) i ressenyes reals d'Instagram ──── -->
+    <section class="px-6 md:px-12 pb-8 md:pb-16 bg-[#c80a07]" aria-labelledby="confianca-title">
+      <div class="max-w-5xl mx-auto rounded-3xl bg-[#F2E6CE] text-[#2A1A0F] px-6 py-8 md:px-12 md:py-10 flex flex-col gap-8">
+        <h2 id="confianca-title" class="text-center text-xs uppercase tracking-[0.2em] font-semibold text-[#c80a07]" data-i18n="conf_title">Ja ens coneixen a Matadepera</h2>
+        <dl class="grid grid-cols-3 gap-4 text-center">
+          <div class="flex flex-col-reverse justify-end gap-1"><dt class="text-xs sm:text-sm text-[#5A3E28] leading-snug" data-i18n="conf_pizzes">pizzes servides</dt><dd class="m-0 font-['League_Spartan',sans-serif] font-extrabold text-3xl sm:text-5xl text-[#c80a07]">+600</dd></div>
+          <div class="flex flex-col-reverse justify-end gap-1"><dt class="text-xs sm:text-sm text-[#5A3E28] leading-snug" data-i18n="conf_clients">veïns ja l'han provada</dt><dd class="m-0 font-['League_Spartan',sans-serif] font-extrabold text-3xl sm:text-5xl text-[#c80a07]">+140</dd></div>
+          <div class="flex flex-col-reverse justify-end gap-1"><dt class="text-xs sm:text-sm text-[#5A3E28] leading-snug" data-i18n="conf_repeteix">clients repeteix</dt><dd class="m-0 font-['League_Spartan',sans-serif] font-extrabold text-3xl sm:text-5xl text-[#c80a07]" data-i18n="conf_repeteix_n">1 de 4</dd></div>
+        </dl>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <figure class="m-0 rounded-2xl border border-[#C4B08A]/50 p-5 flex flex-col gap-3">
+            <blockquote class="m-0 text-base leading-relaxed">"Millor plan per un sopar amb molta gent! Vem flipar i les pizzes de Nutella al final…"</blockquote>
+            <figcaption class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28]"><iconify-icon icon="mdi:instagram" width="16" class="text-[#c80a07]"></iconify-icon>@marc_salles</figcaption>
+          </figure>
+          <figure class="m-0 rounded-2xl border border-[#C4B08A]/50 p-5 flex flex-col gap-3">
+            <blockquote class="m-0 text-base leading-relaxed">"Bona gent i currants. Felicitats i feina. 👏👏👏👏"</blockquote>
+            <figcaption class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28]"><iconify-icon icon="mdi:instagram" width="16" class="text-[#c80a07]"></iconify-icon>@floristeriamontserratmatadep</figcaption>
+          </figure>
+        </div>
+        <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="self-center inline-flex items-center gap-2 text-sm font-semibold text-[#c80a07] underline underline-offset-4 hover:opacity-70" data-i18n="conf_insta">Mira què en diuen a @micsas.ff</a>
+      </div>
+    </section>
 
     <!-- ──── ELS BESTSELLERS ──── -->
     <section class="py-24 md:py-36 px-6 md:px-12 bg-[#c80a07]" id="les-preferides">
@@ -425,7 +459,7 @@
           <div class="perspective-1000 w-full h-[250px] md:h-[350px] cursor-pointer group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
             <div class="flip-card-inner preserve-3d relative w-full h-full">
               <div data-menu-id="nutellina" class="backface-hidden absolute inset-0 w-full h-full rounded-3xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
-                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="Gourmet Chocolate and Pistachio Dessert Pizza" class="w-full h-full object-cover">
+                <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/11a0ca75-7b49-4db4-ba0b-d033532f15dd_800w.png" alt="Pizza Nutellina amb crema de xocolata i festuc" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-[#2A1A0F]/30 group-hover:bg-[#2A1A0F]/40 transition-colors flex flex-col items-center justify-center p-6">
                   <span class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl text-[#F2E6CE] drop-shadow-md">
                     NUTELLINA
@@ -464,6 +498,31 @@
       </div>
     </section>
 
+    <!-- ──── MICSAS EVENTS ──── -->
+    <section class="py-20 md:py-28 px-6 md:px-12 bg-[#F2E6CE] text-[#2A1A0F]" id="events" aria-labelledby="events-title">
+      <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 md:gap-14 items-center reveal">
+        <div class="rounded-3xl overflow-hidden shadow-lg border border-[#C4B08A]/40 aspect-[4/5] max-h-[520px] w-full">
+          <img src="images/events/event-sopar-equip-pergola.png" alt="Convidats gaudint de pizzes micsas.ff en un sopar amb el forn mòbil" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        <div class="flex flex-col gap-5 min-w-0">
+          <span class="text-xs uppercase tracking-[0.2em] font-semibold text-[#c80a07]">Micsas Events</span>
+          <h2 id="events-title" class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl leading-[1.05]" data-i18n="hev_title">Portem el forn a la teva festa</h2>
+          <p class="text-base leading-relaxed text-[#5A3E28] max-w-md" data-i18n="hev_desc">Casaments, aniversaris, sopars d'empresa o festes de barri. Muntem el forn mòbil i fem pizza napolitana al moment, on tu vulguis.</p>
+          <ul class="flex flex-col gap-2 text-sm font-medium">
+            <li class="flex items-center gap-2"><iconify-icon icon="solar:check-circle-bold" width="18" class="text-[#c80a07]"></iconify-icon><span data-i18n="hev_b1">Pressupost a mida en menys de 24 h</span></li>
+            <li class="flex items-center gap-2"><iconify-icon icon="solar:check-circle-bold" width="18" class="text-[#c80a07]"></iconify-icon><span data-i18n="hev_b2">Pizzaiolo i forn inclosos, nosaltres ho muntem tot</span></li>
+            <li class="flex items-center gap-2"><iconify-icon icon="solar:check-circle-bold" width="18" class="text-[#c80a07]"></iconify-icon><span data-i18n="hev_b3">Opcions vegetarianes i veganes</span></li>
+          </ul>
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <a href="micsas-events.html#formulari" class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] text-[#F2E6CE] bg-[#c80a07] shadow-sm hover:bg-[#B82A1F] transition-all" data-i18n="hev_cta">Demana pressupost →</a>
+            <a href="https://wa.me/34614714053?text=Hola%20Micsas!%20Voldria%20pressupost%20per%20a%20un%20event." target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] text-[#2A1A0F] border-2 border-[#2A1A0F]/80 hover:bg-[#2A1A0F] hover:text-[#F2E6CE] transition-all">
+              <iconify-icon icon="mdi:whatsapp" width="20"></iconify-icon><span>WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="py-20 md:py-28 px-6 text-center relative overflow-hidden bg-gradient-to-br from-[#F2E6CE]/85 to-[#E6D5B0]/85">
       <img src="https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&q=80&w=1600" alt="Forn de llenya" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay">
       <div class="relative z-10 max-w-4xl mx-auto reveal">
@@ -494,7 +553,7 @@
           <div class="space-y-4 text-sm font-light leading-relaxed max-w-md text-[#F2E6CE]">
             <p class="" data-i18n="nos_p1">
               Micsas neix a Matadepera, d'un noi obsessionat per la pizza
-              napolitana de veritat: massa fermentada 30 hores i ingredients
+              napolitana de veritat: massa fermentada 24 hores i ingredients
               de proximitat escollits un per un.
             </p>
             <p class="" data-i18n="nos_p2">
@@ -520,7 +579,7 @@
     <section id="shop" class="py-24 md:py-28 px-6 md:px-12 bg-[#2A1A0F]/85 text-center relative overflow-hidden">
       <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1600" alt="Ingredients Shop Background" class="opacity-20 mix-blend-luminosity w-full h-full absolute top-0 right-0 bottom-0 left-0 object-cover">
       <div class="max-w-xl mx-auto relative z-10">
-        <span class="text-xs uppercase tracking-widest font-normal text-[#C4B08A] block mb-4">cooming soon...</span>
+        <span class="text-xs uppercase tracking-widest font-normal text-[#C4B08A] block mb-4">coming soon...</span>
         <h2 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-3xl md:text-4xl text-[#F2E6CE] mb-4">
           Micsas Shop
         </h2>
@@ -614,7 +673,7 @@
 
           <!-- Copyright -->
           <p class="text-xs font-light text-[#5A3E28] mb-3 text-center" data-i18n="copyright">
-            © 2025 micsas.ff · Tots els drets reservats
+            © 2026 micsas.ff · Tots els drets reservats
           </p>
 
           <!-- Legal Links -->
@@ -733,5 +792,7 @@
     <script src="transicion.js"></script>
     <script src="carta-del-dia.js" defer></script>
     <script src="cookie-consent.js" defer></script>
+    <script src="pizza-badge.js"></script>
+    <script src="pizza-counter.js"></script>
 
 </body></html>
