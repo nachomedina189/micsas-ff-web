@@ -71,11 +71,8 @@
       ev_f_nom: 'Nom o Empresa', ev_f_data: 'Data event', ev_f_inv: 'Nº Convidats',
       ev_f_det: 'Més detalls', ev_f_nom_ph: 'El teu nom',
       ev_f_det_ph: "Horari, espai, al·lèrgies…", ev_f_btn: 'Demanar pressupost',
-      // CARTA: HERO, CONFIANÇA I EVENTS
-      hero_tagline: 'Pizza napolitana a domicili a Matadepera',
+      // CARTA: HERO I EVENTS
       hero_f_hores: 'Dv i Dg · 20:00–22:30', hero_f_enviament: 'Enviament gratuït', hero_f_minim: 'Sense comanda mínima',
-      conf_title: 'Ja ens coneixen a Matadepera', conf_pizzes: 'pizzes servides', conf_clients: "veïns ja l'han provada",
-      conf_repeteix: 'clients repeteix', conf_repeteix_n: '1 de 4', conf_insta: 'Mira què en diuen a @micsas.ff',
       hev_title: 'Portem el forn a la teva festa',
       hev_desc: "Casaments, aniversaris, sopars d'empresa o festes de barri. Muntem el forn mòbil i fem pizza napolitana al moment, on tu vulguis.",
       hev_b1: 'Pressupost a mida en menys de 24 h', hev_b2: 'Pizzaiolo i forn inclosos, nosaltres ho muntem tot', hev_b3: 'Opcions vegetarianes i veganes',
@@ -162,11 +159,8 @@
       ev_f_nom: 'Nombre o Empresa', ev_f_data: 'Fecha del evento', ev_f_inv: 'Nº Invitados',
       ev_f_det: 'Más detalles', ev_f_nom_ph: 'Tu nombre',
       ev_f_det_ph: "Horario, espacio, alergias…", ev_f_btn: 'Pedir presupuesto',
-      // CARTA: HERO, CONFIANZA Y EVENTOS
-      hero_tagline: 'Pizza napolitana a domicilio en Matadepera',
+      // CARTA: HERO Y EVENTOS
       hero_f_hores: 'Vie y Dom · 20:00–22:30', hero_f_enviament: 'Envío gratis', hero_f_minim: 'Sin pedido mínimo',
-      conf_title: 'Ya nos conocen en Matadepera', conf_pizzes: 'pizzas servidas', conf_clients: 'vecinos ya la han probado',
-      conf_repeteix: 'clientes repite', conf_repeteix_n: '1 de 4', conf_insta: 'Mira lo que dicen en @micsas.ff',
       hev_title: 'Llevamos el horno a tu fiesta',
       hev_desc: 'Bodas, cumpleaños, cenas de empresa o fiestas de barrio. Montamos el horno móvil y hacemos pizza napolitana al momento, donde tú quieras.',
       hev_b1: 'Presupuesto a medida en menos de 24 h', hev_b2: 'Pizzaiolo y horno incluidos, nosotros lo montamos todo', hev_b3: 'Opciones vegetarianas y veganas',
