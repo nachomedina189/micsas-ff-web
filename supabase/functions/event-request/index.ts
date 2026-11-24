@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { nom, telefon, email, data, convidats, detalls } = await req.json();
+    const { nom, telefon, email, data, convidats, detalls, tipus, lloc } = await req.json();
 
     if (!nom || !telefon || !email) {
       return new Response(JSON.stringify({ error: "Falten dades obligatòries." }), {
@@ -37,8 +37,13 @@ Deno.serve(async (req) => {
       data_event: data || null,
       convidats: convidats ?? null,
       detalls: detalls || null,
+      tipus: tipus || null,
+      lloc: lloc || null,
     });
     if (insertErr) throw insertErr;
+
+    const esc = (v: unknown) => String(v ?? "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
     const resendKey = Deno.env.get("RESEND_API_KEY");
     if (resendKey) {
@@ -51,15 +56,17 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: "micsas.ff <events@send.micsasff.com>",
           to: [CLIENT_NOTIFICATION_EMAIL],
-          subject: `Nova petició de pressupost — ${nom}`,
+          subject: `Nova petició de pressupost — ${String(nom).slice(0, 80)}`,
           html: `
             <h2>Nova petició de pressupost per a un esdeveniment</h2>
-            <p><strong>Nom:</strong> ${nom}</p>
-            <p><strong>Telèfon:</strong> ${telefon}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Data de l'event:</strong> ${data || "No especificada"}</p>
-            <p><strong>Nombre de convidats:</strong> ${convidats || "No especificat"}</p>
-            <p><strong>Detalls:</strong><br>${(detalls || "—").replace(/\n/g, "<br>")}</p>
+            <p><strong>Nom:</strong> ${esc(nom)}</p>
+            <p><strong>Telèfon:</strong> ${esc(telefon)}</p>
+            <p><strong>Email:</strong> ${esc(email)}</p>
+            <p><strong>Tipus d'event:</strong> ${esc(tipus || "No especificat")}</p>
+            <p><strong>Lloc:</strong> ${esc(lloc || "No especificat")}</p>
+            <p><strong>Data de l'event:</strong> ${esc(data || "No especificada")}</p>
+            <p><strong>Nombre de convidats:</strong> ${esc(convidats || "No especificat")}</p>
+            <p><strong>Detalls:</strong><br>${esc(detalls || "—").replace(/\n/g, "<br>")}</p>
           `,
         }),
       });

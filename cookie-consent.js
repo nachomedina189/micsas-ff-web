@@ -69,6 +69,17 @@
       .cc-btn-reject { background: transparent; color: #c80a07; border-color: #c80a07; }
       .cc-btn-reject:hover { background: rgba(200,10,7,0.08); }
       .cc-btn-link { background: none; border: none; color: #5A3E28; text-decoration: underline; font-size: 0.8rem; cursor: pointer; padding: 0.5rem; }
+      .cc-wrap { max-width: 64rem; margin: 0 auto; padding: 1rem 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
+      .cc-text { flex: 1 1 16rem; font-size: 0.875rem; color: #2A1A0F; margin: 0; line-height: 1.45; }
+      .cc-actions { display: flex; gap: 0.5rem; align-items: center; }
+      #cc-banner .cc-btn { flex: 0 0 auto; }
+      @media (max-width: 640px) {
+        .cc-wrap { padding: 0.65rem 0.9rem calc(0.65rem + env(safe-area-inset-bottom, 0px)); gap: 0.5rem; }
+        .cc-text { flex-basis: 100%; font-size: 0.78rem; }
+        .cc-actions { width: 100%; }
+        #cc-banner .cc-btn { flex: 1; padding: 0.55rem 0.8rem; font-size: 0.85rem; }
+        #cc-banner .cc-btn-link { padding: 0.35rem 0.25rem; }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -77,12 +88,12 @@
     const el = document.createElement('div');
     el.id = 'cc-banner';
     el.innerHTML = `
-      <div style="max-width:64rem;margin:0 auto;padding:1.25rem 1.5rem;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;">
-        <p style="flex:1 1 16rem;font-size:0.875rem;color:#2A1A0F;margin:0;line-height:1.5;">
-          Utilitzem cookies tècniques (necessàries) i, si ho acceptes, cookies analítiques per millorar la web.
-          Consulta la nostra <a href="cookies.html" style="text-decoration:underline;color:#c80a07;">Política de Cookies</a>.
+      <div class="cc-wrap">
+        <p class="cc-text">
+          Fem servir cookies tècniques i, si ho acceptes, analítiques.
+          <a href="cookies.html" style="text-decoration:underline;color:#c80a07;">Més informació</a>.
         </p>
-        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+        <div class="cc-actions">
           <button type="button" class="cc-btn-link" id="cc-config-btn">Configurar</button>
           <button type="button" class="cc-btn cc-btn-reject" id="cc-reject-btn">Rebutjar</button>
           <button type="button" class="cc-btn cc-btn-accept" id="cc-accept-btn">Acceptar</button>
