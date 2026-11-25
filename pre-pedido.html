@@ -185,6 +185,8 @@
       </div>
 
       <div class="px-6 py-5 space-y-5">
+        <!-- Repetir l'última comanda (perfil desat en aquest dispositiu) -->
+        <div id="pp-repeat" hidden class="rounded-xl border border-[#C4B08A]/50 bg-white/60 px-4 py-3"></div>
 
         <!-- Pas 1: hora. L'adreça no apareix fins que el client confirma
              la franja amb "Continuar". -->
@@ -1586,6 +1588,42 @@
     // Perfil desat en aquest dispositiu: l'adreça de l'última comanda ja ve
     // posada (amb les coordenades exactes que va donar Google llavors). Si
     // el client l'edita, torna a la cerca normal. Només Matadepera.
+    // Repetir: si el client ja ha demanat des d'aquest dispositiu, li
+    // proposem posar al cistell el mateix de l'última vegada.
+    (function offerRepeat() {
+      const box = document.getElementById('pp-repeat');
+      const p = window.MicsasPerfil && MicsasPerfil.get();
+      const items = p && p.last && p.last.items || [];
+      if (!box || !items.length) return;
+      const es = (localStorage.getItem('micsas_lang') || document.documentElement.lang) === 'es';
+      const T = es ? { hi: 'Hola', q: '¿Repites el último pedido?', yes: 'Repetir', on: '✓ Se pondrá en la cesta', undo: 'Quitar', notme: 'No soy yo' }
+                   : { hi: 'Hola', q: "Repeteixes l'última comanda?", yes: 'Repetir', on: '✓ Es posarà a la cistella', undo: 'Treure', notme: 'No sóc jo' };
+      const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const name = (p.firstName || p.name || '').split(' ')[0];
+      const list = items.map(i => esc(i.qty + '× ' + i.name)).join(' · ');
+      const paint = () => {
+        const on = !!sessionStorage.getItem('micsas_repeat');
+        box.innerHTML = `
+          <p class="text-sm font-semibold text-[#2A1A0F]">${esc(T.hi)}${name ? ', ' + esc(name) : ''}! ${esc(T.q)}</p>
+          <p class="text-xs text-[#5A3E28] mt-0.5">${list}</p>
+          <div class="flex items-center gap-3 mt-2.5">
+            ${on ? `<span class="text-sm font-semibold text-[#15803D]">${esc(T.on)}</span>
+                    <button type="button" data-act="undo" class="text-xs underline text-[#5A3E28]">${esc(T.undo)}</button>`
+                 : `<button type="button" data-act="yes" class="px-4 py-1.5 rounded-full border-2 border-[#E23F2E] text-[#E23F2E] text-sm font-semibold hover:bg-[#E23F2E] hover:text-[#F2E6CE] transition-colors">↻ ${esc(T.yes)}</button>`}
+            <button type="button" data-act="notme" class="ml-auto text-xs underline text-[#9B8A72]">${esc(T.notme)}</button>
+          </div>`;
+      };
+      box.addEventListener('click', e => {
+        const act = e.target.closest('[data-act]')?.dataset.act;
+        if (act === 'yes') sessionStorage.setItem('micsas_repeat', JSON.stringify(items));
+        if (act === 'undo') sessionStorage.removeItem('micsas_repeat');
+        if (act === 'notme') { MicsasPerfil.forget(); sessionStorage.removeItem('micsas_repeat'); location.reload(); return; }
+        paint();
+      });
+      paint();
+      box.hidden = false;
+    })();
+
     (function prefillSavedAddress() {
       const p = window.MicsasPerfil && MicsasPerfil.get();
       const a = p && p.address;
