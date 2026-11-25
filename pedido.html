@@ -146,6 +146,7 @@
   </style>
   <link rel="stylesheet" href="pizza-badge.css">
   <script src="pizza-badge.js"></script>
+  <script src="perfil.js"></script>
   <script src="carta-del-dia.js"></script>
 </head>
 
@@ -2076,6 +2077,8 @@
 
       try {
         await _saveOrderToSupabase(d, 'pending');
+        window.MicsasPerfil && MicsasPerfil.stash(d, cart);
+        window.MicsasPerfil && MicsasPerfil.commit();
 
         // Save guest data for next visit
         if (!currentUser) {
@@ -2227,6 +2230,7 @@
     // la comanda ja existeix, només falta que el webhook la confirmi.
     async function createPendingOrderAndIntent(totalEuros) {
       const orderRes = await _saveOrderToSupabase({ ..._pendingOrderData }, 'processing');
+      window.MicsasPerfil && MicsasPerfil.stash(_pendingOrderData, cart);
       _pendingOrderRef = { orderId: orderRes.orderId, clientSecret: null };
       // L'import que es cobrarà és el total que ha calculat place-order
       // (amb el descompte aplicat al servidor), no el de la pàgina.
@@ -2447,6 +2451,7 @@
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         _pendingOrderRef = null;
+        window.MicsasPerfil && MicsasPerfil.commit();
         closeStripeOverlay();
         document.getElementById('cf-global-err').classList.add('hidden');
         document.getElementById('cf-scroll').classList.add('hidden');
@@ -2480,6 +2485,7 @@
         showPaymentReturnFailed();
         return;
       }
+      window.MicsasPerfil && MicsasPerfil.commit();
       if (saved.date) cfDeliveryDate = saved.date;
       if (saved.time) cfSelectedTime = saved.time;
       window._cfSlotReassigned = !!saved.reassigned;
@@ -2598,8 +2604,13 @@
     if (_repeatRaw) {
       try {
         const _parsed = JSON.parse(_repeatRaw);
-        if (Array.isArray(_parsed) && _parsed.length) {
-          cart = _parsed;
+        const _all = [...MENU.casa, ...MENU.classics, ...MENU.drinks];
+        const _now = Array.isArray(_parsed) ? _parsed.map(it => {
+          const m = _all.find(x => x.id === it.id);
+          return m && it.qty > 0 ? { id: m.id, name: m.name, price: m.price, qty: it.qty, note: it.note || '' } : null;
+        }).filter(Boolean) : [];
+        if (_now.length) {
+          cart = _now;
           renderCart(false);
           [...MENU.casa, ...MENU.classics, ...MENU.drinks].forEach(it => syncMenuRow(it.id));
           // Show banner when checkout opens
