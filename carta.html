@@ -338,6 +338,7 @@
               Demana ja! <span class="arrow">→</span>
             </a>
           </div>
+          <div id="benvinguda" hidden class="w-full max-w-[340px] mb-1 rounded-2xl border border-[#F2E6CE]/35 bg-[#2A1A0F]/20 px-4 py-3.5 text-center text-[#F2E6CE]" aria-live="polite"></div>
           <a href="menu.html" class="hero-item hero-ctas-primary inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-['League_Spartan',sans-serif] font-semibold text-[16px] leading-[1.5] shadow-sm transition-all hover:-translate-y-0.5 text-[var(--primary-foreground)] bg-[var(--foreground)] hover:bg-[var(--foreground)]/90 w-full max-w-[240px]" data-i18n="hero_carta">
             Veure la Carta
           </a>
@@ -357,8 +358,18 @@
       <div class="absolute bottom-0 left-0 w-full h-48 md:h-64 bg-gradient-to-b from-transparent to-[#c80a07] pointer-events-none z-10"></div>
     </header>
 
+    <!-- ──── VÍDEO: la moto de micsas (només el vídeo es mou; mai abans que el botó) ──── -->
+    <div class="relative z-20 px-6 -mt-12 md:-mt-24 bg-[#c80a07]">
+      <figure class="mx-auto max-w-2xl rounded-[28px] overflow-hidden border border-[#F2E6CE]/40 bg-[#F1E5CD] shadow-[0_24px_60px_rgba(42,26,15,0.45)]">
+        <video id="hero-moto" muted loop playsinline preload="none" poster="images/hero-moto-poster.jpg" aria-hidden="true" disablepictureinpicture
+          class="block w-full aspect-video object-cover">
+          <source src="videos/hero-moto-960.mp4" type="video/mp4">
+        </video>
+      </figure>
+    </div>
+
     <!-- ──── ELS BESTSELLERS ──── -->
-    <section class="py-24 md:py-36 px-6 md:px-12 bg-[#c80a07]" id="les-preferides">
+    <section class="pt-16 pb-24 md:pt-24 md:pb-36 px-6 md:px-12 bg-[#c80a07]" id="les-preferides">
       <div class="max-w-5xl mx-auto">
         <div class="text-center mb-16 reveal visible">
           <h2 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl mt-3 text-[#F2E6CE]" id="les-preferides" data-i18n="bs_title">
@@ -770,5 +781,7 @@
     <script src="pizza-badge.js"></script>
     <script src="pizza-counter.js"></script>
     <script src="demana-boto.js"></script>
+    <script src="perfil.js"></script>
+    <script src="benvinguda.js"></script>
 
 </body></html>

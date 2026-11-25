@@ -135,6 +135,7 @@
   <link rel="stylesheet" href="pizza-badge.css">
   <link rel="stylesheet" href="sold-out-stamp.css">
   <script src="pizza-badge.js"></script>
+  <script src="perfil.js"></script>
   <script src="sold-out-stamp.js"></script>
 </head>
 <body class="bg-[#F2E6CE] text-[#2A1A0F] font-['League_Spartan',sans-serif] antialiased selection:bg-[#E23F2E]/20">
@@ -1581,6 +1582,24 @@
       }
     }
     window._ppSelectSuggestion = _ppSelectSuggestion;
+
+    // Perfil desat en aquest dispositiu: l'adreça de l'última comanda ja ve
+    // posada (amb les coordenades exactes que va donar Google llavors). Si
+    // el client l'edita, torna a la cerca normal. Només Matadepera.
+    (function prefillSavedAddress() {
+      const p = window.MicsasPerfil && MicsasPerfil.get();
+      const a = p && p.address;
+      if (!a || !a.street || typeof a.lat !== 'number' || typeof a.lng !== 'number') return;
+      if (a.city !== PP_ALLOWED_CITY && a.zip !== MATADEPERA_ZIP) return;
+      document.getElementById('pp-address-input').value = a.street;
+      document.getElementById('pp-floor').value = a.floor || '';
+      window._ppFormattedAddress = a.street;
+      window._ppExtractedZip = a.zip || MATADEPERA_ZIP;
+      window._ppExtractedCity = PP_ALLOWED_CITY;
+      window._ppLat = a.lat; window._ppLng = a.lng;
+      _ppSetNeedsNumber(false);
+      _ppShowZoneOk(window._ppExtractedZip);
+    })();
   </script>
 
   <script>
