@@ -6,12 +6,13 @@
 (function () {
   var box = document.getElementById('intro');
   var v = document.getElementById('intro-video');
-  if (!box || !v) return;
+  if (!box) return;
+  if (!v) { box.remove(); return; }
   var seen = false;
   try { seen = sessionStorage.getItem('micsas_intro_vista') === '1'; } catch (_) {}
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saveData = navigator.connection && navigator.connection.saveData;
-  if (seen || reduce || saveData) return;
+  if (seen || reduce || saveData) { box.remove(); return; }
   try { sessionStorage.setItem('micsas_intro_vista', '1'); } catch (_) {}
 
   var root = document.documentElement, done = false;
