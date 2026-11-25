@@ -206,11 +206,6 @@
         to   { opacity: 1; transform: translateY(0); }
       }
       .hero-item { animation: hero-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both; }
-      .intro-on .hero-item, .intro-on .btn-demana, .intro-on .btn-demana .arrow { animation-play-state: paused; }
-      #intro { transition: opacity .35s ease; }
-      #intro[hidden] { display: none !important; } /* la classe flex no l'ha de tornar a mostrar */
-      #intro.intro-out { opacity: 0; pointer-events: none; }
-      .intro-on #cc-banner { visibility: hidden; }
       .hero-subtitle       { animation-delay: 0.1s; }
       .hero-title          { animation-delay: 0.35s; }
       .hero-tagline        { animation-delay: 0.7s; }
@@ -252,13 +247,6 @@
     <link rel="stylesheet" href="demana.css">
 </head>
   <body class="text-[var(--foreground)] font-['League_Spartan',sans-serif] antialiased overflow-x-hidden selection:bg-[var(--primary)]/20 bg-transparent">
-    <!-- ──── INTRO: el vídeo de la moto, accelerat, un cop per visita ──── -->
-    <div id="intro" hidden class="fixed inset-0 z-[10002] flex items-center justify-center bg-[#F1E5CD] cursor-pointer" role="presentation">
-      <video id="intro-video" muted playsinline preload="auto" poster="images/hero-moto-poster.jpg" disablepictureinpicture aria-hidden="true"
-        class="w-full h-full object-contain pointer-events-none"><source src="videos/hero-moto-960.mp4" type="video/mp4"></video>
-      <button type="button" id="intro-skip" class="absolute bottom-6 right-6 px-4 py-2 rounded-full bg-[#2A1A0F]/80 text-[#F2E6CE] text-sm font-semibold">Saltar →</button>
-    </div>
-    <script src="intro.js"></script>
     <!-- Paper texture -->
     <div class="fixed inset-0 w-full h-full pointer-events-none z-[9998] opacity-[0.03]" style="background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
 
@@ -620,7 +608,7 @@
             <a href="https://instagram.com/micsas.ff" target="_blank" rel="noopener noreferrer" class="w-11 h-11 rounded-full border border-[#F2E6CE]/40 flex items-center justify-center transition-all hover:bg-[#E23F2E] hover:text-[#F2E6CE] hover:border-[#E23F2E] text-[#F2E6CE] shrink-0" aria-label="Instagram">
               <iconify-icon icon="mdi:instagram" width="22" height="22"></iconify-icon>
             </a>
-            <a href="tel:+34614714053" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-[#2A1A0F] shadow-sm transition-all hover:bg-[#E23F2E] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
+            <a href="tel:+34614714053" class="inline-flex items-center justify-center px-6 py-3 rounded-full font-['League_Spartan',sans-serif] text-[16px] leading-[1.5] font-medium text-[#F2E6CE] bg-transparent border-2 border-[#F2E6CE] transition-all hover:bg-[#F2E6CE] hover:text-[#c80a07] hover:-translate-y-0.5 shrink-0" data-i18n="contacte">
               Contacte
             </a>
             <div class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-full border border-[#C4B08A]/60 bg-[#F2E6CE] shadow-sm text-sm shrink-0">
