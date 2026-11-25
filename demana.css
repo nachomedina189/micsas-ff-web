@@ -1,0 +1,22 @@
+/* "Demana ja!" (i "Demana per a avui" / "Reserva per…"): l'únic botó marró
+   de la web, perquè el color signifiqui sempre "demanar". Per sobre de les
+   classes de Tailwind i dels canvis de color de la capçalera. */
+a[data-i18n="demana"],
+#navbar a[data-i18n="demana"],
+#navbar.nav-scrolled a[data-i18n="demana"] {
+  background: #2A1A0F !important;
+  color: #F2E6CE !important;
+  border-color: #2A1A0F !important;
+  font-weight: 800 !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .28) !important;
+}
+a[data-i18n="demana"]:hover,
+#navbar.nav-scrolled a[data-i18n="demana"]:hover { background: #3B271A !important; color: #F2E6CE !important; }
+a[data-i18n="demana"]:focus-visible { outline: 3px solid #F2E6CE; outline-offset: 3px; }
+/* El de la portada, més gran i elevat */
+.hero-demana a[data-i18n="demana"] {
+  max-width: 280px !important;
+  padding: 18px 32px !important;
+  font-size: 19px !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .35) !important;
+}
