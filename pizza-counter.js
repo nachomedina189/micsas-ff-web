@@ -28,6 +28,7 @@
       var st = Array.isArray(rows) ? rows[0] : rows;
       var today = iso(d) === iso(new Date());
       window.renderPizzaBadge(bar, st, today ? 'avui' : 'al ' + DAYS[d.getDay()]);
+      document.dispatchEvent(new CustomEvent('micsas:pizza-status', { detail: { status: st, date: iso(d) } }));
     }).catch(function () {});
   }
   load();
