@@ -26,6 +26,18 @@ const CATALOG: Record<string, { name: string; price: number }> = {
   "d3":                   { name: "Cervesa artesana Moretti", price: 3 },
 };
 
+// Especial Nadal: els panettones (ids "pn-…") NO són al CATALOG — preu, nom i
+// unitats els diu la taula panettones (supabase/migrations/20261127000000_
+// panettones_nadal.sql). No compten com a pizzes, i l'estoc es reserva amb
+// add_panettone_items, amb un bloqueig perquè no se'n vengui cap de més.
+const isPanettoneId = (id: unknown): boolean => typeof id === "string" && id.startsWith("pn-");
+function panettoneSoldOutMsg(name: string, left: number): string {
+  if (left === 1) return `Només queda 1 unitat de ${name}. Treu-ne del cistell i torna-ho a provar.`;
+  return left > 0
+    ? `Només queden ${left} unitats de ${name}. Treu-ne alguna del cistell i torna-ho a provar.`
+    : `Ho sentim, el ${name} s'ha esgotat. Treu-lo del cistell i torna-ho a provar.`;
+}
+
 // Data i hora actuals a Europe/Madrid (gestiona CET/CEST automàticament)
 // — cal calcular-ho explícitament perquè el runtime de l'edge function
 // no té garantit aquest fus horari (sol ser UTC).
@@ -109,6 +121,7 @@ Deno.serve(async (req) => {
       slotTime, deliveryDate,
       items,
       discountCode,
+      panettoneDelivery,
     } = await req.json();
 
     // Nom i cognoms arriben per separat; a customers.name es continua desant
@@ -137,7 +150,39 @@ Deno.serve(async (req) => {
     let subtotal = 0;
     let pizzaCount = 0;
     const resolvedItems: { product_name: string; unit_price: number; quantity: number; notes: string | null }[] = [];
+    // Panettones: es resolen contra la taula (no contra CATALOG) i les seves
+    // línies les insereix add_panettone_items, que comprova l'estoc.
+    const panettoneLines: { id: string; quantity: number }[] = [];
+    const panettoneEmailItems: { product_name: string; unit_price: number; quantity: number; notes: string | null }[] = [];
+    let panettoneRows: { id: string; name: string; price: number; active: boolean; stock_total: number | null }[] = [];
+    if (items.some((it: { id?: unknown }) => isPanettoneId(it?.id))) {
+      const { data: pRows, error: pErr } = await sb.from("panettones").select("id, name, price, active, stock_total");
+      if (pErr) throw pErr;
+      panettoneRows = (pRows ?? []) as typeof panettoneRows;
+    }
     for (const it of items) {
+      if (isPanettoneId(it?.id)) {
+        const pan = panettoneRows.find((p) => p.id === it.id);
+        const qty = Number(it?.quantity);
+        if (!pan || !Number.isInteger(qty) || qty <= 0 || qty > 30) {
+          return new Response(JSON.stringify({ error: "Article no vàlid a la comanda." }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (!pan.active || pan.stock_total === null) {
+          return new Response(JSON.stringify({ error: `Ho sentim, el ${pan.name} encara no està a la venda.`, panettoneSoldOut: true, id: pan.id, remaining: 0 }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const price = Number(pan.price);
+        subtotal += price * qty;
+        const existing = panettoneLines.find((l) => l.id === pan.id);
+        if (existing) existing.quantity += qty; else panettoneLines.push({ id: pan.id, quantity: qty });
+        panettoneEmailItems.push({ product_name: pan.name, unit_price: price, quantity: qty, notes: null });
+        continue;
+      }
       const catalogItem = CATALOG[it?.id];
       const quantity = Number(it?.quantity);
       if (!catalogItem || !Number.isFinite(quantity) || quantity <= 0 || quantity > 30) {
@@ -156,6 +201,33 @@ Deno.serve(async (req) => {
       });
     }
     subtotal = Math.round(subtotal * 100) / 100;
+
+    // Quan arriben els panettones: amb la comanda (dia de pase) o el dia
+    // d'entrega de panettones. Una comanda NOMÉS de panettones per a aquell
+    // dia no té dia de pase ni franja: es desa sense delivery_date.
+    const panDelivery: "order" | "panettone_day" | null = panettoneLines.length
+      ? (panettoneDelivery === "panettone_day" ? "panettone_day" : "order")
+      : null;
+    const panettoneDayOnly = panDelivery === "panettone_day" && resolvedItems.length === 0;
+
+    // Comprovació ràpida de l'estoc ABANS de crear client, adreça i comanda
+    // (la de veritat, amb bloqueig, la fa add_panettone_items).
+    if (panettoneLines.length) {
+      const { data: stockData, error: stockErr } = await sb.rpc("get_panettone_stock");
+      if (stockErr) console.error("[place-order] get_panettone_stock", stockErr.message);
+      const stockItems = ((stockData as { items?: { id: string; remaining: number | null }[] } | null)?.items) ?? [];
+      for (const line of panettoneLines) {
+        const row = stockItems.find((r) => r.id === line.id);
+        const left = row?.remaining ?? null;
+        if (row && (left === null || left < line.quantity)) {
+          const name = panettoneRows.find((p) => p.id === line.id)?.name ?? "panettone";
+          return new Response(JSON.stringify({ error: panettoneSoldOutMsg(name, left ?? 0), panettoneSoldOut: true, id: line.id, remaining: left ?? 0 }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    }
     // La propina és l'única part de l'import que de veritat decideix el
     // client — es manté, però mai negativa (rebaixaria el total per sota
     // del subtotal real).
@@ -202,7 +274,7 @@ Deno.serve(async (req) => {
     // Es rebutja també si falta deliveryDate: no s'accepta cap comanda sense
     // dia d'entrega vàlid (evita saltar-se la validació enviant-lo buit).
     const deliveryDay = deliveryDate ? new Date(`${deliveryDate}T00:00:00`).getDay() : NaN;
-    if (deliveryDay !== 5 && deliveryDay !== 0) {
+    if (!panettoneDayOnly && deliveryDay !== 5 && deliveryDay !== 0) {
       return new Response(JSON.stringify({ error: "Només s'accepten comandes per divendres i diumenge." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -214,7 +286,7 @@ Deno.serve(async (req) => {
     // create_order_with_slot, si no troba la franja demanada a la llista,
     // comença a buscar per la PRIMERA franja de la nit i la comanda acabaria
     // assignada a les 20:00.
-    if (slotTime && !REAL_SLOTS.includes(slotTime)) {
+    if (!panettoneDayOnly && slotTime && !REAL_SLOTS.includes(slotTime)) {
       await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "slot_closed" });
       return new Response(JSON.stringify({ error: `Aquesta franja ja no està disponible: l'última franja és a les ${LAST_SLOT}h. Tria una altra hora.` }), {
         status: 409,
@@ -232,7 +304,8 @@ Deno.serve(async (req) => {
 
     // Dia exhaurit: no s'accepta cap comanda, ni tan sols només de begudes
     // (create_order_with_slot només bloqueja si hi ha pizzes a la comanda).
-    const { data: dayStatus } = await sb.rpc("get_pizza_status", { p_delivery_date: deliveryDate });
+    // Una comanda només de panettones no gasta masses: es pot fer igualment.
+    const { data: dayStatus } = (panettoneDayOnly || resolvedItems.length === 0) ? { data: null } : await sb.rpc("get_pizza_status", { p_delivery_date: deliveryDate });
     const dayRow = Array.isArray(dayStatus) ? dayStatus[0] : dayStatus;
     if (dayRow?.status === "soldout") {
       await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
@@ -247,7 +320,9 @@ Deno.serve(async (req) => {
     // crida directa) encara els podria enviar. Es comprova abans de crear
     // res. Si la consulta falla, no es bloqueja la comanda (igual que el
     // control de dia exhaurit de dalt).
-    const { data: offRows, error: offErr } = await sb.rpc("get_menu_availability", { p_delivery_date: deliveryDate });
+    const { data: offRows, error: offErr } = panettoneDayOnly
+      ? { data: [], error: null }
+      : await sb.rpc("get_menu_availability", { p_delivery_date: deliveryDate });
     if (offErr) console.error("[place-order] get_menu_availability", offErr.message);
     const offIds = new Set(((offRows ?? []) as { product_id: string }[]).map((r) => r.product_id));
     const unavailable = [...new Set(items.map((it: { id: string }) => String(it.id)))].filter((id) => offIds.has(id));
@@ -329,7 +404,7 @@ Deno.serve(async (req) => {
     // partir d'aquí — exactament el mateix mecanisme que ja fa servir
     // quan la franja triada està plena.
     const SLOT_LEAD_MIN = 15;
-    let effectiveSlotTime = slotTime ?? null;
+    let effectiveSlotTime = panettoneDayOnly ? null : (slotTime ?? null);
     // Franges on create_order_with_slot pot posar pizzes. Per a una comanda
     // gran, ara pot començar la primera tanda ABANS de la franja demanada
     // (perquè tot estigui llest a l'hora triada) — per avui, mai abans de
@@ -376,55 +451,100 @@ Deno.serve(async (req) => {
     // lock per delivery_date, evita que dues comandes simultànies per la
     // mateixa franja passin totes dues la comprovació d'aforo abans que
     // cap de les dues s'hagi inserit.
-    const { data: rpcRows, error: rpcErr } = await sb.rpc("create_order_with_slot", {
-      p_customer_id:    customerId,
-      p_address_id:     address.id,
-      p_payment_method: paymentMethod,
-      p_payment_status: paymentStatus,
-      p_subtotal:       subtotal,
-      p_delivery_fee:   0,
-      p_tip_amount:     safeTip,
-      p_total:          total,
-      p_notes:          finalNotes ?? null,
-      p_requested_slot: effectiveSlotTime,
-      p_pizza_count:    pizzaCount,
-      p_delivery_date:  deliveryDate,
-      p_slots:          bookableSlots,
-    });
-    // Masses del dia exhaurides (les posa el pizzero a cocina.html):
-    // create_order_with_slot llança "DAILY_SOLDOUT remaining=N" en lloc de
-    // simplement no retornar franja, perquè el missatge sigui diferent de
-    // "no queden franges" — aquí no és que aquella hora estigui plena, és
-    // que ja no hi ha prou masses. Si en queden algunes, diem quantes.
-    if (rpcErr && rpcErr.message?.includes("DAILY_SOLDOUT")) {
-      const left = Number(/remaining=(\d+)/.exec(rpcErr.message)?.[1] ?? 0);
-      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
-      const msg = left > 0
-        ? `Només en queden ${left} per a aquest dia. Treu-ne alguna del cistell i torna-ho a provar.`
-        : "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!";
-      return new Response(JSON.stringify({ error: msg, soldOut: left === 0, remaining: left }), {
-        status: 409,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Comanda només de panettones per al dia d'entrega de panettones: no hi ha
+    // pase, ni franja, ni pizzes; es crea directament (sense aforo).
+    let orderRow: { order_id: string; slot_time: string | null } | undefined;
+    if (panettoneDayOnly) {
+      const { data: pOrder, error: pOrderErr } = await sb.from("orders").insert({
+        customer_id:        customerId,
+        address_id:         address.id,
+        payment_method:     paymentMethod,
+        payment_status:     paymentStatus,
+        status:             "pending",
+        subtotal,
+        delivery_fee:       0,
+        tip_amount:         safeTip,
+        total,
+        notes:              finalNotes ?? null,
+        slot_time:          null,
+        pizza_count:        0,
+        delivery_date:      null,
+        panettone_delivery: "panettone_day",
+      }).select("id").single();
+      if (pOrderErr) throw pOrderErr;
+      orderRow = { order_id: pOrder.id, slot_time: null };
+    } else {
+      const { data: rpcRows, error: rpcErr } = await sb.rpc("create_order_with_slot", {
+        p_customer_id:    customerId,
+        p_address_id:     address.id,
+        p_payment_method: paymentMethod,
+        p_payment_status: paymentStatus,
+        p_subtotal:       subtotal,
+        p_delivery_fee:   0,
+        p_tip_amount:     safeTip,
+        p_total:          total,
+        p_notes:          finalNotes ?? null,
+        p_requested_slot: effectiveSlotTime,
+        p_pizza_count:    pizzaCount,
+        p_delivery_date:  deliveryDate,
+        p_slots:          bookableSlots,
       });
-    }
-    if (rpcErr) throw rpcErr;
+      // Masses del dia exhaurides (les posa el pizzero a cocina.html):
+      // create_order_with_slot llança "DAILY_SOLDOUT remaining=N" en lloc de
+      // simplement no retornar franja, perquè el missatge sigui diferent de
+      // "no queden franges" — aquí no és que aquella hora estigui plena, és
+      // que ja no hi ha prou masses. Si en queden algunes, diem quantes.
+      if (rpcErr && rpcErr.message?.includes("DAILY_SOLDOUT")) {
+        const left = Number(/remaining=(\d+)/.exec(rpcErr.message)?.[1] ?? 0);
+        await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime ?? null, pizza_count: pizzaCount, reason: "soldout" });
+        const msg = left > 0
+          ? `Només en queden ${left} per a aquest dia. Treu-ne alguna del cistell i torna-ho a provar.`
+          : "Avui hem exhaurit les pizzes disponibles. Gràcies per la paciència — torna un altre dia!";
+        return new Response(JSON.stringify({ error: msg, soldOut: left === 0, remaining: left }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (rpcErr) throw rpcErr;
 
-    const orderRow = rpcRows?.[0] as { order_id: string; slot_time: string | null } | undefined;
-    if (slotTime && !orderRow) {
-      await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "no_slots" });
-      return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
-        status: 409,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      orderRow = rpcRows?.[0] as { order_id: string; slot_time: string | null } | undefined;
+      if (slotTime && !orderRow) {
+        await logRejection(sb, { delivery_date: deliveryDate, requested_slot: slotTime, pizza_count: pizzaCount, reason: "no_slots" });
+        return new Response(JSON.stringify({ error: "No queden franges disponibles per avui. Si us plau, tria un altre dia." }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!orderRow) throw new Error("create_order_with_slot no ha retornat cap comanda");
     }
-    if (!orderRow) throw new Error("create_order_with_slot no ha retornat cap comanda");
+
+    // Panettones: reserva atòmica de l'estoc. Si algú s'ha endut l'últim
+    // entre la comprovació d'abans i ara, la comanda es cancel·la (encara no
+    // té cap línia ni cap pagament) i el client ho veu a pantalla.
+    if (panettoneLines.length) {
+      const { error: panErr } = await sb.rpc("add_panettone_items", { p_order_id: orderRow.order_id, p_items: panettoneLines });
+      if (panErr) {
+        await sb.from("orders").update({ status: "cancelled", payment_status: "failed" }).eq("id", orderRow.order_id);
+        if (panErr.message?.includes("PANETTONE_SOLDOUT")) {
+          const id = /id=(\S+)/.exec(panErr.message)?.[1] ?? "";
+          const left = Number(/remaining=(\d+)/.exec(panErr.message)?.[1] ?? 0);
+          const pname = panettoneRows.find((p) => p.id === id)?.name ?? "panettone";
+          return new Response(JSON.stringify({ error: panettoneSoldOutMsg(pname, left), panettoneSoldOut: true, id, remaining: left }), {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        throw panErr;
+      }
+    }
 
     // Franja que va triar el client: si estava plena, la comanda ha quedat
     // en una de posterior, i l'informe del pase compta aquests desplaçaments.
     // També el codi de descompte aplicat (orders.total ja el porta restat).
-    if (slotTime || discount) {
+    if ((slotTime && !panettoneDayOnly) || discount || (panDelivery && !panettoneDayOnly)) {
       const extra: Record<string, unknown> = {};
-      if (slotTime) extra.requested_slot = slotTime;
+      if (slotTime && !panettoneDayOnly) extra.requested_slot = slotTime;
+      if (panDelivery && !panettoneDayOnly) extra.panettone_delivery = panDelivery;
       if (discount) { extra.discount_code = discount.code; extra.discount_amount = discount.amount; }
       const { error: reqErr } = await sb.from("orders").update(extra).eq("id", orderRow.order_id);
       if (reqErr) console.error("[place-order] requested_slot/discount", reqErr.message);
@@ -432,14 +552,16 @@ Deno.serve(async (req) => {
 
     // Insert order items — sempre amb els valors RECALCULATS (resolvedItems),
     // mai amb el que hagués enviat el client.
-    const { error: itemsErr } = await sb.from("order_items").insert(
-      resolvedItems.map((it) => ({
-        order_id:   orderRow.order_id,
-        product_id: null,
-        ...it,
-      }))
-    );
-    if (itemsErr) throw itemsErr;
+    if (resolvedItems.length) {
+      const { error: itemsErr } = await sb.from("order_items").insert(
+        resolvedItems.map((it) => ({
+          order_id:   orderRow.order_id,
+          product_id: null,
+          ...it,
+        }))
+      );
+      if (itemsErr) throw itemsErr;
+    }
 
     // Email de confirmació NOMÉS per a comandes en efectiu — no hi ha cap
     // pagament online pel mig, així que la comanda ja està confirmada en
@@ -451,18 +573,26 @@ Deno.serve(async (req) => {
     // té try/catch intern i mai llança error, així que això no pot
     // trencar la creació de la comanda.
     if (paymentMethod === "cash") {
+      let panettoneDate: string | null = null;
+      if (panDelivery === "panettone_day") {
+        const { data: ps } = await sb.from("panettone_settings").select("delivery_date").limit(1).maybeSingle();
+        panettoneDate = (ps as { delivery_date: string | null } | null)?.delivery_date ?? null;
+      }
+      const emailItems = [...resolvedItems, ...panettoneEmailItems];
       await sendOrderConfirmationEmail({
         toEmail: email,
         toName: name,
         // El descompte surt al correu com una línia més, en negatiu.
         items: discount
-          ? [...resolvedItems, { product_name: `Descompte ${discount.code}`, quantity: 1, unit_price: -discount.amount, notes: null }]
-          : resolvedItems,
+          ? [...emailItems, { product_name: `Descompte ${discount.code}`, quantity: 1, unit_price: -discount.amount, notes: null }]
+          : emailItems,
         total,
         paymentMethod,
-        deliveryDate,
+        deliveryDate: panettoneDayOnly ? null : deliveryDate,
         slotTime: orderRow.slot_time,
         address: { street, floor, postalCode, city },
+        panettoneDelivery: panDelivery,
+        panettoneDate,
       });
     }
 

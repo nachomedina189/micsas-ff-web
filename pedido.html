@@ -148,6 +148,7 @@
   <script src="pizza-badge.js"></script>
   <script src="perfil.js"></script>
   <script src="carta-del-dia.js"></script>
+  <script src="panettones.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.min.js" integrity="sha384-R18XzqnxvVLEF+BYfhpmDx30v7eP83fAckyfoRzK7/Uf6nGqufcmsk0eAKo7S3RU" crossorigin="anonymous" defer></script>
     <script src="scroll-suau.js" defer></script>
 </head>
@@ -206,6 +207,18 @@
           <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#F2E6CE]/70">les nostres creacions</p>
         </div>
         <div id="menu-classics"></div>
+      </div>
+
+      <!-- Especial Nadal: panettones (panettones.js; preu i estoc els diu el servidor) -->
+      <div class="mb-16" id="sec-nadal">
+        <div class="border-b border-[#F2E6CE]/40 pb-4 mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl md:text-3xl text-[#F2E6CE]">Especial Nadal</h2>
+            <p class="text-xs uppercase tracking-widest mt-1.5 font-normal text-[#F2E6CE]/70">panettones artesans de Sicília · unitats limitades</p>
+          </div>
+          <a href="nadal.html" class="shrink-0 text-sm font-medium text-[#F2E6CE] underline underline-offset-4 decoration-[#F2E6CE]/50 hover:decoration-[#F2E6CE]">Veure'ls de prop →</a>
+        </div>
+        <div id="menu-nadal" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
       </div>
 
       <!-- Begudes & Postres -->
@@ -374,7 +387,7 @@
     <div id="cf-time-step" class="hidden flex-1 overflow-y-auto">
       <div class="max-w-lg mx-auto px-4 py-10 space-y-6 pb-12">
         <div class="text-center">
-          <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F] mb-2">Quan vols rebre la pizza?</h2>
+          <h2 id="cf-time-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-3xl text-[#2A1A0F] mb-2">Quan vols rebre la pizza?</h2>
           <p class="text-sm font-light text-[#5A3E28]">Tria el dia i a quina hora la vols rebre (hora aproximada d'arribada)</p>
         </div>
         <div class="flex gap-2 justify-center">
@@ -435,6 +448,22 @@
             <iconify-icon icon="solar:close-linear" width="16"></iconify-icon>
           </button>
         </div>
+
+        <!-- Especial Nadal: quan arriben els panettones del cistell -->
+        <section id="cf-pan" class="hidden">
+          <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-xl text-[#2A1A0F] mb-1">Quan vols els panettones?</h2>
+          <p class="text-xs font-light text-[#5A3E28] mb-3">Te'ls portem a casa, a Matadepera.</p>
+          <div class="space-y-2" role="radiogroup" aria-label="Entrega dels panettones">
+            <label class="cf-pan-opt flex items-start gap-3 rounded-xl border border-[#C4B08A]/40 bg-[#E6D5B0]/10 px-4 py-3 cursor-pointer transition-colors">
+              <input type="radio" name="cf-pan" value="order" class="mt-0.5 w-4 h-4 accent-[#E23F2E] shrink-0">
+              <span><b class="block text-sm font-semibold text-[#2A1A0F]">Amb aquesta comanda</b><span id="cf-pan-order-sub" class="block text-xs font-light text-[#5A3E28] mt-0.5"></span></span>
+            </label>
+            <label class="cf-pan-opt flex items-start gap-3 rounded-xl border border-[#C4B08A]/40 bg-[#E6D5B0]/10 px-4 py-3 cursor-pointer transition-colors">
+              <input type="radio" name="cf-pan" value="panettone_day" class="mt-0.5 w-4 h-4 accent-[#E23F2E] shrink-0">
+              <span><b class="block text-sm font-semibold text-[#2A1A0F]">El dia d'entrega de panettones</b><span id="cf-pan-day-sub" class="block text-xs font-light text-[#5A3E28] mt-0.5"></span></span>
+            </label>
+          </div>
+        </section>
 
         <!-- Auth block eliminat temporalment (setmana de llançament) —
              veure la branca git "backup/login-signup-2026-09" per restaurar-ho. -->
@@ -769,6 +798,29 @@
     const DELIVERY_FEE = 0;
     let cart = [];
 
+    // ── Especial Nadal (panettones.js) ──
+    // Ids "pn-…": no són pizzes (no ocupen forn ni aforo) i en queden les
+    // unitats que diu el servidor. Poden arribar amb la comanda o el dia
+    // d'entrega de panettones (cfPanettoneDelivery). Una comanda NOMÉS de
+    // panettones per a aquell dia no té dia ni hora de pase.
+    const NADAL = window.MicsasNadal || null;
+    MENU.nadal = NADAL ? NADAL.items.map(p => ({ id: p.id, name: p.order, desc: NADAL.t(p.tag), img: p.img + '-600.webp', price: p.price })) : [];
+    let cfPanettoneDelivery = 'order';
+    function isPanId(id) { return typeof id === 'string' && id.startsWith('pn-'); }
+    function cartHasPan() { return cart.some(i => isPanId(i.id)); }
+    function cartOnlyPan() { return cart.length > 0 && cart.every(i => isPanId(i.id)); }
+    function cfPanDayOnly() { return cartOnlyPan() && cfPanettoneDelivery === 'panettone_day'; }
+    function panDayLabel() {
+      const d = NADAL && NADAL.deliveryDate ? NADAL.fmtDate(NADAL.deliveryDate) : null;
+      return d ? d.charAt(0).toUpperCase() + d.slice(1) : "Data per confirmar: t'avisarem per correu";
+    }
+    // Quantes en pot afegir encara (null = sense límit: no és un panettone).
+    function panRoom(id) {
+      if (!isPanId(id)) return null;
+      const max = NADAL ? NADAL.maxQty(id) : 0;
+      return max - (getCartItem(id)?.qty || 0);
+    }
+
     function fmt(n) { return '€' + n.toFixed(2); }
     function fmtComma(n) { return '€' + n.toFixed(2).replace('.', ','); }
     function subtotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
@@ -873,6 +925,65 @@
     renderPizzaGrid('menu-classics', MENU.classics);
     renderSection('menu-drinks', MENU.drinks, false);
 
+    function nadalStockText(id) {
+      if (!NADAL || (!NADAL.loaded && !NADAL.failed)) return { t: '', red: false };
+      const st = NADAL.status(id), r = NADAL.remaining(id);
+      if (st === 'soon') return { t: 'Aviat a la venda', red: false };
+      if (st === 'soldout') return { t: 'Esgotat', red: true };
+      if (st === 'few') return { t: r === 1 ? 'Només en queda 1!' : `Només en queden ${r}!`, red: true };
+      return { t: `Queden ${r}`, red: false };
+    }
+    function renderNadal() {
+      const box = document.getElementById('menu-nadal');
+      if (!box) return;
+      if (!MENU.nadal.length) { document.getElementById('sec-nadal')?.classList.add('hidden'); return; }
+      box.innerHTML = MENU.nadal.map(item => {
+        const st = nadalStockText(item.id);
+        const can = NADAL && (NADAL.status(item.id) === 'ok' || NADAL.status(item.id) === 'few');
+        const price = (NADAL ? NADAL.price(item.id) : item.price);
+        const safeName = item.name.replace(/'/g, "\\'");
+        return `
+        <div class="flex items-center gap-4 rounded-2xl border border-[#C4B08A]/30 bg-[#F2E6CE] p-3 pr-4 shadow-sm" data-pizza-row="${item.id}">
+          <a href="nadal.html" class="shrink-0" tabindex="-1" aria-hidden="true"><img src="${item.img}" alt="" width="96" height="96" loading="lazy" class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover${can ? '' : ' grayscale-[.5]'}"></a>
+          <div class="flex-1 min-w-0">
+            <span class="font-['League_Spartan',sans-serif] font-black text-base lg:text-lg tracking-tight text-[#2A1A0F] uppercase block">${item.name}</span>
+            <span class="text-sm text-[#5A3E28] leading-snug block">${item.desc}</span>
+            <span class="flex items-center gap-2 mt-1.5 text-sm">
+              <span class="font-medium text-[#E23F2E]">${price.toFixed(2).replace('.', ',')} €</span>
+              ${st.t ? `<span class="text-xs font-semibold ${st.red ? 'text-[#E23F2E]' : 'text-[#5A3E28]'}">· ${st.t}</span>` : ''}
+            </span>
+          </div>
+          <div class="shrink-0" data-ctrl-wrap="${item.id}">
+            ${can ? `
+            <button type="button" data-btn-add="${item.id}" class="bg-[#E23F2E] text-[#F2E6CE] px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-95 whitespace-nowrap hover:opacity-90" onclick="addToCartSilent('${item.id}','${safeName}',${price})">Afegir</button>
+            <div data-counter="${item.id}" class="hidden items-center gap-2 bg-[#F2E6CE] border border-[#C4B08A]/40 rounded-full p-1">
+              <button type="button" class="w-7 h-7 flex items-center justify-center rounded-full text-[#2A1A0F] hover:bg-[#E23F2E]/10" onclick="changeQtySilent('${item.id}',-1)" aria-label="Un menys"><iconify-icon icon="solar:minus-linear" width="18"></iconify-icon></button>
+              <span data-qty="${item.id}" class="w-4 text-center text-xs font-medium text-[#2A1A0F]">1</span>
+              <button type="button" class="w-7 h-7 flex items-center justify-center rounded-full text-[#2A1A0F] hover:bg-[#E23F2E]/10" onclick="changeQtySilent('${item.id}',1)" aria-label="Un més"><iconify-icon icon="solar:add-linear" width="18"></iconify-icon></button>
+            </div>` : `<span class="text-xs font-bold uppercase tracking-wide text-[#9B8A72]">${st.t || 'Aviat'}</span>`}
+          </div>
+        </div>`;
+      }).join('');
+      MENU.nadal.forEach(it => syncMenuRow(it.id));
+    }
+    // El preu i les unitats arriben de Supabase (cada 20 s): es repinta i, si
+    // al cistell n'hi ha més de les que queden, s'ajusta.
+    function onNadalStock() {
+      if (!NADAL) return;
+      cart.forEach(it => {
+        if (!isPanId(it.id)) return;
+        const max = NADAL.maxQty(it.id);
+        it.price = NADAL.price(it.id);
+        if (it.qty > max) { it.qty = max; showCfToast(max ? `Només queden ${max} unitats de ${it.name}: hem ajustat el cistell.` : `${it.name} s'ha esgotat i l'hem tret del cistell.`); }
+      });
+      cart = cart.filter(it => it.qty > 0);
+      renderNadal();
+      renderCart(false);
+      renderPanChoice();
+    }
+    if (NADAL) NADAL.onChange(onNadalStock);
+    renderNadal();
+
     function badgePulse() {
       const badge = document.getElementById('cart-badge');
       if (!badge || badge.classList.contains('hidden')) return;
@@ -910,6 +1021,7 @@
 
     function addToCartSilent(id, name, price, quiet) {
       if (isOff(id)) return;
+      if (isPanId(id) && panRoom(id) <= 0) { showCfToast(NADAL && NADAL.status(id) === 'soldout' ? 'Aquest panettone està esgotat.' : 'No en queden més unitats.'); return; }
       const ex = cart.find(i => i.id === id);
       if (ex) ex.qty++; else cart.push({ id, name, price, qty: 1, note: '' });
       if (!quiet) window.ppNotifyAdded?.(id, name);
@@ -921,6 +1033,7 @@
     function changeQtySilent(id, delta) {
       const it = cart.find(i => i.id === id);
       if (!it) return;
+      if (delta > 0 && isPanId(id) && panRoom(id) <= 0) { showCfToast('No en queden més unitats.'); return; }
       it.qty = Math.max(0, it.qty + delta);
       if (it.qty === 0) cart = cart.filter(i => i.id !== id);
       if (delta > 0) window.ppNotifyAdded?.(id, it.name);
@@ -1205,7 +1318,7 @@
     // mateixa hora que veu cuina. Sumar-hi 15 min feia que el primer
     // horari visible fos les 20:15 i ningú pogués demanar per a les 20:00.
     const cfMins = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
-    const cfPizzaCount = () => cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0);
+    const cfPizzaCount = () => cart.filter(i => !i.id.startsWith('d') && !isPanId(i.id)).reduce((s, i) => s + i.qty, 0);
 
     // Franges on el servidor pot posar pizzes (mateixa llista que
     // bookableSlots a place-order).
@@ -1377,7 +1490,13 @@
       const isToday = cfDeliveryDate === todayISO();
       const labelEl = document.getElementById('cf-success-estimate-label');
       const el = document.getElementById('cf-success-estimate');
-      if (isToday) {
+      // Comanda feta: els panettones ja no han de tornar a sortir a la cistella.
+      if (NADAL && (cartHasPan() || window._cfPanSuccess)) NADAL.clearCheckout();
+      if (window._cfPanDaySuccess || cfPanDayOnly()) {
+        estimacioEntrega = '';
+        if (labelEl) labelEl.textContent = "Dia d'entrega de panettones";
+        if (el) el.textContent = panDayLabel();
+      } else if (isToday) {
         estimacioEntrega = computeEstimacioEntrega();
         if (labelEl) labelEl.textContent = 'Arriba aprox.';
         if (el) el.textContent = estimacioEntrega;
@@ -1570,16 +1689,55 @@
       if (errEl) errEl.classList.add('hidden');
       // Aquest botó no passava per placeOrder: obria el pagament sense tornar
       // a comprovar exhaurit, marge ni lloc a la franja.
-      await loadSlotCountsFor(cfDeliveryDate);
-      if (_cfDailySoldOut) { cfBackToTimeStep('Sold ooout, moltes gràcies família! Ja no queden pizzes per a aquest dia.'); return; }
-      if (!isSlotStillValid()) { cfBackToTimeStep('Aquesta hora ja no té marge suficient. Tria una altra hora.'); return; }
-      if (!cfCheckSlotFits()) return;
+      if (!cfPanDayOnly()) {
+        await loadSlotCountsFor(cfDeliveryDate);
+        if (_cfDailySoldOut && !cartOnlyPan()) { cfBackToTimeStep('Sold ooout, moltes gràcies família! Ja no queden pizzes per a aquest dia.'); return; }
+        if (!cfSelectedTime) { cfBackToTimeStep('Tria el dia i l\'hora d\'entrega.'); return; }
+        if (!isSlotStillValid()) { cfBackToTimeStep('Aquesta hora ja no té marge suficient. Tria una altra hora.'); return; }
+        if (!cfCheckSlotFits()) return;
+      }
       // Aquest botó és sempre pagament online, encara que abans s'hagi tocat
       // "Pagament al repartidor": sense forçar-ho, la comanda es desava com a
       // efectiu i cuina la veia com "Efectiu al repartidor" ja pagada.
       _pendingOrderData = { ..._collectOrderData(), paymentMethod: 'card_delivery' };
       openStripeOverlay(_pendingOrderData.total);
     }
+
+    // Bloc "Quan vols els panettones?" del checkout.
+    function renderPanChoice() {
+      const box = document.getElementById('cf-pan');
+      if (!box) return;
+      const has = cartHasPan();
+      box.classList.toggle('hidden', !has);
+      const title = document.getElementById('cf-time-title');
+      if (title) title.textContent = cartOnlyPan() ? 'Quan vols rebre el panettone?' : 'Quan vols rebre la pizza?';
+      if (!has) return;
+      const only = cartOnlyPan();
+      document.getElementById('cf-pan-order-sub').textContent = only
+        ? "Un divendres o diumenge, a l'hora que triïs."
+        : "Junt amb les pizzes, el dia i l'hora que has triat.";
+      // Amb pizzes, tot es paga ara (targeta) o en efectiu amb la pizza: el dia
+      // de panettones ja no es cobra res.
+      document.getElementById('cf-pan-day-sub').textContent = panDayLabel() + '.' + (only ? '' : ' Ho pagues tot amb aquesta comanda.');
+      box.querySelectorAll('input[name="cf-pan"]').forEach(r => {
+        r.checked = r.value === cfPanettoneDelivery;
+        r.closest('.cf-pan-opt').classList.toggle('border-[#E23F2E]', r.checked);
+        r.closest('.cf-pan-opt').classList.toggle('bg-[#E23F2E]/5', r.checked);
+      });
+    }
+    document.addEventListener('change', e => {
+      if (!e.target || e.target.name !== 'cf-pan') return;
+      cfPanettoneDelivery = e.target.value === 'panettone_day' ? 'panettone_day' : 'order';
+      if (NADAL) NADAL.cart.setDelivery(cfPanettoneDelivery);
+      renderPanChoice();
+      // Només panettones i ara "amb la comanda": cal triar dia i hora.
+      if (cartOnlyPan() && cfPanettoneDelivery === 'order' && !cfSelectedTime) {
+        document.getElementById('cf-scroll').classList.add('hidden');
+        document.getElementById('cf-time-step').classList.remove('hidden');
+        selectDeliveryDay(isValidOrderDay(cfDeliveryDate) && cfDeliveryDate >= todayISO() ? (cfDeliveryDate === todayISO() ? 'today' : 'other') : (isValidOrderDay(todayISO()) ? 'today' : 'other'));
+      }
+      document.dispatchEvent(new Event('cf-pan-changed'));
+    });
 
     function openCheckout() {
       closeCartDrawer();
@@ -1596,6 +1754,7 @@
       const _ssFloor = sessionStorage.getItem('micsas_floor');
       if (_ssDate) cfDeliveryDate = _ssDate;
       if (_ssTime && !cfSelectedTime && CF_REAL_SLOTS.includes(_ssTime)) cfSelectedTime = _ssTime;
+      renderPanChoice();
       // Defensa extra si sessionStorage porta una data no vàlida (viernes/domingo).
       if (!isValidOrderDay(cfDeliveryDate)) {
         cfDeliveryDate = isValidOrderDay(todayISO()) ? todayISO() : nextValidDate(todayISO());
@@ -1605,7 +1764,8 @@
       refreshMenuAvailability(cfDeliveryDate);
 
       // Skip time step if already selected (from pre-pedido or previous selection)
-      if (cfSelectedTime) {
+      // — o si només hi ha panettones per al dia d'entrega de panettones.
+      if (cfSelectedTime || cfPanDayOnly()) {
         document.getElementById('cf-time-step').classList.add('hidden');
         document.getElementById('cf-scroll').classList.remove('hidden');
       } else {
@@ -2027,10 +2187,14 @@
         return;
       }
 
+      // Només panettones per al dia d'entrega de panettones: no hi ha dia ni
+      // hora de pase que comprovar.
+      const panDay = cfPanDayOnly();
+
       // Sold out: mai es deixa comprar. Es torna a consultar just ara perquè
       // la pàgina pot portar oberta una estona i les pizzes s'han pogut acabar.
-      await loadSlotCountsFor(cfDeliveryDate);
-      if (_cfDailySoldOut) {
+      if (!panDay) await loadSlotCountsFor(cfDeliveryDate);
+      if (!panDay && _cfDailySoldOut && !cartOnlyPan()) {
         cfSelectedTime = null;
         document.getElementById('cf-global-err').textContent = 'Sold ooout, moltes gràcies família! Ja no queden pizzes per a aquest dia.';
         document.getElementById('cf-global-err').classList.remove('hidden');
@@ -2040,7 +2204,7 @@
         return;
       }
 
-      if (!isValidOrderDay(cfDeliveryDate)) {
+      if (!panDay && !isValidOrderDay(cfDeliveryDate)) {
         cfSelectedTime = null;
         document.getElementById('cf-global-err').textContent = 'Només fem comandes per divendres i diumenge. Tria un altre dia.';
         document.getElementById('cf-global-err').classList.remove('hidden');
@@ -2050,7 +2214,8 @@
         return;
       }
 
-      if (!isSlotStillValid()) {
+      if (!panDay && !cfSelectedTime) { cfBackToTimeStep('Tria el dia i l\'hora d\'entrega.'); return; }
+      if (!panDay && !isSlotStillValid()) {
         cfSelectedTime = null;
         document.getElementById('cf-global-err').textContent = 'Aquesta franja horària ja no té marge suficient. Tria una franja horària diferent.';
         document.getElementById('cf-global-err').classList.remove('hidden');
@@ -2060,7 +2225,7 @@
         return;
       }
 
-      if (!cfCheckSlotFits()) return;
+      if (!panDay && !cfCheckSlotFits()) return;
 
       // Online payment: collect order data and open Stripe
       if (cfPayMethod === 'online') {
@@ -2164,7 +2329,8 @@
       const marketingConsent = !!(document.getElementById('cf-marketing') && document.getElementById('cf-marketing').checked);
       const name = [firstName, lastName].filter(Boolean).join(' ');
       const discountCode = cfDiscount ? cfDiscount.code : null;
-      return { name, firstName, lastName, discountCode, email, phone, street, floor, postalCode, city, lat, lng, delivNotes, finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: cfDeliveryDate, marketingConsent };
+      const panDay = cfPanDayOnly();
+      return { name, firstName, lastName, discountCode, email, phone, street, floor, postalCode, city, lat, lng, delivNotes, finalNotes: panDay ? delivNotes : finalNotes, paymentMethod, total: total(), subtotal: subtotal(), tipAmount: cfTipAmount, deliveryDate: panDay ? null : cfDeliveryDate, panDay, panettoneDelivery: cartHasPan() ? cfPanettoneDelivery : null, marketingConsent };
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
@@ -2198,8 +2364,9 @@
           paymentStatus,
           tipAmount: d.tipAmount,
           authUserId: currentUser ? currentUser.id : null,
-          slotTime: cfSelectedTime || null,
-          deliveryDate: d.deliveryDate || todayISO(),
+          slotTime: d.panDay ? null : (cfSelectedTime || null),
+          deliveryDate: d.panDay ? null : (d.deliveryDate || todayISO()),
+          panettoneDelivery: d.panettoneDelivery || null,
           items,
         }),
       });
@@ -2209,6 +2376,9 @@
       }
       // El codi ha deixat de valer (caducat, esgotat...) entre aplicar-lo i
       // pagar: es treu, i el client veu el total nou abans de tornar-hi.
+      // Algú s'ha endut els últims panettones: es torna a llegir l'estoc i el
+      // cistell s'ajusta sol (onNadalStock) abans que el client ho torni a provar.
+      if (!res.ok && json.panettoneSoldOut && NADAL) await NADAL.refresh();
       if (!res.ok && json.discountInvalid) {
         removeDiscountCode();
         showDiscountErr(json.error);
@@ -2218,7 +2388,7 @@
       // s'ha omplert just abans de confirmar (rollover automàtic a la
       // següent franja amb lloc) — reflectim aquí la franja real assignada.
       window._cfSlotReassigned = !!(json.slotTime && json.slotTime !== cfSelectedTime);
-      window._cfBigOrder = cart.filter(i => !i.id.startsWith('d')).reduce((s, i) => s + i.qty, 0) > 6;
+      window._cfBigOrder = cfPizzaCount() > 6;
       if (json.slotTime) cfSelectedTime = json.slotTime;
       return json;
     }
@@ -2433,6 +2603,7 @@
       try {
         sessionStorage.setItem('micsas_pay_return', JSON.stringify({
           date: cfDeliveryDate, time: cfSelectedTime, reassigned: !!window._cfSlotReassigned, big: !!window._cfBigOrder,
+          panDay: cfPanDayOnly(), pan: cartHasPan(),
         }));
       } catch (_) {}
       _payRedirecting = true;
@@ -2492,6 +2663,8 @@
       if (saved.time) cfSelectedTime = saved.time;
       window._cfSlotReassigned = !!saved.reassigned;
       window._cfBigOrder = !!saved.big;
+      window._cfPanDaySuccess = !!saved.panDay;
+      window._cfPanSuccess = !!saved.pan;
       const fs = document.getElementById('checkout-fullscreen');
       fs.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
       document.body.style.overflow = 'hidden';
@@ -2624,6 +2797,26 @@
       } catch(e) { console.warn('[repeat-cart]', e); }
       sessionStorage.removeItem('micsas_repeat');
     }
+
+    // ── Especial Nadal: venim de nadal.html amb panettones a la cistella ──
+    (function prefillNadal() {
+      if (!NADAL) return;
+      const nc = NADAL.takeCheckout();
+      if (!nc || !nc.items.length) return;
+      nc.items.forEach(l => {
+        const m = MENU.nadal.find(x => x.id === l.id);
+        const qty = Math.max(0, Math.min(30, Math.floor(Number(l.qty)) || 0));
+        if (!m || !qty) return;
+        const ex = cart.find(i => i.id === m.id);
+        if (ex) ex.qty = qty; else cart.push({ id: m.id, name: m.name, price: NADAL.price(m.id) || m.price, qty, note: '' });
+      });
+      cfPanettoneDelivery = nc.delivery === 'panettone_day' ? 'panettone_day' : 'order';
+      renderCart(false);
+      MENU.nadal.forEach(it => syncMenuRow(it.id));
+      setTimeout(() => showCfToast(cfPanettoneDelivery === 'panettone_day'
+        ? "Els teus panettones ja són a la cistella. Te'ls portem el dia d'entrega de panettones."
+        : 'Els teus panettones ja són a la cistella. Hi pots afegir pizzes.'), 400);
+    })();
 
     // ── Carta del dia: el que cuina ha apagat no es pot demanar ──
     // Data per defecte: la triada a pre-pedido o, si no n'hi ha, el proper

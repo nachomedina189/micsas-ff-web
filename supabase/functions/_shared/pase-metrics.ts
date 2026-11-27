@@ -223,6 +223,8 @@ export function buildPaseReport(input: ReportInput, summaries = daySummaries(inp
   for (const name of PIZZA_MENU) if (!OFF_MENU.has(name)) prodMap.set(name, { qty: 0, revenue: 0 });
   let drinks = 0;
   for (const it of dayItems) {
+    // Els panettones (Especial Nadal) no són ni pizzes ni begudes.
+    if (/^Panettone /.test(it.product_name)) continue;
     if (!PIZZA_MENU.includes(it.product_name)) { drinks += it.quantity; continue; }
     const p = prodMap.get(it.product_name) ?? { qty: 0, revenue: 0 };
     p.qty += it.quantity;
