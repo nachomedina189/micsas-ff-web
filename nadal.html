@@ -9,7 +9,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="micsas.ff">
   <meta property="og:title" content="Especial Nadal · Panettones artesans de Sicília">
-  <meta property="og:description" content="Quatre panettones artesans de Sicília, unitats limitades. Te'ls portem a casa a Matadepera.">
+  <meta property="og:description" content="Quatre panettones artesans de Sicília, edició limitada. Te'ls portem a casa a Matadepera.">
   <meta property="og:image" content="https://www.micsasff.com/images/nadal/panettone-festuc.webp">
   <meta property="og:url" content="https://www.micsasff.com/nadal.html">
   <meta property="og:locale" content="ca_ES">
@@ -19,14 +19,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300..900&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="images/nadal/estanteria-1600.webp" media="(min-width: 768px) and (max-width: 1600px)">
-  <link rel="preload" as="image" href="images/nadal/estanteria.webp" media="(min-width: 1601px)">
-  <link rel="preload" as="image" href="images/nadal/estanteria-mobil.webp" media="(max-width: 767px)">
+  <link rel="preload" as="image" href="images/nadal/estanteria-1600.webp" media="(min-width: 768px) and (min-aspect-ratio: 9/10) and (max-width: 1600px)">
+  <link rel="preload" as="image" href="images/nadal/estanteria.webp" media="(min-width: 1601px) and (min-aspect-ratio: 9/10)">
+  <link rel="preload" as="image" href="images/nadal/estanteria-doble.webp" media="(max-width: 767px), (max-aspect-ratio: 9/10)">
   <link rel="stylesheet" href="transicion.css">
   <style>
     :root {
       --wall: #EFE3CC; --ink: #2A1A0F; --ink-2: #5A3E28; --muted: #76624C;
-      --red: #c80a07; --red-2: #E23F2E; --cream: #F2E6CE; --line: rgba(42, 26, 15, .14);
+      --red: #c80a07; --red-2: #E23F2E; --cream: #F2E6CE; --paper: #FBF4E6; --line: rgba(42, 26, 15, .14);
       --font: 'League Spartan', system-ui, -apple-system, 'Segoe UI', sans-serif;
       --header-h: 64px;
     }
@@ -78,13 +78,29 @@
     }
     .nd-cartcount[data-n="0"] { background: rgba(242, 230, 206, .22); color: var(--cream); }
 
-    .nd-tagline {
-      position: fixed; left: clamp(16px, 2.4vw, 32px); top: calc(var(--header-h) + 6px + env(safe-area-inset-top)); z-index: 30; margin: 0;
-      font-size: 15px; line-height: 1.25; color: var(--ink-2); font-weight: 400; pointer-events: none;
+    /* ── Dalt: frase i reclam d'edició limitada ─────────────────────── */
+    .nd-top {
+      position: fixed; left: 50%; top: calc(var(--header-h) + 4px + env(safe-area-inset-top)); z-index: 30;
+      transform: translateX(-50%); width: max-content; max-width: calc(100vw - 24px);
+      display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; pointer-events: none;
       opacity: 0; transition: opacity .5s;
     }
-    .is-ready .nd-tagline { opacity: 1; }
-    .is-crate.is-open .nd-tagline { opacity: 0; }
+    .is-ready .nd-top { opacity: 1; }
+    .is-open .nd-top { opacity: 0; }
+    .nd-kicker { margin: 0; font-size: 15px; line-height: 1.2; color: var(--ink-2); }
+    .nd-banner {
+      display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+      padding: 8px 16px 8px 14px; border-radius: 999px; font-size: 14px; line-height: 1.25;
+      background: rgba(251, 244, 230, .86); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      border: 1px solid rgba(200, 10, 7, .22); box-shadow: 0 10px 26px rgba(42, 26, 15, .10);
+    }
+    .nd-banner b { color: var(--red); font-weight: 900; letter-spacing: .12em; text-transform: uppercase; font-size: 12.5px; }
+    .nd-banner .bn-sep { width: 1px; height: 14px; background: var(--line); }
+    .nd-banner em { font-style: normal; font-weight: 800; }
+    .nd-banner em.is-hot { color: var(--red); }
+    .nd-pulse { position: relative; width: 9px; height: 9px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+    .nd-pulse::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--red); opacity: 0; animation: nd-ping 1.8s cubic-bezier(.2, .7, .3, 1) infinite; }
+    @keyframes nd-ping { 0% { transform: scale(.4); opacity: .8; } 100% { transform: scale(1.4); opacity: 0; } }
 
     /* ── Escenari ──────────────────────────────────────────────────── */
     .nd-stage { position: fixed; inset: 0; overflow: hidden; }
@@ -94,113 +110,158 @@
     .is-wall .nd-wall { opacity: 1; }
     .nd-wall-soft { opacity: 0; transition: opacity .7s ease; transform: scale(1.04); }
     .is-focus .nd-wall-soft { opacity: 1; }
-    .nd-glow {
-      position: absolute; top: 0; left: -24vw; width: 64vw; height: 100%; border-radius: 50%; z-index: 15;
-      background: radial-gradient(closest-side, rgba(239, 227, 204, .97) 35%, rgba(239, 227, 204, .75) 65%, rgba(239, 227, 204, 0));
-      opacity: 0; transition: opacity .7s; pointer-events: none;
-    }
-    .is-focus .nd-glow { opacity: 1; }
+    .nd-veil { position: absolute; inset: 0; background: rgba(239, 227, 204, .38); opacity: 0; transition: opacity .7s; pointer-events: none; z-index: 14; }
+    .is-focus .nd-veil { opacity: 1; }
 
-    .nd-item { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; opacity: 0; pointer-events: none; }
+    /* Cada panettone: les capes interiors el mouen (aixecar, inclinar); només
+       el botó rep el ratolí. */
+    .nd-item { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; opacity: 0; pointer-events: none; transition: filter .7s ease, opacity .25s; }
     .nd-item.is-on { opacity: 1; }
-    .nd-item.is-blur { filter: blur(7px) saturate(.9); opacity: .9; }
-    .nd-item { transition: filter .7s ease, opacity .25s; }
-    .nd-wob, .nd-lift, .nd-tilt, .nd-card { position: absolute; inset: 0; transform-style: preserve-3d; }
-    /* Només la portada rep el ratolí: les capes que la mouen són invisibles. */
-    .nd-card { pointer-events: auto; }
-    .nd-tilt { transform-origin: 50% 100%; }
-    .nd-card { border: 0; padding: 0; margin: 0; background: none; cursor: pointer; display: block; width: 100%; height: 100%; }
-    .nd-card:focus-visible { outline: none; }
-    .nd-card:focus-visible .nd-front { box-shadow: 0 0 0 3px var(--wall), 0 0 0 6px var(--red), 0 18px 40px rgba(42, 26, 15, .28); }
-    .nd-face {
-      position: absolute; inset: 0; border-radius: 3px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    .nd-item.is-blur, .nd-tag.is-blur { filter: blur(7px) saturate(.9); }
+    .nd-wob, .nd-lift { position: absolute; inset: 0; transform-style: preserve-3d; }
+    .nd-pan {
+      position: absolute; inset: 0; border: 0; padding: 0; margin: 0; background: none; cursor: pointer; display: block;
+      pointer-events: auto; border-radius: 14px;
     }
-    .nd-front { background: #d9c8a8; box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 10px 24px rgba(42, 26, 15, .22), 0 2px 4px rgba(42, 26, 15, .18); }
-    .nd-front img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
-    /* Brillantor de funda: una llum molt suau que creua la portada. */
-    .nd-front::after {
-      content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(115deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .08) 100%);
+    .nd-pan:focus-visible { outline: 3px solid var(--red); outline-offset: 6px; }
+    .nd-pan img {
+      width: 100%; height: 100%; display: block; object-fit: contain; object-position: 50% 100%;
+      user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 8px 10px rgba(42, 26, 15, .16));
     }
-    .nd-back {
-      transform: rotateY(180deg); background: var(--cream); color: var(--ink);
-      box-shadow: 0 10px 24px rgba(42, 26, 15, .22); display: flex; flex-direction: column;
-      padding: 8% 8% 6.5%; text-align: left; font-size: var(--bf, 10px); line-height: 1.3;
-    }
-    .nd-back::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4.2%; background: var(--c, var(--red)); }
-    .nd-back .b-kicker { font-size: .72em; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-top: 2%; }
-    .nd-back .b-name { font-size: 2.2em; line-height: .98; font-weight: 800; letter-spacing: -.02em; margin: .3em 0 .4em; }
-    .nd-back .b-desc { margin: 0 0 .9em; color: var(--ink-2); font-size: 1.08em; }
-    .nd-back .b-row { display: flex; gap: .6em; border-top: 1px solid var(--line); padding: .5em 0; font-size: .92em; }
-    .nd-back .b-row b { flex: 0 0 6.6em; font-weight: 700; }
-    .nd-back .b-foot { margin-top: auto; display: flex; align-items: baseline; justify-content: space-between; gap: 1em; padding-top: .6em; border-top: 2px solid var(--ink); }
-    .nd-back .b-price { font-size: 1.7em; font-weight: 800; }
-    .nd-back .b-stock { font-size: .86em; font-weight: 700; color: var(--ink-2); text-align: right; }
-    .nd-back .b-stock.is-few { color: var(--red); }
-
-    /* Ombra de contacte sobre el prestatge (com el reflex de l'original). */
+    .is-soldout .nd-pan img { filter: grayscale(.6) brightness(.95) drop-shadow(0 8px 10px rgba(42, 26, 15, .16)); }
+    /* Ombra de contacte sobre el prestatge. */
     .nd-shadow {
-      position: absolute; left: 6%; right: 6%; bottom: -5px; height: 12px; border-radius: 50%;
-      background: radial-gradient(closest-side, rgba(42, 26, 15, .55), rgba(42, 26, 15, 0));
-      filter: blur(2px); pointer-events: none; opacity: .45;
+      position: absolute; left: 6%; right: 6%; bottom: -5%; height: 13%; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(42, 26, 15, .6), rgba(42, 26, 15, 0));
+      filter: blur(3px); pointer-events: none;
     }
-    /* Pestanya amb el nom: només a la pila del mòbil, perquè les portades de
-       darrere (de les quals només es veu el cantell) diguin quina és quina. */
-    .nd-tab {
-      position: absolute; left: 6%; top: 0; padding: .32em .7em .38em; border-radius: 0 0 .5em .5em; display: none;
-      background: var(--c); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; line-height: 1;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .18);
-    }
-    .is-crate .nd-tab { display: block; }
     /* Segell "Esgotat" (mateix estil que el sold out de pre-pedido). */
     .nd-stamp {
-      position: absolute; left: 50%; top: 50%; width: 74%; transform: translate(-50%, -50%) rotate(-8deg);
+      position: absolute; left: 50%; top: 52%; width: 86%; transform: translate(-50%, -50%) rotate(-10deg);
       pointer-events: none; display: none; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .25));
     }
     .is-soldout .nd-stamp { display: block; }
-    .is-soldout .nd-front img { filter: grayscale(.55) brightness(.92); }
 
-    /* Botons que apareixen sobre la portada quan s'aixeca. */
-    .nd-pills {
-      position: absolute; left: 0; right: 0; bottom: 5%; display: flex; justify-content: center; gap: 6px;
-      opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; pointer-events: none;
-      transform-style: flat;
+    /* ── Etiquetes penjades del prestatge: preu i unitats ───────────── */
+    .nd-tag {
+      position: absolute; left: 0; top: 0; z-index: 7; pointer-events: none; transform-origin: 50% 0;
+      opacity: 0; transition: opacity .45s, filter .7s; filter: drop-shadow(0 4px 6px rgba(42, 26, 15, .22));
     }
-    .is-lifted .nd-pills { opacity: 1; transform: none; pointer-events: auto; }
-    .nd-pill {
-      border: 0; cursor: pointer; white-space: nowrap; border-radius: 999px; font-weight: 600; color: var(--ink);
-      padding: clamp(7px, .9vw, 10px) clamp(11px, 1.15vw, 15px); font-size: clamp(12px, 1vw, 14px); line-height: 1;
-      background: rgba(242, 230, 206, .78); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-      transition: background-color .3s, opacity .3s;
+    .nd-tag.is-on { opacity: 1; animation: nd-swing 5.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
+    .nd-tag.is-hot { animation-duration: 1.4s; }
+    .nd-tag.is-gone { opacity: 0; }
+    @keyframes nd-swing { 0%, 100% { transform: rotate(-2.4deg); } 50% { transform: rotate(2.4deg); } }
+    .nd-tag .t-str { display: block; width: 2px; margin: 0 auto; background: linear-gradient(#8f0705, var(--red)); border-radius: 2px; }
+    .nd-tag .t-card {
+      position: relative; display: block; margin-top: -1px; padding: 1.05em .5em .55em; text-align: center; color: var(--ink);
+      background: var(--paper); clip-path: polygon(18% 0, 82% 0, 100% 22%, 100% 100%, 0 100%, 0 22%);
     }
-    .nd-pill:hover, .nd-pill:focus-visible { background: var(--cream); }
-    .nd-pill[disabled] { opacity: .6; cursor: default; }
+    .nd-tag .t-card::before {
+      content: ''; position: absolute; left: 50%; top: .32em; width: .48em; height: .48em; margin-left: -.24em; border-radius: 50%;
+      background: var(--wall); box-shadow: inset 0 0 0 1.5px #8f0705;
+    }
+    .nd-tag .t-price { display: block; font-size: 1.55em; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+    .nd-tag .t-stock { display: block; margin-top: .32em; font-size: .8em; font-weight: 800; line-height: 1.1; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+    .nd-tag.is-few .t-stock { color: var(--red); }
+    .nd-tag.is-soldout .t-card { background: var(--red); color: #fff; }
+    .nd-tag.is-soldout .t-stock { color: #fff; }
 
-    /* ── Informació de l'actiu (esquerra) i accions (sota) ───────────── */
-    .nd-info {
-      position: absolute; left: clamp(20px, 3vw, 44px); top: 50%; width: min(30vw, 380px); transform: translateY(-50%);
-      opacity: 0; visibility: hidden; transition: opacity .45s, visibility .45s; z-index: 20; pointer-events: none;
+    /* ── Fitxa plegada que es desplega ──────────────────────────────── */
+    .nd-sheet {
+      position: fixed; left: 0; top: 0; z-index: 36; perspective: 1900px; visibility: hidden; pointer-events: none;
+      color: var(--ink);
     }
-    .is-open .nd-info { opacity: 1; visibility: visible; transition-delay: .25s; pointer-events: auto; }
-    .nd-info .i-kicker { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 10px; }
-    .nd-info h2 { font-size: clamp(30px, 3.2vw, 48px); line-height: .96; letter-spacing: -.02em; font-weight: 800; margin: 0 0 12px; }
-    .nd-info .i-tag { font-size: 17px; line-height: 1.35; color: var(--ink-2); margin: 0 0 14px; }
-    .nd-info .i-meta { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 15px; margin: 0 0 14px; }
-    .nd-info .i-price { font-size: 26px; font-weight: 800; }
-    .nd-stock { font-weight: 700; color: var(--ink-2); }
-    .nd-stock.is-few, .nd-stock.is-soldout { color: var(--red); }
-    .nd-info .i-flip {
-      background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); font-weight: 600; font-size: 15px;
-      text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px;
+    .nd-sheet.is-on { visibility: visible; pointer-events: auto; }
+    .nd-f1 {
+      position: relative; transform-style: preserve-3d; background: var(--paper); border-radius: 16px 0 0 16px;
+      box-shadow: 0 30px 60px rgba(42, 26, 15, .22), 0 2px 6px rgba(42, 26, 15, .12);
+      transform-origin: 0 50%; transform: rotateY(-86deg); opacity: 0;
+      transition: transform .5s cubic-bezier(.2, .85, .25, 1), opacity .22s;
     }
-    .nd-actions {
-      position: absolute; left: 50%; transform: translate(-50%, 8px); z-index: 25; display: flex; gap: 10px; align-items: center;
-      opacity: 0; visibility: hidden; transition: opacity .35s, transform .35s, visibility .35s;
+    .nd-sheet.is-on .nd-f1 { transform: none; opacity: 1; }
+    .nd-f1-in { position: relative; height: 100%; display: flex; flex-direction: column; padding: 26px 26px 24px; overflow: auto; }
+    .nd-f1-in::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c, var(--red)); border-radius: 16px 0 0 16px; }
+    .nd-f2 {
+      position: absolute; left: 100%; top: 0; width: 100%; height: 100%; transform-style: preserve-3d;
+      transform-origin: 0 50%; transform: rotateY(-179deg); transition: transform .8s cubic-bezier(.3, .8, .2, 1);
     }
-    .is-open .nd-actions { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: .3s; }
+    .nd-sheet.is-unfold .nd-f2 { transform: rotateY(0deg); }
+    .nd-f2-in, .nd-f2-cover { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 0 16px 16px 0; }
+    .nd-f2-in {
+      background: var(--paper); padding: 26px 26px 24px; overflow: auto; display: flex; flex-direction: column;
+      box-shadow: inset 14px 0 16px -14px rgba(42, 26, 15, .28), 0 30px 60px rgba(42, 26, 15, .18);
+    }
+    .nd-f2-cover {
+      transform: rotateY(180deg); background: var(--c, var(--red)); color: #fff; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px;
+      background-image: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 55%);
+    }
+    .nd-f2-cover small { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; font-weight: 800; opacity: .85; }
+    .nd-f2-cover strong { font-size: 28px; line-height: 1; font-weight: 900; letter-spacing: -.02em; }
+    .nd-f2-cover span { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; padding: 6px 12px; border: 1.5px solid rgba(255, 255, 255, .7); border-radius: 999px; }
+
+    .s-kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--red); font-weight: 900; }
+    .s-kicker .nd-pulse { width: 8px; height: 8px; }
+    .nd-sheet h2 { margin: 0; font-size: clamp(30px, 2.8vw, 42px); line-height: .95; letter-spacing: -.025em; font-weight: 900; }
+    .s-sub { margin: 4px 0 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .s-tag { margin: 12px 0 0; font-size: 16px; line-height: 1.35; color: var(--ink-2); }
+    .s-price { margin: 16px 0 0; font-size: 30px; font-weight: 900; letter-spacing: -.02em; }
+    .nd-meter { margin: 14px 0 0; }
+    .nd-meter .m-big { display: block; font-size: 17px; line-height: 1.15; font-weight: 900; color: var(--ink); }
+    .nd-meter .m-small { display: block; margin-top: 7px; font-size: 13px; font-weight: 700; color: var(--muted); }
+    .nd-meter .m-bar { position: relative; height: 10px; margin-top: 8px; border-radius: 999px; background: rgba(42, 26, 15, .1); overflow: hidden; }
+    .nd-meter .m-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, #e0731c, var(--red)); transition: width 1.1s cubic-bezier(.2, .8, .2, 1) .5s; }
+    .nd-meter.is-soon .m-bar i { width: 100% !important; background: repeating-linear-gradient(-45deg, rgba(42, 26, 15, .14) 0 6px, rgba(42, 26, 15, .05) 6px 12px); }
+    .nd-meter.is-few .m-big { color: var(--red); }
+    .nd-meter.is-few .m-bar i { animation: nd-glow 1.3s ease-in-out infinite; }
+    @keyframes nd-glow { 50% { filter: brightness(1.25); } }
+    .nd-sheet .nd-btn { margin-top: auto; width: 100%; }
+    .s-gap { flex: 1 1 18px; min-height: 18px; }
+    .s-desc { margin: 0; font-size: 16px; line-height: 1.45; color: var(--ink-2); }
+    .s-rows { margin: 16px 0 0; }
+    .s-rows div { display: grid; grid-template-columns: 7.2em 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.35; }
+    .s-rows dt { font-weight: 800; }
+    .s-rows dd { margin: 0; color: var(--ink-2); }
+    .s-pay { margin: auto 0 0; padding-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+    .nd-sheet-x {
+      position: absolute; right: -14px; top: -14px; z-index: 3; width: 40px; height: 40px; border-radius: 999px; border: 0; cursor: pointer;
+      display: grid; place-items: center; background: var(--ink); color: var(--cream); box-shadow: 0 8px 20px rgba(42, 26, 15, .25);
+      opacity: 0; transform: scale(.6); transition: opacity .25s, transform .25s;
+    }
+    .nd-sheet.is-unfold .nd-sheet-x { opacity: 1; transform: none; transition-delay: .5s; }
+    .nd-sheet-x svg { width: 18px; height: 18px; }
+
+    /* Mòbil: la fitxa es desplega cap avall. */
+    .nd-sheet.is-v .nd-f1 { border-radius: 18px 18px 0 0; transform-origin: 50% 0; transform: rotateX(80deg); }
+    .nd-sheet.is-v.is-on .nd-f1 { transform: none; }
+    .nd-sheet.is-v .nd-f1-in { padding: 18px 18px 16px; }
+    .nd-sheet.is-v .nd-f1-in::before { left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 5px; border-radius: 18px 18px 0 0; }
+    .nd-sheet.is-v .nd-f2 { left: 0; top: 100%; transform-origin: 50% 0; transform: rotateX(179deg); }
+    .nd-sheet.is-v.is-unfold .nd-f2 { transform: rotateX(0deg); }
+    .nd-sheet.is-v .nd-f2-in, .nd-sheet.is-v .nd-f2-cover { border-radius: 0 0 18px 18px; }
+    .nd-sheet.is-v .nd-f2-in { padding: 16px 18px 16px; box-shadow: inset 0 14px 16px -14px rgba(42, 26, 15, .28), 0 24px 50px rgba(42, 26, 15, .18); }
+    .nd-sheet.is-v .nd-f2-cover { transform: rotateX(180deg); }
+    .nd-sheet.is-v h2 { font-size: 30px; }
+    .nd-sheet.is-v .s-kicker { margin-bottom: 8px; font-size: 11px; }
+    .nd-sheet.is-v .s-tag { margin-top: 6px; font-size: 14.5px; }
+    .nd-sheet.is-v .s-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .nd-sheet.is-v .s-price { margin: 0; font-size: 26px; }
+    .nd-sheet.is-v .nd-meter { margin-top: 10px; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 10px; }
+    .nd-sheet.is-v .nd-meter .m-big { grid-column: 2; grid-row: 1; font-size: 14px; text-align: right; }
+    .nd-sheet.is-v .nd-meter .m-small { grid-column: 1; grid-row: 1; margin: 0; font-size: 13px; }
+    .nd-sheet.is-v .nd-meter .m-bar { grid-column: 1 / -1; grid-row: 2; }
+    .nd-sheet.is-v .s-row-origin { display: none; }
+    .nd-sheet.is-v .s-gap { flex-basis: 12px; min-height: 12px; }
+    .nd-sheet.is-v .s-desc { font-size: 14.5px; line-height: 1.4; }
+    .nd-sheet.is-v .s-rows { margin-top: 8px; }
+    .nd-sheet.is-v .s-rows div { padding: 7px 0; font-size: 13px; grid-template-columns: 6.6em 1fr; }
+    .nd-sheet.is-v .s-pay { padding-top: 8px; font-size: 12px; }
+    .nd-sheet.is-v .nd-sheet-x { right: 8px; top: -50px; }
+    .s-head { display: block; }
+
     .nd-btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap;
-      border-radius: 999px; padding: 13px 22px; font-size: 16px; font-weight: 700; line-height: 1;
+      border-radius: 999px; padding: 15px 22px; font-size: 16px; font-weight: 800; line-height: 1;
       background: var(--red); color: #fff; box-shadow: 0 10px 24px rgba(200, 10, 7, .28);
       transition: transform .25s, background-color .25s, box-shadow .25s, opacity .25s;
     }
@@ -208,10 +269,8 @@
     .nd-btn:active { transform: scale(.98); }
     .nd-btn[disabled] { background: #9B8A72; box-shadow: none; cursor: default; transform: none; }
     .nd-btn.is-done { background: #1B6E33; box-shadow: 0 10px 24px rgba(27, 110, 51, .28); }
-    .nd-btn-ghost { background: rgba(242, 230, 206, .85); color: var(--ink); box-shadow: 0 6px 16px rgba(42, 26, 15, .12); border: 1px solid var(--line); }
-    .nd-btn-ghost:hover { background: var(--cream); }
 
-    /* Etiqueta que segueix el cursor sobre la portada oberta ("Gira"). */
+    /* Etiqueta que segueix el cursor sobre un panettone ("Obre"). */
     .nd-cursor {
       position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; padding: 8px 14px; border-radius: 999px;
       background: var(--cream); color: var(--ink); font-size: 13px; font-weight: 700; box-shadow: 0 6px 18px rgba(42, 26, 15, .18);
@@ -232,29 +291,18 @@
     .nd-li h3::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: currentColor; opacity: 0; transition: opacity .5s; }
     .nd-li:hover p, .nd-li.is-current p { color: var(--ink); }
     .nd-li:hover h3::after, .nd-li.is-current h3::after { opacity: 1; }
-    .nd-li .nd-stock { font-weight: 600; }
+    .nd-stock { font-weight: 700; color: var(--ink-2); }
+    .nd-stock.is-few, .nd-stock.is-soldout { color: var(--red); }
 
-    /* ── Mòbil: la pila (caixa de discos) ────────────────────────────── */
-    .nd-bar {
-      position: fixed; left: 16px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 30;
-      display: none; align-items: flex-end; justify-content: space-between; gap: 12px;
-      opacity: 0; transition: opacity .5s;
+    .nd-hint {
+      position: fixed; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 30; margin: 0; text-align: center;
+      font-size: 14px; font-weight: 600; color: var(--ink-2); display: none; opacity: 0; transition: opacity .5s; pointer-events: none;
     }
-    .is-ready .nd-bar { opacity: 1; }
-    .nd-bar-info { min-width: 0; }
-    .nd-bar-info p { margin: 0; font-size: 12px; color: rgba(42, 26, 15, .65); }
-    .nd-bar-info h3 { margin: 2px 0 0; font-size: 18px; font-weight: 700; line-height: 1.1; }
-    .nd-bar-btns { display: flex; gap: 8px; flex-shrink: 0; }
-    .nd-bar .nd-btn { padding: 13px 18px; font-size: 15px; }
-    .nd-dots { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 8px; z-index: 20; }
-    .nd-dots i { width: 4px; height: 14px; border-radius: 4px; background: rgba(42, 26, 15, .2); transition: background-color .3s, height .3s; }
-    .nd-dots i.is-on { background: var(--ink); height: 26px; }
-    .is-crate .nd-list, .is-crate .nd-info { display: none; }
-    .is-crate .nd-bar { display: flex; }
-    .is-crate .nd-dots { display: flex; }
-    .is-crate.is-open .nd-dots { opacity: 0; }
-    .is-crate .nd-actions { display: none; }
-    .is-crate .nd-tagline { font-size: 14px; }
+    .nd-hint span { display: inline-block; padding: 9px 16px; border-radius: 999px; background: rgba(251, 244, 230, .82); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .is-duo .nd-hint { display: block; }
+    .is-duo.is-ready .nd-hint { opacity: 1; }
+    .is-duo.is-open .nd-hint { opacity: 0; }
+    .is-duo .nd-list { display: none; }
 
     /* ── Cistella ───────────────────────────────────────────────────── */
     .nd-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(42, 26, 15, .34); opacity: 0; visibility: hidden; transition: opacity .35s, visibility .35s; }
@@ -273,7 +321,7 @@
     .nd-cart-body { flex: 1; overflow-y: auto; padding: 8px 22px 20px; overscroll-behavior: contain; }
     .nd-cart-empty { color: var(--ink-2); padding: 28px 0; }
     .nd-line { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
-    .nd-line img { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; display: block; }
+    .nd-line img { width: 56px; height: 56px; border-radius: 10px; object-fit: contain; display: block; background: var(--wall); padding: 4px; }
     .nd-line h4 { margin: 0; font-size: 16px; font-weight: 700; }
     .nd-line p { margin: 2px 0 0; font-size: 13px; color: var(--ink-2); }
     .nd-qty { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: #fff8ec; }
@@ -302,7 +350,7 @@
     .nd-toast span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .nd-toast button { border: 0; background: var(--cream); color: var(--ink); border-radius: 999px; padding: 8px 14px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Càrrega (barra com la de l'original) ────────────────────────── */
+    /* ── Càrrega ──────────────────────────────────────────────────────── */
     .nd-loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; pointer-events: none; transition: opacity .3s .1s, visibility .3s .1s; }
     .is-loaded .nd-loader { opacity: 0; visibility: hidden; }
     .nd-loader-track { width: 140px; height: 6px; border-radius: 999px; background: #D5C4A1; overflow: hidden; position: relative; }
@@ -319,13 +367,13 @@
       .nd-cart { top: auto; left: 0; width: 100%; max-height: 92dvh; border-radius: 20px 20px 0 0; transform: translateY(104%); box-shadow: 0 -20px 50px rgba(42, 26, 15, .2); }
       .nd-toast { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 70px); }
     }
-    @media (min-width: 768px) and (max-width: 1100px) {
-      .nd-list { gap: 28px; }
-      .nd-info { width: 27vw; }
-      .nd-info .i-tag { font-size: 15px; }
-    }
+    .is-duo .nd-kicker { font-size: 14px; }
+    .is-duo .nd-banner { gap: 6px 8px; padding: 7px 12px; font-size: 13px; border-radius: 18px; }
+    .is-duo .nd-banner b { font-size: 11.5px; }
+    .is-duo .nd-banner .bn-sep { display: none; }
     @media (prefers-reduced-motion: reduce) {
-      .nd-wall, .nd-wall-soft, .nd-item, .nd-info, .nd-actions, .nd-cart, .nd-overlay, .nd-toast { transition-duration: .01ms !important; transition-delay: 0s !important; }
+      .nd-wall, .nd-wall-soft, .nd-item, .nd-veil, .nd-f1, .nd-f2, .nd-sheet-x, .nd-cart, .nd-overlay, .nd-toast, .nd-meter .m-bar i { transition-duration: .01ms !important; transition-delay: 0s !important; }
+      .nd-tag.is-on, .nd-pulse::after, .nd-meter.is-few .m-bar i { animation: none; }
       .nd-loader-bar { animation: none; transform: translateX(-30%); }
     }
   </style>
@@ -354,7 +402,10 @@
     </div>
   </header>
 
-  <p class="nd-tagline"><span data-t="tag1">Panettones artesans de Sicília.</span><br><span data-t="tag2">Unitats limitades.</span></p>
+  <div class="nd-top" id="nd-top">
+    <p class="nd-kicker" data-t="tag1">Panettones artesans de Sicília</p>
+    <p class="nd-banner" id="nd-banner" aria-live="polite"><span class="nd-pulse" aria-hidden="true"></span><b data-t="limited">Edició limitada</b><span class="bn-sep" aria-hidden="true"></span><span id="nd-banner-txt"></span></p>
+  </div>
 
   <main class="nd-stage" id="nd-stage" aria-labelledby="nd-h1">
     <h1 id="nd-h1" class="sr-only" data-t="h1">Especial Nadal: panettones artesans de Sicília</h1>
@@ -362,32 +413,49 @@
       <img class="nd-wall-sharp" id="nd-wall-sharp" alt="" decoding="async" fetchpriority="high">
       <img class="nd-wall-soft" id="nd-wall-soft" alt="" decoding="async">
     </div>
-    <div class="nd-glow" aria-hidden="true"></div>
+    <div class="nd-veil" aria-hidden="true"></div>
+    <div id="nd-tags" aria-hidden="true"></div>
     <div id="nd-items" role="list"></div>
-    <section class="nd-info" id="nd-info" aria-live="polite">
-      <p class="i-kicker" data-t="kicker">Panettone artesà de Sicília</p>
-      <h2 id="nd-info-name"></h2>
-      <p class="i-tag" id="nd-info-tag"></p>
-      <p class="i-meta"><span class="i-price" id="nd-info-price"></span><span class="nd-stock" id="nd-info-stock"></span></p>
-      <button type="button" class="i-flip" id="nd-info-flip" data-t="flipHint">Gira'l per veure'n els detalls</button>
+
+    <section class="nd-sheet" id="nd-sheet" role="dialog" aria-labelledby="nd-s-name" aria-hidden="true">
+      <div class="nd-f1">
+        <div class="nd-f1-in">
+          <p class="s-kicker"><span class="nd-pulse" aria-hidden="true"></span><span data-t="limited">Edició limitada</span></p>
+          <div class="s-head">
+            <div>
+              <h2 id="nd-s-name"></h2>
+              <p class="s-sub" data-t="kicker">Panettone artesà de Sicília</p>
+            </div>
+            <p class="s-price" id="nd-s-price"></p>
+          </div>
+          <p class="s-tag" id="nd-s-tag"></p>
+          <div class="nd-meter" id="nd-meter"><b class="m-big" id="nd-m-r"></b><div class="m-bar"><i id="nd-m-fill"></i></div><span class="m-small" id="nd-m-l"></span></div>
+          <span class="s-gap"></span>
+          <button type="button" class="nd-btn" id="nd-add"></button>
+        </div>
+        <div class="nd-f2">
+          <div class="nd-f2-in">
+            <p class="s-desc" id="nd-s-desc"></p>
+            <dl class="s-rows">
+              <div><dt data-t="allergens">Al·lèrgens</dt><dd id="nd-s-all"></dd></div>
+              <div><dt data-t="delivery">Entrega</dt><dd id="nd-s-dlv"></dd></div>
+              <div class="s-row-origin"><dt data-t="origin">Origen</dt><dd data-t="originV">Sicília, elaboració artesana</dd></div>
+            </dl>
+            <p class="s-pay" data-t="pay">Pagament amb targeta, Bizum o en efectiu a l'entrega. Només repartim a Matadepera.</p>
+          </div>
+          <div class="nd-f2-cover" aria-hidden="true"><small>micsas.ff</small><strong id="nd-s-cover"></strong><span data-t="limited">Edició limitada</span></div>
+        </div>
+      </div>
+      <button type="button" class="nd-sheet-x" id="nd-sheet-x" data-t-aria="close" aria-label="Tancar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
     </section>
-    <div class="nd-actions" id="nd-actions">
-      <button type="button" class="nd-btn" id="nd-add"></button>
-    </div>
-    <div class="nd-dots" id="nd-dots" aria-hidden="true"></div>
   </main>
 
   <nav class="nd-list" id="nd-list" aria-label="Panettones" tabindex="-1"></nav>
+  <p class="nd-hint" id="nd-hint"><span data-t="hint">Toca un panettone per descobrir-lo</span></p>
 
-  <div class="nd-bar" id="nd-bar">
-    <div class="nd-bar-info" aria-live="polite"><p id="nd-bar-meta"></p><h3 id="nd-bar-name"></h3></div>
-    <div class="nd-bar-btns">
-      <button type="button" class="nd-btn nd-btn-ghost" id="nd-bar-a"></button>
-      <button type="button" class="nd-btn" id="nd-bar-b"></button>
-    </div>
-  </div>
-
-  <div class="nd-cursor" id="nd-cursor" aria-hidden="true" data-t="flip">Gira</div>
+  <div class="nd-cursor" id="nd-cursor" aria-hidden="true" data-t="see">Obre</div>
   <div class="nd-loader" aria-hidden="true"><div class="nd-loader-track"><div class="nd-loader-bar"></div></div></div>
   <div class="nd-toast" id="nd-toast" role="status" aria-live="polite"><span id="nd-toast-text"></span><button type="button" id="nd-toast-btn" data-t="viewCart">Veure cistella</button></div>
 
@@ -420,42 +488,58 @@
     var TX = {
       ca: {
         skip: 'Salta a la llista de panettones', back: 'Tornar', backAria: 'Tornar a la carta', brand: 'Especial Nadal',
-        tag1: 'Panettones artesans de Sicília.', tag2: 'Unitats limitades.', h1: 'Especial Nadal: panettones artesans de Sicília',
-        kicker: 'Panettone artesà de Sicília', panettone: 'Panettone', details: 'Detalls', add: 'Afegir', addCart: 'Afegir a la cistella',
-        added: 'Afegit', flip: 'Gira', flipHint: "Gira'l per veure'n els detalls", flipBack: 'Torna a la portada', close: 'Tancar', backBtn: 'Tornar',
-        soon: 'Aviat a la venda', soldout: 'Esgotat', cart: 'Cistella', cartTitle: 'La teva cistella',
+        tag1: 'Panettones artesans de Sicília', h1: 'Especial Nadal: panettones artesans de Sicília', limited: 'Edició limitada',
+        kicker: 'Panettone artesà de Sicília', panettone: 'Panettone', add: 'Afegir', addCart: 'Afegir a la cistella',
+        added: 'Afegit', see: 'Obre', close: 'Tancar', hint: 'Toca un panettone per descobrir-lo',
+        soon: 'Aviat a la venda', soonShort: 'Aviat', soldout: 'Esgotat', cart: 'Cistella', cartTitle: 'La teva cistella',
         cartEmpty: 'Encara no hi has posat cap panettone.', when: 'Quan el vols?',
         optPase: 'Divendres o diumenge', optPaseSub: "Te'l portem amb la teva comanda de pizzes (o sol). Tries el dia i l'hora al pas següent.",
         optDay: "Dia d'entrega de panettones", optDayTbc: "Data per confirmar: t'avisarem per correu quan la tinguem.",
         total: 'Total', continue: 'Continuar', pay: "Pagament amb targeta, Bizum o en efectiu a l'entrega. Només repartim a Matadepera.",
-        viewCart: 'Veure cistella', remove: 'Treure', less: 'Un menys', more: 'Un més', allergens: 'Al·lèrgens', origin: 'Origen',
+        viewCart: 'Veure cistella', less: 'Un menys', more: 'Un més', allergens: 'Al·lèrgens', origin: 'Origen',
         originV: 'Sicília, elaboració artesana', delivery: 'Entrega', deliveryV: 'A casa, a Matadepera', max: 'No en queden més unitats.',
-        unit: 'u.', open: function (n, p) { return n + ', ' + p + '. Obre els detalls.'; },
+        limitedUnits: 'Unitats limitades',
+        open: function (n, p, s) { return n + ', ' + p + (s ? ', ' + s : '') + '. Obre la fitxa.'; },
         left: function (n) { return n === 1 ? 'Queda 1 unitat' : 'Queden ' + n + ' unitats'; },
         leftShort: function (n) { return 'Queden ' + n; },
         few: function (n) { return n === 1 ? 'Només en queda 1!' : 'Només en queden ' + n + '!'; },
+        fewTag: function (n) { return n === 1 ? 'Última!' : 'Últimes ' + n + '!'; },
+        sold: function (s, t) { return 'Venuts ' + s + ' de ' + t; },
+        only: function (t) { return 'Només ' + t + ' unitats'; }, beFirst: 'Sigues dels primers a tastar-lo', reserve: 'Reserva el teu',
+        bannerTotal: function (t) { return 'Només <em>' + t + ' panettones</em> aquest Nadal'; },
+        bannerLeft: function (r, hot) { return hot ? 'Queden només <em class="is-hot">' + r + '</em>' : 'Queden <em>' + r + '</em>'; },
+        bannerSoon: 'Unitats limitades · <em>Aviat a la venda</em>',
+        bannerSold: '<em class="is-hot">Esgotats!</em> Gràcies per fer-ho possible',
         addedToast: function (n) { return '✓ ' + n + ' a la cistella'; },
-        opened: function (n) { return n + ' obert. Tecla Espai per girar-lo, Escape per tornar a la prestatgeria.'; },
+        opened: function (n) { return n + ' obert. Escape per tornar a la prestatgeria.'; },
         closed: 'Tornes a la prestatgeria.'
       },
       es: {
         skip: 'Saltar a la lista de panettones', back: 'Volver', backAria: 'Volver a la carta', brand: 'Especial Navidad',
-        tag1: 'Panettones artesanos de Sicilia.', tag2: 'Unidades limitadas.', h1: 'Especial Navidad: panettones artesanos de Sicilia',
-        kicker: 'Panettone artesano de Sicilia', panettone: 'Panettone', details: 'Detalles', add: 'Añadir', addCart: 'Añadir a la cesta',
-        added: 'Añadido', flip: 'Gira', flipHint: 'Dale la vuelta para ver los detalles', flipBack: 'Volver a la portada', close: 'Cerrar', backBtn: 'Volver',
-        soon: 'Pronto a la venta', soldout: 'Agotado', cart: 'Cesta', cartTitle: 'Tu cesta',
+        tag1: 'Panettones artesanos de Sicilia', h1: 'Especial Navidad: panettones artesanos de Sicilia', limited: 'Edición limitada',
+        kicker: 'Panettone artesano de Sicilia', panettone: 'Panettone', add: 'Añadir', addCart: 'Añadir a la cesta',
+        added: 'Añadido', see: 'Abrir', close: 'Cerrar', hint: 'Toca un panettone para descubrirlo',
+        soon: 'Pronto a la venta', soonShort: 'Pronto', soldout: 'Agotado', cart: 'Cesta', cartTitle: 'Tu cesta',
         cartEmpty: 'Todavía no has añadido ningún panettone.', when: '¿Cuándo lo quieres?',
         optPase: 'Viernes o domingo', optPaseSub: 'Te lo llevamos con tu pedido de pizzas (o solo). Eliges el día y la hora en el siguiente paso.',
         optDay: 'Día de entrega de panettones', optDayTbc: 'Fecha por confirmar: te avisaremos por correo cuando la tengamos.',
         total: 'Total', continue: 'Continuar', pay: 'Pago con tarjeta, Bizum o en efectivo en la entrega. Solo repartimos en Matadepera.',
-        viewCart: 'Ver cesta', remove: 'Quitar', less: 'Uno menos', more: 'Uno más', allergens: 'Alérgenos', origin: 'Origen',
+        viewCart: 'Ver cesta', less: 'Uno menos', more: 'Uno más', allergens: 'Alérgenos', origin: 'Origen',
         originV: 'Sicilia, elaboración artesana', delivery: 'Entrega', deliveryV: 'A domicilio, en Matadepera', max: 'No quedan más unidades.',
-        unit: 'ud.', open: function (n, p) { return n + ', ' + p + '. Abre los detalles.'; },
+        limitedUnits: 'Unidades limitadas',
+        open: function (n, p, s) { return n + ', ' + p + (s ? ', ' + s : '') + '. Abre la ficha.'; },
         left: function (n) { return n === 1 ? 'Queda 1 unidad' : 'Quedan ' + n + ' unidades'; },
         leftShort: function (n) { return 'Quedan ' + n; },
         few: function (n) { return n === 1 ? '¡Solo queda 1!' : '¡Solo quedan ' + n + '!'; },
+        fewTag: function (n) { return n === 1 ? '¡Última!' : '¡Últimas ' + n + '!'; },
+        sold: function (s, t) { return 'Vendidos ' + s + ' de ' + t; },
+        only: function (t) { return 'Solo ' + t + ' unidades'; }, beFirst: 'Sé de los primeros en probarlo', reserve: 'Reserva el tuyo',
+        bannerTotal: function (t) { return 'Solo <em>' + t + ' panettones</em> esta Navidad'; },
+        bannerLeft: function (r, hot) { return hot ? 'Quedan solo <em class="is-hot">' + r + '</em>' : 'Quedan <em>' + r + '</em>'; },
+        bannerSoon: 'Unidades limitadas · <em>Pronto a la venta</em>',
+        bannerSold: '<em class="is-hot">¡Agotados!</em> Gracias por hacerlo posible',
         addedToast: function (n) { return '✓ ' + n + ' en la cesta'; },
-        opened: function (n) { return n + ' abierto. Tecla Espacio para girarlo, Escape para volver a la estantería.'; },
+        opened: function (n) { return n + ' abierto. Escape para volver a la estantería.'; },
         closed: 'Vuelves a la estantería.'
       }
     };
@@ -471,6 +555,7 @@
       doc.querySelectorAll('[data-setlang]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-setlang') === lang)); });
       doc.title = lang === 'es' ? 'Especial Navidad · Panettones artesanos · micsas.ff' : 'Especial Nadal · Panettones artesans · micsas.ff';
       paintAll();
+      if (S.active) layoutSheet();
     }
 
     // ── Corbes: les mateixes que shopify.com/editions ────────────────────
@@ -479,7 +564,7 @@
     // Arrencada lenta (30 % del temps fa el 30 % del camí, accelerant) i una
     // frenada llarga i suau per a la resta: el vol cap al centre.
     var easeFly = function (t) { return t < .3 ? .3 * Math.pow(t / .3, 3) : .3 + .7 * (1 - Math.pow(1 - (t - .3) / .7, 3)); };
-    var D = { fly: 700, lift: 1000, drop: 400, stagger: 75, staggerM: 161, wallIn: 1000, appear: 400, scaleIn: 150 };
+    var D = { fly: 700, lift: 1000, drop: 400, stagger: 75, wallIn: 1000, appear: 400, scaleIn: 150, sheetIn: 160, unfold: 520 };
 
     // ── Motor d'animació: valors amb interpolació o molla, interrompibles ──
     var running = [], rafId = 0, lastT = 0;
@@ -529,89 +614,97 @@
     var SETTLE = { mass: 1, tension: 80, friction: 14 };
 
     // ── Escena ──────────────────────────────────────────────────────────
-    // Fotos de la prestatgeria (Higgsfield): on és el cantell de dalt del
-    // prestatge i on comença/acaba, en fracció de la imatge.
+    // Fotos de la prestatgeria (Higgsfield): on és el cantell de dalt de cada
+    // prestatge (rows), el gruix del prestatge i on comença/acaba, en
+    // fracció de la imatge.
     var WALLS = {
-      shelf: { sharp: 'images/nadal/estanteria', soft: 'images/nadal/estanteria-blur.webp', w: 3840, h: 2160, y: .7009, x0: .0734, x1: .925, posY: .62 },
-      crate: { sharp: 'images/nadal/estanteria-mobil.webp', soft: 'images/nadal/estanteria-mobil-blur.webp', w: 2160, h: 3840, y: .6919, x0: .049, x1: .951, posY: .62 }
+      shelf: { base: 'images/nadal/estanteria', soft: 'images/nadal/estanteria-blur.webp', w: 3840, h: 2160, rows: [.7009], thick: .032, x0: .0734, x1: .925, posY: .62 },
+      duo: { src: 'images/nadal/estanteria-doble.webp', soft: 'images/nadal/estanteria-doble-blur.webp', w: 1520, h: 2688, rows: [.4675, .7355], thick: .022, x0: .034, x1: .962, posY: .5 }
     };
-    var LIFT = .107;   // quant s'aixeca (fracció de la mida de la portada)
-    var LIFT_Z = .051; // i quant s'acosta
-    var LEAN = 15;     // graus que la portada reposa inclinada enrere
+    var MAXCH = 1969;   // alçada del retall més alt (Festuc): la mateixa escala per a tots
+    var LIFT = .085;    // quant s'aixeca (fracció de l'alçada)
+    var LIFT_Z = .05;   // i quant s'acosta
 
     var items = N.items.map(function (p, i) {
       return {
-        p: p, i: i, el: null, wob: null, lift: null, tilt: null, card: null, shadow: null, img: null, pills: null,
-        act: new Val(0), liftY: new Val(0), liftZ: new Val(0), lean: new Val(LEAN), wobX: new Val(0), wobY: new Val(0),
-        flip: new Val(0), shade: new Val(.45), show: new Val(0), crate: new Val(0), hiRes: false, lifted: false
+        p: p, i: i, el: null, wob: null, lift: null, pan: null, shadow: null, img: null, tag: null, slot: null, focus: null,
+        act: new Val(0), liftY: new Val(0), liftZ: new Val(0), wobX: new Val(0), wobY: new Val(0), show: new Val(0), lifted: false
       };
     });
-    var S = {
-      mode: 'shelf', phase: 'loading', active: null, hover: null, flipped: false, crateIdx: 0,
-      layout: null, lastFocus: null, openedByKey: false
-    };
+    var S = { mode: 'shelf', phase: 'loading', active: null, hover: null, layout: null, lastFocus: null, openedByKey: false, timers: [] };
+    function later(fn, ms) { var t = setTimeout(fn, ms); S.timers.push(t); return t; }
+    function clearLater() { S.timers.forEach(clearTimeout); S.timers = []; }
 
     function buildItems() {
-      var wrap = $('nd-items');
-      wrap.innerHTML = '';
+      var wrap = $('nd-items'), tags = $('nd-tags');
+      wrap.innerHTML = ''; tags.innerHTML = '';
       items.forEach(function (it) {
+        var p = it.p, sw = Math.round(440 * p.cw / p.ch), bw = Math.round(1000 * p.cw / p.ch);
         var el = doc.createElement('div');
         el.className = 'nd-item';
         el.setAttribute('role', 'listitem');
-        el.style.setProperty('--c', it.p.color);
         el.innerHTML =
           '<div class="nd-shadow"></div>' +
-          '<div class="nd-wob"><div class="nd-lift"><div class="nd-tilt">' +
-            '<button type="button" class="nd-card" data-id="' + it.p.id + '">' +
-              '<span class="nd-face nd-front"><img alt="" draggable="false" decoding="async"><span class="nd-tab" aria-hidden="true"></span>' +
-                '<svg class="nd-stamp" viewBox="0 0 400 150" aria-hidden="true"><g fill="none" stroke="#E23F2E"><rect x="6" y="6" width="388" height="138" rx="16" stroke-width="7"/><rect x="20" y="20" width="360" height="110" rx="9" stroke-width="3"/></g>' +
-                '<text x="200" y="98" text-anchor="middle" fill="#E23F2E" font-family="League Spartan, sans-serif" font-weight="900" font-size="64" class="nd-stamp-t"></text></svg>' +
-              '</span>' +
-              '<span class="nd-face nd-back" aria-hidden="true"></span>' +
+          '<div class="nd-wob"><div class="nd-lift">' +
+            '<button type="button" class="nd-pan" data-id="' + p.id + '">' +
+              '<img alt="" draggable="false" decoding="async" srcset="' + p.cut + '-sm.webp ' + sw + 'w, ' + p.cut + '.webp ' + bw + 'w" sizes="300px" src="' + p.cut + '-sm.webp">' +
+              '<svg class="nd-stamp" viewBox="0 0 400 150" aria-hidden="true"><g fill="none" stroke="#E23F2E"><rect x="6" y="6" width="388" height="138" rx="16" stroke-width="7"/><rect x="20" y="20" width="360" height="110" rx="9" stroke-width="3"/></g>' +
+              '<text x="200" y="98" text-anchor="middle" fill="#E23F2E" font-family="League Spartan, sans-serif" font-weight="900" font-size="64" class="nd-stamp-t"></text></svg>' +
             '</button>' +
-            '<div class="nd-pills"><button type="button" class="nd-pill" data-act="details"></button><button type="button" class="nd-pill" data-act="add"></button></div>' +
-          '</div></div></div>';
+          '</div></div>';
         wrap.appendChild(el);
-        it.el = el;
+        var tag = doc.createElement('div');
+        tag.className = 'nd-tag';
+        tag.style.setProperty('--d', (-it.i * 1.3) + 's');
+        tag.innerHTML = '<span class="t-str"></span><span class="t-card"><span class="t-price"></span><span class="t-stock"></span></span>';
+        tags.appendChild(tag);
+        it.el = el; it.tag = tag;
         it.shadow = el.querySelector('.nd-shadow');
         it.wob = el.querySelector('.nd-wob');
         it.lift = el.querySelector('.nd-lift');
-        it.tilt = el.querySelector('.nd-tilt');
-        it.card = el.querySelector('.nd-card');
-        it.img = el.querySelector('.nd-front img');
-        it.back = el.querySelector('.nd-back');
-        it.pills = el.querySelector('.nd-pills');
-        it.img.src = it.p.img + '-600.webp';
+        it.pan = el.querySelector('.nd-pan');
+        it.img = el.querySelector('.nd-pan img');
       });
     }
 
     // ── Geometria ──────────────────────────────────────────────────────
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
     function computeLayout() {
       var vw = innerWidth, vh = innerHeight;
-      var mode = (vw < 768 || vw / vh < .9) ? 'crate' : 'shelf';
+      var mode = (vw >= 768 && vw / vh >= .9) ? 'shelf' : 'duo';
       var W = WALLS[mode];
       // Mateix càlcul que object-fit: cover + object-position de la paret.
       var sc = Math.max(vw / W.w, vh / W.h), dw = W.w * sc, dh = W.h * sc;
       var ox = (vw - dw) / 2, oy = (vh - dh) * W.posY;
-      var shelfY = oy + W.y * dh;
-      var sx0 = Math.max(0, ox + W.x0 * dw), sx1 = Math.min(vw, ox + W.x1 * dw);
-      var L = { vw: vw, vh: vh, mode: mode, shelfY: shelfY, slots: [], persp: 2.84 * vh };
-      var headerH = mode === 'crate' ? 58 : 64;
+      var rows = W.rows.map(function (r) { return oy + r * dh; });
+      var thick = W.thick * dh;
+      var span = Math.min(vw, ox + W.x1 * dw) - Math.max(0, ox + W.x0 * dw);
+      var headerH = mode === 'duo' ? 58 : 64;
+      var topEl = $('nd-top'), topB = topEl.offsetHeight ? topEl.getBoundingClientRect().top + topEl.offsetHeight : headerH + 80;
+      var L = { vw: vw, vh: vh, mode: mode, rows: rows, thick: thick, headerH: headerH, slots: [], persp: mode === 'duo' ? 1400 : 2.84 * vh };
+      var place = function (list, rowY, H, gapU) {
+        var k = H / MAXCH, ws = list.map(function (it) { return it.p.cw * k; }), gap = gapU * H;
+        var tot = ws.reduce(function (a, b) { return a + b; }, 0) + gap * (list.length - 1), x = vw / 2 - tot / 2;
+        list.forEach(function (it, j) {
+          var h = it.p.ch * k;
+          L.slots[it.i] = { x: x, y: rowY + thick * .35 - h, w: ws[j], h: h, row: rowY };
+          x += ws[j] + gap;
+        });
+      };
       if (mode === 'shelf') {
-        var n = items.length;
-        var size = Math.min(.21 * vw, .3 * vh, (sx1 - sx0) / (n + (n - 1) * .16 + .6));
-        // Que la portada no xoqui amb el text de dalt a pantalles baixes.
-        size = Math.min(size, shelfY - headerH - 70);
-        var gap = size * .16, total = n * size + (n - 1) * gap, x = vw / 2 - total / 2;
-        for (var i = 0; i < n; i++) L.slots.push({ x: x + i * (size + gap), y: shelfY - size, s: size });
-        var as = Math.min(.5 * vh, .36 * vw, vh - headerH - 150);
-        L.focus = { cx: vw / 2, cy: Math.max(headerH + as / 2 + 12, .47 * vh), s: as };
-        L.actionsTop = L.focus.cy + as / 2 + 18;
+        var sumU = items.reduce(function (a, it) { return a + it.p.cw; }, 0) / MAXCH;
+        var H = Math.min(.34 * vh, rows[0] - topB - 26, (span - 40) / (sumU + .3 * (items.length - 1) + .3));
+        H = Math.max(90, H);
+        L.tag = { w: Math.round(clamp(H * .3, 66, 96)), str: 12 };
+        place(items, rows[0], H, .3);
       } else {
-        var cw = Math.min(.74 * vw, .4 * vh, 340);
-        for (var j = 0; j < items.length; j++) L.slots.push({ x: vw / 2 - cw / 2, y: shelfY - cw, s: cw });
-        var fs = Math.min(.9 * vw, vh - headerH - 150, 460);
-        L.focus = { cx: vw / 2, cy: headerH + 12 + fs / 2, s: fs };
+        L.tag = { w: Math.round(clamp(vw * .15, 54, 74)), str: 5 };
+        var tagH = L.tag.str + L.tag.w * .64;
+        var rowU = Math.max(items[0].p.cw + items[1].p.cw, items[2].p.cw + items[3].p.cw) / MAXCH;
+        var H2 = Math.min(rows[0] - topB - 12, rows[1] - rows[0] - thick - tagH - 4, (Math.min(vw, span) - 28) / (rowU + .45), 300);
+        H2 = Math.max(80, H2);
+        place(items.slice(0, 2), rows[0], H2, .24);
+        place(items.slice(2, 4), rows[1], H2, .24);
       }
       return L;
     }
@@ -620,81 +713,61 @@
       var L = S.layout = computeLayout();
       var modeChanged = S.mode !== L.mode;
       S.mode = L.mode;
-      body.classList.toggle('is-crate', L.mode === 'crate');
+      body.classList.toggle('is-duo', L.mode === 'duo');
       var W = WALLS[L.mode];
       var sharp = $('nd-wall-sharp'), soft = $('nd-wall-soft');
       if (L.mode === 'shelf') {
-        sharp.srcset = W.sharp + '-1600.webp 1600w, ' + W.sharp + '.webp 2560w';
+        sharp.srcset = W.base + '-1600.webp 1600w, ' + W.base + '.webp 2560w';
         sharp.sizes = '100vw';
-        if (!sharp.getAttribute('src') || modeChanged) sharp.src = W.sharp + '-1600.webp';
+        if (!sharp.getAttribute('src') || modeChanged) sharp.src = W.base + '-1600.webp';
       } else {
         sharp.removeAttribute('srcset');
-        if (sharp.getAttribute('src') !== W.sharp) sharp.src = W.sharp;
+        if (sharp.getAttribute('src') !== W.src) sharp.src = W.src;
       }
+      sharp.style.objectPosition = soft.style.objectPosition = '50% ' + (W.posY * 100) + '%';
       if (soft.getAttribute('src') !== W.soft) soft.src = W.soft;
+      // Mode diferent (girar el mòbil, finestra estreta): es recomputa la
+      // mida (ja es fa a computeLayout: la frase de dalt canvia de mida).
+      if (modeChanged) { S.layout = L = computeLayout(); }
       items.forEach(function (it, i) {
-        var sl = L.slots[i];
+        var sl = it.slot = L.slots[i];
         it.el.style.left = sl.x + 'px';
         it.el.style.top = sl.y + 'px';
-        it.el.style.width = it.el.style.height = sl.s + 'px';
-        it.el.style.perspective = (L.mode === 'crate' ? 1100 : L.persp) + 'px';
-        it.el.style.perspectiveOrigin = L.mode === 'crate' ? '50% -60%' : '50% 50%';
-        it.back.style.setProperty('--bf', Math.max(8, sl.s * .038).toFixed(2) + 'px');
+        it.el.style.width = sl.w + 'px';
+        it.el.style.height = sl.h + 'px';
+        it.el.style.perspective = L.persp + 'px';
+        if (S.active !== it) it.img.sizes = Math.round(sl.w) + 'px';
+        var t = it.tag;
+        t.style.width = L.tag.w + 'px';
+        t.style.fontSize = (L.tag.w * .145).toFixed(2) + 'px';
+        t.style.left = (sl.x + sl.w / 2 - L.tag.w / 2) + 'px';
+        t.style.top = (sl.row + L.thick * .92) + 'px';
+        t.querySelector('.t-str').style.height = L.tag.str + 'px';
       });
-      $('nd-actions').style.top = (L.actionsTop || 0) + 'px';
-      if (modeChanged && S.phase !== 'loading') {
-        // Canvi entre prestatgeria i pila: es tanca el que hi hagi obert.
-        if (S.active) closeActive(true);
-        items.forEach(function (it) { restPose(it, true); });
-      }
+      if (modeChanged && S.phase !== 'loading' && S.active) closeActive(true);
+      if (S.active) layoutSheet();
       render();
-    }
-
-    // Postura de repòs: a la prestatgeria, inclinada; a la pila, segons el lloc.
-    function restPose(it, instant) {
-      if (S.mode === 'shelf') {
-        if (instant) { it.liftY.set(0); it.liftZ.set(0); it.lean.set(LEAN); it.shade.set(.45); it.crate.set(0); }
-      } else {
-        var k = it.i - S.crateIdx;
-        if (instant) { it.liftY.set(0); it.liftZ.set(0); it.lean.set(0); it.shade.set(0); it.crate.set(k); }
-        else it.crate.to(k, 650, easeOutQuart);
-      }
     }
 
     // ── Pintar ─────────────────────────────────────────────────────────
     function render() {
       var L = S.layout; if (!L) return;
-      items.forEach(function (it, i) {
-        var sl = L.slots[i], s = sl.s;
-        var a = it.act.v;
-        var tx = 0, ty = 0, sc = 1;
-        if (a > 0.0001) {
-          var fs = L.focus.s / s;
-          var liftPx = it.liftY.v * LIFT * s * (1 + (fs - 1) * a);
-          var cx0 = sl.x + s / 2, cy0 = sl.y + s / 2;
-          tx = (L.focus.cx - cx0) * a;
-          ty = (L.focus.cy + liftPx - cy0) * a;
+      items.forEach(function (it) {
+        var sl = it.slot, a = it.act.v, tx = 0, ty = 0, sc = 1;
+        if (a > 0.0001 && it.focus) {
+          var f = it.focus, fs = f.h / sl.h;
+          tx = (f.cx - (sl.x + sl.w / 2)) * a;
+          ty = (f.cy - (sl.y + sl.h / 2)) * a;
           sc = 1 + (fs - 1) * a;
         }
         var show = it.show.v;
-        it.el.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + (sc * (.92 + .08 * show)).toFixed(4) + ')';
+        it.el.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + (sc * (.9 + .1 * show)).toFixed(4) + ')';
         it.el.style.opacity = show >= .999 ? '' : show.toFixed(3);
-        it.el.style.zIndex = a > 0.001 ? 30 : (L.mode === 'crate' ? 10 - Math.round(it.crate.v) : (it.lifted ? 6 : 5));
+        it.el.style.zIndex = a > 0.001 ? 30 : (it.lifted ? 6 : 5);
         it.wob.style.transform = 'rotateX(' + it.wobX.v.toFixed(3) + 'deg) rotateY(' + it.wobY.v.toFixed(3) + 'deg)';
-        if (L.mode === 'crate') {
-          var k = it.crate.v, ka = Math.max(0, k), kb = Math.min(0, k);
-          // Darrere (k>0): més amunt i més lluny. Davant (k<0): abatuda cap a tu.
-          var cy = -ka * .085 * s + (-kb) * .04 * s, cz = -ka * .16 * s + (-kb) * .03 * s;
-          var fold = Math.max(-1, kb) * 60 + (kb < -1 ? (kb + 1) * 5 : 0);
-          it.lift.style.transform = 'translate3d(0,' + (cy - it.liftY.v * LIFT * s).toFixed(2) + 'px,' + cz.toFixed(2) + 'px)';
-          it.tilt.style.transform = 'rotateX(' + (fold * (1 - a)).toFixed(3) + 'deg)';
-          it.shadow.style.opacity = Math.max(0, .4 - Math.abs(k) * .4) * (1 - a);
-        } else {
-          it.lift.style.transform = 'translate3d(0,' + (-it.liftY.v * LIFT * s).toFixed(2) + 'px,' + (it.liftZ.v * LIFT_Z * s).toFixed(2) + 'px)';
-          it.tilt.style.transform = 'rotateX(' + it.lean.v.toFixed(3) + 'deg)';
-          it.shadow.style.opacity = (it.shade.v * (1 - a)).toFixed(3);
-        }
-        it.card.style.transform = 'rotateY(' + it.flip.v.toFixed(3) + 'deg)';
+        it.lift.style.transform = 'translate3d(0,' + (-it.liftY.v * LIFT * sl.h * (1 - a * .6)).toFixed(2) + 'px,' + (it.liftZ.v * LIFT_Z * sl.h).toFixed(2) + 'px)';
+        it.shadow.style.opacity = (.62 * (1 - .65 * it.liftY.v) * (1 - a)).toFixed(3);
+        it.shadow.style.transform = 'scale(' + (1 - .22 * it.liftY.v).toFixed(3) + ')';
       });
     }
 
@@ -703,169 +776,199 @@
       var d = dur == null ? D.lift : dur;
       it.liftY.to(1, d, easeOutQuart);
       it.liftZ.to(1, d, easeOutQuart);
-      it.lean.to(0, d, easeOutQuart);
-      it.shade.to(0, d * .45, easeOutQuart);
     }
     function drop(it) {
       it.liftY.to(0, D.drop, easeInQuart);
       it.liftZ.to(0, D.drop, easeInQuart);
-      it.lean.to(LEAN, D.drop, easeInQuart, D.drop * .6);
-      it.shade.to(.45, D.drop, easeInQuart);
       it.wobX.to(0, D.drop * 2, easeOutQuart);
       it.wobY.to(0, D.drop * 2, easeOutQuart);
     }
     function setHover(it) {
-      if (S.mode !== 'shelf' || S.phase !== 'idle') return;
+      if (S.phase !== 'idle') return;
       if (S.hover === it) return;
-      if (S.hover) { S.hover.lifted = false; S.hover.el.classList.remove('is-lifted'); drop(S.hover); }
+      if (S.hover) { S.hover.lifted = false; S.hover.tag.classList.remove('is-hot'); drop(S.hover); }
       S.hover = it;
-      if (it) {
-        it.lifted = true; it.el.classList.add('is-lifted'); lift(it); upgradeImage(it);
-      }
+      if (it) { it.lifted = true; it.tag.classList.add('is-hot'); lift(it); }
       $('nd-list').querySelectorAll('.nd-li').forEach(function (b) { b.classList.toggle('is-current', !!it && b.dataset.id === it.p.id); });
     }
     function tiltTo(it, ev, open) {
-      var r = it.card.getBoundingClientRect();
+      var r = it.pan.getBoundingClientRect();
       if (!r.width) return;
-      var u = (ev.clientX - r.left) / r.width, v = (ev.clientY - r.top) / r.height;
-      u = Math.min(1, Math.max(0, u)); v = Math.min(1, Math.max(0, v));
-      if (S.flipped && open) u = 1 - u;
-      // Graus: obert ±8,6° / ±6,7°; a la prestatgeria ±5,1° / ±4°.
-      var ry = (open ? 180 / 21 : 180 / 35) * (u - .5) * 2;
-      var rx = (open ? 180 / 27 : 180 / 45) * (v - .5) * 2 * (S.flipped && open ? -1 : 1);
+      var u = clamp((ev.clientX - r.left) / r.width, 0, 1), v = clamp((ev.clientY - r.top) / r.height, 0, 1);
+      // Un objecte de debò: menys inclinació que una portada plana.
+      var ry = (open ? 7 : 4.5) * (u - .5) * 2;
+      var rx = (open ? 5 : 3.5) * (v - .5) * 2;
       var cfg = open ? WOBBLE_OPEN : WOBBLE;
       it.wobY.spring(ry, cfg);
       it.wobX.spring(rx, cfg);
     }
 
-    // ── Obrir / girar / tancar (animateToActive, animateFlip, resetToInactive) ──
+    // ── La fitxa plegada: on va i quin espai deixa al panettone ─────────
+    function layoutSheet() {
+      var it = S.active, L = S.layout; if (!it || !L) return;
+      var sheet = $('nd-sheet'), f1 = sheet.querySelector('.nd-f1'), f1in = sheet.querySelector('.nd-f1-in'), f2 = sheet.querySelector('.nd-f2'), f2in = sheet.querySelector('.nd-f2-in');
+      var vw = L.vw, vh = L.vh, p = it.p, ratio = p.cw / p.ch;
+      var v = L.mode === 'duo';
+      sheet.classList.toggle('is-v', v);
+      f1.style.height = ''; f1in.style.height = ''; f2.style.height = '';
+      if (!v) {
+        var pw = Math.round(clamp(vw * .2, 240, 300));
+        sheet.style.width = (2 * pw) + 'px';
+        f1.style.width = pw + 'px';
+        var maxH = vh - L.headerH - 40;
+        var hh = Math.min(maxH, Math.max(f1in.scrollHeight, f2in.scrollHeight, 330));
+        f1.style.height = hh + 'px';
+        var gapX = clamp(vw * .045, 28, 72);
+        var fh = Math.min(.64 * vh, vh - L.headerH - 80, .42 * vw) * (p.ch / MAXCH);
+        var fw = fh * ratio;
+        var room = vw - 48 - gapX - 2 * pw;
+        if (fw > room) { fw = Math.max(140, room); fh = fw / ratio; }
+        var x0 = Math.max(24, (vw - (fw + gapX + 2 * pw)) / 2);
+        var cy = L.headerH + (vh - L.headerH) / 2 + 4;
+        it.focus = { cx: x0 + fw / 2, cy: cy, h: fh };
+        sheet.style.left = (x0 + fw + gapX) + 'px';
+        sheet.style.top = clamp(cy - hh / 2, L.headerH + 12, vh - hh - 16) + 'px';
+        it.img.sizes = Math.round(fw) + 'px';
+      } else {
+        var sw = Math.round(Math.min(vw - 24, 440));
+        sheet.style.width = sw + 'px';
+        f1.style.width = sw + 'px';
+        // Cada plec amb la seva alçada (el de sota es mesura amb alçada 0).
+        f2.style.height = '0px';
+        var h1 = f1in.scrollHeight, h2 = f2in.scrollHeight;
+        var top0 = L.headerH + 6, bottomPad = 14;
+        var avail = vh - top0 - h1 - h2 - 14 - bottomPad;
+        if (avail < 120) { var k = Math.max(.5, (vh - top0 - 120 - 14 - bottomPad) / (h1 + h2)); h1 *= k; h2 *= k; avail = 120; }
+        f1.style.height = h1 + 'px';
+        f2.style.height = h2 + 'px';
+        var fh2 = Math.min(avail, .62 * vw / ratio, 330);
+        var cx = vw / 2, cy2 = top0 + fh2 / 2;
+        it.focus = { cx: cx, cy: cy2, h: fh2 };
+        sheet.style.left = ((vw - sw) / 2) + 'px';
+        sheet.style.top = (top0 + fh2 + 14) + 'px';
+        it.img.sizes = Math.round(fh2 * ratio) + 'px';
+      }
+      render();
+    }
+
+    // ── Obrir / tancar ─────────────────────────────────────────────────
     function openItem(it, byKey) {
-      if (!it || S.phase === 'loading' || S.phase === 'intro') return;
+      if (!it || S.phase === 'loading' || S.phase === 'intro' || S.phase === 'closing') return;
       if (S.active === it) return;
       if (S.active) { closeActive(false, function () { openItem(it, byKey); }); return; }
-      if (S.hover && S.hover !== it) { S.hover.lifted = false; S.hover.el.classList.remove('is-lifted'); drop(S.hover); }
+      clearLater();
+      if (S.hover && S.hover !== it) { S.hover.lifted = false; S.hover.tag.classList.remove('is-hot'); drop(S.hover); }
       S.hover = null;
-      S.active = it; S.flipped = false; S.openedByKey = !!byKey;
+      $('nd-cursor').classList.remove('is-on');
+      S.active = it; S.openedByKey = !!byKey;
       S.lastFocus = doc.activeElement;
       S.phase = 'opening';
-      upgradeImage(it);
-      it.el.classList.remove('is-lifted');
+      paintSheet();
+      layoutSheet();
       it.lifted = true;
       lift(it);
-      it.flip.set(0);
       it.act.to(1, D.fly, easeFly);
-      items.forEach(function (o) { o.el.classList.toggle('is-blur', o !== it); });
+      items.forEach(function (o) { o.el.classList.toggle('is-blur', o !== it); o.tag.classList.toggle('is-blur', o !== it); o.tag.classList.remove('is-hot'); });
+      it.tag.classList.add('is-gone');
       body.classList.add('is-focus', 'is-open');
-      paintActive();
+      var sheet = $('nd-sheet');
+      sheet.setAttribute('aria-hidden', 'false');
+      if (reduce.matches) {
+        sheet.classList.add('is-on', 'is-unfold');
+      } else {
+        later(function () { sheet.classList.add('is-on'); }, D.sheetIn);
+        later(function () { sheet.classList.add('is-unfold'); }, D.unfold);
+      }
       announce(TX[lang].opened(N.t(it.p.name)));
-      setTimeout(function () {
+      later(function () {
         if (S.active !== it) return;
         S.phase = 'open';
-        if (S.mode === 'crate') setTimeout(function () { if (S.active === it && !S.flipped && S.autoFlip) { S.autoFlip = false; flip(); } }, 120);
-        if (byKey) (S.mode === 'crate' ? $('nd-bar-b') : $('nd-add')).focus({ preventScroll: true });
-      }, D.fly);
-    }
-    function flip() {
-      var it = S.active; if (!it || S.phase !== 'open') return;
-      S.flipped = !S.flipped;
-      it.flip.to(S.flipped ? 180 : 0, D.fly, easeFly);
-      it.back.setAttribute('aria-hidden', String(!S.flipped));
-      paintActive();
+        paintMeter(true);
+        if (byKey) $('nd-add').focus({ preventScroll: true });
+      }, reduce.matches ? 0 : D.unfold + 300);
     }
     function closeActive(instant, then) {
       var it = S.active; if (!it) { if (then) then(); return; }
+      clearLater();
       S.phase = 'closing';
-      body.classList.remove('is-focus', 'is-open');
-      items.forEach(function (o) { o.el.classList.remove('is-blur'); });
+      var sheet = $('nd-sheet');
       $('nd-cursor').classList.remove('is-on');
-      it.back.setAttribute('aria-hidden', 'true');
       announce(T('closed'));
       var done = function () {
         it.lifted = false;
-        S.active = null; S.flipped = false; S.phase = 'idle';
-        if (S.mode === 'crate') restPose(it, false);
+        S.active = null; S.phase = 'idle';
+        it.img.sizes = Math.round(it.slot.w) + 'px';
         if (then) then();
         else if (S.lastFocus && doc.contains(S.lastFocus) && S.openedByKey) S.lastFocus.focus({ preventScroll: true });
-        paintBar();
+      };
+      var back = function () {
+        body.classList.remove('is-focus', 'is-open');
+        items.forEach(function (o) { o.el.classList.remove('is-blur'); o.tag.classList.remove('is-blur'); });
+        it.tag.classList.remove('is-gone');
+        sheet.setAttribute('aria-hidden', 'true');
       };
       if (instant || reduce.matches) {
-        it.act.set(0); it.flip.set(0); it.wobX.set(0); it.wobY.set(0);
-        if (S.mode === 'shelf') { it.liftY.set(0); it.liftZ.set(0); it.lean.set(LEAN); it.shade.set(.45); } else { it.liftY.set(0); it.liftZ.set(0); }
+        sheet.classList.remove('is-unfold', 'is-on');
+        back();
+        it.act.set(0); it.wobX.set(0); it.wobY.set(0); it.liftY.set(0); it.liftZ.set(0);
+        paintMeter(false);
         done(); return;
       }
-      it.liftY.spring(.75, SETTLE);
-      it.liftZ.spring(0, SETTLE);
-      it.wobX.to(0, D.fly, easeFly); it.wobY.to(0, D.fly, easeFly);
-      it.flip.to(0, D.fly, easeFly);
-      it.act.to(0, D.fly, easeFly);
-      setTimeout(function () {
-        if (S.mode === 'shelf') drop(it); else { it.liftY.to(0, D.drop, easeInQuart); it.liftZ.to(0, D.drop, easeInQuart); }
-      }, D.fly);
-      setTimeout(done, D.fly + 20);
-    }
-
-    // Foto gran (1200 px) quan la portada es fa gran.
-    function upgradeImage(it) {
-      if (it.hiRes) return;
-      it.hiRes = true;
-      var big = new Image();
-      big.decoding = 'async';
-      big.onload = function () { it.img.src = big.src; };
-      big.src = it.p.img + '.webp';
-    }
-
-    // ── Pila del mòbil ─────────────────────────────────────────────────
-    function crateGo(idx, fromSwipe) {
-      idx = Math.max(0, Math.min(items.length - 1, idx));
-      if (idx === S.crateIdx) return;
-      S.crateIdx = idx;
-      items.forEach(function (it) { it.crate.to(it.i - idx, 650, easeOutQuart); });
-      upgradeImage(items[idx]);
-      paintBar();
+      // Primer es plega la fitxa, després el panettone torna volant al seu lloc.
+      sheet.classList.remove('is-unfold');
+      later(function () { sheet.classList.remove('is-on'); }, 300);
+      later(function () {
+        back();
+        it.liftY.spring(.75, SETTLE);
+        it.liftZ.spring(0, SETTLE);
+        it.wobX.to(0, D.fly, easeFly); it.wobY.to(0, D.fly, easeFly);
+        it.act.to(0, D.fly, easeFly);
+      }, 260);
+      later(function () { drop(it); paintMeter(false); }, 260 + D.fly);
+      later(done, 260 + D.fly + 20);
     }
 
     // ── Textos que depenen del producte i de l'estoc ───────────────────
     function stockText(id, short) {
       var st = N.status(id), r = N.remaining(id);
-      if (!N.loaded && !N.failed) return { t: '', cls: '' };
-      if (st === 'soon') return { t: T('soon'), cls: '' };
+      if (!N.loaded) return { t: '', cls: '' };
+      if (st === 'soon') return { t: short ? T('soonShort') : T('soon'), cls: '' };
       if (st === 'soldout') return { t: T('soldout'), cls: 'is-soldout' };
       if (st === 'few') return { t: TX[lang].few(r), cls: 'is-few' };
       return { t: short ? TX[lang].leftShort(r) : TX[lang].left(r), cls: '' };
     }
     function canBuy(id) { var st = N.status(id); return st === 'ok' || st === 'few'; }
-    function addLabel(id, long) {
+    function addLabel(id) {
       var st = N.status(id);
       if (st === 'soldout') return T('soldout');
       if (st === 'soon') return T('soon');
-      return (long ? T('addCart') : T('add')) + ' · ' + N.fmtPrice(N.price(id));
-    }
-    function backHtml(it) {
-      var p = it.p, st = stockText(p.id);
-      var date = N.deliveryDate ? N.fmtDate(N.deliveryDate) : null;
-      return '<span class="b-kicker">' + T('kicker') + '</span>' +
-        '<span class="b-name">' + esc(N.t(p.name)) + '</span>' +
-        '<span class="b-desc">' + esc(N.t(p.desc)) + '</span>' +
-        '<span class="b-row"><b>' + T('allergens') + '</b><span>' + esc(N.t(p.allergens)) + '</span></span>' +
-        '<span class="b-row"><b>' + T('delivery') + '</b><span>' + T('deliveryV') + (date ? ' · ' + esc(date) : '') + '</span></span>' +
-        '<span class="b-foot"><span class="b-price">' + N.fmtPrice(N.price(p.id)) + '</span><span class="b-stock ' + st.cls + '">' + esc(st.t) + '</span></span>';
+      return T('addCart') + ' · ' + N.fmtPrice(N.price(id));
     }
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
     function paintItems() {
       items.forEach(function (it) {
-        var p = it.p, name = N.t(p.name);
+        var p = it.p, name = N.t(p.name), st = N.status(p.id), stx = stockText(p.id, true);
         it.img.alt = 'Panettone ' + name;
-        it.card.setAttribute('aria-label', TX[lang].open('Panettone ' + name, N.fmtPrice(N.price(p.id))));
-        it.back.innerHTML = backHtml(it);
-        it.el.classList.toggle('is-soldout', N.status(p.id) === 'soldout');
+        it.pan.setAttribute('aria-label', TX[lang].open('Panettone ' + name, N.fmtPrice(N.price(p.id)), stx.t));
+        it.el.classList.toggle('is-soldout', st === 'soldout');
         it.el.querySelector('.nd-stamp-t').textContent = T('soldout').toUpperCase();
-        it.el.querySelector('.nd-tab').textContent = name;
-        var pills = it.pills.querySelectorAll('.nd-pill');
-        pills[0].textContent = T('details');
-        pills[1].textContent = canBuy(p.id) ? T('add') : (N.status(p.id) === 'soldout' ? T('soldout') : T('soon'));
-        pills[1].disabled = !canBuy(p.id);
+        // Etiqueta penjada: preu i unitats (el reclam).
+        var t = it.tag, r = N.remaining(p.id);
+        t.querySelector('.t-price').textContent = N.fmtPrice(N.price(p.id));
+        var line = !N.loaded ? '' : st === 'soon' ? T('soonShort') : st === 'soldout' ? T('soldout') : st === 'few' ? TX[lang].fewTag(r) : TX[lang].leftShort(r);
+        t.querySelector('.t-stock').textContent = line;
+        t.classList.toggle('is-few', st === 'few');
+        t.classList.toggle('is-soldout', st === 'soldout');
       });
+    }
+    function paintBanner() {
+      var el = $('nd-banner-txt'), tt = N.totals();
+      if (!N.loaded) { el.textContent = T('limitedUnits'); return; }
+      if (!tt) { el.innerHTML = T('bannerSoon'); return; }
+      if (tt.remaining <= 0) { el.innerHTML = T('bannerSold'); return; }
+      // Si encara no se n'ha venut cap, "Queden 40 de 40" no diu res: llavors, reserva'l.
+      el.innerHTML = TX[lang].bannerTotal(tt.total) + ' · ' + (tt.remaining >= tt.total ? '<em>' + T('reserve') + '</em>' : TX[lang].bannerLeft(tt.remaining, tt.remaining <= Math.max(5, tt.total * .25)));
     }
     function paintList() {
       var nav = $('nd-list');
@@ -888,40 +991,54 @@
         b.setAttribute('aria-label', 'Panettone ' + N.t(it.p.name) + ', ' + N.fmtPrice(N.price(it.p.id)) + (st.t ? ', ' + st.t : ''));
       });
     }
-    function paintActive() {
-      var it = S.active || items[S.crateIdx];
-      if (!it) return;
-      var p = it.p, st = stockText(p.id);
-      $('nd-info-name').textContent = N.t(p.name);
-      $('nd-info-tag').textContent = N.t(p.tag);
-      $('nd-info-price').textContent = N.fmtPrice(N.price(p.id));
-      var s = $('nd-info-stock'); s.textContent = st.t; s.className = 'nd-stock ' + st.cls;
-      $('nd-info-flip').textContent = S.flipped ? T('flipBack') : T('flipHint');
+    function paintSheet() {
+      var it = S.active; if (!it) return;
+      var p = it.p, sheet = $('nd-sheet');
+      sheet.style.setProperty('--c', p.color);
+      $('nd-s-name').textContent = N.t(p.name);
+      $('nd-s-cover').textContent = 'Panettone ' + N.t(p.name);
+      $('nd-s-tag').textContent = N.t(p.tag);
+      $('nd-s-price').textContent = N.fmtPrice(N.price(p.id));
+      $('nd-s-desc').textContent = N.t(p.desc);
+      $('nd-s-all').textContent = N.t(p.allergens);
+      var date = N.deliveryDate ? N.fmtDate(N.deliveryDate) : null;
+      $('nd-s-dlv').textContent = T('deliveryV') + (date ? ' · ' + date : '');
       var add = $('nd-add');
       add.disabled = !canBuy(p.id);
       add.classList.remove('is-done');
-      add.textContent = addLabel(p.id, true);
-      paintBar();
+      add.textContent = addLabel(p.id);
+      paintMeter(S.phase === 'open');
     }
-    function paintBar() {
-      if (S.mode !== 'crate') return;
-      var it = S.active || items[S.crateIdx], p = it.p, st = stockText(p.id, true);
-      $('nd-bar-meta').innerHTML = esc(N.fmtPrice(N.price(p.id))) + (st.t ? ' · <span class="nd-stock ' + st.cls + '">' + esc(st.t) + '</span>' : '');
-      $('nd-bar-name').textContent = N.t(p.name);
-      var a = $('nd-bar-a'), b = $('nd-bar-b');
-      a.textContent = S.active ? T('backBtn') : T('details');
-      b.disabled = !canBuy(p.id);
-      b.classList.remove('is-done');
-      b.textContent = canBuy(p.id) ? T('add') + ' · ' + N.fmtPrice(N.price(p.id)) : (N.status(p.id) === 'soldout' ? T('soldout') : T('soon'));
-      var dots = $('nd-dots');
-      if (dots.children.length !== items.length) dots.innerHTML = items.map(function () { return '<i></i>'; }).join('');
-      Array.prototype.forEach.call(dots.children, function (d, i) { d.classList.toggle('is-on', i === S.crateIdx); });
+    // Barra d'unitats: "Venuts 28 de 40 · Queden 12". La barra s'omple quan
+    // la fitxa ja és oberta (fill = true), perquè es vegi créixer.
+    function paintMeter(fill) {
+      var it = S.active, m = $('nd-meter'); if (!it) { $('nd-m-fill').style.width = '0'; return; }
+      var id = it.p.id, st = N.status(id), r = N.remaining(id), tot = N.total(id);
+      m.hidden = !N.loaded;
+      m.classList.toggle('is-soon', st === 'soon');
+      m.classList.toggle('is-few', st === 'few' || st === 'soldout');
+      var l = $('nd-m-l'), rt = $('nd-m-r'), pct = 0;
+      if (st === 'soon') { l.textContent = T('limitedUnits'); rt.textContent = T('soon'); }
+      else if (tot) {
+        var sold = Math.max(0, tot - r);
+        pct = Math.min(100, sold / tot * 100);
+        // Sense cap venda, "Venuts 0 de 10" fa l'efecte contrari: llavors
+        // "Només 10 unitats · Sigues dels primers".
+        var none = sold === 0 && st !== 'soldout';
+        l.textContent = none ? T('beFirst') : TX[lang].sold(sold, tot);
+        rt.textContent = st === 'soldout' ? T('soldout') : st === 'few' ? TX[lang].few(r) : none ? TX[lang].only(tot) : TX[lang].leftShort(r);
+      } else { l.textContent = T('limitedUnits'); rt.textContent = stockText(id).t; }
+      $('nd-m-fill').style.width = (fill ? Math.max(pct, st === 'soon' ? 0 : 4) : 0) + '%';
     }
     function paintCartCount() {
       var n = N.cart.count(), c = $('nd-cartcount');
       c.textContent = n; c.dataset.n = n;
     }
-    function paintAll() { paintItems(); paintList(); paintActive(); paintCartCount(); if ($('nd-cart').classList.contains('is-on')) paintCart(); }
+    function paintAll() {
+      paintItems(); paintBanner(); paintList(); paintCartCount();
+      if (S.active) paintSheet();
+      if ($('nd-cart').classList.contains('is-on')) paintCart();
+    }
 
     // ── Afegir a la cistella ──────────────────────────────────────────
     var toastTimer = 0;
@@ -936,7 +1053,7 @@
         btn.classList.add('is-done');
         btn.textContent = '✓ ' + T('added') + (now > 1 ? ' (' + now + ')' : '');
         clearTimeout(btn._t);
-        btn._t = setTimeout(function () { if (btn.id === 'nd-add' || btn.id === 'nd-bar-b') { paintActive(); } else paintItems(); }, 1600);
+        btn._t = setTimeout(function () { if (S.active) paintSheet(); }, 1600);
       }
       toast(TX[lang].addedToast(N.t(it.p.name)), true);
     }
@@ -955,7 +1072,7 @@
       if (!lines.length) h += '<p class="nd-cart-empty">' + T('cartEmpty') + '</p>';
       lines.forEach(function (l) {
         var p = N.byId(l.id), max = N.maxQty(l.id);
-        h += '<div class="nd-line" data-id="' + l.id + '"><img src="' + p.img + '-600.webp" alt="">' +
+        h += '<div class="nd-line" data-id="' + l.id + '"><img src="' + p.cut + '-sm.webp" alt="">' +
           '<div><h4>Panettone ' + esc(N.t(p.name)) + '</h4><p>' + N.fmtPrice(N.price(l.id)) + ' · ' + esc(stockText(l.id, true).t) + '</p></div>' +
           '<div class="nd-qty"><button type="button" data-q="-1" aria-label="' + T('less') + '">−</button><span>' + l.qty + '</span>' +
           '<button type="button" data-q="1" aria-label="' + T('more') + '"' + (l.qty >= max ? ' disabled' : '') + '>+</button></div></div>';
@@ -997,60 +1114,42 @@
       return c ? items.find(function (it) { return it.el === c; }) : null;
     }
     function bind() {
-      var stage = $('nd-stage');
-      // Ratolí sobre la prestatgeria: aixeca la portada i la inclina cap al cursor.
+      var stage = $('nd-stage'), cur = $('nd-cursor');
+      // Ratolí sobre la prestatgeria: aixeca el panettone i l'inclina cap al cursor.
       stage.addEventListener('pointermove', function (e) {
         if (e.pointerType === 'touch') return;
         var it = itemOf(e.target);
-        if (S.mode === 'shelf' && S.phase === 'idle') {
+        if (S.phase === 'idle') {
           setHover(it);
           if (it) tiltTo(it, e, false);
+          cur.classList.toggle('is-on', !!it);
+          if (it) { cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; }
         } else if (S.phase === 'open' && S.active) {
-          var over = it === S.active && !e.target.closest('.nd-pills');
-          var cur = $('nd-cursor');
-          cur.classList.toggle('is-on', over && S.mode === 'shelf');
-          if (over) {
-            cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
-            tiltTo(S.active, e, true);
-          } else if (S.active.wobX.b !== 0 || S.active.wobY.b !== 0) {
-            S.active.wobX.spring(0, WOBBLE_OPEN); S.active.wobY.spring(0, WOBBLE_OPEN);
-          }
+          if (it === S.active) tiltTo(S.active, e, true);
+          else if (S.active.wobX.b !== 0 || S.active.wobY.b !== 0) { S.active.wobX.spring(0, WOBBLE_OPEN); S.active.wobY.spring(0, WOBBLE_OPEN); }
         }
       });
       stage.addEventListener('pointerleave', function () {
-        if (S.phase === 'idle' && S.mode === 'shelf') setHover(null);
-        $('nd-cursor').classList.remove('is-on');
+        if (S.phase === 'idle') setHover(null);
+        cur.classList.remove('is-on');
       });
       stage.addEventListener('click', function (e) {
-        var pill = e.target.closest('.nd-pill');
         var it = itemOf(e.target);
-        if (pill && it) {
-          e.stopPropagation();
-          if (pill.dataset.act === 'add') addToCart(it, pill);
-          else openItem(it, e.detail === 0);
-          return;
-        }
-        if (S.phase === 'open') {
-          if (it === S.active && e.target.closest('.nd-card')) { flip(); return; }
-          if (e.target.closest('.nd-actions, .nd-info')) return;
-          closeActive(false);
+        if (S.active) {
+          if (e.target.closest('.nd-sheet') || it === S.active) return;
+          if (S.phase === 'open' || S.phase === 'opening') closeActive(false);
           return;
         }
         if (S.phase !== 'idle' || !it) return;
-        if (S.mode === 'crate') {
-          if (it.i === S.crateIdx) { S.autoFlip = false; openItem(it, e.detail === 0); }
-          else crateGo(it.i);
-          return;
-        }
         openItem(it, e.detail === 0);
       });
-      // Teclat: Tab per les portades; Espai gira; Escape tanca; fletxes passen.
+      // Teclat: Tab pels panettones; Intro obre; Escape tanca; fletxes passen.
       stage.addEventListener('focusin', function (e) {
         var it = itemOf(e.target);
-        if (it && S.phase === 'idle' && S.mode === 'shelf' && e.target.matches(':focus-visible')) setHover(it);
+        if (it && S.phase === 'idle' && e.target.matches(':focus-visible')) setHover(it);
       });
       stage.addEventListener('focusout', function (e) {
-        if (S.phase === 'idle' && S.mode === 'shelf' && !itemOf(e.relatedTarget)) setHover(null);
+        if (S.phase === 'idle' && !itemOf(e.relatedTarget)) setHover(null);
       });
       doc.addEventListener('keydown', function (e) {
         if ($('nd-cart').classList.contains('is-on')) {
@@ -1058,51 +1157,16 @@
           else if (e.key === 'Tab') trapFocus(e, $('nd-cart'));
           return;
         }
-        if (S.active && S.phase === 'open') {
+        if (S.active && (S.phase === 'open' || S.phase === 'opening')) {
           if (e.key === 'Escape') { e.preventDefault(); closeActive(false); }
-          else if (e.key === ' ' && !e.target.closest('button:not(.nd-card), a, input')) { e.preventDefault(); flip(); }
-          else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && S.phase === 'open') {
             e.preventDefault();
-            var n = items[(S.active.i + (e.key === 'ArrowRight' ? 1 : items.length - 1)) % items.length];
-            if (S.mode === 'crate') crateGo(n.i);
-            openItem(n, true);
+            openItem(items[(S.active.i + (e.key === 'ArrowRight' ? 1 : items.length - 1)) % items.length], true);
           }
-          return;
-        }
-        if (S.mode === 'crate' && S.phase === 'idle' && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-          e.preventDefault(); crateGo(S.crateIdx + (e.key === 'ArrowDown' ? 1 : -1));
         }
       });
       $('nd-add').addEventListener('click', function () { if (S.active) addToCart(S.active, this); });
-      $('nd-info-flip').addEventListener('click', flip);
-      // Barra del mòbil
-      $('nd-bar-a').addEventListener('click', function (e) {
-        if (S.active) closeActive(false);
-        else { S.autoFlip = true; openItem(items[S.crateIdx], e.detail === 0); }
-      });
-      $('nd-bar-b').addEventListener('click', function () { addToCart(S.active || items[S.crateIdx], this); });
-      // Lliscar per la pila
-      var t0 = null;
-      stage.addEventListener('touchstart', function (e) {
-        if (S.mode !== 'crate' || S.phase !== 'idle' || e.touches.length !== 1) { t0 = null; return; }
-        t0 = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
-      }, { passive: true });
-      stage.addEventListener('touchend', function (e) {
-        if (!t0) return;
-        var tt = e.changedTouches[0], dy = tt.clientY - t0.y, dx = tt.clientX - t0.x;
-        if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx)) {
-          crateGo(S.crateIdx + (dy < 0 ? 1 : -1), true);
-          S.swiped = Date.now();
-        }
-        t0 = null;
-      }, { passive: true });
-      stage.addEventListener('wheel', function (e) {
-        if (S.mode !== 'crate' || S.phase !== 'idle') return;
-        var now = Date.now();
-        if (now - (S.lastWheel || 0) < 420 || Math.abs(e.deltaY) < 12) return;
-        S.lastWheel = now;
-        crateGo(S.crateIdx + (e.deltaY > 0 ? 1 : -1));
-      }, { passive: true });
+      $('nd-sheet-x').addEventListener('click', function (e) { e.stopPropagation(); closeActive(false); });
       // Cistella
       $('nd-cartbtn').addEventListener('click', openCart);
       $('nd-toast-btn').addEventListener('click', function () { $('nd-toast').classList.remove('is-on'); openCart(); });
@@ -1132,7 +1196,7 @@
       else if (!e.shiftKey && doc.activeElement === last) { e.preventDefault(); first.focus(); }
     }
 
-    // ── Entrada (intro): paret, i les portades cauen una a una ─────────
+    // ── Entrada (intro): paret, i els panettones cauen un a un ─────────
     function waitImages(list, maxMs) {
       return new Promise(function (res) {
         var left = list.length, done = false;
@@ -1149,29 +1213,22 @@
       body.classList.add('is-loaded', 'is-wall');
       S.phase = 'intro';
       var quick = reduce.matches;
-      if (S.mode === 'shelf') {
-        items.forEach(function (it, i) {
-          // Com l'original: apareix aixecada i dreta, i cau al prestatge.
-          it.liftY.set(1); it.liftZ.set(1); it.lean.set(0); it.shade.set(0);
-          var appearAt = quick ? 0 : D.appear + i * D.stagger, dropAt = quick ? 0 : D.appear + 2 * i * D.stagger;
-          setTimeout(function () { it.el.classList.add('is-on'); it.show.to(1, D.scaleIn, easeOutQuart); }, appearAt);
-          setTimeout(function () { drop(it); }, dropAt);
-        });
-      } else {
-        items.forEach(function (it) { it.crate.set(it.i - S.crateIdx); it.lean.set(0); it.shade.set(0); });
-        items.slice().reverse().forEach(function (it, n) {
-          it.liftY.set(1.6);
-          setTimeout(function () { it.el.classList.add('is-on'); it.show.to(1, 300, easeOutQuart); it.liftY.to(0, 700, easeOutQuart); }, quick ? 0 : 300 + n * D.staggerM);
-        });
-      }
-      var interactiveAt = quick ? 0 : D.wallIn + items.length * (S.mode === 'shelf' ? D.stagger : D.staggerM);
-      setTimeout(function () { S.phase = 'idle'; body.classList.add('is-ready'); paintBar(); }, interactiveAt);
+      items.forEach(function (it, i) {
+        // Com l'original: apareix aixecat i cau al prestatge; després l'etiqueta.
+        it.liftY.set(1); it.liftZ.set(1);
+        var appearAt = quick ? 0 : D.appear + i * D.stagger, dropAt = quick ? 0 : D.appear + 2 * i * D.stagger + 150;
+        setTimeout(function () { it.el.classList.add('is-on'); it.show.to(1, D.scaleIn, easeOutQuart); }, appearAt);
+        setTimeout(function () { drop(it); }, dropAt);
+        setTimeout(function () { it.tag.classList.add('is-on'); }, quick ? 0 : dropAt + D.drop + 120);
+      });
+      var interactiveAt = quick ? 0 : D.wallIn + items.length * D.stagger;
+      setTimeout(function () { S.phase = 'idle'; body.classList.add('is-ready'); applyLayout(); }, interactiveAt);
     }
 
     // ── Engega ────────────────────────────────────────────────────────
     buildItems();
-    applyLayout();
     setLang(lang);
+    applyLayout();
     bind();
     N.onChange(function () { paintAll(); });
     var wallImg = $('nd-wall-sharp');
