@@ -1003,6 +1003,15 @@
     // al cistell n'hi ha més de les que queden, s'ajusta.
     function onNadalStock() {
       if (!NADAL) return;
+      // Amb un pagament en marxa la comanda ja és creada i el servidor ja
+      // compta aquests panettones com a venuts: si se n'enduia els últims,
+      // l'estoc nou deia "esgotat" i els treia del cistell enmig del pagament
+      // (el client veia un error i no podia pagar el panettone). Mentre es
+      // paga no es toca el cistell; només es repinta la carta.
+      let paying = false;
+      try { paying = !!_pendingOrderRef; } catch (_) {}
+      const ov = document.getElementById('stripe-overlay');
+      if (paying || (ov && !ov.classList.contains('hidden'))) { renderNadal(); return; }
       cart.forEach(it => {
         if (!isPanId(it.id)) return;
         const max = NADAL.maxQty(it.id);
@@ -3250,7 +3259,7 @@
   </div>
 
   <!-- Stripe payment overlay -->
-  <div id="stripe-overlay" class="hidden fixed inset-0 z-[9000] bg-[#2A1A0F]/50 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
+  <div id="stripe-overlay" class="hidden fixed inset-0 z-[9000] bg-[#2A1A0F]/60 md:bg-[#2A1A0F]/50 md:backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
     <div id="stripe-modal-panel" class="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-sm overflow-hidden">
       <div class="flex items-center justify-between px-5 pt-5 pb-3">
         <span id="stripe-amount-label" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">€0,00</span>
