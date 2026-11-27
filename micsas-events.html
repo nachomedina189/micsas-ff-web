@@ -58,6 +58,9 @@
     #navbar.nav-scrolled a[data-i18n="demana"]:hover {
       background: #E6D5B0 !important;
     }
+    /* Mòbil: la barra de dalt sense desenfocament de fons mentre es fa
+       scroll (als mòbils modestos és car a cada frame). */
+    @media (max-width: 767px) { #navbar.nav-scrolled { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(200, 10, 7, .97) !important; } }
   </style>
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.min.js" integrity="sha384-R18XzqnxvVLEF+BYfhpmDx30v7eP83fAckyfoRzK7/Uf6nGqufcmsk0eAKo7S3RU" crossorigin="anonymous" defer></script>
     <script src="scroll-suau.js" defer></script>
@@ -524,8 +527,14 @@
 
     // ───── Navbar scroll behaviour ─────
     const navbar = document.getElementById('navbar');
+    // Només quan canvia (abans tocava les classes a cada pas de scroll i el
+    // Tailwind del CDN recalculava tots els estils: al mòbil anava a batzegades).
+    let navOn = null;
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
+      const on = window.scrollY > 40;
+      if (on === navOn) return;
+      navOn = on;
+      if (on) {
         navbar.classList.add('bg-[#c80a07]/85', 'backdrop-blur-md', 'border-[#F2E6CE]/30', 'shadow-sm', 'nav-scrolled');
         navbar.classList.remove('border-transparent');
       } else {
@@ -538,10 +547,16 @@
     const reveals = document.querySelectorAll('.reveal');
     function doReveal() {
       reveals.forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
+        if (!el.classList.contains('visible') && el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
       });
     }
-    window.addEventListener('scroll', doReveal, { passive: true });
+    // Sense mirar res a cada pas de scroll: avisa el navegador quan entren.
+    if ('IntersectionObserver' in window) {
+      const revealIO = new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('visible'); revealIO.unobserve(e.target); }
+      }), { rootMargin: '0px 0px -60px 0px' });
+      reveals.forEach(el => revealIO.observe(el));
+    } else window.addEventListener('scroll', doReveal, { passive: true });
     doReveal();
 
     // ───── Toast ─────

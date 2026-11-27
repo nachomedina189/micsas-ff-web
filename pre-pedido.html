@@ -651,7 +651,7 @@
       const box = document.getElementById('pp-time-dropdown');
       if (box) box.classList.add('hidden');
       if (toAddress && PP_PANETTONE_DAY) {
-        document.getElementById('pp-time-summary').textContent = "Dia d'entrega de panettones";
+        document.getElementById('pp-time-summary').textContent = "Dia d'entrega de panettones · amb cost d'enviament (segons la zona)";
         document.getElementById('pp-time-change')?.classList.add('hidden');
       } else if (toAddress) {
         const label = document.getElementById('pp-time-select-label')?.textContent?.trim() || ppSelectedTime;

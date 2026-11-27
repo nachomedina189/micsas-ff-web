@@ -156,6 +156,9 @@
     .cf-up-list::-webkit-scrollbar { display: none; }
     .cf-up-list { scroll-padding-inline: 20px; }
     .cf-up-card { flex: 1 0 100px; max-width: 150px; scroll-snap-align: start; background: #FBF4E6; color: #2A1A0F; border-radius: 12px; }
+    /* Mòbil: la barra de dalt sense desenfocament de fons mentre es fa
+       scroll (als mòbils modestos és car a cada frame). */
+    @media (max-width: 767px) { #navbar.nav-scrolled { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(242, 230, 206, .98) !important; } }
   </style>
   <link rel="stylesheet" href="pizza-badge.css">
   <script src="pizza-badge.js"></script>
@@ -791,8 +794,14 @@
 
   <script>
     const navbar = document.getElementById('navbar');
+    // Només quan canvia (abans tocava les classes a cada pas de scroll i el
+    // Tailwind del CDN recalculava tots els estils: al mòbil anava a batzegades).
+    let navOn = null;
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
+      const on = window.scrollY > 40;
+      if (on === navOn) return;
+      navOn = on;
+      if (on) {
         navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm', 'nav-scrolled');
         navbar.classList.remove('border-transparent');
       } else {
@@ -1784,11 +1793,13 @@
       if (!has) return;
       const only = cartOnlyPan();
       document.getElementById('cf-pan-order-sub').textContent = only
-        ? "Un divendres o diumenge, a l'hora que triïs."
-        : "Junt amb les pizzes, el dia i l'hora que has triat.";
+        ? "Un divendres o diumenge, a l'hora que triïs. Sense cost d'enviament."
+        : "Junt amb les pizzes, el dia i l'hora que has triat. Sense cost d'enviament.";
       // Amb pizzes, tot es paga ara (targeta) o en efectiu amb la pizza: el dia
       // de panettones ja no es cobra res.
-      document.getElementById('cf-pan-day-sub').textContent = panDayLabel() + '.' + (only ? '' : ' Ho pagues tot amb aquesta comanda.');
+      // El dia de panettones l'enviament es cobra a part (import per fixar,
+      // segons la zona): s'avisa ara, i divendres/diumenge surt més a compte.
+      document.getElementById('cf-pan-day-sub').textContent = panDayLabel() + '.' + (only ? '' : ' Els panettones els pagues amb aquesta comanda.') + " Amb cost d'enviament: encara per determinar, segons la zona.";
       box.querySelectorAll('input[name="cf-pan"]').forEach(r => {
         r.checked = r.value === cfPanettoneDelivery;
         r.closest('.cf-pan-opt').classList.toggle('border-[#E23F2E]', r.checked);
@@ -2885,7 +2896,7 @@
       renderCart(false);
       MENU.nadal.forEach(it => syncMenuRow(it.id));
       setTimeout(() => showCfToast(cfPanettoneDelivery === 'panettone_day'
-        ? "Els teus panettones ja són a la cistella. Te'ls portem el dia d'entrega de panettones."
+        ? "Els teus panettones ja són a la cistella. Te'ls portem el dia d'entrega de panettones (amb cost d'enviament, segons la zona)."
         : 'Els teus panettones ja són a la cistella. Hi pots afegir pizzes.'), 400);
     })();
 

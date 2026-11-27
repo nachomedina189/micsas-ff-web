@@ -93,6 +93,9 @@
         filter: none !important;
         mix-blend-mode: multiply !important;
       }
+      /* Mòbil: la barra de dalt sense desenfocament de fons mentre es fa
+         scroll (als mòbils modestos és car a cada frame). */
+      @media (max-width: 767px) { #navbar.nav-scrolled { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(242, 230, 206, .98) !important; } }
     </style>
     <link rel="stylesheet" href="pizza-badge.css">
   <script src="pizza-badge.js"></script>
@@ -771,8 +774,14 @@
 
     <script>
       const navbar = document.getElementById('navbar');
+      // Només quan canvia (abans tocava les classes a cada pas de scroll i el
+      // Tailwind del CDN recalculava tots els estils: al mòbil anava a batzegades).
+      let navOn = null;
       window.addEventListener('scroll', () => {
-        if (window.scrollY > 40) {
+        const on = window.scrollY > 40;
+        if (on === navOn) return;
+        navOn = on;
+        if (on) {
           navbar.classList.add('bg-[#F2E6CE]/95', 'backdrop-blur-md', 'border-[#C4B08A]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.remove('border-transparent');
         } else {
@@ -784,10 +793,16 @@
       const reveals = document.querySelectorAll('.reveal');
       function doReveal() {
         reveals.forEach(el => {
-          if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
+          if (!el.classList.contains('visible') && el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
         });
       }
-      window.addEventListener('scroll', doReveal, { passive: true });
+      // Sense mirar res a cada pas de scroll: avisa el navegador quan entren.
+      if ('IntersectionObserver' in window) {
+        const revealIO = new IntersectionObserver(es => es.forEach(e => {
+          if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('visible'); revealIO.unobserve(e.target); }
+        }), { rootMargin: '0px 0px -60px 0px' });
+        reveals.forEach(el => revealIO.observe(el));
+      } else window.addEventListener('scroll', doReveal, { passive: true });
       doReveal();
 
       // ── Files de pizzes: el scroll vertical les mou cap a l'esquerra ──

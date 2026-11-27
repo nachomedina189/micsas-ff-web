@@ -109,6 +109,9 @@
       }
       .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
       .reveal.visible { opacity: 1; transform: translateY(0); }
+      /* Mòbil: la barra de dalt sense desenfocament de fons mentre es fa
+         scroll (als mòbils modestos és car a cada frame). */
+      @media (max-width: 767px) { #navbar.nav-scrolled { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(242, 230, 206, .97) !important; } }
     </style>
     <style>
       @keyframes floating-bob {
@@ -592,7 +595,7 @@
       <div class="max-w-2xl mx-auto relative z-10">
         <span class="text-xs uppercase tracking-[0.22em] font-bold text-[#c80a07] block mb-4" data-i18n="nadal_kicker">Especial Nadal · Unitats limitades</span>
         <h2 class="font-['League_Spartan',sans-serif] font-extrabold tracking-tight text-4xl md:text-5xl leading-[1.02] text-[#2A1A0F] mb-4" data-i18n="nadal_title">Panettones artesans de Sicília</h2>
-        <p class="text-base md:text-lg font-light text-[#5A3E28] leading-relaxed mb-10 md:mb-12" data-i18n="nadal_desc">Quatre panettones per regalar (o per regalar-te). Te'ls portem a casa amb la teva comanda o el dia d'entrega de panettones.</p>
+        <p class="text-base md:text-lg font-light text-[#5A3E28] leading-relaxed mb-10 md:mb-12" data-i18n="nadal_desc">Quatre panettones per regalar (o per regalar-te). Te'ls portem a casa amb la teva comanda, sense cost d'enviament, o el dia d'entrega de panettones.</p>
       </div>
       <a href="nadal.html" class="nadal-teaser block relative max-w-[1100px] mx-auto rounded-2xl overflow-hidden aspect-[16/9] shadow-[0_24px_60px_rgba(42,26,15,0.18)]" aria-label="Veure els panettones de Nadal" data-i18n-aria="nadal_cta_aria">
         <img src="images/nadal/estanteria-1600.webp" alt="" class="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" width="1600" height="900">
@@ -720,8 +723,14 @@
 
     <script>
       const navbar = document.getElementById('navbar');
+      // Només quan canvia (abans tocava les classes a cada pas de scroll i el
+      // Tailwind del CDN recalculava tots els estils: al mòbil anava a batzegades).
+      let navOn = null;
       window.addEventListener('scroll', () => {
-        if (window.scrollY > 40) {
+        const on = window.scrollY > 40;
+        if (on === navOn) return;
+        navOn = on;
+        if (on) {
           navbar.classList.add('bg-[#F2E6CE]/85', 'backdrop-blur-md', 'border-[#c80a07]/30', 'shadow-sm', 'nav-scrolled');
           navbar.classList.remove('border-transparent');
         } else {
@@ -754,10 +763,16 @@
       const reveals = document.querySelectorAll('.reveal');
       function doReveal() {
         reveals.forEach(el => {
-          if (el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
+          if (!el.classList.contains('visible') && el.getBoundingClientRect().top < window.innerHeight - 60) el.classList.add('visible');
         });
       }
-      window.addEventListener('scroll', doReveal, { passive: true });
+      // Sense mirar res a cada pas de scroll: avisa el navegador quan entren.
+      if ('IntersectionObserver' in window) {
+        const revealIO = new IntersectionObserver(es => es.forEach(e => {
+          if (e.isIntersecting || e.boundingClientRect.top < 0) { e.target.classList.add('visible'); revealIO.unobserve(e.target); }
+        }), { rootMargin: '0px 0px -60px 0px' });
+        reveals.forEach(el => revealIO.observe(el));
+      } else window.addEventListener('scroll', doReveal, { passive: true });
       doReveal();
 
       (function() {
