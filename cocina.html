@@ -368,10 +368,10 @@
       </div>
       <div class="px-6 py-3 border-b border-kline flex items-center gap-3 flex-wrap shrink-0">
         <label for="history-from" class="text-xs font-semibold text-kmute">Des de</label>
-        <input type="date" id="history-from" onchange="renderHistoryList()"
+        <input type="date" id="history-from" onchange="loadHistoryRange()"
           class="bg-kbg border border-kline rounded-lg px-3 py-1.5 text-sm outline-none focus:border-kblue">
         <label for="history-to" class="text-xs font-semibold text-kmute">Fins a</label>
-        <input type="date" id="history-to" onchange="renderHistoryList()"
+        <input type="date" id="history-to" onchange="loadHistoryRange()"
           class="bg-kbg border border-kline rounded-lg px-3 py-1.5 text-sm outline-none focus:border-kblue">
       </div>
       <div id="history-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3"></div>
@@ -1269,12 +1269,59 @@
     let _rtStatus = '';       // estat del canal realtime de Supabase
     let _lastRenderSig = '';
     let _panLoadedOnce = false;
+    // ── Càrrega sense límit de files ──
+    // Supabase (PostgREST) torna com a màxim 1000 files per consulta. Si es
+    // demanava tot d'un cop, a partir de la comanda 1000 les més noves
+    // deixaven de sortir al tauler. fetchAll demana pàgines fins a tenir-les
+    // TOTES: el total el diu el servidor (count exact) i es continua mentre
+    // en faltin, sigui quin sigui el màxim per pàgina. Si una pàgina falla,
+    // torna l'error i no es toca el que ja es veu a pantalla.
+    // `build` ha de fer el select amb { count: 'exact' }; `orderCols` ha de
+    // donar un ordre fix (acabat en una columna única) perquè les pàgines no
+    // se solapin.
+    async function fetchAll(build, orderCols) {
+      const out = [];
+      for (let page = 0; page < 500; page++) {
+        let q = build();
+        for (const c of orderCols) q = q.order(c, { ascending: true });
+        const { data, error, count } = await q.range(out.length, out.length + 999);
+        if (error) return { data: null, error };
+        const rows = data || [];
+        out.push(...rows);
+        if (!rows.length) break;
+        if (typeof count === 'number' ? out.length >= count : rows.length < 1000) break;
+      }
+      return { data: out, error: null };
+    }
+    const ORDER_SELECT = '*, customers(name, phone, email), addresses(street, floor, postal_code, city, notes, lat, lng), order_items(*)';
+    // El tauler només fa servir comandes d'avui endavant (més una setmana
+    // enrere de marge, per tancar un pase oblidat) i les de panettones per
+    // al dia d'entrega, siguin de quan siguin. L'historial demana el seu
+    // rang a part (loadHistoryRange). Així cada recàrrega és petita i no
+    // creix amb els mesos.
+    const BOARD_DAYS_BACK = 7;
+    function boardSince() {
+      const d = new Date();
+      d.setDate(d.getDate() - BOARD_DAYS_BACK);
+      return businessDateISO(d);
+    }
     async function loadOrders() {
       const seq = ++_loadSeq;
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*, customers(name, phone, email), addresses(street, floor, postal_code, city, notes, lat, lng), order_items(*)')
-        .order('created_at', { ascending: true });
+      let res = await fetchAll(
+        () => supabase.from('orders').select(ORDER_SELECT, { count: 'exact' })
+          .or(`delivery_date.gte.${boardSince()},delivery_date.is.null,panettone_delivery.eq.panettone_day`),
+        ['created_at', 'id']);
+      if (res.error && seq === _loadSeq) {
+        // Si el servidor rebutgés el filtre per qualsevol motiu, millor
+        // carregar-les totes (també a pàgines) que deixar el tauler buit.
+        console.error('[comandes] filtre del tauler', res.error);
+        res = await fetchAll(() => supabase.from('orders').select(ORDER_SELECT, { count: 'exact' }), ['created_at', 'id']);
+      }
+      const error = res.error;
+      // Una comanda esborrada mentre es pagina pot fer que una altra surti
+      // dues vegades: es deixa una sola còpia de cada id.
+      const seenIds = new Set();
+      const data = res.data && res.data.filter(o => !seenIds.has(o.id) && seenIds.add(o.id));
       if (seq !== _loadSeq) return;
       if (error) { console.error(error); _lastLoadFailed = true; updateConnStatus(); return; }
       _lastLoadOk = Date.now(); _lastLoadFailed = false; updateConnStatus();
@@ -2147,7 +2194,7 @@
     const INCIDENT_LABEL = { cremada: 'Cremada', equivocada: 'Equivocada', falta: 'Falta producte', retard: 'Retard', queixa: 'Queixa', altres: 'Altres' };
 
     async function loadIncidents() {
-      const { data, error } = await supabase.from('order_incidents').select('order_id, kind');
+      const { data, error } = await fetchAll(() => supabase.from('order_incidents').select('order_id, kind', { count: 'exact' }), ['id']);
       if (error) return;
       incidentsByOrder = new Map();
       for (const i of data || []) {
@@ -2298,9 +2345,39 @@
       fromEl.value = localDateStr(from);
       toEl.value = localDateStr(new Date());
       document.getElementById('history-modal').classList.remove('hidden');
-      renderHistoryList();
+      loadHistoryRange();
     }
     window.openHistory = openHistory;
+
+    // El tauler només carrega els últims dies: les comandes del rang triat
+    // es demanen aquí, totes (fetchAll), quan s'obre l'historial o es
+    // canvien les dates.
+    let historyCache = [];
+    let _histSeq = 0, _histLoading = false, _histFailed = false;
+    async function loadHistoryRange() {
+      const from = document.getElementById('history-from').value;
+      const to   = document.getElementById('history-to').value;
+      const seq = ++_histSeq;
+      _histLoading = true;
+      renderHistoryList();
+      // updated_at és un instant: el rang de dies (hora local) es passa a UTC.
+      const start = from ? new Date(from + 'T00:00:00') : null;
+      const end = to ? new Date(to + 'T00:00:00') : null;
+      if (end) end.setDate(end.getDate() + 1);
+      const { data, error } = await fetchAll(() => {
+        let q = supabase.from('orders').select(ORDER_SELECT, { count: 'exact' }).in('status', ['delivered', 'cancelled']);
+        if (start && !isNaN(start)) q = q.gte('updated_at', start.toISOString());
+        if (end && !isNaN(end)) q = q.lt('updated_at', end.toISOString());
+        return q;
+      }, ['created_at', 'id']);
+      if (seq !== _histSeq) return;
+      _histLoading = false;
+      _histFailed = !!error;
+      if (error) console.error('[historial]', error);
+      else historyCache = data;
+      renderHistoryList();
+    }
+    window.loadHistoryRange = loadHistoryRange;
 
     // Filtra i ordena per updated_at (el moment REAL en què la comanda va
     // quedar entregada/cancel·lada), no per delivery_date — una comanda
@@ -2310,7 +2387,10 @@
     function getFilteredHistoryOrders() {
       const from = document.getElementById('history-from').value;
       const to   = document.getElementById('history-to').value;
-      return ordersCache
+      // Les del rang demanat + les del tauler (més fresques, en temps real).
+      const byId = new Map(historyCache.map(o => [o.id, o]));
+      for (const o of ordersCache) byId.set(o.id, o);
+      return [...byId.values()]
         .filter(o => (o.status === 'delivered' || o.status === 'cancelled') && o.updated_at)
         .map(o => ({ o, day: localDateStr(o.updated_at) }))
         .filter(({ day }) => (!from || day >= from) && (!to || day <= to))
@@ -2321,7 +2401,10 @@
       const hist = getFilteredHistoryOrders();
       const list = document.getElementById('history-list');
       if (!hist.length) {
-        list.innerHTML = '<p class="text-center text-kmute py-10">Sense comandes completades en aquest període.</p>';
+        const msg = _histLoading ? 'Carregant…'
+          : _histFailed ? "No s'ha pogut carregar l'historial. Comprova la connexió i torna a triar les dates."
+          : 'Sense comandes completades en aquest període.';
+        list.innerHTML = `<p class="text-center text-kmute py-10">${msg}</p>`;
         return;
       }
 
