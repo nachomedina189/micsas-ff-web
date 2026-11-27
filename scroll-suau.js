@@ -11,6 +11,9 @@
   document.head.appendChild(st);
 
   var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  // Mòbils i tauletes (només dit): Lenis no hi fa res però tenia un bucle
+  // a cada frame; millor no engegar-lo i deixar el scroll natiu tot sol.
+  var touchOnly = matchMedia('(hover: none) and (pointer: coarse)');
   var lenis = null;
   var easeOut = function (t) { return 1 - Math.pow(1 - t, 4); };
 
@@ -54,10 +57,10 @@
 
   function init() {
     headerGap();
-    setSmooth(!reduce.matches);
+    setSmooth(!reduce.matches && !touchOnly.matches);
     if (document.body) new MutationObserver(syncLock).observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  if (reduce.addEventListener) reduce.addEventListener('change', function () { setSmooth(!reduce.matches); });
+  if (reduce.addEventListener) reduce.addEventListener('change', function () { setSmooth(!reduce.matches && !touchOnly.matches); });
   addEventListener('resize', headerGap);
 })();

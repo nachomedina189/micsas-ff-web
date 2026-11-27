@@ -385,6 +385,7 @@
     .nd-when { margin: 22px 0 6px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
     .nd-opt { display: flex; gap: 12px; align-items: flex-start; padding: 14px; margin-top: 10px; border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer; background: #fff8ec; transition: border-color .25s, background-color .25s; }
     .nd-opt:has(input:checked) { border-color: var(--red); background: #fff; }
+    .nd-opt .nd-fee { display: block; margin-top: 4px; font-style: normal; font-weight: 700; color: var(--red); }
     .nd-opt input { margin-top: 3px; accent-color: var(--red); width: 18px; height: 18px; flex-shrink: 0; }
     .nd-opt b { display: block; font-size: 16px; }
     .nd-opt span { display: block; font-size: 14px; color: var(--ink-2); margin-top: 3px; line-height: 1.35; }
@@ -540,7 +541,8 @@
         added: 'Afegit', see: 'Obre', close: 'Tancar', hint: 'Toca un panettone per descobrir-lo',
         soon: 'Aviat a la venda', soonShort: 'Aviat', soldout: 'Esgotat', cart: 'Cistella', cartTitle: 'La teva cistella',
         cartEmpty: 'Encara no hi has posat cap panettone.', when: 'Quan el vols?',
-        optPase: 'Divendres o diumenge', optPaseSub: "Te'l portem amb la teva comanda de pizzes (o sol). Tries el dia i l'hora al pas següent.",
+        optPase: 'Divendres o diumenge · sense cost d\'enviament', optPaseSub: "Te'l portem amb la teva comanda de pizzes (o sol). Tries el dia i l'hora al pas següent.",
+        optDayFee: "Amb cost d'enviament: encara per determinar, segons la zona.",
         optDay: "Dia d'entrega de panettones", optDayTbc: "Data per confirmar: t'avisarem per correu quan la tinguem.",
         total: 'Total', continue: 'Continuar', pay: "Pagament amb targeta, Bizum o en efectiu a l'entrega. Només repartim a Matadepera.",
         viewCart: 'Veure cistella', less: 'Un menys', more: 'Un més', allergens: 'Al·lèrgens', origin: 'Origen',
@@ -569,7 +571,8 @@
         added: 'Añadido', see: 'Abrir', close: 'Cerrar', hint: 'Toca un panettone para descubrirlo',
         soon: 'Pronto a la venta', soonShort: 'Pronto', soldout: 'Agotado', cart: 'Cesta', cartTitle: 'Tu cesta',
         cartEmpty: 'Todavía no has añadido ningún panettone.', when: '¿Cuándo lo quieres?',
-        optPase: 'Viernes o domingo', optPaseSub: 'Te lo llevamos con tu pedido de pizzas (o solo). Eliges el día y la hora en el siguiente paso.',
+        optPase: 'Viernes o domingo · sin gastos de envío', optPaseSub: 'Te lo llevamos con tu pedido de pizzas (o solo). Eliges el día y la hora en el siguiente paso.',
+        optDayFee: 'Con gastos de envío: aún por determinar, según la zona.',
         optDay: 'Día de entrega de panettones', optDayTbc: 'Fecha por confirmar: te avisaremos por correo cuando la tengamos.',
         total: 'Total', continue: 'Continuar', pay: 'Pago con tarjeta, Bizum o en efectivo en la entrega. Solo repartimos en Matadepera.',
         viewCart: 'Ver cesta', less: 'Uno menos', more: 'Uno más', allergens: 'Alérgenos', origin: 'Origen',
@@ -1220,7 +1223,7 @@
       h += '<p class="nd-when">' + T('when') + '</p>' +
         '<label class="nd-opt"><input type="radio" name="nd-dlv" value="order"' + (dlv === 'order' ? ' checked' : '') + '><span><b>' + T('optPase') + '</b><span>' + T('optPaseSub') + '</span></span></label>' +
         '<label class="nd-opt"><input type="radio" name="nd-dlv" value="panettone_day"' + (dlv === 'panettone_day' ? ' checked' : '') + '><span><b>' + T('optDay') + '</b><span>' +
-          (date ? esc(date.charAt(0).toUpperCase() + date.slice(1)) + '.' : T('optDayTbc')) + '</span></span></label>';
+          (date ? esc(date.charAt(0).toUpperCase() + date.slice(1)) + '.' : T('optDayTbc')) + ' <em class="nd-fee">' + T('optDayFee') + '</em></span></span></label>';
       bodyEl.innerHTML = h;
       $('nd-cart-total').textContent = N.fmtPrice(N.cart.total());
       $('nd-cart-go').disabled = !lines.length;

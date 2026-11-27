@@ -843,6 +843,7 @@
             <b class="min-w-0">${escapeHtml(c.name || 'Client')}</b>
             ${c.phone ? `<a href="${telHref(c.phone)}" class="text-sm underline">${escapeHtml(phoneLabel(c.phone))}</a>` : ''}
             <span class="text-sm ${paidOk ? 'text-kgreen' : 'text-kamber'} font-semibold">${pay}</span>
+            <span class="text-sm text-kamber font-semibold" title="El dia de panettones l'enviament va a part (import segons la zona)">+ cost d'enviament</span>
             <label class="ml-auto flex items-center gap-2 text-sm font-semibold cursor-pointer"><input type="checkbox" ${done ? 'checked' : ''} onchange="setPanDelivered('${o.id}', this.checked)" class="w-5 h-5"> Entregat</label>
           </div>
           <p class="text-sm mt-1">🎄 ${pans}</p>

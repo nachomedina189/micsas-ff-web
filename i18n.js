@@ -27,7 +27,7 @@
       nos_p2: "Cuinem i entreguem nosaltres mateixos perquè la pizza arribi al teu portal encara calenta. També tenim el servei d'esdeveniments, per a tot aquell públic que vol la pizza tradicional napolitana en la seva festa.",
       // SHOP
       nadal_kicker: 'Especial Nadal · Unitats limitades', nadal_title: 'Panettones artesans de Sicília',
-      nadal_desc: "Quatre panettones per regalar (o per regalar-te). Te'ls portem a casa amb la teva comanda o el dia d'entrega de panettones.",
+      nadal_desc: "Quatre panettones per regalar (o per regalar-te). Te'ls portem a casa amb la teva comanda, sense cost d'enviament, o el dia d'entrega de panettones.",
       nadal_cta: 'Veure els panettones →', nadal_cta_aria: 'Veure els panettones de Nadal', nadal_badge: 'Edició limitada', hero_nou: 'Nou',
       // MENU
       menu_h1: 'Les nostres pizzes',
@@ -116,7 +116,7 @@
       nos_p2: "Cocinamos y entregamos nosotros mismos para que la pizza llegue a tu puerta todavía caliente. También tenemos el servicio de eventos, para todo aquel público que quiera la pizza napolitana tradicional en su fiesta.",
       // SHOP
       nadal_kicker: 'Especial Navidad · Unidades limitadas', nadal_title: 'Panettones artesanos de Sicilia',
-      nadal_desc: 'Cuatro panettones para regalar (o para darte un capricho). Te los llevamos a casa con tu pedido o el día de entrega de panettones.',
+      nadal_desc: 'Cuatro panettones para regalar (o para darte un capricho). Te los llevamos a casa con tu pedido, sin gastos de envío, o el día de entrega de panettones.',
       nadal_cta: 'Ver los panettones →', nadal_cta_aria: 'Ver los panettones de Navidad', nadal_badge: 'Edición limitada', hero_nou: 'Nuevo',
       // MENU
       menu_h1: 'Nuestras pizzas',
