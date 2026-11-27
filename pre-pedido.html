@@ -183,7 +183,7 @@
 
       <!-- Card header -->
       <div class="px-6 pt-7 pb-5 border-b border-[#C4B08A]/20">
-        <h1 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">Quan i on et portem la pizza?</h1>
+        <h1 id="pp-card-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">Quan i on et portem la pizza?</h1>
       </div>
 
       <div class="px-6 py-5 space-y-5">
@@ -227,7 +227,7 @@
             <p class="text-xs font-semibold uppercase tracking-widest text-[#2A1A0F]">Quan</p>
             <p id="pp-time-summary" class="text-sm text-[#2A1A0F] truncate"></p>
           </div>
-          <button type="button" onclick="_ppShowStep('time')" class="shrink-0 text-sm font-medium text-[#E23F2E] hover:underline">Canviar</button>
+          <button type="button" id="pp-time-change" onclick="_ppShowStep('time')" class="shrink-0 text-sm font-medium text-[#E23F2E] hover:underline">Canviar</button>
         </div>
 
         <!-- Address -->
@@ -277,7 +277,7 @@
             class="w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all">
             Demana
           </button>
-          <p class="text-xs text-center font-light text-[#9B8A72] mt-3">Podràs triar les teves pizzes al següent pas</p>
+          <p id="pp-cta-note" class="text-xs text-center font-light text-[#9B8A72] mt-3">Podràs triar les teves pizzes al següent pas</p>
         </div>
 
         </div><!-- /pp-step-address -->
@@ -321,6 +321,9 @@
     }
 
     let ppSelectedTime = null;
+    // Especial Nadal (nadal.html → "Dia d'entrega de panettones"): només cal
+    // l'adreça; el dia el decidim nosaltres i no hi ha franja horària.
+    const PP_PANETTONE_DAY = new URLSearchParams(location.search).get('entrega') === 'panettones';
     function todayISO() { return new Date().toISOString().split('T')[0]; }
     // Només s'accepten comandes per divendres (5) i diumenge (0).
     function isValidOrderDay(dateStr) {
@@ -431,7 +434,7 @@
       const statusEl = document.getElementById('pp-pizza-status');
       window.renderPizzaBadge(statusEl, _ppPizzaStatus);
       if (_ppDailySoldOut) {
-        window.showSoldOut(ppDeliveryDate, () => selectDeliveryDay('other'));
+        if (!PP_PANETTONE_DAY) window.showSoldOut(ppDeliveryDate, () => selectDeliveryDay('other'));
         ppTimeOptions = [{ value: '', label: 'Pizzes exhaurides per aquest dia — torna un altre dia', disabled: true }];
         _ppRenderTimeDropdown();
         return;
@@ -622,7 +625,7 @@
     const PP_BTN_OFF = "w-full py-3.5 rounded-xl font-['League_Spartan',sans-serif] font-medium text-[15px] leading-[1.5] text-[#9B8A72] bg-[#C4B08A]/30 cursor-not-allowed transition-all";
 
     function validateForm() {
-      const ok  = !!(ppSelectedTime && ppAddressValid && (!ppNeedsNumber || _ppStreetNumber()));
+      const ok  = !!((ppSelectedTime || PP_PANETTONE_DAY) && ppAddressValid && (!ppNeedsNumber || _ppStreetNumber()));
       const btn = document.getElementById('pp-cta');
       btn.disabled = !ok;
       btn.className = ok ? PP_BTN_ON : PP_BTN_OFF;
@@ -634,7 +637,7 @@
       }
       // Si l'hora deixa de ser vàlida (canvi de dia, sold out...), es torna
       // al pas de l'hora: l'adreça només es mostra amb una hora triada.
-      if (!ppSelectedTime) _ppShowStep('time');
+      if (!ppSelectedTime && !PP_PANETTONE_DAY) _ppShowStep('time');
     }
 
     // Dos passos: primer l'hora i, un cop confirmada, l'adreça.
@@ -647,7 +650,10 @@
       addrStep.classList.toggle('hidden', !toAddress);
       const box = document.getElementById('pp-time-dropdown');
       if (box) box.classList.add('hidden');
-      if (toAddress) {
+      if (toAddress && PP_PANETTONE_DAY) {
+        document.getElementById('pp-time-summary').textContent = "Dia d'entrega de panettones";
+        document.getElementById('pp-time-change')?.classList.add('hidden');
+      } else if (toAddress) {
         const label = document.getElementById('pp-time-select-label')?.textContent?.trim() || ppSelectedTime;
         let day = 'Avui';
         if (ppDeliveryDate !== todayISO()) {
@@ -687,6 +693,20 @@
     }
 
     function goToMenu() {
+      if (PP_PANETTONE_DAY) {
+        if (!ppAddressValid || (ppNeedsNumber && !_ppStreetNumber())) return;
+        sessionStorage.removeItem('micsas_time');
+        sessionStorage.removeItem('micsas_delivery_date');
+        const _a = window._ppFormattedAddress || '';
+        sessionStorage.setItem('micsas_address', ppNeedsNumber ? [_a, _ppStreetNumber()].filter(Boolean).join(', ') : _a);
+        sessionStorage.setItem('micsas_zip',     window._ppExtractedZip    || '');
+        sessionStorage.setItem('micsas_city',    window._ppExtractedCity   || '');
+        sessionStorage.setItem('micsas_floor',   document.getElementById('pp-floor').value.trim());
+        sessionStorage.setItem('micsas_lat',     window._ppLat != null ? String(window._ppLat) : '');
+        sessionStorage.setItem('micsas_lng',     window._ppLng != null ? String(window._ppLng) : '');
+        window.location.href = 'pedido.html';
+        return;
+      }
       if (!ppSelectedTime || !ppAddressValid || _ppDailySoldOut) return;
       if (ppNeedsNumber && !_ppStreetNumber()) return;
       if (!isValidOrderDay(ppDeliveryDate)) {
@@ -716,6 +736,16 @@
 
     // Render slots immediately (no counts yet), then reload once Supabase is ready
     selectDeliveryDay('today');
+
+    // Especial Nadal: directe a l'adreça, sense passar per la tria d'hora.
+    if (PP_PANETTONE_DAY) {
+      document.getElementById('pp-card-title').textContent = "On et portem els panettones?";
+      document.getElementById('pp-cta-note').textContent = 'Al següent pas confirmes les teves dades i pagues';
+      document.getElementById('pp-cta').textContent = 'Continuar';
+      document.getElementById('pp-landing').classList.add('hidden');
+      document.getElementById('pp-card').classList.remove('hidden');
+      _ppShowStep('address');
+    }
   </script>
 
   <script type="module">
@@ -1596,7 +1626,9 @@
       const box = document.getElementById('pp-repeat');
       const p = window.MicsasPerfil && MicsasPerfil.get();
       const items = p && p.last && p.last.items || [];
-      if (!box || !items.length) return;
+      // Amb panettones per al dia d'entrega de panettones no es proposa
+      // repetir pizzes: aquella comanda no té ni dia ni hora de pase.
+      if (!box || !items.length || PP_PANETTONE_DAY) return;
       const es = (localStorage.getItem('micsas_lang') || document.documentElement.lang) === 'es';
       const T = es ? { hi: 'Hola', q: '¿Repites el último pedido?', yes: 'Repetir', on: '✓ Se pondrá en la cesta', undo: 'Quitar', notme: 'No soy yo' }
                    : { hi: 'Hola', q: "Repeteixes l'última comanda?", yes: 'Repetir', on: '✓ Es posarà a la cistella', undo: 'Treure', notme: 'No sóc jo' };

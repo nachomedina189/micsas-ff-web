@@ -254,6 +254,38 @@
           <div id="menu-list" class="space-y-2"></div>
         </div>
       </section>
+
+      <!-- Especial Nadal: unitats, dia d'entrega i entregues de panettones -->
+      <section id="pan-panel" class="flex-1 min-w-[17rem] bg-kcard border border-kline rounded-2xl">
+        <button type="button" id="pan-toggle" onclick="togglePanPanel()" aria-expanded="false" aria-controls="pan-body"
+          class="w-full flex items-center gap-4 px-4 py-3 text-left">
+          <span class="min-w-0 flex-1">
+            <span class="block text-xs font-bold uppercase tracking-widest text-kmute">🎄 Panettones</span>
+            <span id="pan-summary" class="block text-sm font-semibold mt-1">Carregant…</span>
+          </span>
+          <span id="pan-chev" class="chev">Editar</span>
+        </button>
+        <div id="pan-body" class="hidden px-4 pb-4 space-y-4">
+          <div>
+            <p class="text-xs text-kmute mb-2 leading-relaxed">Unitats totals de cada panettone (les que teniu per vendre). La web resta les venudes i ensenya "Queden X". Buit = encara no a la venda.</p>
+            <div id="pan-stock" class="space-y-2"></div>
+          </div>
+          <div class="border-t border-kline pt-4">
+            <p class="text-xs font-bold uppercase tracking-widest text-kmute mb-2">Dia d'entrega de panettones</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="pan-date" type="date" class="h-11 rounded-xl border border-kline bg-kbg px-3 text-sm font-semibold">
+              <button type="button" onclick="savePanDate()" class="ghost-btn h-11">Desar</button>
+              <button type="button" onclick="savePanDate(true)" class="ghost-btn h-11">Per confirmar</button>
+            </div>
+            <p id="pan-date-note" class="text-xs text-kmute mt-2"></p>
+          </div>
+          <div class="border-t border-kline pt-4">
+            <p class="text-xs font-bold uppercase tracking-widest text-kmute mb-2">Per entregar el dia de panettones <span id="pan-count" class="normal-case tracking-normal"></span></p>
+            <div id="pan-orders" class="space-y-2"></div>
+          </div>
+          <p id="pan-status" class="text-xs font-bold h-4 text-kmute" aria-live="polite"></p>
+        </div>
+      </section>
     </div>
 
     <!-- ════ VISTA CUINA: Sense afegir (a Aronium) → Preparant → Llest ════ -->
@@ -729,6 +761,121 @@
     }
 
 
+    // ── Especial Nadal: panell de panettones ──
+    const PAN_PANEL_KEY = 'micsas_pan_panel_open';
+    let panRows = [], panStock = {}, panDate = null;
+    function applyPanPanelOpen(open) {
+      document.getElementById('pan-body').classList.toggle('hidden', !open);
+      document.getElementById('pan-panel').classList.toggle('basis-full', open);
+      document.getElementById('pan-toggle').setAttribute('aria-expanded', String(open));
+      document.getElementById('pan-chev').textContent = open ? 'Amagar' : 'Editar';
+    }
+    function togglePanPanel() {
+      const open = document.getElementById('pan-body').classList.contains('hidden');
+      applyPanPanelOpen(open);
+      try { localStorage.setItem(PAN_PANEL_KEY, open ? '1' : '0'); } catch (_) {}
+      if (open) loadPanettones();
+    }
+    window.togglePanPanel = togglePanPanel;
+    try { applyPanPanelOpen(localStorage.getItem(PAN_PANEL_KEY) === '1'); } catch (_) {}
+    function panShort(name) { return String(name || '').replace(/^Panettone /, ''); }
+    function fmtPanDate(iso) {
+      if (!iso) return null;
+      const s = new Date(iso + 'T00:00:00').toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+    async function loadPanettones() {
+      const [{ data: rows, error: e1 }, { data: stock, error: e2 }] = await Promise.all([
+        supabase.from('panettones').select('id, name, price, stock_total, active, sort').order('sort'),
+        supabase.rpc('get_panettone_stock'),
+      ]);
+      if (e1 || e2) { document.getElementById('pan-summary').textContent = 'No s\'ha pogut carregar'; return; }
+      panRows = rows || [];
+      panStock = {};
+      ((stock && stock.items) || []).forEach(r => { panStock[r.id] = r; });
+      panDate = (stock && stock.delivery_date) || null;
+      renderPanettones();
+    }
+    function panDayOrders() {
+      return ordersCache.filter(o => o.panettone_delivery === 'panettone_day' && o.status !== 'cancelled' && isPaymentConfirmed(o)
+        && (o.order_items || []).some(isPanettoneItem));
+    }
+    function renderPanettones() {
+      const configured = panRows.filter(r => r.stock_total !== null);
+      const pending = panDayOrders().filter(o => !o.panettone_delivered_at);
+      document.getElementById('pan-summary').textContent = !panRows.length ? '—'
+        : (configured.length
+            ? panRows.map(r => `${panShort(r.name)} ${r.stock_total === null ? '–' : (panStock[r.id]?.remaining ?? '–')}`).join(' · ')
+            : 'Sense unitats posades: encara no es poden comprar')
+          + (pending.length ? ` · ${pending.length} per entregar` : '');
+      if (document.getElementById('pan-body').classList.contains('hidden')) return;
+      document.getElementById('pan-stock').innerHTML = panRows.map(r => {
+        const left = panStock[r.id]?.remaining;
+        const sold = r.stock_total === null || left == null ? null : r.stock_total - left;
+        return `<div class="flex flex-wrap items-center gap-3 rounded-xl border border-kline bg-kbg px-3 py-2">
+          <span class="min-w-[9rem] flex-1 font-semibold">${escapeHtml(panShort(r.name))} <span class="text-kmute font-normal text-sm">· ${Number(r.price).toFixed(2).replace('.', ',')} €</span></span>
+          <span class="text-sm text-kmute">${sold === null ? 'no a la venda' : `${sold} ${sold === 1 ? 'venut' : 'venuts'} · <b class="text-kfg">queden ${left}</b>`}</span>
+          <input type="number" min="0" max="9999" inputmode="numeric" data-pan-total="${r.id}" value="${r.stock_total ?? ''}" placeholder="—" aria-label="Unitats totals de ${escapeHtml(panShort(r.name))}"
+            class="w-20 h-10 rounded-lg border border-kline bg-kcard text-center font-black tabular-nums">
+          <button type="button" class="ghost-btn h-10" onclick="savePanStock('${r.id}')">Desar</button>
+        </div>`;
+      }).join('');
+      document.getElementById('pan-date').value = panDate || '';
+      document.getElementById('pan-date-note').textContent = panDate
+        ? `La web diu: ${fmtPanDate(panDate)}.`
+        : "La web diu: data per confirmar (t'avisarem per correu).";
+      const list = panDayOrders().sort((a, b) => (a.panettone_delivered_at ? 1 : 0) - (b.panettone_delivered_at ? 1 : 0) || new Date(a.created_at) - new Date(b.created_at));
+      document.getElementById('pan-count').textContent = `(${pending.length} pendents de ${list.length})`;
+      document.getElementById('pan-orders').innerHTML = list.length ? list.map(o => {
+        const c = o.customers || {}, a = o.addresses || {};
+        const pans = (o.order_items || []).filter(isPanettoneItem).map(it => `${Number(it.quantity) || 0}× ${escapeHtml(panShort(it.product_name))}`).join(' · ');
+        const done = !!o.panettone_delivered_at;
+        // Si la comanda també porta pizza (té dia de pase), en efectiu es cobra
+        // tot amb la pizza: el dia de panettones ja no s'ha de cobrar res.
+        const withPizza = !!o.delivery_date;
+        const paidOk = o.payment_status === 'paid' || (withPizza && o.status === 'delivered');
+        const pay = o.payment_status === 'paid' ? 'Pagat'
+          : withPizza ? (o.status === 'delivered' ? 'Cobrat amb la comanda de pizza' : 'Es cobra amb la comanda de pizza')
+          : `Cobrar ${Number(o.total).toFixed(2).replace('.', ',')} € en efectiu`;
+        const nav = a.lat != null && a.lng != null ? `https://www.google.com/maps/dir/?api=1&destination=${a.lat},${a.lng}&dir_action=navigate` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([a.street, a.city].filter(Boolean).join(', '))}`;
+        return `<div class="rounded-xl border border-kline px-3 py-2 ${done ? 'opacity-50' : ''}">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <b class="min-w-0">${escapeHtml(c.name || 'Client')}</b>
+            ${c.phone ? `<a href="${telHref(c.phone)}" class="text-sm underline">${escapeHtml(phoneLabel(c.phone))}</a>` : ''}
+            <span class="text-sm ${paidOk ? 'text-kgreen' : 'text-kamber'} font-semibold">${pay}</span>
+            <label class="ml-auto flex items-center gap-2 text-sm font-semibold cursor-pointer"><input type="checkbox" ${done ? 'checked' : ''} onchange="setPanDelivered('${o.id}', this.checked)" class="w-5 h-5"> Entregat</label>
+          </div>
+          <p class="text-sm mt-1">🎄 ${pans}</p>
+          <p class="text-sm text-kmute"><a href="${nav}" target="_blank" rel="noopener" class="underline">${escapeHtml(cuinaAddress(a))}</a>${o.delivery_date ? ` · pizza: ${escapeHtml(fmtPanDate(o.delivery_date).toLowerCase())}` : ''}</p>
+        </div>`;
+      }).join('') : '<p class="text-sm text-kmute">Encara no n\'hi ha cap.</p>';
+    }
+    async function savePanStock(id) {
+      const input = document.querySelector(`[data-pan-total="${id}"]`);
+      const raw = input.value.trim();
+      const total = raw === '' ? null : Math.max(0, Math.min(9999, Math.floor(Number(raw))));
+      if (raw !== '' && !Number.isFinite(total)) return;
+      const { error } = await supabase.rpc('set_panettone_stock', { p_id: id, p_total: total, p_active: true });
+      document.getElementById('pan-status').textContent = error ? 'No s\'ha pogut desar' : 'Desat ✓';
+      if (error) console.error(error);
+      loadPanettones();
+    }
+    window.savePanStock = savePanStock;
+    async function savePanDate(clear) {
+      const v = clear ? null : (document.getElementById('pan-date').value || null);
+      const { error } = await supabase.rpc('set_panettone_delivery_date', { p_date: v });
+      document.getElementById('pan-status').textContent = error ? 'No s\'ha pogut desar' : 'Desat ✓';
+      if (error) console.error(error);
+      loadPanettones();
+    }
+    window.savePanDate = savePanDate;
+    async function setPanDelivered(id, on) {
+      const { error } = await supabase.rpc('set_panettone_delivered', { p_order_id: id, p_delivered: !!on });
+      if (error) { console.error(error); showToast('No s\'ha pogut desar', true); }
+      scheduleLoadOrders();
+    }
+    window.setPanDelivered = setPanDelivered;
+
     // ── Masses del dia ──
     // El nombre de masses és el nombre de pizzes que es poden vendre aquell
     // dia (la web ho bloqueja quan s'acaben). Es posa per data d'entrega,
@@ -1121,6 +1268,7 @@
     let _lastLoadFailed = false;
     let _rtStatus = '';       // estat del canal realtime de Supabase
     let _lastRenderSig = '';
+    let _panLoadedOnce = false;
     async function loadOrders() {
       const seq = ++_loadSeq;
       const { data, error } = await supabase
@@ -1141,6 +1289,7 @@
       const sig = JSON.stringify(ordersCache) + JSON.stringify([...incidentsByOrder]) + businessDateISO();
       if (sig !== _lastRenderSig) { _lastRenderSig = sig; renderOrders(); } else updateTimers();
       loadDoughs();
+      if (panRows.length || !_panLoadedOnce) { _panLoadedOnce = true; loadPanettones(); }
       if (!isFirstLoad && newInScope) { _lastNewIds = newIds.filter(id => ordersCache.some(o => o.id === id && inDateScope(o))); playNewOrderSound(); }
     }
 
@@ -1191,6 +1340,9 @@
     window.addEventListener('offline', updateConnStatus);
 
     function inDateScope(o) {
+      // Comandes NOMÉS de panettones per al dia d'entrega de panettones: no
+      // tenen dia de pase; es veuen al panell "Panettones".
+      if (!o.delivery_date && o.panettone_delivery === 'panettone_day') return false;
       const today = businessDateISO();
       if (currentDateScope === 'today') return o.delivery_date === today;
       // Tots els pedidos d'avui endavant: la web deixa reservar fins a 13
@@ -1231,9 +1383,11 @@
       if (p) return p.kind === 'drink';
       return /cervesa|moretti|aigua|refresc|coca|beguda/i.test(name || '');
     }
+    // Especial Nadal: les línies de panettone (no són pizzes ni begudes).
+    function isPanettoneItem(it) { return it.sku ? String(it.sku).startsWith('pn-') : /^Panettone /.test(it.product_name || ''); }
     function pizzasOf(o) {
       if (o.pizza_count !== null && o.pizza_count !== undefined && Number.isFinite(Number(o.pizza_count))) return Number(o.pizza_count);
-      return (o.order_items || []).filter(it => !isDrinkName(it.product_name)).reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+      return (o.order_items || []).filter(it => !isDrinkName(it.product_name) && !isPanettoneItem(it)).reduce((s, it) => s + (Number(it.quantity) || 0), 0);
     }
 
     // entries: [{ group: [comandes], unconfirmed?: true }]
@@ -1465,7 +1619,7 @@
     function itemsHtml(o) {
       const items = o.order_items || [];
       const note = it => it.notes ? `<span class="block text-sm font-bold text-tred">⚠ ${escapeHtml(it.notes)}</span>` : '';
-      const pizzas = items.filter(it => !isDrinkName(it.product_name)).map(it => `
+      const pizzas = items.filter(it => !isDrinkName(it.product_name) && !isPanettoneItem(it)).map(it => `
         <li class="flex gap-3 text-[17px] leading-snug">
           <span class="w-6 shrink-0 text-right font-black tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0 font-semibold">${escapeHtml(it.product_name)}${note(it)}</span>
@@ -1475,12 +1629,30 @@
           <span class="w-6 shrink-0 text-right font-bold tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0">${escapeHtml(it.product_name)}${note(it)}</span>
         </li>`).join('');
-      return `<ul class="space-y-1">${pizzas}${drinks}</ul>`;
+      // Panettones: a part, amb quan s'han de portar.
+      const panTag = o.panettone_delivery === 'panettone_day'
+        ? `<span class="block text-xs font-bold text-tamber">NO avui · dia d'entrega de panettones</span>`
+        : `<span class="block text-xs font-bold text-tgreen">Porta'l amb aquesta comanda</span>`;
+      const pans = items.filter(it => isPanettoneItem(it)).map(it => `
+        <li class="flex gap-3 text-sm">
+          <span class="w-6 shrink-0 text-right font-bold tabular-nums">${Number(it.quantity) || 0}</span>
+          <span class="min-w-0">🎄 ${escapeHtml(it.product_name)}${panTag}</span>
+        </li>`).join('');
+      return `<ul class="space-y-1">${pizzas}${pans}${drinks}</ul>`;
     }
     function itemsInline(o) {
       const items = o.order_items || [];
       const notes = items.filter(it => it.notes).map(it => `<span class="block text-sm font-bold text-tred">⚠ ${escapeHtml(it.product_name)}: ${escapeHtml(it.notes)}</span>`).join('');
-      return `<p class="text-sm text-tmute">${items.map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ')}</p>${notes}`;
+      const line = list => list.map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ');
+      const rest = items.filter(it => !isPanettoneItem(it));
+      const pans = items.filter(isPanettoneItem);
+      // Panettones: el repartidor ha de saber si els porta ara o el dia
+      // d'entrega de panettones.
+      const later = o.panettone_delivery === 'panettone_day';
+      const panLine = pans.length
+        ? `<p class="text-sm font-bold ${later ? 'text-tamber' : 'text-tgreen'}">🎄 ${line(pans)} · ${later ? "NO avui (dia d'entrega de panettones)" : "porta'l ara"}</p>`
+        : '';
+      return `${rest.length ? `<p class="text-sm text-tmute">${line(rest)}</p>` : ''}${panLine}${notes}`;
     }
     function notesHtml(o) {
       const n = cleanNotes(o);
@@ -1573,12 +1745,16 @@
       const cashTotal = cash.reduce((s, o) => s + (Number(o.total) || 0), 0);
       const paidTotal = group.filter(o => o.payment_method !== 'cash').reduce((s, o) => s + (Number(o.total) || 0), 0);
       const tip = group.reduce((s, o) => s + (Number(o.tip_amount) || 0), 0);
+      // Pizza ara + panettones el dia d'entrega de panettones, en efectiu: es
+      // cobra tot ara (el dia de panettones ja no es cobra res).
+      const panCashLater = cash.some(o => o.panettone_delivery === 'panettone_day' && (o.order_items || []).some(isPanettoneItem));
       const payment = `
         ${cash.length ? `
           <div class="flex items-center justify-between gap-3 rounded-xl bg-tamberbg border border-tamberline px-4 py-2.5">
             <span class="text-xs font-black uppercase tracking-wide text-tamber">Cobrar en efectiu</span>
             <span class="text-2xl font-black tabular-nums">${fmt(cashTotal)}</span>
-          </div>` : ''}
+          </div>
+          ${panCashLater ? `<p class="text-xs font-semibold text-tamber">Inclou els panettones del dia d'entrega de panettones: es cobren ara.</p>` : ''}` : ''}
         ${paidTotal > 0 ? `<p class="text-sm font-semibold text-tgreen">✓ Pagat online · ${fmt(paidTotal)}</p>` : ''}
         ${tip > 0 ? `<p class="text-xs text-tmute">Inclou propina de ${fmt(tip)}</p>` : ''}`;
       const nav = stage === 'ready' || stage === 'out_for_delivery' ? `

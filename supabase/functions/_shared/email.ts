@@ -31,8 +31,11 @@ export interface OrderEmailData {
   items: OrderEmailItem[];
   total: number;
   paymentMethod: string; // 'cash' | 'card_delivery'
-  deliveryDate: string;  // YYYY-MM-DD
+  deliveryDate: string | null;  // YYYY-MM-DD; null = comanda només de panettones per al dia d'entrega de panettones
   slotTime: string | null;
+  // Especial Nadal: quan arriben els panettones de la comanda (si n'hi ha).
+  panettoneDelivery?: "order" | "panettone_day" | null;
+  panettoneDate?: string | null; // dia d'entrega de panettones; null = per confirmar
   address: {
     street: string;
     floor?: string | null;
@@ -73,9 +76,16 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
   const addressLine1 = [data.address.street, data.address.floor].filter(Boolean).map(escapeHtml).join(", ");
   const addressLine2 = [data.address.postalCode, data.address.city].filter(Boolean).map(escapeHtml).join(" ");
   const paymentLabel = data.paymentMethod === "cash" ? "Efectiu al repartidor" : "Pagat amb targeta";
-  const slotLabel = data.slotTime
-    ? `${fmtDeliveryDay(data.deliveryDate)} · ${escapeHtml(data.slotTime)}`
-    : fmtDeliveryDay(data.deliveryDate);
+  const panettoneDayLabel = data.panettoneDate
+    ? `Dia d'entrega de panettones: ${fmtDeliveryDay(data.panettoneDate)}`
+    : "Dia d'entrega de panettones (data per confirmar: t'avisarem per correu)";
+  const slotLabel = !data.deliveryDate
+    ? panettoneDayLabel
+    : (data.slotTime
+      ? `${fmtDeliveryDay(data.deliveryDate)} · ${escapeHtml(data.slotTime)}`
+      : fmtDeliveryDay(data.deliveryDate))
+      + (data.panettoneDelivery === "panettone_day" ? `<br><span style="font-size:13px;color:#5A3E28;">Panettones: ${panettoneDayLabel.charAt(0).toLowerCase() + panettoneDayLabel.slice(1)}</span>` : "");
+  const onlyPanettones = data.items.length > 0 && data.items.every((it) => it.unit_price < 0 || /^panettone /i.test(it.product_name));
 
   return `<!doctype html>
 <html lang="ca">
@@ -99,7 +109,7 @@ function buildOrderConfirmationHtml(data: OrderEmailData): string {
             <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.06em;text-transform:uppercase;color:#E23F2E;">Comanda confirmada</p>
             <h1 style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:22px;color:#2A1A0F;">Gràcies, ${escapeHtml(data.toName)}!</h1>
             <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#5A3E28;">
-              Hem rebut la teva comanda i ja la tenim preparada per al forn. Aquí tens el resum:
+              ${onlyPanettones ? "Hem rebut la teva comanda de panettones. Aquí tens el resum:" : "Hem rebut la teva comanda i ja la tenim preparada per al forn. Aquí tens el resum:"}
             </p>
 
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">

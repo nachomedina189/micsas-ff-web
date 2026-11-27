@@ -106,7 +106,12 @@
     try { d = cfDeliveryDate || ''; } catch (e) {}
     try { a = cfPlacesAddress || ''; } catch (e) {}
     if (t === 'Com més aviat millor' && window._cfEarliestSlot) t = 'Com més aviat millor (cap a les ' + window._cfEarliestSlot + ')';
-    when.textContent = 'Lliurament · ' + [fmtDay(d), t].filter(Boolean).join(', ');
+    // Especial Nadal: només panettones per al dia d'entrega de panettones.
+    let panDay = false;
+    try { panDay = typeof cfPanDayOnly === 'function' && cfPanDayOnly(); } catch (e) {}
+    when.textContent = panDay
+      ? "Lliurament · Dia d'entrega de panettones" + (typeof panDayLabel === 'function' ? ' (' + panDayLabel().replace(/:.*/, '').toLowerCase() + ')' : '')
+      : 'Lliurament · ' + [fmtDay(d), t].filter(Boolean).join(', ');
     where.textContent = a || 'A domicili · Matadepera';
   }
 
@@ -147,6 +152,7 @@
     const el = document.getElementById(id);
     if (el) mo.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
+  document.addEventListener('cf-pan-changed', sync);
   sync();
 })();
 

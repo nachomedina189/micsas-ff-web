@@ -71,13 +71,19 @@ Deno.serve(async (req) => {
           if (!error) {
             const { data: order, error: fetchErr } = await sb
               .from("orders")
-              .select("total, discount_code, discount_amount, payment_method, delivery_date, slot_time, customers(name, email), addresses(street, floor, postal_code, city), order_items(product_name, quantity, unit_price, notes)")
+              .select("total, discount_code, discount_amount, payment_method, delivery_date, slot_time, panettone_delivery, customers(name, email), addresses(street, floor, postal_code, city), order_items(product_name, quantity, unit_price, notes)")
               .eq("id", orderId)
               .single();
             if (fetchErr || !order) {
               console.error("[stripe-webhook] no s'ha pogut recuperar la comanda per l'email", orderId, fetchErr);
             } else {
               const cust = (order.customers as { name: string; email: string } | null) ?? { name: "", email: "" };
+              // Especial Nadal: data del dia d'entrega de panettones (si n'hi ha).
+              let panettoneDate: string | null = null;
+              if (order.panettone_delivery === "panettone_day") {
+                const { data: ps } = await sb.from("panettone_settings").select("delivery_date").limit(1).maybeSingle();
+                panettoneDate = (ps as { delivery_date: string | null } | null)?.delivery_date ?? null;
+              }
               const addr = (order.addresses as { street: string; floor: string | null; postal_code: string; city: string } | null) ?? { street: "", floor: null, postal_code: "", city: "" };
               await sendOrderConfirmationEmail({
                 toEmail: cust.email,
@@ -91,8 +97,10 @@ Deno.serve(async (req) => {
                 ],
                 total: Number(order.total),
                 paymentMethod: order.payment_method as string,
-                deliveryDate: order.delivery_date as string,
+                deliveryDate: order.delivery_date as string | null,
                 slotTime: order.slot_time as string | null,
+                panettoneDelivery: (order.panettone_delivery as "order" | "panettone_day" | null) ?? null,
+                panettoneDate,
                 address: { street: addr.street, floor: addr.floor, postalCode: addr.postal_code, city: addr.city },
               });
             }
