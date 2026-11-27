@@ -26,6 +26,8 @@
   var ITEMS = [
     {
       id: 'pn-tradicional', price: 32, color: '#6B2FD0', img: 'images/nadal/panettone-tradicional',
+      // Retall (fons transparent) per a la prestatgeria: -sm.webp i .webp; cw/ch = mida original.
+      cut: 'images/nadal/pn-tradicional', cw: 1696, ch: 1919,
       name: { ca: 'Tradicional', es: 'Tradicional' },
       order: 'Panettone Tradicional',
       tag: { ca: 'Panses i taronja confitada', es: 'Pasas y naranja confitada' },
@@ -37,6 +39,7 @@
     },
     {
       id: 'pn-festuc', price: 37, color: '#6E9B2F', img: 'images/nadal/panettone-festuc',
+      cut: 'images/nadal/pn-festuc', cw: 1823, ch: 1969,
       name: { ca: 'Festuc', es: 'Pistacho' },
       order: 'Panettone Festuc',
       tag: { ca: 'Glaçat i crema de festuc', es: 'Glaseado y crema de pistacho' },
@@ -48,6 +51,7 @@
     },
     {
       id: 'pn-xocolata', price: 33, color: '#1F5FB0', img: 'images/nadal/panettone-xocolata',
+      cut: 'images/nadal/pn-xocolata', cw: 1878, ch: 1904,
       name: { ca: 'Xocolata siciliana', es: 'Chocolate siciliano' },
       order: 'Panettone Xocolata siciliana',
       tag: { ca: 'Banyat de xocolata negra', es: 'Bañado en chocolate negro' },
@@ -59,6 +63,7 @@
     },
     {
       id: 'pn-gotes', price: 33, color: '#E0731C', img: 'images/nadal/panettone-gotes',
+      cut: 'images/nadal/pn-gotes', cw: 1781, ch: 1933,
       name: { ca: 'Gotes de xocolata', es: 'Gotas de chocolate' },
       order: 'Panettone Gotes de xocolata',
       tag: { ca: 'Massa daurada amb gotes de xocolata', es: 'Masa dorada con gotas de chocolate' },
@@ -103,7 +108,8 @@
         stock[row.id] = {
           remaining: row.remaining == null ? null : Math.max(0, Number(row.remaining) || 0),
           active: row.active !== false,
-          price: Number(row.price) || null
+          price: Number(row.price) || null,
+          total: row.total == null ? null : Math.max(0, Number(row.total) || 0)
         };
       });
       state.stock = stock;
@@ -132,6 +138,21 @@
     if (r <= 0) return 'soldout';
     if (r <= FEW) return 'few';
     return 'ok';
+  }
+  // Unitats totals (null = encara no posades) i sumes per al reclam
+  // "Només N panettones aquest Nadal · Queden M".
+  function total(id) {
+    var s = state.stock[id];
+    return s && s.total != null ? s.total : null;
+  }
+  function totals() {
+    var t = 0, r = 0, any = false;
+    ITEMS.forEach(function (it) {
+      var tt = total(it.id), rr = remaining(it.id);
+      if (tt == null || rr == null) return;
+      any = true; t += tt; r += rr;
+    });
+    return any ? { total: t, remaining: r } : null;
   }
   function price(id) {
     var s = state.stock[id];
@@ -239,7 +260,7 @@
     lang: lang, t: t, fmtPrice: fmtPrice, fmtDate: fmtDate,
     refresh: refresh,
     onChange: function (fn) { listeners.push(fn); if (state.loaded || state.failed) fn(api); },
-    remaining: remaining, status: status, price: price, maxQty: maxQty,
+    remaining: remaining, status: status, price: price, maxQty: maxQty, total: total, totals: totals,
     get loaded() { return state.loaded; },
     get failed() { return state.failed; },
     get deliveryDate() { return state.deliveryDate; },
