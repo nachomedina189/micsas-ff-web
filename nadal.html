@@ -14,11 +14,14 @@
   <meta property="og:url" content="https://www.micsasff.com/nadal.html">
   <meta property="og:locale" content="ca_ES">
   <meta name="theme-color" content="#EFE3CC">
-  <link rel="icon" href="logo micsas.png">
-  <link rel="apple-touch-icon" href="logo micsas.png">
+  <link rel="icon" href="images/nadal/icon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="images/nadal/icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300..900&display=swap" rel="stylesheet">
+  <!-- Títols del llibre: només les lletres dels noms dels panettones (pocs KB).
+       Si se n'afegeix un amb lletres noves, afegiu-les a text=. -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&amp;display=swap&amp;text=%20.ACEFGIMNOPSTXacdefhilmnorstux" rel="stylesheet">
   <link rel="preload" as="image" href="images/nadal/estanteria-1600.webp" media="(min-width: 768px) and (min-aspect-ratio: 9/10) and (max-width: 1600px)">
   <link rel="preload" as="image" href="images/nadal/estanteria.webp" media="(min-width: 1601px) and (min-aspect-ratio: 9/10)">
   <link rel="preload" as="image" href="images/nadal/estanteria-doble.webp" media="(max-width: 767px), (max-aspect-ratio: 9/10)">
@@ -28,6 +31,7 @@
       --wall: #EFE3CC; --ink: #2A1A0F; --ink-2: #5A3E28; --muted: #76624C;
       --red: #c80a07; --red-2: #E23F2E; --cream: #F2E6CE; --paper: #FBF4E6; --line: rgba(42, 26, 15, .14);
       --font: 'League Spartan', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --serif: 'Cinzel Decorative', 'Cinzel', Georgia, 'Times New Roman', serif;
       --header-h: 64px;
     }
     * { box-sizing: border-box; }
@@ -179,33 +183,71 @@
     }
     .nd-sheet.is-on { visibility: visible; pointer-events: auto; transition-delay: 0s; }
     .nd-sheet.is-v { perspective: 3600px; }
+    .nd-sheet.is-snap, .nd-sheet.is-snap * { transition: none !important; }
+    /* Les textures del llibre (~35 KB) es baixen quan la pàgina ja s'ha
+       carregat, o en obrir-lo: no competeixen amb la prestatgeria. */
+    .nd-sheet.is-ready { --pell: url('images/nadal/libre-pell.webp'); --cvk: url('images/nadal/libre-cantonada.webp'); }
+    /* Llibre de Nadal: tapes de pell (una textura grisa de 13 KB que es tenyeix
+       amb el color de cada panettone), cantoneres i filet daurats, i dins
+       pàgines de paper vell. La pell es veu com a vora de les tapes al
+       voltant de les pàgines, menys pel llom. */
+    .nd-leather {
+      background-color: var(--lc, #1E4024);
+      background-image: var(--pell, none);
+      background-size: 300px 300px; background-blend-mode: overlay;
+    }
     .nd-f1 {
-      position: relative; transform-style: preserve-3d; background: var(--paper); border-radius: 16px 0 0 16px;
-      box-shadow: 0 30px 60px rgba(42, 26, 15, .22), 0 2px 6px rgba(42, 26, 15, .12);
+      position: relative; transform-style: preserve-3d; border-radius: 10px 0 0 10px;
+      box-shadow: 0 30px 60px rgba(42, 26, 15, .26), 0 2px 6px rgba(42, 26, 15, .14);
       transform-origin: 0 50%; transform: rotateY(-86deg); opacity: 0;
       transition: transform .42s cubic-bezier(.55, 0, .7, .2), opacity .3s .12s;
     }
     .nd-sheet.is-on .nd-f1 { transform: none; opacity: 1; transition: transform .5s cubic-bezier(.2, .85, .25, 1), opacity .22s; }
-    .nd-f1-in { position: relative; height: 100%; display: flex; flex-direction: column; padding: 26px 26px 24px; overflow: auto; }
-    .nd-f1-in::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c, var(--red)); border-radius: 16px 0 0 16px; }
+    .nd-page {
+      border: 9px solid transparent; border-right-width: 0;
+      background:
+        radial-gradient(130% 100% at 70% 45%, #FCF5E6 50%, #F1E3C5 100%) padding-box,
+        var(--pell, none) 0 0 / 300px 300px border-box,
+        var(--lc, #1E4024);
+      background-blend-mode: normal, overlay;
+    }
+    .nd-f1-in {
+      position: relative; height: 100%; display: flex; flex-direction: column; padding: 24px 24px 20px; overflow: auto;
+      border-radius: 10px 0 0 10px; box-shadow: inset -16px 0 18px -16px rgba(42, 26, 15, .32);
+    }
     .nd-f2 {
       position: absolute; left: 100%; top: 0; width: 100%; height: 100%; transform-style: preserve-3d;
       transform-origin: 0 50%; transform: rotateY(-179deg); transition: transform .45s cubic-bezier(.5, 0, .75, .3);
     }
     .nd-sheet.is-unfold .nd-f2 { transform: rotateY(0deg); transition: transform .8s cubic-bezier(.3, .8, .2, 1); }
-    .nd-f2-in, .nd-f2-cover { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 0 16px 16px 0; }
+    .nd-f2-in, .nd-f2-cover { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 0 10px 10px 0; }
     .nd-f2-in {
-      background: var(--paper); padding: 26px 26px 24px; overflow: auto; display: flex; flex-direction: column;
-      box-shadow: inset 14px 0 16px -14px rgba(42, 26, 15, .28), 0 30px 60px rgba(42, 26, 15, .18);
+      border-width: 9px 9px 9px 0; padding: 24px 24px 20px; overflow: auto; display: flex; flex-direction: column;
+      box-shadow: inset 16px 0 18px -16px rgba(42, 26, 15, .32), 0 30px 60px rgba(42, 26, 15, .2);
     }
     .nd-f2-cover {
-      transform: rotateY(180deg); background: var(--c, var(--red)); color: #fff; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px;
-      background-image: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 55%);
+      transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; text-align: center; padding: 24px; color: #E4C47E; overflow: hidden;
+      box-shadow: inset 0 0 34px rgba(0, 0, 0, .5), inset 0 0 3px rgba(0, 0, 0, .6);
     }
-    .nd-f2-cover small { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; font-weight: 800; opacity: .85; }
-    .nd-f2-cover strong { font-size: 28px; line-height: 1; font-weight: 900; letter-spacing: -.02em; }
-    .nd-f2-cover span { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; padding: 6px 12px; border: 1.5px solid rgba(255, 255, 255, .7); border-radius: 999px; }
+    /* Filet doble daurat i cantoneres (una sola imatge girada). */
+    .nd-f2-cover::before {
+      content: ''; position: absolute; inset: 11px; border: 4px double rgba(222, 189, 110, .8); border-radius: 2px; pointer-events: none;
+    }
+    .cv-k {
+      position: absolute; left: 5px; top: 5px; width: clamp(46px, 21%, 82px); aspect-ratio: 220 / 232;
+      background: var(--cvk, none) 0 0 / contain no-repeat; pointer-events: none;
+    }
+    .cv-k.is-tr { left: auto; right: 5px; transform: scaleX(-1); }
+    .cv-k.is-bl { top: auto; bottom: 5px; transform: scaleY(-1); }
+    .cv-k.is-br { left: auto; top: auto; right: 5px; bottom: 5px; transform: scale(-1, -1); }
+    .nd-f2-cover .cv-pre, .nd-f2-cover .cv-by { position: relative; font-family: var(--serif); font-size: 12px; letter-spacing: .3em; text-transform: uppercase; font-weight: 700; }
+    .nd-f2-cover strong {
+      position: relative; max-width: 86%; font-family: var(--serif); font-size: clamp(26px, 2.6vw, 36px); line-height: 1.05; font-weight: 700;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, .6), 0 -1px 0 rgba(255, 236, 190, .22), 0 0 14px rgba(0, 0, 0, .3);
+    }
+    .nd-f2-cover .cv-pre, .nd-f2-cover .cv-by { text-shadow: 0 1px 0 rgba(0, 0, 0, .6); }
+    .nd-f2-cover .cv-rule { position: relative; width: 54px; height: 1px; margin: 4px 0 2px; background: currentColor; opacity: .8; }
 
     .s-kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--red); font-weight: 900; }
     /* Punts i fletxes per passar d'un panettone a l'altre (o lliscar). */
@@ -219,10 +261,12 @@
     .s-nav .nv-dot.is-on i { width: 14px; background: var(--c, var(--red)); }
     .nd-sheet:not(.is-v) .s-nav .nv-dot { display: none; }
     .s-kicker .nd-pulse { width: 8px; height: 8px; }
-    .nd-sheet h2 { margin: 0; font-size: clamp(30px, 2.8vw, 42px); line-height: .95; letter-spacing: -.025em; font-weight: 900; }
-    .s-sub { margin: 4px 0 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
-    .s-tag { margin: 12px 0 0; font-size: 16px; line-height: 1.35; color: var(--ink-2); }
-    .s-price { margin: 16px 0 0; font-size: 30px; font-weight: 900; letter-spacing: -.02em; }
+    .nd-sheet h2 { margin: 0; font-family: var(--serif); font-size: clamp(28px, 2.5vw, 38px); line-height: 1.02; letter-spacing: 0; font-weight: 700; color: var(--ink); }
+    .s-tag { margin: 10px 0 0; font-size: 16px; line-height: 1.35; color: var(--ink-2); }
+    .s-orn { display: block; width: 90px; height: auto; margin: 16px 0 0; opacity: .9; }
+    .s-all { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+    .s-all b { font-weight: 800; }
+    .s-price { margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -.02em; }
     .nd-meter { margin: 14px 0 0; }
     .nd-meter .m-big { display: block; font-size: 17px; line-height: 1.15; font-weight: 900; color: var(--ink); }
     .nd-meter .m-small { display: block; margin-top: 7px; font-size: 13px; font-weight: 700; color: var(--muted); }
@@ -234,12 +278,6 @@
     @keyframes nd-glow { 50% { filter: brightness(1.25); } }
     .nd-sheet .nd-btn { margin-top: auto; width: 100%; }
     .s-gap { flex: 1 1 18px; min-height: 18px; }
-    .s-desc { margin: 0; font-size: 16px; line-height: 1.45; color: var(--ink-2); }
-    .s-rows { margin: 16px 0 0; }
-    .s-rows div { display: grid; grid-template-columns: 7.2em 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.35; }
-    .s-rows dt { font-weight: 800; }
-    .s-rows dd { margin: 0; color: var(--ink-2); }
-    .s-pay { margin: auto 0 0; padding-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
     .nd-sheet-x {
       position: absolute; right: -14px; top: -14px; z-index: 3; width: 40px; height: 40px; border-radius: 999px; border: 0; cursor: pointer;
       display: grid; place-items: center; background: var(--ink); color: var(--cream); box-shadow: 0 8px 20px rgba(42, 26, 15, .25);
@@ -248,34 +286,31 @@
     .nd-sheet.is-unfold .nd-sheet-x { opacity: 1; transform: none; transition-delay: .5s; }
     .nd-sheet-x svg { width: 18px; height: 18px; }
 
-    /* Mòbil: la fitxa es desplega cap avall. */
-    .nd-sheet.is-v .nd-f1 { border-radius: 18px 18px 0 0; transform-origin: 50% 0; transform: rotateX(80deg); }
-    .nd-sheet.is-v .s-sub { display: none; }
+    /* Mòbil: el llibre s'obre cap avall (llom horitzontal). */
+    .nd-sheet.is-v .nd-f1 { border-radius: 10px 10px 0 0; transform-origin: 50% 0; transform: rotateX(80deg); }
     .nd-sheet.is-v.is-on .nd-f1 { transform: none; }
-    .nd-sheet.is-v .nd-f1-in { padding: 18px 18px 16px; }
-    .nd-sheet.is-v .nd-f1-in::before { left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 5px; border-radius: 18px 18px 0 0; }
+    .nd-sheet.is-v .nd-f1-in { border-width: 8px 8px 0 8px; border-radius: 10px 10px 0 0; padding: 16px 18px 14px; box-shadow: inset 0 -16px 18px -16px rgba(42, 26, 15, .32); }
     .nd-sheet.is-v .nd-f2 { left: 0; top: 100%; transform-origin: 50% 0; transform: rotateX(179deg); }
     .nd-sheet.is-v.is-unfold .nd-f2 { transform: rotateX(0deg); transition: transform .8s cubic-bezier(.3, .8, .2, 1); }
-    .nd-sheet.is-v .nd-f2-in, .nd-sheet.is-v .nd-f2-cover { border-radius: 0 0 18px 18px; }
-    .nd-sheet.is-v .nd-f2-in { padding: 16px 18px 16px; box-shadow: inset 0 14px 16px -14px rgba(42, 26, 15, .28), 0 24px 50px rgba(42, 26, 15, .18); }
-    .nd-sheet.is-v .nd-f2-cover { transform: rotateX(180deg); }
-    .nd-sheet.is-v h2 { font-size: 30px; }
+    .nd-sheet.is-v .nd-f2-in, .nd-sheet.is-v .nd-f2-cover { border-radius: 0 0 10px 10px; }
+    .nd-sheet.is-v .nd-f2-in { border-width: 0 8px 8px 8px; padding: 14px 18px 16px; box-shadow: inset 0 16px 18px -16px rgba(42, 26, 15, .32), 0 24px 50px rgba(42, 26, 15, .2); }
+    .nd-sheet.is-v .nd-f2-cover { transform: rotateX(180deg); padding: 14px 20px; gap: 5px; }
+    .nd-sheet.is-v .nd-f2-cover::before { inset: 9px; }
+    .nd-sheet.is-v .nd-f2-cover strong { font-size: 26px; }
+    .nd-sheet.is-v .nd-f2-cover .cv-pre, .nd-sheet.is-v .nd-f2-cover .cv-by { font-size: 10.5px; }
+    .nd-sheet.is-v .cv-k { width: clamp(40px, 15%, 64px); }
+    .nd-sheet.is-v h2 { font-size: 27px; }
     .nd-sheet.is-v .s-kicker { margin-bottom: 8px; font-size: 11px; }
-    .nd-sheet.is-v .s-tag { margin-top: 6px; font-size: 14.5px; }
-    .nd-sheet.is-v .s-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-    .nd-sheet.is-v .s-price { margin: 0; font-size: 26px; }
-    .nd-sheet.is-v .nd-meter { margin-top: 10px; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 10px; }
+    .nd-sheet.is-v .s-tag { margin-top: 5px; font-size: 14.5px; }
+    .nd-sheet.is-v .s-orn { display: none; }
+    .nd-sheet.is-v .s-gap { flex-basis: 10px; min-height: 10px; }
+    .nd-sheet.is-v .s-all { font-size: 12px; }
+    .nd-sheet.is-v .s-price { font-size: 28px; }
+    .nd-sheet.is-v .nd-meter { margin-top: 6px; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 10px; }
     .nd-sheet.is-v .nd-meter .m-big { grid-column: 2; grid-row: 1; font-size: 14px; text-align: right; }
     .nd-sheet.is-v .nd-meter .m-small { grid-column: 1; grid-row: 1; margin: 0; font-size: 13px; }
     .nd-sheet.is-v .nd-meter .m-bar { grid-column: 1 / -1; grid-row: 2; }
-    .nd-sheet.is-v .s-row-origin { display: none; }
-    .nd-sheet.is-v .s-gap { flex-basis: 12px; min-height: 12px; }
-    .nd-sheet.is-v .s-desc { font-size: 14.5px; line-height: 1.4; }
-    .nd-sheet.is-v .s-rows { margin-top: 8px; }
-    .nd-sheet.is-v .s-rows div { padding: 7px 0; font-size: 13px; grid-template-columns: 6.6em 1fr; }
-    .nd-sheet.is-v .s-pay { padding-top: 8px; font-size: 12px; }
     .nd-sheet.is-v .nd-sheet-x { right: 8px; top: -50px; }
-    .s-head { display: block; }
 
     .nd-btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap;
@@ -405,7 +440,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         <span data-t="back">Tornar</span>
       </a>
-      <div class="nd-brand"><img src="images/micsas-wordmark-red.png" alt="micsas.ff" width="88" height="22"><span data-t="brand">Especial Nadal</span></div>
+      <div class="nd-brand"><img src="images/nadal/wordmark.webp" alt="micsas.ff" width="75" height="22"><span data-t="brand">Especial Nadal</span></div>
     </div>
     <div class="nd-right">
       <div class="nd-lang" role="group" aria-label="Idioma">
@@ -437,31 +472,25 @@
 
     <section class="nd-sheet" id="nd-sheet" role="dialog" aria-labelledby="nd-s-name" aria-hidden="true">
       <div class="nd-f1">
-        <div class="nd-f1-in">
+        <div class="nd-f1-in nd-page">
           <div class="s-kicker"><span class="nd-pulse" aria-hidden="true"></span><span data-t="limited">Edició limitada</span><span class="s-nav" id="nd-nav"></span></div>
-          <div class="s-head">
-            <div>
-              <h2 id="nd-s-name"></h2>
-              <p class="s-sub" data-t="kicker">Panettone artesà de Sicília</p>
-            </div>
-            <p class="s-price" id="nd-s-price"></p>
-          </div>
+          <h2 id="nd-s-name"></h2>
           <p class="s-tag" id="nd-s-tag"></p>
-          <div class="nd-meter" id="nd-meter"><b class="m-big" id="nd-m-r"></b><div class="m-bar"><i id="nd-m-fill"></i></div><span class="m-small" id="nd-m-l"></span></div>
+          <img class="s-orn" data-src="images/nadal/libre-floro.webp" alt="" width="90" height="45" decoding="async">
           <span class="s-gap"></span>
-          <button type="button" class="nd-btn" id="nd-add"></button>
+          <p class="s-all"><b data-t="allergens">Al·lèrgens</b>: <span id="nd-s-all"></span></p>
         </div>
         <div class="nd-f2">
-          <div class="nd-f2-in">
-            <p class="s-desc" id="nd-s-desc"></p>
-            <dl class="s-rows">
-              <div><dt data-t="allergens">Al·lèrgens</dt><dd id="nd-s-all"></dd></div>
-              <div><dt data-t="delivery">Entrega</dt><dd id="nd-s-dlv"></dd></div>
-              <div class="s-row-origin"><dt data-t="origin">Origen</dt><dd data-t="originV">Sicília, elaboració artesana</dd></div>
-            </dl>
-            <p class="s-pay" data-t="pay">Pagament amb targeta, Bizum o en efectiu a l'entrega. Només repartim a Matadepera.</p>
+          <div class="nd-f2-in nd-page">
+            <p class="s-price" id="nd-s-price"></p>
+            <div class="nd-meter" id="nd-meter"><b class="m-big" id="nd-m-r"></b><div class="m-bar"><i id="nd-m-fill"></i></div><span class="m-small" id="nd-m-l"></span></div>
+            <span class="s-gap"></span>
+            <button type="button" class="nd-btn" id="nd-add"></button>
           </div>
-          <div class="nd-f2-cover" aria-hidden="true"><small>micsas.ff</small><strong id="nd-s-cover"></strong><span data-t="limited">Edició limitada</span></div>
+          <div class="nd-f2-cover nd-leather" aria-hidden="true">
+            <i class="cv-k"></i><i class="cv-k is-tr"></i><i class="cv-k is-bl"></i><i class="cv-k is-br"></i>
+            <span class="cv-pre">Panettone</span><strong id="nd-s-cover"></strong><i class="cv-rule"></i><span class="cv-by">micsas.ff</span>
+          </div>
         </div>
       </div>
       <button type="button" class="nd-sheet-x" id="nd-sheet-x" data-t-aria="close" aria-label="Tancar">
@@ -831,7 +860,12 @@
       var sheet = $('nd-sheet'), f1 = sheet.querySelector('.nd-f1'), f1in = sheet.querySelector('.nd-f1-in'), f2 = sheet.querySelector('.nd-f2'), f2in = sheet.querySelector('.nd-f2-in');
       var vw = L.vw, vh = L.vh, p = it.p, ratio = p.cw / p.ch;
       var v = L.mode === 'duo';
-      sheet.classList.toggle('is-v', v);
+      // Canviar d'orientació sense transició: si no, la primera vegada que
+      // s'obre al mòbil la tapa passava de rotateY a rotateX i sortia torta.
+      if (sheet.classList.contains('is-v') !== v) {
+        sheet.classList.add('is-snap'); sheet.classList.toggle('is-v', v);
+        void sheet.offsetWidth; sheet.classList.remove('is-snap');
+      }
       f1.style.height = ''; f1in.style.height = ''; f2.style.height = '';
       if (!v) {
         var pw = Math.round(clamp(vw * .2, 240, 300));
@@ -876,7 +910,15 @@
     }
 
     // ── Obrir / tancar ─────────────────────────────────────────────────
+    function bookReady() {
+      var sh = $('nd-sheet'), o = sh.querySelector('.s-orn');
+      if (sh.classList.contains('is-ready')) return;
+      sh.classList.add('is-ready');
+      if (o && o.dataset.src) o.src = o.dataset.src;
+    }
+    window.addEventListener('load', function () { setTimeout(bookReady, 1200); });
     function openItem(it, byKey) {
+      bookReady();
       if (!it || S.phase === 'loading' || S.phase === 'intro' || S.phase === 'closing') return;
       if (S.active === it) return;
       if (S.active) {
@@ -1088,18 +1130,18 @@
         b.setAttribute('aria-label', 'Panettone ' + N.t(it.p.name) + ', ' + N.fmtPrice(N.price(it.p.id)) + (st.t ? ', ' + st.t : ''));
       });
     }
+    // Color de la pell de cada llibre (el del paquet, fosc i vellut).
+    var LEATHER = { 'pn-tradicional': '#41205F', 'pn-festuc': '#1F4A27', 'pn-xocolata': '#18396B', 'pn-gotes': '#8A3F14' };
     function paintSheet() {
       var it = S.active; if (!it) return;
       var p = it.p, sheet = $('nd-sheet');
       sheet.style.setProperty('--c', p.color);
+      sheet.style.setProperty('--lc', LEATHER[p.id] || '#1F3F22');
       $('nd-s-name').textContent = N.t(p.name);
-      $('nd-s-cover').textContent = 'Panettone ' + N.t(p.name);
+      $('nd-s-cover').textContent = N.t(p.name);
       $('nd-s-tag').textContent = N.t(p.tag);
       $('nd-s-price').textContent = N.fmtPrice(N.price(p.id));
-      $('nd-s-desc').textContent = N.t(p.desc);
       $('nd-s-all').textContent = N.t(p.allergens);
-      var date = N.deliveryDate ? N.fmtDate(N.deliveryDate) : null;
-      $('nd-s-dlv').textContent = T('deliveryV') + (date ? ' · ' + date : '');
       var add = $('nd-add');
       add.disabled = !canBuy(p.id);
       add.classList.remove('is-done');

@@ -143,6 +143,19 @@
     #navbar.nav-scrolled button[aria-label="Cistella"] iconify-icon {
       color: #2A1A0F !important;
     }
+    /* Especial Nadal: "No voleu un panettone?" al checkout. Tapa de llibre de
+       pell verda amb filet daurat, com a nadal.html. */
+    .cf-up {
+      position: relative; border-radius: 16px; color: #F2E6CE; overflow: hidden;
+      background-color: #1F4A27; background-image: url('images/nadal/libre-pell.webp'); background-size: 300px 300px; background-blend-mode: overlay;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, .45), 0 10px 24px rgba(31, 74, 39, .22);
+    }
+    .cf-up::before { content: ''; position: absolute; inset: 7px; border: 3px double rgba(222, 189, 110, .75); border-radius: 11px; pointer-events: none; }
+    .cf-up-k { color: #E4C47E; }
+    .cf-up-list { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .cf-up-list::-webkit-scrollbar { display: none; }
+    .cf-up-list { scroll-padding-inline: 20px; }
+    .cf-up-card { flex: 1 0 100px; max-width: 150px; scroll-snap-align: start; background: #FBF4E6; color: #2A1A0F; border-radius: 12px; }
   </style>
   <link rel="stylesheet" href="pizza-badge.css">
   <script src="pizza-badge.js"></script>
@@ -585,6 +598,17 @@
             oninput="setCustomTip(this.value)">
         </section>
 
+        <!-- Especial Nadal: si no hi ha cap panettone al cistell, se n'ofereix un
+             abans de pagar (renderUpsell). -->
+        <section id="cf-upsell" class="cf-up hidden" aria-labelledby="cf-up-title">
+          <div class="relative px-5 pt-5 pb-3">
+            <p class="cf-up-k text-[11px] uppercase tracking-[.2em] font-bold">Especial Nadal · unitats limitades</p>
+            <h2 id="cf-up-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl mt-1">No voleu un panettone?</h2>
+            <p class="text-xs font-light opacity-85 mt-1">Artesans de Sicília. Us el portem amb aquesta comanda.</p>
+          </div>
+          <div id="cf-upsell-list" class="cf-up-list relative flex gap-2.5 overflow-x-auto snap-x px-5 pb-5"></div>
+        </section>
+
         <!-- Terms & Conditions -->
         <label class="flex items-start gap-3 cursor-pointer group">
           <input type="checkbox" id="cf-tnc"
@@ -980,6 +1004,7 @@
       renderNadal();
       renderCart(false);
       renderPanChoice();
+      renderUpsell();
     }
     if (NADAL) NADAL.onChange(onNadalStock);
     renderNadal();
@@ -1703,6 +1728,51 @@
       openStripeOverlay(_pendingOrderData.total);
     }
 
+    // "No voleu un panettone?": només si al cistell no n'hi ha cap i en queden.
+    let _upsellKey = '';
+    function renderUpsell() {
+      const box = document.getElementById('cf-upsell');
+      if (!box) return;
+      const list = !NADAL || !NADAL.loaded || cartHasPan() ? [] : NADAL.items.filter(p => {
+        const st = NADAL.status(p.id);
+        return (st === 'ok' || st === 'few') && panRoom(p.id) > 0;
+      });
+      box.classList.toggle('hidden', !list.length);
+      const key = list.map(p => p.id + ':' + NADAL.price(p.id) + ':' + NADAL.remaining(p.id)).join('|');
+      if (!list.length || key === _upsellKey) return;
+      _upsellKey = key;
+      const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+      document.getElementById('cf-upsell-list').innerHTML = list.map(p => {
+        const st = nadalStockText(p.id);
+        return `<div class="cf-up-card flex flex-col items-center text-center px-2.5 pt-3 pb-2.5">
+            <img src="${p.cut}-th.webp" alt="" width="70" height="75" loading="lazy" decoding="async" class="h-[75px] w-auto">
+            <p class="mt-1.5 text-sm font-bold leading-tight">${esc(NADAL.t(p.name))}</p>
+            <p class="text-xs text-[#5A3E28] mt-0.5">${esc(fmtComma(NADAL.price(p.id)))}${st.red ? ` · <span class="text-[#E23F2E] font-semibold">${esc(st.t)}</span>` : ''}</p>
+            <button type="button" onclick="upsellAdd('${p.id}')" class="mt-2 w-full py-2 rounded-full bg-[#E23F2E] hover:bg-[#B82A1F] text-white text-xs font-semibold transition-colors" aria-label="Afegir el panettone ${esc(NADAL.t(p.name))}">+ Afegir</button>
+          </div>`;
+      }).join('');
+    }
+    function upsellAdd(id) {
+      const m = MENU.nadal.find(x => x.id === id);
+      if (!m || !NADAL) return;
+      const before = totalCount();
+      addToCartSilent(id, m.name, NADAL.price(id) || m.price, true);
+      if (totalCount() === before) return;
+      // "Us el portem amb aquesta comanda": junt amb les pizzes.
+      cfPanettoneDelivery = 'order';
+      NADAL.cart.setDelivery('order');
+      document.getElementById('cf-subtotal-display').textContent = fmtComma(subtotal());
+      const count = totalCount();
+      document.getElementById('cf-items-count').textContent = count + (count === 1 ? ' article' : ' articles');
+      const panel = document.getElementById('cf-order-summary');
+      if (panel && panel.style.maxHeight && panel.style.maxHeight !== '0px') { toggleOrderSummary(); toggleOrderSummary(); }
+      refreshTotals();
+      renderPanChoice();
+      renderUpsell();
+      validateCheckout();
+      showCfToast(`Panettone ${NADAL.t(NADAL.items.find(p => p.id === id).name)} afegit 🎄 Us el portem amb la comanda.`);
+    }
+
     // Bloc "Quan vols els panettones?" del checkout.
     function renderPanChoice() {
       const box = document.getElementById('cf-pan');
@@ -1755,6 +1825,7 @@
       if (_ssDate) cfDeliveryDate = _ssDate;
       if (_ssTime && !cfSelectedTime && CF_REAL_SLOTS.includes(_ssTime)) cfSelectedTime = _ssTime;
       renderPanChoice();
+      renderUpsell();
       // Defensa extra si sessionStorage porta una data no vàlida (viernes/domingo).
       if (!isValidOrderDay(cfDeliveryDate)) {
         cfDeliveryDate = isValidOrderDay(todayISO()) ? todayISO() : nextValidDate(todayISO());
