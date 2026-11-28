@@ -1193,6 +1193,9 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iY3NzdXZpdHFncmRxYWhxb21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTc1MTIsImV4cCI6MjA5NTQ3MzUxMn0.LkVkXzKjTgLYZSpxWLcdA4-COdDoAnWrSqnwAbtmTaU';
     let _stripe = null;
     let _stripeElements = null;
+    // Cada obertura de la finestra de pagament és un intent; tancar-la
+    // invalida el que encara s'estigui carregant.
+    let _payAttempt = 0;
     let _pendingOrderData = null;
     // Comanda online creada ('processing') però encara no pagada: si el
     // client abandona el pagament cal alliberar-la, o seguiria ocupant
@@ -2491,10 +2494,14 @@
     // com a 'paid' quan Stripe confirma el cobrament real — així un pagament
     // que es completa però el navegador es penja abans d'acabar no es perd:
     // la comanda ja existeix, només falta que el webhook la confirmi.
-    async function createPendingOrderAndIntent(totalEuros) {
+    async function createPendingOrderAndIntent(totalEuros, attempt) {
       const orderRes = await _saveOrderToSupabase({ ..._pendingOrderData }, 'processing');
+      const ref = { orderId: orderRes.orderId, clientSecret: null };
+      // El client ha tancat la finestra mentre es creava la comanda: no s'ha
+      // de quedar ocupant franja ni barrejar-se amb un intent nou.
+      if (attempt !== _payAttempt) { sendRelease(ref, 'tancat_mentre_es_creava'); throw new Error('abandonat'); }
       window.MicsasPerfil && MicsasPerfil.stash(_pendingOrderData, cart);
-      _pendingOrderRef = { orderId: orderRes.orderId, clientSecret: null };
+      _pendingOrderRef = ref;
       // L'import que es cobrarà és el total que ha calculat place-order
       // (amb el descompte aplicat al servidor), no el de la pàgina.
       if (typeof orderRes.total === 'number' && _pendingOrderData) _pendingOrderData.total = orderRes.total;
@@ -2509,12 +2516,15 @@
         });
         const json = await res.json();
         if (json.error) throw new Error(json.error);
-        _pendingOrderRef.clientSecret = json.clientSecret;
+        ref.clientSecret = json.clientSecret;
+        // Abandonat mentre es creava el pagament (ja s'ha alliberat sense el
+        // PaymentIntent): ara que existeix, també es cancel·la a Stripe.
+        if (attempt !== _payAttempt || _pendingOrderRef !== ref) { sendRelease(ref, 'tancat_mentre_carregava'); throw new Error('abandonat'); }
         return { clientSecret: json.clientSecret, orderId: orderRes.orderId };
       } catch (err) {
         // La comanda ja està desada i ocupa franja, però no s'ha pogut crear
         // el pagament: ningú la podrà pagar mai, així que s'allibera.
-        releasePendingOrder();
+        if (_pendingOrderRef === ref) releasePendingOrder('error_creant_pagament', err && err.message);
         throw err;
       }
     }
@@ -2523,28 +2533,40 @@
     // pizzes de la franja. Es pot cridar sempre sense risc: el servidor no
     // toca res si la comanda ja està pagada o el pagament és en marxa. Amb
     // keepalive també arriba si el client tanca o recarrega la pestanya.
-    function releasePendingOrder() {
-      const ref = _pendingOrderRef;
-      _pendingOrderRef = null;
+    // El motiu (i l'últim error que ha vist el client) queda desat a la
+    // comanda (orders.cancel_reason): així, si algú diu "m'ha sortit un
+    // error", es pot saber què ha passat de debò.
+    let _lastPayError = '';
+    function sendRelease(ref, reason, detail) {
       if (!ref) return;
       try {
         fetch(RELEASE_ORDER_FN_URL, {
           method: 'POST',
           keepalive: true,
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ orderId: ref.orderId, clientSecret: ref.clientSecret }),
+          body: JSON.stringify({
+            orderId: ref.orderId, clientSecret: ref.clientSecret, reason: reason || 'desconegut',
+            detail: String(detail || _lastPayError || '').slice(0, 300),
+          }),
         }).catch(() => {});
       } catch (_) { /* si falla, el límit de 15 min de l'aforo ho cobreix igualment */ }
+    }
+    function releasePendingOrder(reason, detail) {
+      const ref = _pendingOrderRef;
+      _pendingOrderRef = null;
+      sendRelease(ref, reason, detail);
     }
     // Bizum (i qualsevol mètode amb redirecció) surt de la pàgina per
     // aprovar el pagament: aquí NO s'ha d'alliberar la comanda, perquè es
     // cancel·laria el PaymentIntent mentre el client paga al banc.
     let _payRedirecting = false;
-    window.addEventListener('pagehide', () => { if (!_payRedirecting) releasePendingOrder(); });
+    window.addEventListener('pagehide', (e) => { if (!_payRedirecting) releasePendingOrder(e && e.persisted ? 'pagina_amagada' : 'pagina_tancada'); });
 
     // El client tanca la finestra de pagament sense pagar.
     function cancelStripeOverlay() {
-      releasePendingOrder();
+      // L'intent que encara s'estigui carregant ja no ha de tocar res.
+      _payAttempt++;
+      releasePendingOrder('tancat_pel_client');
       closeStripeOverlay();
       // Ha tancat després de veure que l'hora havia canviat: que en triï una altra.
       if (window._cfSlotReassigned) {
@@ -2558,6 +2580,8 @@
       // Un segon toc a "Pagar" amb la finestra ja oberta creava una segona
       // comanda, i la primera es quedava ocupant franja sense pagar mai.
       if (!overlay.classList.contains('hidden')) return;
+      const attempt = ++_payAttempt;
+      _lastPayError = '';
       overlay.classList.remove('hidden');
       const panel = document.getElementById('stripe-modal-panel');
       panel.classList.remove('enter-modal');
@@ -2571,7 +2595,8 @@
         '<div class="flex items-center justify-center h-40"><svg class="animate-spin w-6 h-6 text-[#C4B08A]" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg></div>';
 
       try {
-        const { clientSecret } = await createPendingOrderAndIntent(totalEuros);
+        const { clientSecret } = await createPendingOrderAndIntent(totalEuros, attempt);
+        if (attempt !== _payAttempt) return;
         totalEuros = _pendingOrderData?.total ?? totalEuros;
         document.getElementById('stripe-amount-label').textContent = fmtComma(totalEuros);
         // El servidor ja ha reservat la franja: si l'ha hagut de moure (algú
@@ -2662,6 +2687,9 @@
         });
       } catch (err) {
         console.error('[openStripeOverlay]', err);
+        // Un intent abandonat no pot pintar errors a la finestra d'un altre.
+        if (attempt !== _payAttempt) return;
+        _lastPayError = 'carregar: ' + ((err && err.message) || err);
         document.getElementById('stripe-payment-element').innerHTML = '';
         const errEl = document.getElementById('stripe-error');
         errEl.textContent = 'Error al carregar el pagament. Torna-ho a intentar.';
@@ -2709,6 +2737,7 @@
         btn.disabled = false;
         btn.textContent = `Pagar ${(_pendingOrderData?.total || 0).toFixed(2).replace('.', ',')} €`;
         errEl.textContent = error.message || 'Error al processar el pagament.';
+        _lastPayError = 'stripe: ' + [error.type, error.code, error.decline_code, error.message].filter(Boolean).join(' | ');
         errEl.classList.remove('hidden');
         return;
       }
