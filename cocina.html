@@ -1630,18 +1630,12 @@
       return (o.notes || '').replace(/^Hora: \d{1,2}:\d{2}( · )?/, '').trim();
     }
 
-    // La web ensenya al client l'hora d'ARRIBADA (franja + 15 min), no la
-    // franja de forn: el text ha de parlar el mateix idioma que ell.
+    // Temps estimat de la cuina a casa del client (ETA de la ruta).
     const DELIVERY_MIN = 15;
-    function arrivalOf(slot) {
-      const m = /^(\d{1,2}):(\d{2})$/.exec(slot || '');
-      if (!m) return slot || '';
-      const t = Number(m[1]) * 60 + Number(m[2]) + DELIVERY_MIN;
-      return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
-    }
+    // La web ensenya al client la franja tal qual (20:00 ... 22:30).
     function requestedSlotHtml(o) {
       if (!o.requested_slot || !o.slot_time || o.requested_slot === o.slot_time) return '';
-      return `<p class="text-xs font-bold text-tred">⚠ El client la volia cap a les ${escapeHtml(arrivalOf(o.requested_slot))} — se li ha dit que arribarà cap a les ${escapeHtml(arrivalOf(o.slot_time))}</p>`;
+      return `<p class="text-sm font-bold text-tred">⚠ El client la volia a les ${escapeHtml(o.requested_slot)} — se li ha dit a les ${escapeHtml(o.slot_time)}</p>`;
     }
 
     // Menú ⋯ de cada targeta. Es recorda quin està obert perquè la
@@ -1667,15 +1661,18 @@
     function itemsHtml(o) {
       const items = o.order_items || [];
       const note = it => it.notes ? `<span class="block text-sm font-bold text-tred">⚠ ${escapeHtml(it.notes)}</span>` : '';
+      const price = it => `<span class="ml-auto shrink-0 pl-2 text-sm font-normal text-tmute tabular-nums">${fmt((Number(it.unit_price) || 0) * (Number(it.quantity) || 0))}</span>`;
       const pizzas = items.filter(it => !isDrinkName(it.product_name) && !isPanettoneItem(it)).map(it => `
         <li class="flex gap-3 text-[17px] leading-snug">
           <span class="w-6 shrink-0 text-right font-black tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0 font-semibold">${escapeHtml(it.product_name)}${note(it)}</span>
+          ${price(it)}
         </li>`).join('');
       const drinks = items.filter(it => isDrinkName(it.product_name)).map(it => `
         <li class="flex gap-3 text-sm text-tmute">
           <span class="w-6 shrink-0 text-right font-bold tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0">${escapeHtml(it.product_name)}${note(it)}</span>
+          ${price(it)}
         </li>`).join('');
       // Panettones: a part, amb quan s'han de portar.
       const panTag = o.panettone_delivery === 'panettone_day'
@@ -1685,22 +1682,34 @@
         <li class="flex gap-3 text-sm">
           <span class="w-6 shrink-0 text-right font-bold tabular-nums">${Number(it.quantity) || 0}</span>
           <span class="min-w-0">🎄 ${escapeHtml(it.product_name)}${panTag}</span>
+          ${price(it)}
         </li>`).join('');
       return `<ul class="space-y-1">${pizzas}${pans}${drinks}</ul>`;
     }
-    function itemsInline(o) {
-      const items = o.order_items || [];
-      const notes = items.filter(it => it.notes).map(it => `<span class="block text-sm font-bold text-tred">⚠ ${escapeHtml(it.product_name)}: ${escapeHtml(it.notes)}</span>`).join('');
-      const line = list => list.map(it => `${Number(it.quantity) || 0}× ${escapeHtml(it.product_name)}`).join(' · ');
-      const rest = items.filter(it => !isPanettoneItem(it));
-      const pans = items.filter(isPanettoneItem);
-      // Panettones: el repartidor ha de saber si els porta ara o el dia
-      // d'entrega de panettones.
-      const later = o.panettone_delivery === 'panettone_day';
-      const panLine = pans.length
-        ? `<p class="text-sm font-bold ${later ? 'text-tamber' : 'text-tgreen'}">🎄 ${line(pans)} · ${later ? "NO avui (dia d'entrega de panettones)" : "porta'l ara"}</p>`
-        : '';
-      return `${rest.length ? `<p class="text-sm text-tmute">${line(rest)}</p>` : ''}${panLine}${notes}`;
+    // Descompte, forma i estat de pagament, propina i total de la comanda.
+    function moneyHtml(o) {
+      const unpaid = o.payment_method !== 'cash' && o.payment_status !== 'paid';
+      const how = o.payment_method === 'cash' ? 'Efectiu al repartidor' : (o.payment_status === 'paid' ? 'Pagat online' : '⚠ Verificant pagament…');
+      return `
+        <div class="pt-2 border-t border-tline space-y-1 text-sm">
+          ${Number(o.discount_amount) > 0 ? `<div class="flex justify-between gap-2 text-tgreen"><span>Descompte ${escapeHtml(o.discount_code || '')}</span><span class="tabular-nums">−${fmt(o.discount_amount)}</span></div>` : ''}
+          <div class="flex items-center justify-between gap-2">
+            <span class="${unpaid ? 'text-tred font-bold' : 'text-tmute'}">${how}${Number(o.tip_amount) > 0 ? ` · Propina ${fmt(o.tip_amount)}` : ''}</span>
+            <span class="font-black text-base tabular-nums">${fmt(o.total)}</span>
+          </div>
+        </div>`;
+    }
+    // Adreça completa: carrer i pis, codi postal i població, i les notes d'entrega.
+    function fullAddressHtml(addr, big) {
+      const street = [addr.street, addr.floor].filter(Boolean).join(', ');
+      const town = [addr.postal_code, addr.city].filter(Boolean).join(' ');
+      if (!street && !town) return `<p class="text-sm font-bold text-tred">⚠ Sense adreça</p>`;
+      return `
+        <div>
+          <p class="${big ? 'font-semibold' : 'text-sm font-medium'} leading-snug break-words">${escapeHtml(street)}</p>
+          <p class="text-sm text-tmute">${escapeHtml(town)}</p>
+          ${addr.notes ? `<p class="text-sm font-semibold text-tamber mt-0.5">${escapeHtml(addr.notes)}</p>` : ''}
+        </div>`;
     }
     function notesHtml(o) {
       const n = cleanNotes(o);
@@ -1722,15 +1731,15 @@
         </div>`;
     }
 
-    // Adreça discreta per a la targeta del pizzero: una sola línia petita
-    // ("Carrer Major, 12, 2n 1a · Matadepera"), sense codi postal ni notes.
+    // Adreça en una sola línia ("Carrer Major, 12, 2n 1a · Matadepera") per a la llista de panettones.
     function cuinaAddress(addr) {
       const street = [addr.street, addr.floor].filter(Boolean).join(', ');
       return [street, addr.city].filter(Boolean).join(' · ');
     }
 
-    // view 'cuina': el pizzero veu el nom, l'adreça en petit, les pizzes en gran i les notes.
-    // view 'repartiment': adreça, telèfon, quant cobrar i navegació.
+    // Les dues vistes ensenyen tota la comanda: client, adreça completa, telèfon,
+    // articles amb preu, notes, pagament i total. 'repartiment' hi afegeix què
+    // cobrar i la navegació.
     function renderOrderCard(group, view = 'cuina') {
       const isGroup = group.length > 1;
       const first = group[0];
@@ -1745,6 +1754,9 @@
       const kinds = group.flatMap(o => incidentsByOrder.get(o.id) || []);
       const tags = kinds.map(k => `<span class="px-2 py-0.5 rounded-full bg-tred/10 text-tred text-xs font-bold">⚠ ${escapeHtml(INCIDENT_LABEL[k] || k)}</span>`).join('');
       const done = stage === 'delivered';
+      // Des que la targeta arriba al repartidor (Llest, En camí, Entregat)
+      // la comanda s'ha d'entregar: ja no es pot cancel·lar (també ho bloqueja la BD).
+      const canCancel = group.every(o => o.status === 'pending' || o.status === 'preparing');
 
       const menu = `
         <details class="card-more relative shrink-0" data-key="${escapeHtml(key)}" ${_openCardMenus.has(key) ? 'open' : ''} ontoggle="onCardMenuToggle(this)">
@@ -1752,7 +1764,7 @@
           <div class="absolute right-0 top-full mt-1 w-60 bg-kcard2 border border-kline rounded-xl shadow-2xl p-1.5 z-20">
             ${tel ? `<a href="${escapeHtml(tel)}" class="menu-item">📞 Trucar · ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
             <button type="button" onclick="closeCardMenu(this); openIncident('${first.id}')" class="menu-item">⚠ Apuntar incidència</button>
-            ${done ? '' : `<button type="button" onclick="closeCardMenu(this); confirmCancelOrder(['${ids.join("','")}'])" class="menu-item is-danger">✕ Cancel·lar ${isGroup ? `les ${group.length} comandes` : 'comanda'}</button>`}
+            ${canCancel ? `<button type="button" onclick="closeCardMenu(this); confirmCancelOrder(['${ids.join("','")}'])" class="menu-item is-danger">✕ Cancel·lar ${isGroup ? `les ${group.length} comandes` : 'comanda'}</button>` : ''}
           </div>
         </details>`;
 
@@ -1760,7 +1772,6 @@
         <div class="flex items-start gap-2">
           <div class="min-w-0 flex-1">
             <p class="font-bold text-lg leading-tight break-words">${escapeHtml(cust.name || 'Client')}</p>
-            ${view === 'cuina' && cuinaAddress(addr) ? `<p class="text-xs text-tmute mt-0.5 break-words">${escapeHtml(cuinaAddress(addr))}</p>` : ''}
             ${isGroup ? `<p class="text-xs font-semibold text-tmute mt-0.5">${group.length} comandes juntes</p>` : ''}
           </div>
           ${view === 'cuina' && stage === 'pending' && !isNaN(created) ? `<span class="js-new hidden shrink-0 px-2 py-0.5 rounded-full bg-tamberbg text-tamber text-xs font-bold" data-created="${created}">Nova</span>` : ''}
@@ -1771,10 +1782,25 @@
       const orders = group.map((o, idx) => `
         <div class="space-y-2 ${idx ? 'pt-3 border-t border-dashed border-tline' : ''}">
           ${isGroup ? `<p class="text-xs font-bold uppercase tracking-wide text-tmute">Comanda ${idx + 1}${allSameStatus ? '' : ' · ' + escapeHtml(STATUS_LABEL[o.status] || o.status)}</p>` : ''}
-          ${view === 'cuina' ? itemsHtml(o) : itemsInline(o)}
+          ${itemsHtml(o)}
           ${notesHtml(o)}
+          ${moneyHtml(o)}
           ${isGroup && !allSameStatus && o.status !== 'delivered' ? actionButton([o.id], stageOf(o), 'sm') : ''}
         </div>`).join('');
+
+      const grandTotal = group.reduce((s, o) => s + (Number(o.total) || 0), 0);
+      const combined = isGroup ? `
+        <div class="flex items-center justify-between text-sm pt-2 border-t border-tline">
+          <span class="font-semibold text-tmute">Total combinat</span>
+          <span class="font-black text-lg tabular-nums">${fmt(grandTotal)}</span>
+        </div>` : '';
+
+      // Client: adreça completa i telèfon, a les dues vistes.
+      const contact = `
+        <div>
+          ${fullAddressHtml(addr, view !== 'cuina')}
+          ${tel ? `<a href="${escapeHtml(tel)}" class="inline-flex items-center gap-1.5 mt-1.5 min-h-[36px] text-tblue font-semibold">📞 ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
+        </div>`;
 
       const footer = allSameStatus && !done ? actionButton(ids, stage, 'lg') : '';
 
@@ -1782,8 +1808,11 @@
         return `
           <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="ticket rounded-2xl p-4 space-y-3">
             ${top}
+            ${contact}
+            ${requestedSlotHtml(first)}
             ${bigOrderHtml(group)}
             ${orders}
+            ${combined}
             ${footer}
           </article>`;
       }
@@ -1813,14 +1842,10 @@
       return `
         <article data-flip="${escapeHtml(key)}" data-ids="${ids.join(',')}" class="ticket rounded-2xl p-4 space-y-3 ${done ? 'opacity-60' : ''}">
           ${top}
-          <div>
-            <p class="font-semibold leading-snug">${escapeHtml(addr.street || '')}${addr.floor ? ', ' + escapeHtml(addr.floor) : ''}</p>
-            <p class="text-sm text-tmute">${escapeHtml(addr.postal_code || '')} ${escapeHtml(addr.city || '')}</p>
-            ${addr.notes ? `<p class="text-sm font-semibold text-tamber mt-1">${escapeHtml(addr.notes)}</p>` : ''}
-            ${tel ? `<a href="${escapeHtml(tel)}" class="inline-flex items-center gap-1.5 mt-1.5 min-h-[36px] text-tblue font-semibold">📞 ${escapeHtml(phoneLabel(cust.phone))}</a>` : ''}
-          </div>
+          ${contact}
           ${requestedSlotHtml(first)}
           ${orders}
+          ${combined}
           ${done ? '' : payment}
           ${nav}
           ${footer}
@@ -2320,6 +2345,10 @@
     // només la treu del tauler. Cal fer la devolució des de Stripe.
     function confirmCancelOrder(ids) {
       const orders = ids.map(id => ordersCache.find(o => o.id === id)).filter(Boolean);
+      if (orders.some(o => o.status !== 'pending' && o.status !== 'preparing')) {
+        showToast('Aquesta comanda ja és al repartiment: s\'ha d\'entregar, no es pot cancel·lar.', true);
+        return;
+      }
       const paid = orders.filter(o => o.payment_method !== 'cash' && o.payment_status === 'paid');
       const paidTotal = paid.reduce((s, o) => s + (Number(o.total) || 0), 0);
       const n = ids.length;

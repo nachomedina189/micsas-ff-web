@@ -35,7 +35,7 @@
         <span class="text-[#C4B08A]/60 select-none">|</span>
         <button data-lang="es" onclick="applyLang('es')" style="font-weight:500;color:#2A1E16">ES</button>
       </div>
-      <a href="pedido.html" class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
+      <a href="pre-pedido.html" class="flex items-center gap-1.5 text-sm font-medium text-[#5A3E28] hover:text-[#E23F2E] transition-colors font-['League_Spartan',sans-serif]">
         <iconify-icon icon="solar:arrow-left-linear" width="16" style="stroke-width:1.5;"></iconify-icon>
         Tornar a la carta
       </a>
@@ -58,7 +58,7 @@
       </div>
       <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F] mb-2">Has d'iniciar sessió</h2>
       <p class="text-sm font-light text-[#5A3E28] mb-8">Inicia sessió per veure les teves dades i comandes.</p>
-      <a href="pedido.html"
+      <a href="pre-pedido.html"
         class="inline-block px-6 py-3 rounded-full font-['League_Spartan',sans-serif] font-medium text-[15px] text-[#F2E6CE] bg-[#E23F2E] hover:bg-[#B82A1F] transition-all shadow-sm">
         Anar a la comanda
       </a>
@@ -117,7 +117,7 @@
         <div id="orders-empty" class="hidden px-6 py-10 text-center">
           <iconify-icon icon="solar:bag-heart-linear" width="36" style="color:#C4B08A;" class="mb-3 block mx-auto"></iconify-icon>
           <p class="text-sm font-light text-[#5A3E28]">Encara no has fet cap comanda.</p>
-          <a href="pedido.html" class="inline-block mt-4 text-sm font-medium text-[#E23F2E] hover:underline font-['League_Spartan',sans-serif]">Fer la primera comanda →</a>
+          <a href="pre-pedido.html" class="inline-block mt-4 text-sm font-medium text-[#E23F2E] hover:underline font-['League_Spartan',sans-serif]">Fer la primera comanda →</a>
         </div>
       </section>
 
@@ -279,7 +279,7 @@
       }
       if (resolved.length) {
         sessionStorage.setItem('micsas_repeat', JSON.stringify(resolved));
-        window.location.href = 'pedido.html';
+        window.location.href = 'pre-pedido.html';
       } else {
         showToast('Cap producte disponible per repetir.', true);
       }
@@ -307,7 +307,7 @@
     async function signOutAndRedirect() {
       const sb = window._sb;
       if (sb) await sb.auth.signOut();
-      window.location.href = 'pedido.html';
+      window.location.href = 'pre-pedido.html';
     }
 
     async function loadAccount(user) {
