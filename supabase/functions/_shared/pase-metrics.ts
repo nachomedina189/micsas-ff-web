@@ -53,6 +53,11 @@ export interface ReportInput {
   incidents: IncidentRow[];
   doughs: Record<string, { doughs: number; set: boolean }>;
   closedAt?: string | null;         // quan s'ha premut "Tancar pase"
+  // Especial Nadal: comandes per al "dia d'entrega de panettones" (sense dia
+  // de pase) fetes des del tancament del pase anterior fins a aquest, i les
+  // seves línies. Compten a l'informe i a la factura d'aquest pase.
+  panDayOrders?: OrderRow[];
+  panDayItems?: ItemRow[];
 }
 
 // ── Utilitats ───────────────────────────────────────────────────────────
@@ -155,6 +160,14 @@ export function daySummaries(input: ReportInput): DaySummary[] {
 
 // ── Informe complet d'un pase (plantilla B) ─────────────────────────────
 export interface ProductRow { name: string; qty: number; revenue: number; prev: number | null }
+export interface PanettoneSummary {
+  units: number;
+  revenue: number;
+  withOrder: { units: number; revenue: number };                 // amb una comanda del pase (ja dins de la facturació del pase)
+  panDay: { units: number; revenue: number; orders: number; card: number; cash: number; cardRevenue: number };
+  flavors: { name: string; units: number; revenue: number }[];
+}
+export const isPanettoneLine = (name: string) => /^Panettone /.test(name);
 export interface Insight { level: "bad" | "warn" | "good" | "info"; title: string; text: string }
 
 export interface PaseReport {
@@ -165,6 +178,7 @@ export interface PaseReport {
   avg4: { orders: number; pizzas: number; revenue: number; ticket: number; pizzasPerOrder: number; tips: number } | null;
   drinks: number;
   products: ProductRow[];
+  panettones: PanettoneSummary;
   fullSlots: string[];
   emptySlots: string[];
   displaced: number;
@@ -231,6 +245,31 @@ export function buildPaseReport(input: ReportInput, summaries = daySummaries(inp
     p.revenue += it.quantity * Number(it.unit_price);
     prodMap.set(it.product_name, p);
   }
+  // Panettones (Especial Nadal): els de les comandes del pase i els del dia
+  // d'entrega de panettones venuts des del pase anterior.
+  const flav = new Map<string, { units: number; revenue: number }>();
+  const addPan = (it: ItemRow) => {
+    const f = flav.get(it.product_name) ?? { units: 0, revenue: 0 };
+    f.units += it.quantity; f.revenue += it.quantity * Number(it.unit_price);
+    flav.set(it.product_name, f);
+  };
+  const withOrder = { units: 0, revenue: 0 };
+  for (const it of dayItems) if (isPanettoneLine(it.product_name)) { withOrder.units += it.quantity; withOrder.revenue += it.quantity * Number(it.unit_price); addPan(it); }
+  const pdOrders = (input.panDayOrders ?? []).filter(isConfirmed);
+  const pdIds = new Set(pdOrders.map((o) => o.id));
+  const panDay = { units: 0, revenue: 0, orders: pdOrders.length, card: 0, cash: 0, cardRevenue: 0 };
+  for (const o of pdOrders) {
+    panDay.revenue += Number(o.total) || 0;
+    if (o.payment_method === "cash") panDay.cash++; else { panDay.card++; panDay.cardRevenue += Number(o.total) || 0; }
+  }
+  for (const it of input.panDayItems ?? []) if (pdIds.has(it.order_id) && isPanettoneLine(it.product_name)) { panDay.units += it.quantity; addPan(it); }
+  const panettones: PanettoneSummary = {
+    units: withOrder.units + panDay.units,
+    revenue: withOrder.revenue + panDay.revenue,
+    withOrder, panDay,
+    flavors: [...flav.entries()].map(([name, f]) => ({ name: name.replace(/^Panettone /, ""), ...f })).sort((a, b) => b.units - a.units || b.revenue - a.revenue),
+  };
+
   const products: ProductRow[] = [...prodMap.entries()]
     .map(([name, p]) => ({ name, qty: p.qty, revenue: p.revenue, prev: prevSameDay ? (prevSameDay.products[name] ?? 0) : null }))
     .sort((a, b) => b.qty - a.qty || b.revenue - a.revenue);
@@ -347,7 +386,7 @@ export function buildPaseReport(input: ReportInput, summaries = daySummaries(inp
   const rejections = { total: dayRej.length, pizzas: sum(dayRej.map((r) => r.pizza_count || 0)), byReason };
 
   const report: PaseReport = {
-    date, closedAt: input.closedAt ?? null, day, prevSameDay, avg4, drinks, products,
+    date, closedAt: input.closedAt ?? null, day, prevSameDay, avg4, drinks, products, panettones,
     fullSlots, emptySlots, displaced, peakHour,
     pizzasPerHour: day.pizzas / serviceHours, ordersPerHour: day.orders / serviceHours,
     timing, payments, tipsDetail, abandoned, cancelled, doughs, ops, incidents, rejections, insights: [],

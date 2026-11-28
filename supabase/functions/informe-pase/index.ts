@@ -123,7 +123,35 @@ async function loadInput(sb: SupabaseClient, date: string, closedAt: string | nu
     doughs[d] = { doughs: Number(def ?? 40), set: false };
   }
 
-  return { date, orders, items, events, rejections: (rej ?? []) as RejectionRow[], incidents, doughs, closedAt };
+  // Especial Nadal: comandes per al dia d'entrega de panettones (no tenen dia
+  // de pase). Van a l'informe i a la factura del primer pase que es tanca
+  // després de fer-les: des del tancament del pase anterior fins a aquest
+  // (mateixa finestra que issue_pase_invoice).
+  const { data: prevRep } = await sb.from("pase_reports").select("closed_at")
+    .lt("delivery_date", date).order("delivery_date", { ascending: false }).limit(1).maybeSingle();
+  const winFrom = (prevRep as { closed_at?: string } | null)?.closed_at ?? null;
+  const winTo = closedAt ?? new Date().toISOString();
+  let pdQuery = sb.from("orders")
+    .select("id, delivery_date, status, payment_method, payment_status, total, tip_amount, pizza_count, slot_time, requested_slot, slot_allocations, created_at, updated_at")
+    .is("delivery_date", null).eq("panettone_delivery", "panettone_day").lte("created_at", winTo);
+  if (winFrom) pdQuery = pdQuery.gt("created_at", winFrom);
+  const { data: pdRaw, error: pdErr } = await pdQuery;
+  if (pdErr) throw new Error(pdErr.message);
+  const panDayOrders: OrderRow[] = (pdRaw ?? []).map((o: Record<string, unknown>) => ({
+    id: String(o.id), delivery_date: "", status: String(o.status), payment_method: String(o.payment_method),
+    payment_status: String(o.payment_status), total: Number(o.total) || 0, tip_amount: Number(o.tip_amount) || 0,
+    pizza_count: 0, slot_time: null, requested_slot: null, slot_allocations: null,
+    created_at: String(o.created_at), updated_at: (o.updated_at as string) ?? null, customer_key: null,
+  }));
+  let panDayItems: ItemRow[] = [];
+  if (panDayOrders.length) {
+    const { data: pdItems, error: piErr } = await sb.from("order_items")
+      .select("order_id, product_name, unit_price, quantity").in("order_id", panDayOrders.map((o) => o.id));
+    if (piErr) throw new Error(piErr.message);
+    panDayItems = (pdItems ?? []) as ItemRow[];
+  }
+
+  return { date, orders, items, events, rejections: (rej ?? []) as RejectionRow[], incidents, doughs, closedAt, panDayOrders, panDayItems };
 }
 
 // Factura del pase en PDF, o null si les factures estan desactivades.

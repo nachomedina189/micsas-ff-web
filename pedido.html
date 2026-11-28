@@ -1,6 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="ca" class="scroll-smooth">
 <head>
+  <script>
+    // Especial Nadal, "dia d'entrega de panettones": pedido.html?panettones=1 és
+    // la mateixa passarel·la de pagament però només amb panettones (sense la
+    // carta de pizzes darrere ni barrejar-los amb cap comanda de pizza).
+    if (new URLSearchParams(location.search).get('panettones') === '1') document.documentElement.classList.add('pan-mode');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demana pizza a domicili a Matadepera · micsas.ff</title>
@@ -159,6 +165,9 @@
     /* Mòbil: la barra de dalt sense desenfocament de fons mentre es fa
        scroll (als mòbils modestos és car a cada frame). */
     @media (max-width: 767px) { #navbar.nav-scrolled { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background-color: rgba(242, 230, 206, .98) !important; } }
+    html.pan-mode body > nav, html.pan-mode body > section, html.pan-mode body > footer,
+    html.pan-mode #mobile-cart-bar, html.pan-mode #cf-upsell { display: none !important; }
+    html.pan-mode body { background: #F2E6CE; }
   </style>
   <link rel="stylesheet" href="pizza-badge.css">
   <script src="pizza-badge.js"></script>
@@ -445,7 +454,7 @@
             </div>
             <div class="flex justify-between">
               <span class="text-sm font-light text-[#5A3E28]">Enviament</span>
-              <span class="text-sm font-medium text-[#E23F2E]">Gratuït</span>
+              <span id="cf-ship-val" class="text-sm font-medium text-[#E23F2E]">Gratuït</span>
             </div>
             <div id="cf-discount-row" class="hidden flex justify-between">
               <span id="cf-discount-row-label" class="text-sm font-light text-[#5A3E28]">Descompte</span>
@@ -465,21 +474,6 @@
           </button>
         </div>
 
-        <!-- Especial Nadal: quan arriben els panettones del cistell -->
-        <section id="cf-pan" class="hidden">
-          <h2 class="font-['League_Spartan',sans-serif] font-black tracking-tight text-xl text-[#2A1A0F] mb-1">Quan vols els panettones?</h2>
-          <p class="text-xs font-light text-[#5A3E28] mb-3">Te'ls portem a casa, a Matadepera.</p>
-          <div class="space-y-2" role="radiogroup" aria-label="Entrega dels panettones">
-            <label class="cf-pan-opt flex items-start gap-3 rounded-xl border border-[#C4B08A]/40 bg-[#E6D5B0]/10 px-4 py-3 cursor-pointer transition-colors">
-              <input type="radio" name="cf-pan" value="order" class="mt-0.5 w-4 h-4 accent-[#E23F2E] shrink-0">
-              <span><b class="block text-sm font-semibold text-[#2A1A0F]">Amb aquesta comanda</b><span id="cf-pan-order-sub" class="block text-xs font-light text-[#5A3E28] mt-0.5"></span></span>
-            </label>
-            <label class="cf-pan-opt flex items-start gap-3 rounded-xl border border-[#C4B08A]/40 bg-[#E6D5B0]/10 px-4 py-3 cursor-pointer transition-colors">
-              <input type="radio" name="cf-pan" value="panettone_day" class="mt-0.5 w-4 h-4 accent-[#E23F2E] shrink-0">
-              <span><b class="block text-sm font-semibold text-[#2A1A0F]">El dia d'entrega de panettones</b><span id="cf-pan-day-sub" class="block text-xs font-light text-[#5A3E28] mt-0.5"></span></span>
-            </label>
-          </div>
-        </section>
 
         <!-- Auth block eliminat temporalment (setmana de llançament) —
              veure la branca git "backup/login-signup-2026-09" per restaurar-ho. -->
@@ -837,6 +831,7 @@
     // d'entrega de panettones (cfPanettoneDelivery). Una comanda NOMÉS de
     // panettones per a aquell dia no té dia ni hora de pase.
     const NADAL = window.MicsasNadal || null;
+    const PAN_MODE = document.documentElement.classList.contains('pan-mode');
     MENU.nadal = NADAL ? NADAL.items.map(p => ({ id: p.id, name: p.order, desc: NADAL.t(p.tag), img: p.img + '-600.webp', price: p.price })) : [];
     let cfPanettoneDelivery = 'order';
     function isPanId(id) { return typeof id === 'string' && id.startsWith('pn-'); }
@@ -1605,6 +1600,7 @@
     }
 
     function checkoutGoBack() {
+      if (PAN_MODE) { location.href = 'nadal.html'; return; }
       closeCheckout();
     }
 
@@ -1795,42 +1791,15 @@
     }
 
     // Bloc "Quan vols els panettones?" del checkout.
+    // Quan arriben els panettones ja ve decidit d'abans: amb la comanda
+    // (pedido.html, el dia i l'hora triats a pre-pedido) o el dia d'entrega de
+    // panettones (passarel·la pedido.html?panettones=1, només panettones). Aquí
+    // no es torna a preguntar.
     function renderPanChoice() {
-      const box = document.getElementById('cf-pan');
-      if (!box) return;
-      const has = cartHasPan();
-      box.classList.toggle('hidden', !has);
+      cfPanettoneDelivery = PAN_MODE ? 'panettone_day' : 'order';
       const title = document.getElementById('cf-time-title');
       if (title) title.textContent = cartOnlyPan() ? 'Quan vols rebre el panettone?' : 'Quan vols rebre la pizza?';
-      if (!has) return;
-      const only = cartOnlyPan();
-      document.getElementById('cf-pan-order-sub').textContent = only
-        ? "Un divendres o diumenge, a l'hora que triïs. Sense cost d'enviament."
-        : "Junt amb les pizzes, el dia i l'hora que has triat. Sense cost d'enviament.";
-      // Amb pizzes, tot es paga ara (targeta) o en efectiu amb la pizza: el dia
-      // de panettones ja no es cobra res.
-      // El dia de panettones l'enviament es cobra a part (import per fixar,
-      // segons la zona): s'avisa ara, i divendres/diumenge surt més a compte.
-      document.getElementById('cf-pan-day-sub').textContent = panDayLabel() + '.' + (only ? '' : ' Els panettones els pagues amb aquesta comanda.') + " Amb cost d'enviament: encara per determinar, segons la zona.";
-      box.querySelectorAll('input[name="cf-pan"]').forEach(r => {
-        r.checked = r.value === cfPanettoneDelivery;
-        r.closest('.cf-pan-opt').classList.toggle('border-[#E23F2E]', r.checked);
-        r.closest('.cf-pan-opt').classList.toggle('bg-[#E23F2E]/5', r.checked);
-      });
     }
-    document.addEventListener('change', e => {
-      if (!e.target || e.target.name !== 'cf-pan') return;
-      cfPanettoneDelivery = e.target.value === 'panettone_day' ? 'panettone_day' : 'order';
-      if (NADAL) NADAL.cart.setDelivery(cfPanettoneDelivery);
-      renderPanChoice();
-      // Només panettones i ara "amb la comanda": cal triar dia i hora.
-      if (cartOnlyPan() && cfPanettoneDelivery === 'order' && !cfSelectedTime) {
-        document.getElementById('cf-scroll').classList.add('hidden');
-        document.getElementById('cf-time-step').classList.remove('hidden');
-        selectDeliveryDay(isValidOrderDay(cfDeliveryDate) && cfDeliveryDate >= todayISO() ? (cfDeliveryDate === todayISO() ? 'today' : 'other') : (isValidOrderDay(todayISO()) ? 'today' : 'other'));
-      }
-      document.dispatchEvent(new Event('cf-pan-changed'));
-    });
 
     function openCheckout() {
       closeCartDrawer();
@@ -1888,6 +1857,7 @@
     }
 
     function closeCheckout() {
+      if (PAN_MODE) { location.href = 'nadal.html'; return; }
       const fs = document.getElementById('checkout-fullscreen');
       fs.classList.add('opacity-0', 'pointer-events-none');
       setTimeout(() => {
@@ -2920,8 +2890,18 @@
 
     // ── Especial Nadal: venim de nadal.html amb panettones a la cistella ──
     (function prefillNadal() {
-      if (!NADAL) return;
+      if (!NADAL) { if (PAN_MODE) location.replace('nadal.html'); return; }
       const nc = NADAL.takeCheckout();
+      // Passarel·la de panettones: només amb una cistella de nadal.html per al
+      // dia d'entrega de panettones i l'adreça ja triada a pre-pedido.
+      if (PAN_MODE) {
+        if (!nc || !nc.items.length || nc.delivery !== 'panettone_day') { location.replace('nadal.html'); return; }
+        if (!sessionStorage.getItem('micsas_address')) { location.replace('pre-pedido.html?entrega=panettones'); return; }
+      } else if (nc && nc.items.length && nc.delivery === 'panettone_day') {
+        // Una cistella per al dia de panettones no es barreja amb pizzes.
+        location.replace(sessionStorage.getItem('micsas_address') ? 'pedido.html?panettones=1' : 'pre-pedido.html?entrega=panettones');
+        return;
+      }
       if (!nc || !nc.items.length) return;
       nc.items.forEach(l => {
         const m = MENU.nadal.find(x => x.id === l.id);
@@ -2930,12 +2910,20 @@
         const ex = cart.find(i => i.id === m.id);
         if (ex) ex.qty = qty; else cart.push({ id: m.id, name: m.name, price: NADAL.price(m.id) || m.price, qty, note: '' });
       });
-      cfPanettoneDelivery = nc.delivery === 'panettone_day' ? 'panettone_day' : 'order';
+      cfPanettoneDelivery = PAN_MODE ? 'panettone_day' : 'order';
       renderCart(false);
       MENU.nadal.forEach(it => syncMenuRow(it.id));
-      setTimeout(() => showCfToast(cfPanettoneDelivery === 'panettone_day'
-        ? "Els teus panettones ja són a la cistella. Te'ls portem el dia d'entrega de panettones (amb cost d'enviament, segons la zona)."
-        : 'Els teus panettones ja són a la cistella. Hi pots afegir pizzes.'), 400);
+      if (PAN_MODE) {
+        // El dia de panettones l'enviament va a part (import per fixar, segons la zona).
+        const ship = document.getElementById('cf-ship-val');
+        if (ship) { ship.textContent = 'Segons la zona (per confirmar)'; ship.classList.remove('text-[#E23F2E]'); ship.classList.add('text-[#5A3E28]'); }
+        // Directe a pagar: dades, mètode de pagament i ja està.
+        sessionStorage.removeItem('micsas_time');
+        sessionStorage.removeItem('micsas_delivery_date');
+        window.addEventListener('load', () => openCheckout());
+        return;
+      }
+      setTimeout(() => showCfToast('Els teus panettones ja són a la cistella. Hi pots afegir pizzes.'), 400);
     })();
 
     // ── Carta del dia: el que cuina ha apagat no es pot demanar ──

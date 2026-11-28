@@ -63,7 +63,7 @@
   if (header && !$('.pp-steps')) {
     header.insertAdjacentHTML('afterend', `
       <div class="pp-steps" aria-hidden="true">
-        <span class="pp-step" data-s="1"><i>1</i>Hora</span><span class="bar"></span>
+        <span class="pp-step" data-s="1"><i>1</i>${document.documentElement.classList.contains('pan-mode') ? 'Adreça' : 'Hora'}</span><span class="bar"></span>
         <span class="pp-step" data-s="2"><i>2</i>Dades</span><span class="bar"></span>
         <span class="pp-step" data-s="3"><i>3</i>Pagament</span>
       </div>`);

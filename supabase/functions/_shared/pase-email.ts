@@ -314,6 +314,19 @@ export function renderPaseEmail(r: PaseReport): string {
     prodRows, zeroRows,
   );
 
+  // Panettones (Especial Nadal)
+  const pn = r.panettones;
+  const panCard = pn.units || pn.panDay.orders ? (() => {
+    const rows = pn.flavors.map((f) => [esc(f.name), `<b>${f.units}</b>`, euro(f.revenue)]);
+    const tbl = dataTable([{ label: "Panettone" }, { label: "Unitats", align: "right" }, { label: "Import", align: "right" }], rows, []);
+    const lines = [
+      pn.withOrder.units ? `Amb una comanda del pase: <b>${plural(pn.withOrder.units, "panettone", "panettones")}</b> · ${euro(pn.withOrder.revenue)} (ja inclòs a la facturació del pase).` : "",
+      pn.panDay.orders ? `Per al dia d'entrega de panettones, venuts des de l'últim pase: <b>${plural(pn.panDay.units, "panettone", "panettones")}</b> en ${plural(pn.panDay.orders, "comanda", "comandes")} · ${euro(pn.panDay.revenue)} (${pn.panDay.card} amb targeta, ${pn.panDay.cash} en efectiu). La part amb targeta (${euro(pn.panDay.cardRevenue)}) va a la factura d'aquest pase; l'efectiu es cobra el dia d'entrega.` : "",
+      pn.panDay.orders ? `Total facturat amb aquests panettones: <b>${euro(d.revenue + pn.panDay.revenue)}</b>.` : "",
+    ].filter(Boolean).map((l) => `<div style="font-family:${FONT};font-size:12px;line-height:1.6;color:${C.muted};margin-top:6px;">${l}</div>`).join("");
+    return `<tr><td style="padding:0 0 16px;">${table(`<tr>${td("padding:20px 20px 14px;", `<div style="color:${C.text};font-size:15px;font-weight:700;">Panettones · Especial Nadal</div><div style="color:${C.muted};font-size:12px;margin-top:2px;">${plural(pn.units, "panettone", "panettones")} · ${euro(pn.revenue)}</div>`)}</tr><tr><td>${tbl}</td></tr><tr>${td("padding:4px 20px 18px;", lines)}</tr>`, `background:${C.card};border:1px solid ${C.border};border-radius:14px;overflow:hidden;`, `bgcolor="${C.card}"`)}</td></tr>`;
+  })() : "";
+
   // Clients
   const t = r.timing;
   const customersBody = `
@@ -351,13 +364,14 @@ export function renderPaseEmail(r: PaseReport): string {
     punctBody,
     card("Logística i ritme", "Sortides del repartidor i producció per hora", logistics),
     `<tr><td style="padding:0 0 16px;">${table(`<tr>${td("padding:20px 20px 14px;", `<div style="color:${C.text};font-size:15px;font-weight:700;">Pizzes</div><div style="color:${C.muted};font-size:12px;margin-top:2px;">${plural(d.pizzas, "pizza", "pizzes")}${r.drinks ? ` · ${plural(r.drinks, "beguda", "begudes")}` : ""}</div>`)}</tr><tr><td>${prodTable}</td></tr>`, `background:${C.card};border:1px solid ${C.border};border-radius:14px;overflow:hidden;`, `bgcolor="${C.card}"`)}</td></tr>`,
+    panCard,
     card("Clients", "Quan demanen, qui repeteix i com paguen", customersBody),
     `<tr><td style="padding:0 0 16px;">${table(`<tr>${td("padding:20px 20px 14px;", `<div style="color:${C.text};font-size:15px;font-weight:700;">Pèrdues i qualitat</div><div style="color:${C.muted};font-size:12px;margin-top:2px;">El que no s'ha venut o ha sortit malament</div>`)}</tr><tr><td>${lossTable}</td></tr>`, `background:${C.card};border:1px solid ${C.border};border-radius:14px;overflow:hidden;`, `bgcolor="${C.card}"`)}</td></tr>`,
     card("Comparativa", "", compare),
   ].join("");
 
   return shell({
-    preheader: `${plural(d.pizzas, "pizza", "pizzes")}, ${euro(d.revenue)}, ${plural(d.orders, "comanda", "comandes")}, ${euro(d.tips, d.tips % 1 ? 2 : 0)} de propines.`,
+    preheader: `${plural(d.pizzas, "pizza", "pizzes")}, ${euro(d.revenue)}, ${plural(d.orders, "comanda", "comandes")}, ${euro(d.tips, d.tips % 1 ? 2 : 0)} de propines${r.panettones.units ? `, ${plural(r.panettones.units, "panettone", "panettones")}` : ""}.`,
     eyebrow: "Informe del pase",
     title: longDate(r.date),
     subtitle: `Pase de ${SLOTS[0]} a ${SLOTS[SLOTS.length - 1]}${p ? ` · comparat amb el ${dayName(p.date)} ${shortDate(p.date).split(" ")[1]}` : ""}`,

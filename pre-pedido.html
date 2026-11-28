@@ -704,7 +704,8 @@
         sessionStorage.setItem('micsas_floor',   document.getElementById('pp-floor').value.trim());
         sessionStorage.setItem('micsas_lat',     window._ppLat != null ? String(window._ppLat) : '');
         sessionStorage.setItem('micsas_lng',     window._ppLng != null ? String(window._ppLng) : '');
-        window.location.href = 'pedido.html';
+        // Passarel·la només de panettones (no es barregen amb pizzes).
+        window.location.href = 'pedido.html?panettones=1';
         return;
       }
       if (!ppSelectedTime || !ppAddressValid || _ppDailySoldOut) return;
