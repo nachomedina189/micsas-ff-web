@@ -24,6 +24,8 @@ const CATALOG: Record<string, { name: string; price: number }> = {
   "antidiavola":          { name: "Antidiavola",          price: 13 },
   "nutellina":            { name: "Nutellina",            price: 13 },
   "d3":                   { name: "Cervesa artesana Moretti", price: 3 },
+  "d4":                   { name: "Coca-Cola",            price: 2 },
+  "d5":                   { name: "Fanta",                price: 2 },
 };
 
 // Especial Nadal: els panettones (ids "pn-…") NO són al CATALOG — preu, nom i
