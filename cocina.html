@@ -1429,7 +1429,7 @@
     function isDrinkName(name) {
       const p = menuCatalog && menuCatalog.products.find(x => x.name === name);
       if (p) return p.kind === 'drink';
-      return /cervesa|moretti|aigua|refresc|coca|beguda/i.test(name || '');
+      return /cervesa|moretti|aigua|refresc|coca|fanta|beguda/i.test(name || '');
     }
     // Especial Nadal: les línies de panettone (no són pizzes ni begudes).
     function isPanettoneItem(it) { return it.sku ? String(it.sku).startsWith('pn-') : /^Panettone /.test(it.product_name || ''); }

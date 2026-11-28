@@ -611,6 +611,15 @@
             oninput="setCustomTip(this.value)">
         </section>
 
+        <!-- Si la comanda no porta cap beguda, se n'ofereix una abans de pagar (renderDrinkUpsell). -->
+        <section id="cf-drinks-up" class="hidden rounded-2xl border border-[#C4B08A]/40 bg-[#E6D5B0]/25" aria-labelledby="cf-drinks-up-title">
+          <div class="px-5 pt-5 pb-3">
+            <h2 id="cf-drinks-up-title" class="font-['League_Spartan',sans-serif] font-black tracking-tight text-2xl text-[#2A1A0F]">No vols una beguda?</h2>
+            <p class="text-xs font-light text-[#5A3E28] mt-1">Te la portem freda amb les pizzes.</p>
+          </div>
+          <div id="cf-drinks-up-list" class="flex gap-2.5 overflow-x-auto px-5 pb-5"></div>
+        </section>
+
         <!-- Especial Nadal: si no hi ha cap panettone al cistell, se n'ofereix un
              abans de pagar (renderUpsell). -->
         <section id="cf-upsell" class="cf-up hidden" aria-labelledby="cf-up-title">
@@ -836,6 +845,8 @@
       ],
       drinks: [
         { id:'d3', name:'Cervesa artesana Moretti',  desc:'Producció local · 33 cl',           price:3   },
+        { id:'d4', name:'Coca-Cola',                 desc:'Refresc',                           price:2   },
+        { id:'d5', name:'Fanta',                     desc:'Refresc',                           price:2   },
       ],
     };
     const DELIVERY_FEE = 0;
@@ -1763,7 +1774,38 @@
 
     // "No voleu un panettone?": només si al cistell no n'hi ha cap i en queden.
     let _upsellKey = '';
+    // "No vols una beguda?": només si la comanda porta pizzes i cap beguda.
+    function renderDrinkUpsell() {
+      const box = document.getElementById('cf-drinks-up');
+      if (!box) return;
+      const drinkIds = MENU.drinks.map(d => d.id);
+      const hasPizza = cart.some(i => !drinkIds.includes(i.id) && !isPanId(i.id));
+      const list = hasPizza && !cart.some(i => drinkIds.includes(i.id)) ? MENU.drinks.filter(d => !isOff(d.id)) : [];
+      box.classList.toggle('hidden', !list.length);
+      document.getElementById('cf-drinks-up-list').innerHTML = list.map(d => `
+        <div class="flex-1 min-w-[96px] flex flex-col items-center text-center rounded-xl bg-white/70 border border-[#C4B08A]/30 px-2.5 pt-3 pb-2.5">
+          <p class="text-sm font-bold leading-tight text-[#2A1A0F]">${d.name}</p>
+          <p class="text-xs text-[#5A3E28] mt-0.5">${fmtComma(d.price)}</p>
+          <button type="button" onclick="drinkUpsellAdd('${d.id}')" class="mt-2 w-full py-2 rounded-full bg-[#E23F2E] hover:bg-[#B82A1F] text-white text-xs font-semibold transition-colors" aria-label="Afegir ${d.name}">+ Afegir</button>
+        </div>`).join('');
+    }
+    function drinkUpsellAdd(id) {
+      const d = MENU.drinks.find(x => x.id === id);
+      if (!d) return;
+      addToCartSilent(id, d.name, d.price, true);
+      document.getElementById('cf-subtotal-display').textContent = fmtComma(subtotal());
+      const count = totalCount();
+      document.getElementById('cf-items-count').textContent = count + (count === 1 ? ' article' : ' articles');
+      const panel = document.getElementById('cf-order-summary');
+      if (panel && panel.style.maxHeight && panel.style.maxHeight !== '0px') { toggleOrderSummary(); toggleOrderSummary(); }
+      refreshTotals();
+      renderDrinkUpsell();
+      validateCheckout();
+      showCfToast(`${d.name} afegida 🥤`);
+    }
+
     function renderUpsell() {
+      renderDrinkUpsell();
       const box = document.getElementById('cf-upsell');
       if (!box) return;
       const list = !NADAL || !NADAL.loaded || cartHasPan() ? [] : NADAL.items.filter(p => {
