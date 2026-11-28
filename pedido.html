@@ -10,6 +10,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demana pizza a domicili a Matadepera · micsas.ff</title>
+  <script>
+    // Sense l'adreça validada a pre-pedido.html (text + coordenades de Google)
+    // no es pot demanar: abans s'hi arribava per enllaç directe, una pestanya
+    // nova o compte.html i la comanda sortia sense adreça (pase del 27/11).
+    // Excepció: la tornada d'un pagament amb redirecció (Bizum), que ja té comanda.
+    (function () {
+      if (new URLSearchParams(location.search).has('payment_intent_client_secret')) return;
+      var ok = false;
+      try {
+        var s = sessionStorage;
+        ok = (s.getItem('micsas_address') || '').trim().length > 2
+          && !isNaN(parseFloat(s.getItem('micsas_lat'))) && !isNaN(parseFloat(s.getItem('micsas_lng')));
+      } catch (e) {}
+      if (!ok) location.replace('pre-pedido.html');
+    })();
+  </script>
   <meta name="description" content="Fes la teva comanda online de pizza napolitana a micsas.ff. Repartiment a domicili a Matadepera divendres i diumenge de 20:00 a 22:30.">
   <link rel="canonical" href="https://www.micsasff.com/pedido.html">
   <meta property="og:type" content="website">
@@ -2374,8 +2390,8 @@
       }
       const street     = sessionStorage.getItem('micsas_address') || cfPlacesAddress || '';
       const floor      = sessionStorage.getItem('micsas_floor')   || null;
-      const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '08230';
-      const city       = sessionStorage.getItem('micsas_city')    || 'Matadepera';
+      const postalCode = sessionStorage.getItem('micsas_zip')     || (currentZone && currentZone.postal_code) || '';
+      const city       = sessionStorage.getItem('micsas_city')    || '';
       // Coordenades precises que Google Places ja va resoldre a pre-pedido.html
       // en seleccionar l'adreça — les guardem per a que cocina.html pugui
       // navegar-hi directament, sense haver de tornar a geocodificar el text.
@@ -2398,6 +2414,10 @@
     }
 
     async function _saveOrderToSupabase(d, paymentStatus = 'pending') {
+      if (!d.street || !d.street.trim() || typeof d.lat !== 'number' || isNaN(d.lat) || typeof d.lng !== 'number' || isNaN(d.lng)) {
+        location.replace('pre-pedido.html');
+        throw new Error("Falta l'adreça d'entrega. Torna a indicar on et portem la pizza.");
+      }
       // Order creation (customer + address + order + items) and slot-capacity
       // validation happen server-side in the place-order Edge Function
       // (service_role, bypasses RLS) so the 6-pizzas-per-slot cap can't be
@@ -2447,6 +2467,7 @@
         removeDiscountCode();
         showDiscountErr(json.error);
       }
+      if (!res.ok && json.missingAddress) location.replace('pre-pedido.html');
       if (!res.ok) throw new Error(json.error || 'Error desant la comanda');
       // El servidor pot haver assignat una franja diferent de la demanada si
       // s'ha omplert just abans de confirmar (rollover automàtic a la

@@ -70,17 +70,20 @@ function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): num
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function isDeliverable(street: unknown, postalCode: unknown, city: unknown, lat: unknown, lng: unknown): boolean {
-  const hasCoords = typeof lat === "number" && typeof lng === "number";
+// Adreça triada a pre-pedido.html: carrer i coordenades de Google sempre.
+// Sense això, el 27/11 van entrar comandes amb el carrer buit.
+function hasAddress(street: unknown, lat: unknown, lng: unknown): boolean {
+  return String(street ?? "").trim().length >= 3 &&
+    typeof lat === "number" && Number.isFinite(lat) && typeof lng === "number" && Number.isFinite(lng);
+}
+
+function isDeliverable(street: unknown, city: unknown, lat: number, lng: number): boolean {
   if (normalizeText(city) === "matadepera") {
-    return hasCoords
-      ? distanceKm(lat, lng, MATADEPERA_CENTER.lat, MATADEPERA_CENTER.lng) <= MATADEPERA_MAX_KM
-      : String(postalCode ?? "").trim() === "08230";
+    return distanceKm(lat, lng, MATADEPERA_CENTER.lat, MATADEPERA_CENTER.lng) <= MATADEPERA_MAX_KM;
   }
   const s = normalizeText(street);
   if (!s.startsWith("carretera de matadepera")) return false;
-  return /\b383\b/.test(s) ||
-    (hasCoords && distanceKm(lat, lng, Q8_PICKUP.lat, Q8_PICKUP.lng) <= Q8_PICKUP.radiusKm);
+  return /\b383\b/.test(s) || distanceKm(lat, lng, Q8_PICKUP.lat, Q8_PICKUP.lng) <= Q8_PICKUP.radiusKm;
 }
 
 // Apunta una comanda rebutjada (demanda perduda) per a l'informe del pase.
@@ -133,7 +136,14 @@ Deno.serve(async (req) => {
     const name = [first, last].filter(Boolean).join(" ") || cleanName(legacyName);
     const nameParts = first || last ? { first_name: first || null, last_name: last || null } : {};
 
-    if (!isDeliverable(street, postalCode, city || "Matadepera", lat, lng)) {
+    if (!hasAddress(street, lat, lng)) {
+      return new Response(JSON.stringify({ error: "Falta l'adreça d'entrega. Torna a indicar on et portem la pizza.", missingAddress: true }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!isDeliverable(street, city, lat, lng)) {
       return new Response(JSON.stringify({ error: "Només fem entregues a Matadepera. Revisa l'adreça d'entrega." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
