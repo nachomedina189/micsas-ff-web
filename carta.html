@@ -516,7 +516,10 @@
     <section class="py-20 md:py-28 px-6 md:px-12 bg-[#F2E6CE] text-[#2A1A0F]" id="events" aria-labelledby="events-title">
       <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 md:gap-14 items-center reveal">
         <div class="rounded-3xl overflow-hidden shadow-lg border border-[#C4B08A]/40 aspect-[4/5] max-h-[520px] w-full">
-          <img src="images/events/event-sopar-equip-pergola.png" alt="Convidats gaudint de pizzes micsas.ff en un sopar amb el forn mòbil" class="w-full h-full object-cover" loading="lazy">
+          <!-- Vídeo d'un event: no es baixa fins que és a la pantalla i s'atura quan en surt. -->
+          <video class="w-full h-full object-cover" data-lazy-video muted loop playsinline preload="none" disablepictureinpicture poster="images/events/micsas-event-forn-poster.webp" width="480" height="854" aria-label="L'equip de micsas.ff preparant pizzes al forn mòbil en un event">
+            <source data-src="images/events/micsas-event-forn.mp4" type="video/mp4">
+          </video>
         </div>
         <div class="flex flex-col gap-5 min-w-0">
           <span class="text-xs uppercase tracking-[0.2em] font-semibold text-[#c80a07]">Micsas Events</span>
@@ -759,6 +762,23 @@
           if (t) { e.preventDefault(); window.micsasScrollTo ? micsasScrollTo(t) : t.scrollIntoView({ behavior: 'smooth' }); }
         });
       });
+
+      // Vídeos "lazy": es carreguen en arribar a la pantalla, s'aturen en sortir-ne
+      // i no es reprodueixen amb "reduir moviment" ni amb estalvi de dades.
+      (function () {
+        const vids = document.querySelectorAll('video[data-lazy-video]');
+        if (!vids.length) return;
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const saver = navigator.connection && navigator.connection.saveData;
+        const load = v => { v.querySelectorAll('source[data-src]').forEach(s => { s.src = s.dataset.src; s.removeAttribute('data-src'); }); v.load(); };
+        if (reduce || saver || !('IntersectionObserver' in window)) { if (!reduce && !saver) vids.forEach(v => { load(v); v.play().catch(() => {}); }); return; }
+        const io = new IntersectionObserver(es => es.forEach(e => {
+          const v = e.target;
+          if (e.isIntersecting) { if (v.querySelector('source[data-src]')) load(v); v.play().catch(() => {}); }
+          else v.pause();
+        }), { rootMargin: '150px 0px' });
+        vids.forEach(v => io.observe(v));
+      })();
 
       const reveals = document.querySelectorAll('.reveal');
       function doReveal() {
